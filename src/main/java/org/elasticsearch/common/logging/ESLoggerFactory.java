@@ -37,12 +37,10 @@ public abstract class ESLoggerFactory {
             loggerClazz.getMethod("setLevel", Class.forName("org.apache.log4j.Level"));
             defaultFactory = new Log4jESLoggerFactory();
         } catch (Throwable e) {
-            // no log4j
             try {
                 Class.forName("org.slf4j.Logger");
                 defaultFactory = new Slf4jESLoggerFactory();
             } catch (Throwable e1) {
-                // no slf4j
             }
         }
     }

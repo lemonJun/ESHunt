@@ -130,6 +130,14 @@ public class PlainOperationRouting extends AbstractComponent implements Operatio
 
     private static final Map<String, Set<String>> EMPTY_ROUTING = Collections.emptyMap();
 
+    /**
+     * 
+     * @param clusterState
+     * @param concreteIndices
+     * @param routing
+     * @return
+     * @throws IndexMissingException
+     */
     private Set<IndexShardRoutingTable> computeTargetedShards(ClusterState clusterState, String[] concreteIndices, @Nullable Map<String, Set<String>> routing) throws IndexMissingException {
         routing = routing == null ? EMPTY_ROUTING : routing; // just use an empty map
         final Set<IndexShardRoutingTable> set = new HashSet<>();
@@ -250,8 +258,16 @@ public class PlainOperationRouting extends AbstractComponent implements Operatio
         return indexRouting;
     }
 
+    /**
+     * 返回被路由的分片
+     * @param clusterState
+     * @param index
+     * @param type
+     * @param id
+     * @param routing
+     * @return
+     */
     // either routing is set, or type/id are set
-
     protected IndexShardRoutingTable shards(ClusterState clusterState, String index, String type, String id, String routing) {
         int shardId = shardId(clusterState, index, type, id, routing);
         return shards(clusterState, index, shardId);
@@ -265,6 +281,7 @@ public class PlainOperationRouting extends AbstractComponent implements Operatio
         return indexShard;
     }
 
+    //获得所需要被路由的分片
     private int shardId(ClusterState clusterState, String index, String type, @Nullable String id, @Nullable String routing) {
         if (routing == null) {
             if (!useType) {

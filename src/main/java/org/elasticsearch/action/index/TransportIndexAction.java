@@ -163,11 +163,15 @@ public class TransportIndexAction extends TransportShardReplicationOperationActi
     protected ShardIterator shards(ClusterState clusterState, InternalRequest request) {
         return clusterService.operationRouting().indexShards(clusterService.state(), request.concreteIndex(), request.request().type(), request.request().id(), request.request().routing());
     }
-
+    
+    /**
+     * 主分片上操作
+     */
     @Override
     protected Tuple<IndexResponse, IndexRequest> shardOperationOnPrimary(ClusterState clusterState, PrimaryOperationRequest shardRequest) throws Throwable {
         final IndexRequest request = shardRequest.request;
 
+        //判断是否必须要指定routing值
         // validate, if routing is required, that we got routing
         IndexMetaData indexMetaData = clusterState.metaData().index(shardRequest.shardId.getIndex());
         MappingMetaData mappingMd = indexMetaData.mappingOrDefault(request.type());
@@ -203,6 +207,7 @@ public class TransportIndexAction extends TransportShardReplicationOperationActi
                 op = create;
                 created = true;
             }
+            //refresh==commit操作
             if (request.refresh()) {
                 try {
                     indexShard.refresh("refresh_flag_index");
@@ -210,6 +215,7 @@ public class TransportIndexAction extends TransportShardReplicationOperationActi
                     // ignore
                 }
             }
+            //在主片上更新版本号 以便副本使用
             // update the version on the request, so it will be used for the replicas
             request.version(version);
             request.versionType(request.versionType().versionTypeForReplicationAndRecovery());

@@ -230,8 +230,8 @@ public class Bootstrap {
         String stage = "Initialization";
         try {
             if (!foreground) {
-                Loggers.disableConsoleLogging();
-                System.out.close();
+                //                Loggers.disableConsoleLogging();
+                //                System.out.close();
             }
 
             // fail if using broken version

@@ -51,6 +51,7 @@ public class RoutingTable implements Iterable<IndexRoutingTable> {
     private final long version;
 
     // index to IndexRoutingTable map
+    // 分片标识到路由结果的一个映射关系   计算时只计算shardid就可以了  此处会获得真正需要执行的分片
     private final ImmutableMap<String, IndexRoutingTable> indicesRouting;
 
     RoutingTable(long version, Map<String, IndexRoutingTable> indicesRouting) {

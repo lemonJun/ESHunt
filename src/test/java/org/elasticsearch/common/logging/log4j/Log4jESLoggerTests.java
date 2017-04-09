@@ -52,9 +52,7 @@ public class Log4jESLoggerTests extends ElasticsearchTestCase {
         LogConfigurator.reset();
         File configDir = resolveConfigDir();
         // Need to set custom path.conf so we can use a custom logging.yml file for the test
-        Settings settings = ImmutableSettings.builder()
-                .put("path.conf", configDir.getAbsolutePath())
-                .build();
+        Settings settings = ImmutableSettings.builder().put("path.conf", configDir.getAbsolutePath()).build();
         LogConfigurator.configure(settings);
 
         esTestLogger = Log4jESLoggerFactory.getLogger("test");
@@ -122,7 +120,7 @@ public class Log4jESLoggerTests extends ElasticsearchTestCase {
         assertThat(locationInfo, notNullValue());
         assertThat(locationInfo.getClassName(), equalTo(Log4jESLoggerTests.class.getCanonicalName()));
         assertThat(locationInfo.getMethodName(), equalTo("locationInfoTest"));
-        
+
     }
 
     private static File resolveConfigDir() throws Exception {

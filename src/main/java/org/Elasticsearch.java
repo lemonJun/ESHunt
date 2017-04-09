@@ -18,7 +18,6 @@ package org;
  * under the License.
  */
 
-import org.apache.log4j.PropertyConfigurator;
 import org.elasticsearch.bootstrap.Bootstrap;
 
 /**
@@ -33,7 +32,6 @@ public class Elasticsearch extends Bootstrap {
 
     public static void main(String[] args) {
         try {
-            //            PropertyConfigurator.configure("config/log4j.properties");
             Bootstrap.main(args);
         } catch (Exception e) {
             e.printStackTrace();

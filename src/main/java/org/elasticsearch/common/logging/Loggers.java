@@ -19,19 +19,20 @@
 
 package org.elasticsearch.common.logging;
 
-import com.google.common.collect.Lists;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.List;
+
 import org.elasticsearch.common.Classes;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.Index;
 import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.river.RiverName;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.List;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Arrays.asList;
+import com.google.common.collect.Lists;
 
 /**
  * A set of utilities around Logging.

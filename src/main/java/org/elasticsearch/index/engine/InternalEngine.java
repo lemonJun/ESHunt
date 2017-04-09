@@ -397,6 +397,11 @@ public class InternalEngine extends Engine {
         }
     }
 
+    /**
+     * 调用lucene的索引操作
+     * @param index
+     * @throws IOException
+     */
     private void innerIndex(Index index) throws IOException {
         synchronized (dirtyLock(index.uid())) {
             final long currentVersion;
@@ -423,10 +428,10 @@ public class InternalEngine extends Engine {
             updatedVersion = index.versionType().updateVersion(currentVersion, expectedVersion);
 
             index.updateVersion(updatedVersion);
-            if (currentVersion == Versions.NOT_FOUND) {
+            if (currentVersion == Versions.NOT_FOUND) {//文档不存在
                 // document does not exists, we can optimize for create
                 index.created(true);
-                if (index.docs().size() > 1) {
+                if (index.docs().size() > 1) {//批量
                     indexWriter.addDocuments(index.docs(), index.analyzer());
                 } else {
                     indexWriter.addDocument(index.docs().get(0), index.analyzer());

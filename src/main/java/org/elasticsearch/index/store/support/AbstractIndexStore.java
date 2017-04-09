@@ -19,10 +19,10 @@
 
 package org.elasticsearch.index.store.support;
 
+import java.nio.file.Path;
+
 import org.apache.lucene.store.StoreRateLimiting;
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.ElasticsearchIllegalStateException;
-import org.elasticsearch.common.io.FileSystemUtils;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.env.NodeEnvironment;
@@ -34,9 +34,6 @@ import org.elasticsearch.index.settings.IndexSettingsService;
 import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.index.store.IndexStore;
 import org.elasticsearch.indices.store.IndicesStore;
-
-import java.io.IOException;
-import java.nio.file.Path;
 
 /**
  *

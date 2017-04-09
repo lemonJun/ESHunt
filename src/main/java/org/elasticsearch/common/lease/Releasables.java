@@ -26,7 +26,7 @@ import java.util.Arrays;
 /** Utility methods to work with {@link Releasable}s. */
 public enum Releasables {
     ;
-
+    
     private static void rethrow(Throwable t) {
         if (t instanceof RuntimeException) {
             throw (RuntimeException) t;
