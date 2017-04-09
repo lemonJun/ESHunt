@@ -52,22 +52,16 @@ public class TransportClientTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testNodeVersionIsUpdated() {
-        TransportClient client = (TransportClient)  internalCluster().client();
+        TransportClient client = (TransportClient) internalCluster().client();
         TransportClientNodesService nodeService = client.nodeService();
-        Node node = nodeBuilder().data(false).settings(ImmutableSettings.builder()
-                .put(internalCluster().getDefaultSettings())
-                .put("node.name", "testNodeVersionIsUpdated")
-                .put("http.enabled", false)
-                .put("index.store.type", "ram")
-                .put("gateway.type", "none")
-                .put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true) // make sure we get what we set :)
-                .build()).clusterName("foobar").build();
+        Node node = nodeBuilder().data(false).settings(ImmutableSettings.builder().put(internalCluster().getDefaultSettings()).put("node.name", "testNodeVersionIsUpdated").put("http.enabled", false).put("index.store.type", "ram").put("gateway.type", "none").put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true) // make sure we get what we set :)
+                        .build()).clusterName("foobar").build();
         node.start();
         try {
             TransportAddress transportAddress = ((InternalNode) node).injector().getInstance(TransportService.class).boundAddress().publishAddress();
             client.addTransportAddress(transportAddress);
             assertThat(nodeService.connectedNodes().size(), greaterThanOrEqualTo(1)); // since we force transport clients there has to be one node started that we connect to.
-            for (DiscoveryNode discoveryNode : nodeService.connectedNodes()) {  // connected nodes have updated version
+            for (DiscoveryNode discoveryNode : nodeService.connectedNodes()) { // connected nodes have updated version
                 assertThat(discoveryNode.getVersion(), equalTo(Version.CURRENT));
             }
 
@@ -87,7 +81,7 @@ public class TransportClientTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testThatTransportClientSettingIsSet() {
-        TransportClient client = (TransportClient)  internalCluster().client();
+        TransportClient client = (TransportClient) internalCluster().client();
         Settings settings = client.injector.getInstance(Settings.class);
         assertThat(settings.get(Client.CLIENT_TYPE_SETTING), is("transport"));
     }

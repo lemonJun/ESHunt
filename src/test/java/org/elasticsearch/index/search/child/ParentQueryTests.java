@@ -85,10 +85,7 @@ public class ParentQueryTests extends AbstractChildTests {
     public void testRandom() throws Exception {
         Directory directory = newDirectory();
         final Random r = random();
-        final IndexWriterConfig iwc = LuceneTestCase.newIndexWriterConfig(r,
-                LuceneTestCase.TEST_VERSION_CURRENT, new MockAnalyzer(r))
-                .setMaxBufferedDocs(IndexWriterConfig.DISABLE_AUTO_FLUSH)
-                .setRAMBufferSizeMB(scaledRandomIntBetween(16, 64)); // we might index a lot - don't go crazy here
+        final IndexWriterConfig iwc = LuceneTestCase.newIndexWriterConfig(r, LuceneTestCase.TEST_VERSION_CURRENT, new MockAnalyzer(r)).setMaxBufferedDocs(IndexWriterConfig.DISABLE_AUTO_FLUSH).setRAMBufferSizeMB(scaledRandomIntBetween(16, 64)); // we might index a lot - don't go crazy here
         RandomIndexWriter indexWriter = new RandomIndexWriter(r, directory, iwc);
         int numUniqueParentValues = scaledRandomIntBetween(100, 2000);
         String[] parentValues = new String[numUniqueParentValues];
@@ -142,7 +139,7 @@ public class ParentQueryTests extends AbstractChildTests {
                         parentValueToChildIds.put(parentValue, childIdToScore = new TreeMap<>());
                     }
                     if (!markChildAsDeleted && !filterMe) {
-                        assertFalse("child ["+ child + "] already has a score", childIdToScore.containsKey(child));
+                        assertFalse("child [" + child + "] already has a score", childIdToScore.containsKey(child));
                         childIdToScore.put(child, 1f);
                         childIdToParentId.put(Integer.valueOf(child), parentDocId);
                     }
@@ -156,9 +153,7 @@ public class ParentQueryTests extends AbstractChildTests {
 
         IndexReader indexReader = DirectoryReader.open(directory);
         IndexSearcher searcher = new IndexSearcher(indexReader);
-        Engine.Searcher engineSearcher = new Engine.Searcher(
-                ParentQueryTests.class.getSimpleName(), searcher
-        );
+        Engine.Searcher engineSearcher = new Engine.Searcher(ParentQueryTests.class.getSimpleName(), searcher);
         ((TestSearchContext) SearchContext.current()).setSearcher(new ContextIndexSearcher(SearchContext.current(), engineSearcher));
 
         int max = numUniqueParentValues / 4;
@@ -183,9 +178,7 @@ public class ParentQueryTests extends AbstractChildTests {
                 indexReader.close();
                 indexReader = DirectoryReader.open(indexWriter.w, true);
                 searcher = new IndexSearcher(indexReader);
-                engineSearcher = new Engine.Searcher(
-                        ParentConstantScoreQueryTests.class.getSimpleName(), searcher
-                );
+                engineSearcher = new Engine.Searcher(ParentConstantScoreQueryTests.class.getSimpleName(), searcher);
                 ((TestSearchContext) SearchContext.current()).setSearcher(new ContextIndexSearcher(SearchContext.current(), engineSearcher));
             }
 

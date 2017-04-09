@@ -100,7 +100,6 @@ public class MockBigArrays extends BigArrays {
         INSTANCES.add(this);
     }
 
-
     @Override
     public BigArrays withCircuitBreaking() {
         return new MockBigArrays(this.recycler, this.breakerService, true);
@@ -238,7 +237,7 @@ public class MockBigArrays extends BigArrays {
 
     @Override
     public <T> ObjectArray<T> newObjectArray(long size) {
-        return new ObjectArrayWrapper<>(super.<T>newObjectArray(size));
+        return new ObjectArrayWrapper<>(super.<T> newObjectArray(size));
     }
 
     @Override

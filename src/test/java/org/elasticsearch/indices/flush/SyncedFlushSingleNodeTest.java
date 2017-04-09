@@ -155,7 +155,7 @@ public class SyncedFlushSingleNodeTest extends ElasticsearchSingleNodeTest {
         assertNull(listener.result);
         assertEquals("[nosuchindex] missing", listener.error.getMessage());
     }
-    
+
     public void testFailAfterIntermediateCommit() throws InterruptedException {
         createIndex("test");
         client().prepareIndex("test", "test", "1").setSource("{}").get();
@@ -201,7 +201,7 @@ public class SyncedFlushSingleNodeTest extends ElasticsearchSingleNodeTest {
         final IndexShardRoutingTable shardRoutingTable = flushService.getShardRoutingTable(shardId, state);
         final List<ShardRouting> activeShards = shardRoutingTable.activeShards();
         assertEquals("exactly one active shard", 1, activeShards.size());
-        Map<String, Engine.CommitId> commitIds =  SyncedFlushUtil.sendPreSyncRequests(flushService, activeShards, state, shardId);
+        Map<String, Engine.CommitId> commitIds = SyncedFlushUtil.sendPreSyncRequests(flushService, activeShards, state, shardId);
         assertEquals("exactly one commit id", 1, commitIds.size());
         commitIds.clear(); // wipe it...
         String syncId = Strings.base64UUID();
@@ -218,6 +218,5 @@ public class SyncedFlushSingleNodeTest extends ElasticsearchSingleNodeTest {
         assertFalse(syncedFlushResult.shardResponses().get(activeShards.get(0)).success());
         assertEquals("no commit id from pre-sync flush", syncedFlushResult.shardResponses().get(activeShards.get(0)).failureReason());
     }
-
 
 }

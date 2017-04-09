@@ -107,8 +107,7 @@ public class SimpleIndexStateTests extends ElasticsearchIntegrationTest {
     @Test
     public void testFastCloseAfterCreateDoesNotClose() {
         logger.info("--> creating test index that cannot be allocated");
-        client().admin().indices().prepareCreate("test").setSettings(ImmutableSettings.settingsBuilder()
-                .put("index.routing.allocation.include.tag", "no_such_node").build()).get();
+        client().admin().indices().prepareCreate("test").setSettings(ImmutableSettings.settingsBuilder().put("index.routing.allocation.include.tag", "no_such_node").build()).get();
 
         ClusterHealthResponse health = client().admin().cluster().prepareHealth("test").setWaitForNodes(">=2").get();
         assertThat(health.isTimedOut(), equalTo(false));
@@ -117,13 +116,12 @@ public class SimpleIndexStateTests extends ElasticsearchIntegrationTest {
         try {
             client().admin().indices().prepareClose("test").get();
             fail("Exception should have been thrown");
-        } catch(IndexPrimaryShardNotAllocatedException e) {
+        } catch (IndexPrimaryShardNotAllocatedException e) {
             // expected
         }
 
         logger.info("--> updating test index settings to allow allocation");
-        client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.settingsBuilder()
-                .put("index.routing.allocation.include.tag", "").build()).get();
+        client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.settingsBuilder().put("index.routing.allocation.include.tag", "").build()).get();
 
         logger.info("--> waiting for green status");
         ensureGreen();

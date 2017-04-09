@@ -40,11 +40,7 @@ public class BoostMappingTests extends ElasticsearchSingleNodeTest {
 
         DocumentMapper mapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = mapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("_boost", 2.0f)
-                .field("field", "a")
-                .field("field", "b")
-                .endObject().bytes());
+        ParsedDocument doc = mapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("_boost", 2.0f).field("field", "a").field("field", "b").endObject().bytes());
 
         // one fo the same named field will have the proper boost, the others will have 1
         IndexableField[] fields = doc.rootDoc().getFields("field");
@@ -54,22 +50,14 @@ public class BoostMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testCustomName() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_boost").field("name", "custom_boost").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_boost").field("name", "custom_boost").endObject().endObject().endObject().string();
 
         DocumentMapper mapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = mapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field", "a")
-                .field("_boost", 2.0f)
-                .endObject().bytes());
+        ParsedDocument doc = mapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "a").field("_boost", 2.0f).endObject().bytes());
         assertThat(doc.rootDoc().getField("field").boost(), equalTo(1.0f));
 
-        doc = mapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field", "a")
-                .field("custom_boost", 2.0f)
-                .endObject().bytes());
+        doc = mapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "a").field("custom_boost", 2.0f).endObject().bytes());
         assertThat(doc.rootDoc().getField("field").boost(), equalTo(2.0f));
     }
 
@@ -83,11 +71,7 @@ public class BoostMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testSetValues() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_boost")
-                .field("store", "yes").field("index", "not_analyzed")
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_boost").field("store", "yes").field("index", "not_analyzed").endObject().endObject().endObject().string();
         IndexService indexServices = createIndex("test");
         DocumentMapper docMapper = indexServices.mapperService().documentMapperParser().parse("type", mapping);
         assertThat(docMapper.boostFieldMapper().fieldType().stored(), equalTo(true));

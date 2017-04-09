@@ -71,7 +71,7 @@ public class PagedBytesReferenceTest extends ElasticsearchTestCase {
     }
 
     public void testLength() {
-        int[] sizes = {0, randomInt(PAGE_SIZE), PAGE_SIZE, randomInt(PAGE_SIZE * 3)};
+        int[] sizes = { 0, randomInt(PAGE_SIZE), PAGE_SIZE, randomInt(PAGE_SIZE * 3) };
 
         for (int i = 0; i < sizes.length; i++) {
             BytesReference pbr = getRandomizedPagedBytesReference(sizes[i]);
@@ -187,7 +187,7 @@ public class PagedBytesReferenceTest extends ElasticsearchTestCase {
             switch (randomIntBetween(0, 10)) {
                 case 6:
                 case 5:
-                    target.append(new BytesRef(new byte[]{streamInput.readByte()}));
+                    target.append(new BytesRef(new byte[] { streamInput.readByte() }));
                     break;
                 case 4:
                 case 3:
@@ -295,7 +295,7 @@ public class PagedBytesReferenceTest extends ElasticsearchTestCase {
     }
 
     public void testToBytes() {
-        int[] sizes = {0, randomInt(PAGE_SIZE), PAGE_SIZE, randomIntBetween(2, PAGE_SIZE * randomIntBetween(2, 5))};
+        int[] sizes = { 0, randomInt(PAGE_SIZE), PAGE_SIZE, randomIntBetween(2, PAGE_SIZE * randomIntBetween(2, 5)) };
 
         for (int i = 0; i < sizes.length; i++) {
             BytesReference pbr = getRandomizedPagedBytesReference(sizes[i]);
@@ -407,7 +407,7 @@ public class PagedBytesReferenceTest extends ElasticsearchTestCase {
     }
 
     public void testArray() {
-        int[] sizes = {0, randomInt(PAGE_SIZE), PAGE_SIZE, randomIntBetween(2, PAGE_SIZE * randomIntBetween(2, 5))};
+        int[] sizes = { 0, randomInt(PAGE_SIZE), PAGE_SIZE, randomIntBetween(2, PAGE_SIZE * randomIntBetween(2, 5)) };
 
         for (int i = 0; i < sizes.length; i++) {
             BytesReference pbr = getRandomizedPagedBytesReference(sizes[i]);

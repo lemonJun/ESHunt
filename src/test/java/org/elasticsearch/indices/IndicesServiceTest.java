@@ -52,8 +52,7 @@ public class IndicesServiceTest extends ElasticsearchSingleNodeTest {
 
     public void testCanDeleteShardContent() {
         IndicesService indicesService = getIndicesService();
-        IndexMetaData meta = IndexMetaData.builder("test").settings(ImmutableSettings.builder().put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT)).numberOfShards(1).numberOfReplicas(
-                1).build();
+        IndexMetaData meta = IndexMetaData.builder("test").settings(ImmutableSettings.builder().put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT)).numberOfShards(1).numberOfReplicas(1).build();
         assertFalse("no shard location", indicesService.canDeleteShardContent(new ShardId("test", 0), meta));
         IndexService test = createIndex("test");
         assertTrue(test.hasShard(0));
@@ -86,7 +85,6 @@ public class IndicesServiceTest extends ElasticsearchSingleNodeTest {
         meta = gwMetaState.loadMetaState();
         assertNotNull(meta);
         assertNull(meta.index("test"));
-
 
         createIndex("test");
         client().prepareIndex("test", "type", "1").setSource("field", "value").setRefresh(true).get();
@@ -166,7 +164,7 @@ public class IndicesServiceTest extends ElasticsearchSingleNodeTest {
             indicesService.addPendingDelete(new ShardId("bogus", 1), test.getIndexSettings());
             assertEquals(indicesService.numPendingDeletes(test.index()), 2);
             // shard lock released... we can now delete
-            indicesService.processPendingDeletes(test.index(),  test.getIndexSettings(), new TimeValue(0, TimeUnit.MILLISECONDS));
+            indicesService.processPendingDeletes(test.index(), test.getIndexSettings(), new TimeValue(0, TimeUnit.MILLISECONDS));
             assertEquals(indicesService.numPendingDeletes(test.index()), 0);
         }
         assertAcked(client().admin().indices().prepareOpen("test"));

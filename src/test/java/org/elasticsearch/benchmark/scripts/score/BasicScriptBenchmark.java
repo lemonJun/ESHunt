@@ -100,10 +100,7 @@ public class BasicScriptBenchmark {
 
         public void printResults(BufferedWriter writer) throws IOException {
             String comma = (writer == null) ? "" : ";";
-            String results = description + "\n" + Results.TOTAL_TIME_IN_SEC + " = " + getResultArray(resultSeconds) + comma + "\n"
-                    + Results.TIME_PER_QUERY_IN_SEC + " = " + getResultArray(resultMSPerQuery) + comma + "\n" + Results.NUM_DOCS + " = "
-                    + getResultArray(numDocs) + comma + "\n" + Results.NUM_TERMS + " = " + getResultArray(numTerms) + comma + "\n"
-                    + Results.TIME_PER_DOCIN_MILLIS + " = " + getResultArray(timePerDoc) + comma + "\n";
+            String results = description + "\n" + Results.TOTAL_TIME_IN_SEC + " = " + getResultArray(resultSeconds) + comma + "\n" + Results.TIME_PER_QUERY_IN_SEC + " = " + getResultArray(resultMSPerQuery) + comma + "\n" + Results.NUM_DOCS + " = " + getResultArray(numDocs) + comma + "\n" + Results.NUM_TERMS + " = " + getResultArray(numTerms) + comma + "\n" + Results.TIME_PER_DOCIN_MILLIS + " = " + getResultArray(timePerDoc) + comma + "\n";
             if (writer != null) {
                 writer.write(results);
             } else {
@@ -153,9 +150,7 @@ public class BasicScriptBenchmark {
         File file = new File("addToPlot.m");
         BufferedWriter out = Files.newWriter(file, Charsets.UTF_8);
 
-        out.write("function handle = addToPlot(numTerms, perDoc, color, linestyle, linewidth)\n" + "handle = line(numTerms, perDoc);\n"
-                + "set(handle, 'color', color);\n" + "set(handle, 'linestyle',linestyle);\n" + "set(handle, 'LineWidth',linewidth);\n"
-                + "end\n");
+        out.write("function handle = addToPlot(numTerms, perDoc, color, linestyle, linewidth)\n" + "handle = line(numTerms, perDoc);\n" + "set(handle, 'color', color);\n" + "set(handle, 'linestyle',linestyle);\n" + "set(handle, 'LineWidth',linewidth);\n" + "end\n");
         out.close();
     }
 
@@ -180,8 +175,7 @@ public class BasicScriptBenchmark {
                 out.write("\n");
                 out.write("# " + result.description);
                 result.printResults(out);
-                out.write("handleArray = [handleArray, addToPlot(" + Results.NUM_TERMS + ", " + Results.TIME_PER_DOCIN_MILLIS + ", '"
-                        + result.color + "','" + result.lineStyle + "',5)];\n");
+                out.write("handleArray = [handleArray, addToPlot(" + Results.NUM_TERMS + ", " + Results.TIME_PER_DOCIN_MILLIS + ", '" + result.color + "','" + result.lineStyle + "',5)];\n");
                 out.write("tagArray = [tagArray; '" + result.label + "'];\n");
                 out.write("\n");
             }
@@ -204,8 +198,7 @@ public class BasicScriptBenchmark {
     }
 
     static void printResult(SearchResponse searchResponse, StopWatch stopWatch, String queryInfo) {
-        System.out.println("--> Searching with " + queryInfo + " took " + stopWatch.lastTaskTime() + ", per query "
-                + (stopWatch.lastTaskTime().secondsFrac() / 100) + " for " + searchResponse.getHits().totalHits() + " docs");
+        System.out.println("--> Searching with " + queryInfo + " took " + stopWatch.lastTaskTime() + ", per query " + (stopWatch.lastTaskTime().secondsFrac() / 100) + " for " + searchResponse.getHits().totalHits() + " docs");
     }
 
     static void indexData(long numDocs, Client client, boolean randomizeTerms) throws IOException {
@@ -216,27 +209,14 @@ public class BasicScriptBenchmark {
             // saver in general
         }
 
-        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                .startObject("text").field("type", "string").field("index_options", "offsets").field("analyzer", "payload_float")
-                .endObject().endObject().endObject().endObject();
-        client.admin()
-                .indices()
-                .prepareCreate("test")
-                .addMapping("type1", mapping)
-                .setSettings(
-                        ImmutableSettings.settingsBuilder().put("index.analysis.analyzer.payload_float.tokenizer", "whitespace")
-                                .putArray("index.analysis.analyzer.payload_float.filter", "delimited_float")
-                                .put("index.analysis.filter.delimited_float.delimiter", "|")
-                                .put("index.analysis.filter.delimited_float.encoding", "float")
-                                .put("index.analysis.filter.delimited_float.type", "delimited_payload_filter")
-                                .put("index.number_of_replicas", 0).put("index.number_of_shards", 1)).execute().actionGet();
+        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("text").field("type", "string").field("index_options", "offsets").field("analyzer", "payload_float").endObject().endObject().endObject().endObject();
+        client.admin().indices().prepareCreate("test").addMapping("type1", mapping).setSettings(ImmutableSettings.settingsBuilder().put("index.analysis.analyzer.payload_float.tokenizer", "whitespace").putArray("index.analysis.analyzer.payload_float.filter", "delimited_float").put("index.analysis.filter.delimited_float.delimiter", "|").put("index.analysis.filter.delimited_float.encoding", "float").put("index.analysis.filter.delimited_float.type", "delimited_payload_filter").put("index.number_of_replicas", 0).put("index.number_of_shards", 1)).execute().actionGet();
         client.admin().cluster().prepareHealth("test").setWaitForGreenStatus().setTimeout("10s").execute().actionGet();
         BulkRequestBuilder bulkRequest = client.prepareBulk();
         Random random = new Random(1);
         for (int i = 0; i < numDocs; i++) {
 
-            bulkRequest.add(client.prepareIndex().setType("type1").setIndex("test")
-                    .setSource(jsonBuilder().startObject().field("text", randomText(random, randomizeTerms)).endObject()));
+            bulkRequest.add(client.prepareIndex().setType("type1").setIndex("test").setSource(jsonBuilder().startObject().field("text", randomText(random, randomizeTerms)).endObject()));
             if (i % 1000 == 0) {
                 bulkRequest.execute().actionGet();
                 bulkRequest = client.prepareBulk();
@@ -261,9 +241,7 @@ public class BasicScriptBenchmark {
 
     static void printTimings(SearchResponse searchResponse, StopWatch stopWatch, String message, int maxIter) {
         System.out.println(message);
-        System.out.println(stopWatch.lastTaskTime() + ", " + (stopWatch.lastTaskTime().secondsFrac() / maxIter) + ", "
-                + searchResponse.getHits().totalHits() + ", "
-                + (stopWatch.lastTaskTime().secondsFrac() / (maxIter + searchResponse.getHits().totalHits())));
+        System.out.println(stopWatch.lastTaskTime() + ", " + (stopWatch.lastTaskTime().secondsFrac() / maxIter) + ", " + searchResponse.getHits().totalHits() + ", " + (stopWatch.lastTaskTime().secondsFrac() / (maxIter + searchResponse.getHits().totalHits())));
     }
 
     static List<Entry<String, RequestInfo>> initTermQueries(int minTerms, int maxTerms) {
@@ -272,8 +250,7 @@ public class BasicScriptBenchmark {
             Map<String, Object> params = new HashMap<>();
             String[] terms = getTerms(nTerms + 1);
             params.put("text", terms);
-            SearchRequest request = searchRequest().searchType(SearchType.QUERY_THEN_FETCH).source(
-                    searchSource().explain(false).size(0).query(QueryBuilders.termsQuery("text", terms)));
+            SearchRequest request = searchRequest().searchType(SearchType.QUERY_THEN_FETCH).source(searchSource().explain(false).size(0).query(QueryBuilders.termsQuery("text", terms)));
             String infoString = "Results for term query with " + (nTerms + 1) + " terms:";
             termSearchRequests.add(new AbstractMap.SimpleEntry<>(infoString, new RequestInfo(request, nTerms + 1)));
         }
@@ -287,14 +264,8 @@ public class BasicScriptBenchmark {
             String[] terms = getTerms(nTerms + 1);
             params.put("text", terms);
             String infoString = "Results for native script with " + (nTerms + 1) + " terms:";
-            ScriptScoreFunctionBuilder scriptFunction = (langNative == true) ? scriptFunction(script, "native", params) : scriptFunction(
-                    script, params);
-            SearchRequest request = searchRequest().searchType(SearchType.QUERY_THEN_FETCH).source(
-                    searchSource()
-                            .explain(false)
-                            .size(0)
-                            .query(functionScoreQuery(FilterBuilders.termsFilter("text", terms), scriptFunction).boostMode(
-                                    CombineFunction.REPLACE)));
+            ScriptScoreFunctionBuilder scriptFunction = (langNative == true) ? scriptFunction(script, "native", params) : scriptFunction(script, params);
+            SearchRequest request = searchRequest().searchType(SearchType.QUERY_THEN_FETCH).source(searchSource().explain(false).size(0).query(functionScoreQuery(FilterBuilders.termsFilter("text", terms), scriptFunction).boostMode(CombineFunction.REPLACE)));
             nativeSearchRequests.add(new AbstractMap.SimpleEntry<>(infoString, new RequestInfo(request, nTerms + 1)));
         }
         return nativeSearchRequests;
@@ -304,16 +275,13 @@ public class BasicScriptBenchmark {
         List<Entry<String, RequestInfo>> nativeSearchRequests = new ArrayList<>();
         String infoString = "Results for constant score script:";
         ScriptScoreFunctionBuilder scriptFunction = (langNative == true) ? scriptFunction(script, "native") : scriptFunction(script);
-        SearchRequest request = searchRequest().searchType(SearchType.QUERY_THEN_FETCH).source(
-                searchSource().explain(false).size(0)
-                        .query(functionScoreQuery(FilterBuilders.matchAllFilter(), scriptFunction).boostMode(CombineFunction.REPLACE)));
+        SearchRequest request = searchRequest().searchType(SearchType.QUERY_THEN_FETCH).source(searchSource().explain(false).size(0).query(functionScoreQuery(FilterBuilders.matchAllFilter(), scriptFunction).boostMode(CombineFunction.REPLACE)));
         nativeSearchRequests.add(new AbstractMap.SimpleEntry<>(infoString, new RequestInfo(request, 0)));
 
         return nativeSearchRequests;
     }
 
-    static void runBenchmark(Client client, int maxIter, Results results, List<Entry<String, RequestInfo>> nativeSearchRequests,
-            int minTerms, int warmerIter) throws IOException {
+    static void runBenchmark(Client client, int maxIter, Results results, List<Entry<String, RequestInfo>> nativeSearchRequests, int minTerms, int warmerIter) throws IOException {
         int counter = 0;
         for (Entry<String, RequestInfo> entry : nativeSearchRequests) {
             SearchResponse searchResponse = null;

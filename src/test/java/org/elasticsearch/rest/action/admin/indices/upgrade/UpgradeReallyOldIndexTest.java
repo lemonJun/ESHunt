@@ -57,7 +57,7 @@ public class UpgradeReallyOldIndexTest extends StaticIndexBackwardCompatibilityT
 
         // Needs upgrading?
         UpgradeTest.assertNotUpgraded(client(), indexName);
-        
+
         // Now upgrade only the ancient ones:
         assertNoFailures(client().admin().indices().prepareUpgrade(indexName).setUpgradeOnlyAncientSegments(true).get());
 

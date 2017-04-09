@@ -100,10 +100,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
 
     @Before
     public void setup() throws IOException {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("index.cache.filter.type", "none")
-                .put("name", "SimpleIndexQueryParserTests")
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("index.cache.filter.type", "none").put("name", "SimpleIndexQueryParserTests").build();
         IndexService indexService = createIndex("test", settings);
         MapperService mapperService = indexService.mapperService();
 
@@ -201,9 +198,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         assertThat(parsedQuery, instanceOf(BooleanQuery.class));
         BooleanQuery bQuery = (BooleanQuery) parsedQuery;
         assertThat(bQuery.clauses().size(), equalTo(2));
-        assertEquals(Sets.newHashSet(new Term("name.first", "test"), new Term("name.last", "test")),
-                Sets.newHashSet(assertBooleanSubQuery(parsedQuery, TermQuery.class, 0).getTerm(),
-                        assertBooleanSubQuery(parsedQuery, TermQuery.class, 1).getTerm()));
+        assertEquals(Sets.newHashSet(new Term("name.first", "test"), new Term("name.last", "test")), Sets.newHashSet(assertBooleanSubQuery(parsedQuery, TermQuery.class, 0).getTerm(), assertBooleanSubQuery(parsedQuery, TermQuery.class, 1).getTerm()));
     }
 
     @Test
@@ -920,7 +915,6 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         assertThat(iterator.hasNext(), equalTo(false));
     }
 
-
     @Test
     public void testBoolFilteredQuery() throws IOException {
         IndexQueryParserService queryParser = queryParser();
@@ -1150,7 +1144,6 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         assertThat(clauses[3].getOccur(), equalTo(BooleanClause.Occur.SHOULD));
     }
 
-
     @Test
     public void testBoolQuery() throws IOException {
         IndexQueryParserService queryParser = queryParser();
@@ -1213,9 +1206,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
     @Test
     public void testTermsQueryWithMultipleFields() throws IOException {
         IndexQueryParserService queryParser = queryParser();
-        String query = XContentFactory.jsonBuilder().startObject()
-                .startObject("terms").array("foo", 123).array("bar", 456).endObject()
-                .endObject().string();
+        String query = XContentFactory.jsonBuilder().startObject().startObject("terms").array("foo", 123).array("bar", 456).endObject().endObject().string();
         try {
             queryParser.parse(query).query();
             fail();
@@ -1227,11 +1218,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
     @Test
     public void testTermsFilterWithMultipleFields() throws IOException {
         IndexQueryParserService queryParser = queryParser();
-        String query = XContentFactory.jsonBuilder().startObject()
-                .startObject("filtered")
-                .startObject("query").startObject("match_all").endObject().endObject()
-                .startObject("filter").startObject("terms").array("foo", 123).array("bar", 456).endObject().endObject()
-                .endObject().string();
+        String query = XContentFactory.jsonBuilder().startObject().startObject("filtered").startObject("query").startObject("match_all").endObject().endObject().startObject("filter").startObject("terms").array("foo", 123).array("bar", 456).endObject().endObject().endObject().string();
         try {
             queryParser.parse(query).query();
             fail();
@@ -1239,8 +1226,6 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
             assertThat(ex.getMessage(), equalTo("[test] [terms] filter does not support multiple fields"));
         }
     }
-
-
 
     @Test
     public void testInQuery() throws IOException {
@@ -1377,7 +1362,6 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         //assertThat(termsFilter.getTerms().length, equalTo(2));
         //assertThat(termsFilter.getTerms()[0].text(), equalTo("banon"));
     }
-
 
     @Test
     public void testTermsFilterQuery() throws Exception {
@@ -1553,7 +1537,6 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         assertThat(((SpanTermQuery) ((FieldMaskingSpanQuery) spanNearQuery.getClauses()[2]).getMaskedQuery()).getTerm(), equalTo(new Term("age_1", "36")));
         assertThat(spanNearQuery.isInOrder(), equalTo(false));
     }
-
 
     @Test
     public void testSpanOrQueryBuilder() throws IOException {
@@ -1825,7 +1808,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         TermsEnum termsEnum = terms.iterator(null);
         CharsRefBuilder spare = new CharsRefBuilder();
         BytesRef text;
-        while((text = termsEnum.next()) != null) {
+        while ((text = termsEnum.next()) != null) {
             spare.copyUTF8Bytes(text);
             String term = spare.toString();
             strings += term;
@@ -1849,7 +1832,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
             queryParser.parse(fuzzyLikeThisQuery("name.first", "name.last").likeText("something").maxQueryTerms(12).fuzziness(Fuzziness.build("4.1"))).query();
             fail("exception expected - fractional edit distance");
         } catch (ElasticsearchException ex) {
-           //
+            //
         }
 
         try {
@@ -1858,13 +1841,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         } catch (ElasticsearchException ex) {
             //
         }
-        String[] queries = new String[] {
-                "{\"flt\": {\"fields\": [\"comment\"], \"like_text\": \"FFFdfds\",\"fuzziness\": \"4\"}}",
-                "{\"flt\": {\"fields\": [\"comment\"], \"like_text\": \"FFFdfds\",\"fuzziness\": \"4.00000000\"}}",
-                "{\"flt\": {\"fields\": [\"comment\"], \"like_text\": \"FFFdfds\",\"fuzziness\": \"4.\"}}",
-                "{\"flt\": {\"fields\": [\"comment\"], \"like_text\": \"FFFdfds\",\"fuzziness\": 4}}",
-                "{\"flt\": {\"fields\": [\"comment\"], \"like_text\": \"FFFdfds\",\"fuzziness\": 4.0}}"
-        };
+        String[] queries = new String[] { "{\"flt\": {\"fields\": [\"comment\"], \"like_text\": \"FFFdfds\",\"fuzziness\": \"4\"}}", "{\"flt\": {\"fields\": [\"comment\"], \"like_text\": \"FFFdfds\",\"fuzziness\": \"4.00000000\"}}", "{\"flt\": {\"fields\": [\"comment\"], \"like_text\": \"FFFdfds\",\"fuzziness\": \"4.\"}}", "{\"flt\": {\"fields\": [\"comment\"], \"like_text\": \"FFFdfds\",\"fuzziness\": 4}}", "{\"flt\": {\"fields\": [\"comment\"], \"like_text\": \"FFFdfds\",\"fuzziness\": 4.0}}" };
         int iters = scaledRandomIntBetween(5, 100);
         for (int i = 0; i < iters; i++) {
             parsedQuery = queryParser.parse(new BytesArray((String) randomFrom(queries))).query();
@@ -1881,7 +1858,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         String query = copyToStringFromClasspath("/org/elasticsearch/index/query/fuzzyLikeThis.json");
         Query parsedQuery = queryParser.parse(query).query();
         assertThat(parsedQuery, instanceOf(FuzzyLikeThisQuery.class));
-//        FuzzyLikeThisQuery fuzzyLikeThisQuery = (FuzzyLikeThisQuery) parsedQuery;
+        //        FuzzyLikeThisQuery fuzzyLikeThisQuery = (FuzzyLikeThisQuery) parsedQuery;
     }
 
     @Test
@@ -1889,7 +1866,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         IndexQueryParserService queryParser = queryParser();
         Query parsedQuery = queryParser.parse(fuzzyLikeThisFieldQuery("name.first").likeText("something").maxQueryTerms(12)).query();
         assertThat(parsedQuery, instanceOf(FuzzyLikeThisQuery.class));
-//        FuzzyLikeThisQuery fuzzyLikeThisQuery = (FuzzyLikeThisQuery) parsedQuery;
+        //        FuzzyLikeThisQuery fuzzyLikeThisQuery = (FuzzyLikeThisQuery) parsedQuery;
     }
 
     @Test
@@ -1898,7 +1875,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         String query = copyToStringFromClasspath("/org/elasticsearch/index/query/fuzzyLikeThisField.json");
         Query parsedQuery = queryParser.parse(query).query();
         assertThat(parsedQuery, instanceOf(FuzzyLikeThisQuery.class));
-//        FuzzyLikeThisQuery fuzzyLikeThisQuery = (FuzzyLikeThisQuery) parsedQuery;
+        //        FuzzyLikeThisQuery fuzzyLikeThisQuery = (FuzzyLikeThisQuery) parsedQuery;
     }
 
     @Test
@@ -2125,7 +2102,6 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         assertThat(filter.bottomRight().lon(), closeTo(-80, 0.00001));
     }
 
-
     @Test
     public void testGeoBoundingBoxFilter1() throws IOException {
         IndexQueryParserService queryParser = queryParser();
@@ -2216,7 +2192,6 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         assertThat(filter.bottomRight().lon(), closeTo(-80, 0.00001));
     }
 
-
     @Test
     public void testGeoPolygonNamedFilter() throws IOException {
         IndexQueryParserService queryParser = queryParser();
@@ -2236,16 +2211,9 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         assertThat(filter.points()[2].lon(), closeTo(-90, 0.00001));
     }
 
-
     @Test
     public void testGeoPolygonFilterParsingExceptions() throws IOException {
-        String[] brokenFiles = new String[]{
-                "/org/elasticsearch/index/query/geo_polygon_exception_1.json",
-                "/org/elasticsearch/index/query/geo_polygon_exception_2.json",
-                "/org/elasticsearch/index/query/geo_polygon_exception_3.json",
-                "/org/elasticsearch/index/query/geo_polygon_exception_4.json",
-                "/org/elasticsearch/index/query/geo_polygon_exception_5.json"
-        };
+        String[] brokenFiles = new String[] { "/org/elasticsearch/index/query/geo_polygon_exception_1.json", "/org/elasticsearch/index/query/geo_polygon_exception_2.json", "/org/elasticsearch/index/query/geo_polygon_exception_3.json", "/org/elasticsearch/index/query/geo_polygon_exception_4.json", "/org/elasticsearch/index/query/geo_polygon_exception_5.json" };
         for (String brokenFile : brokenFiles) {
             IndexQueryParserService queryParser = queryParser();
             String query = copyToStringFromClasspath(brokenFile);
@@ -2257,7 +2225,6 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
             }
         }
     }
-
 
     @Test
     public void testGeoPolygonFilter1() throws IOException {
@@ -2470,7 +2437,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
             tq1.setBoost(2);
             TermQuery tq2 = new TermQuery(new Term("name.last", "banon"));
             tq2.setBoost(3);
-            expected.add(new DisjunctionMaxQuery(Arrays.<Query>asList(tq1, tq2), 0f), Occur.SHOULD);
+            expected.add(new DisjunctionMaxQuery(Arrays.<Query> asList(tq1, tq2), 0f), Occur.SHOULD);
             assertEquals(expected, rewrittenQuery);
         }
     }
@@ -2489,7 +2456,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         String query = copyToStringFromClasspath("/org/elasticsearch/index/query/match-with-fuzzy-transpositions.json");
         Query parsedQuery = queryParser.parse(query).query();
         assertThat(parsedQuery, instanceOf(FuzzyQuery.class));
-        assertThat( ((FuzzyQuery) parsedQuery).getTranspositions(), equalTo(true));
+        assertThat(((FuzzyQuery) parsedQuery).getTranspositions(), equalTo(true));
     }
 
     @Test
@@ -2498,7 +2465,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         String query = copyToStringFromClasspath("/org/elasticsearch/index/query/match-without-fuzzy-transpositions.json");
         Query parsedQuery = queryParser.parse(query).query();
         assertThat(parsedQuery, instanceOf(FuzzyQuery.class));
-        assertThat( ((FuzzyQuery) parsedQuery).getTranspositions(), equalTo(false));
+        assertThat(((FuzzyQuery) parsedQuery).getTranspositions(), equalTo(false));
     }
 
     // https://github.com/elasticsearch/elasticsearch/issues/7240
@@ -2539,24 +2506,8 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
     @Test
     public void testWeight1fStillProducesWeighFuction() throws IOException {
         IndexQueryParserService queryParser = queryParser();
-        String queryString = jsonBuilder().startObject()
-                .startObject("function_score")
-                .startArray("functions")
-                .startObject()
-                .startObject("field_value_factor")
-                .field("field", "popularity")
-                .endObject()
-                .field("weight", 1.0)
-                .endObject()
-                .endArray()
-                .endObject()
-                .endObject().string();
-        IndexService indexService = createIndex("testidx", client().admin().indices().prepareCreate("testidx")
-                .addMapping("doc",jsonBuilder().startObject()
-                        .startObject("properties")
-                        .startObject("popularity").field("type", "float").endObject()
-                        .endObject()
-                        .endObject()));
+        String queryString = jsonBuilder().startObject().startObject("function_score").startArray("functions").startObject().startObject("field_value_factor").field("field", "popularity").endObject().field("weight", 1.0).endObject().endArray().endObject().endObject().string();
+        IndexService indexService = createIndex("testidx", client().admin().indices().prepareCreate("testidx").addMapping("doc", jsonBuilder().startObject().startObject("properties").startObject("popularity").field("type", "float").endObject().endObject().endObject()));
         SearchContext.setCurrent(createSearchContext(indexService));
         Query query = queryParser.parse(queryString).query();
         assertThat(query, instanceOf(FunctionScoreQuery.class));
@@ -2567,11 +2518,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
     @Test
     public void testProperErrorMessagesForMisplacedWeightsAndFunctions() throws IOException {
         IndexQueryParserService queryParser = queryParser();
-        String query = jsonBuilder().startObject().startObject("function_score")
-                .startArray("functions")
-                .startObject().field("weight", 2).field("boost_factor",2).endObject()
-                .endArray()
-                .endObject().endObject().string();
+        String query = jsonBuilder().startObject().startObject("function_score").startArray("functions").startObject().field("weight", 2).field("boost_factor", 2).endObject().endArray().endObject().endObject().string();
         try {
             queryParser.parse(query).query();
             fail("Expect exception here because boost_factor must not have a weight");
@@ -2584,24 +2531,14 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
         } catch (ElasticsearchIllegalArgumentException e) {
             assertThat(e.getDetailedMessage(), containsString(BoostScoreFunction.BOOST_WEIGHT_ERROR_MESSAGE));
         }
-        query = jsonBuilder().startObject().startObject("function_score")
-                .startArray("functions")
-                .startObject().field("boost_factor",2).endObject()
-                .endArray()
-                .field("weight", 2)
-                .endObject().endObject().string();
+        query = jsonBuilder().startObject().startObject("function_score").startArray("functions").startObject().field("boost_factor", 2).endObject().endArray().field("weight", 2).endObject().endObject().string();
         try {
             queryParser.parse(query).query();
             fail("Expect exception here because array of functions and one weight in body is not allowed.");
         } catch (QueryParsingException e) {
             assertThat(e.getDetailedMessage(), containsString("You can either define \"functions\":[...] or a single function, not both. Found \"functions\": [...] already, now encountering \"weight\"."));
         }
-        query = jsonBuilder().startObject().startObject("function_score")
-                .field("weight", 2)
-                .startArray("functions")
-                .startObject().field("boost_factor",2).endObject()
-                .endArray()
-                .endObject().endObject().string();
+        query = jsonBuilder().startObject().startObject("function_score").field("weight", 2).startArray("functions").startObject().field("boost_factor", 2).endObject().endArray().endObject().endObject().string();
         try {
             queryParser.parse(query).query();
             fail("Expect exception here because array of functions and one weight in body is not allowed.");
@@ -2613,9 +2550,7 @@ public class SimpleIndexQueryParserTests extends ElasticsearchSingleNodeTest {
     // https://github.com/elasticsearch/elasticsearch/issues/6722
     public void testEmptyBoolSubClausesIsMatchAll() throws ElasticsearchException, IOException {
         String query = copyToStringFromClasspath("/org/elasticsearch/index/query/bool-query-with-empty-clauses-for-parsing.json");
-        IndexService indexService = createIndex("testidx", client().admin().indices().prepareCreate("testidx")
-                .addMapping("foo")
-                .addMapping("test", "_parent", "type=foo"));
+        IndexService indexService = createIndex("testidx", client().admin().indices().prepareCreate("testidx").addMapping("foo").addMapping("test", "_parent", "type=foo"));
         SearchContext.setCurrent(createSearchContext(indexService));
         IndexQueryParserService queryParser = indexService.queryParserService();
         Query parsedQuery = queryParser.parse(query).query();

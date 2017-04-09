@@ -34,7 +34,6 @@ import org.junit.Test;
 
 import java.util.concurrent.ExecutionException;
 
-
 @ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.TEST, numDataNodes = 0)
 public class IndexingMemoryControllerTests extends ElasticsearchIntegrationTest {
 
@@ -60,16 +59,12 @@ public class IndexingMemoryControllerTests extends ElasticsearchIntegrationTest 
         boolean success = awaitBusy(new Predicate<Object>() {
             @Override
             public boolean apply(Object input) {
-                return shard1.engine().config().getIndexingBufferSize().bytes() <= expected2ShardsSize &&
-                        shard2.engine().config().getIndexingBufferSize().bytes() <= expected2ShardsSize;
+                return shard1.engine().config().getIndexingBufferSize().bytes() <= expected2ShardsSize && shard2.engine().config().getIndexingBufferSize().bytes() <= expected2ShardsSize;
             }
         });
 
         if (!success) {
-            fail("failed to update shard indexing buffer size. expected [" + expected2ShardsSize + "] shard1 [" +
-                            shard1.engine().config().getIndexingBufferSize().bytes() + "] shard2  [" +
-                            shard2.engine().config().getIndexingBufferSize().bytes() + "]"
-            );
+            fail("failed to update shard indexing buffer size. expected [" + expected2ShardsSize + "] shard1 [" + shard1.engine().config().getIndexingBufferSize().bytes() + "] shard2  [" + shard2.engine().config().getIndexingBufferSize().bytes() + "]");
         }
 
         client().admin().indices().prepareDelete("test2").get();
@@ -81,9 +76,7 @@ public class IndexingMemoryControllerTests extends ElasticsearchIntegrationTest 
         });
 
         if (!success) {
-            fail("failed to update shard indexing buffer size after deleting shards. expected [" + expected1ShardSize + "] got [" +
-                            shard1.engine().config().getIndexingBufferSize().bytes() + "]"
-            );
+            fail("failed to update shard indexing buffer size after deleting shards. expected [" + expected1ShardSize + "] got [" + shard1.engine().config().getIndexingBufferSize().bytes() + "]");
         }
 
     }
@@ -99,7 +92,6 @@ public class IndexingMemoryControllerTests extends ElasticsearchIntegrationTest 
 
         final IndexShard shard1 = internalCluster().getInstance(IndicesService.class).indexService("test1").shard(0);
 
-
         if (randomBoolean()) {
             logger.info("--> indexing some pending operations");
             indexRandom(false, client().prepareIndex("test1", "type", "0").setSource("f", "0"));
@@ -112,9 +104,7 @@ public class IndexingMemoryControllerTests extends ElasticsearchIntegrationTest 
             }
         });
         if (success == false) {
-            fail("failed to update shard indexing buffer size due to inactive state. expected [" + EngineConfig.INACTIVE_SHARD_INDEXING_BUFFER + "] got [" +
-                            shard1.engine().config().getIndexingBufferSize().bytes() + "]"
-            );
+            fail("failed to update shard indexing buffer size due to inactive state. expected [" + EngineConfig.INACTIVE_SHARD_INDEXING_BUFFER + "] got [" + shard1.engine().config().getIndexingBufferSize().bytes() + "]");
         }
 
         index("test1", "type", "1", "f", 1);
@@ -132,14 +122,13 @@ public class IndexingMemoryControllerTests extends ElasticsearchIntegrationTest 
             index("test1", "type", "2", "f", 1);
 
             success = awaitBusy(new Predicate<Object>() {
-                    @Override
-                    public boolean apply(Object input) {
-                        return shard1.engine().config().getIndexingBufferSize().bytes() > EngineConfig.INACTIVE_SHARD_INDEXING_BUFFER.bytes();
-                    }
-                });
+                @Override
+                public boolean apply(Object input) {
+                    return shard1.engine().config().getIndexingBufferSize().bytes() > EngineConfig.INACTIVE_SHARD_INDEXING_BUFFER.bytes();
+                }
+            });
             if (success == false) {
-                fail("failed to update shard indexing buffer size due to active state. expected something larger then [" + EngineConfig.INACTIVE_SHARD_INDEXING_BUFFER + "] got [" +
-                     shard1.engine().config().getIndexingBufferSize().bytes() + "]");
+                fail("failed to update shard indexing buffer size due to active state. expected something larger then [" + EngineConfig.INACTIVE_SHARD_INDEXING_BUFFER + "] got [" + shard1.engine().config().getIndexingBufferSize().bytes() + "]");
             }
         }
 
@@ -155,25 +144,13 @@ public class IndexingMemoryControllerTests extends ElasticsearchIntegrationTest 
             }
         });
         if (!success) {
-            fail("failed to update shard indexing buffer size due to inactive state. expected [" + EngineConfig.INACTIVE_SHARD_INDEXING_BUFFER + "] got [" +
-                            shard1.engine().config().getIndexingBufferSize().bytes() + "]"
-            );
+            fail("failed to update shard indexing buffer size due to inactive state. expected [" + EngineConfig.INACTIVE_SHARD_INDEXING_BUFFER + "] got [" + shard1.engine().config().getIndexingBufferSize().bytes() + "]");
         }
     }
 
     private void createNode(Settings settings) {
-        internalCluster().startNode(ImmutableSettings.builder()
-                        .put(ClusterName.SETTING, "IndexingMemoryControllerTests")
-                        .put("node.name", "IndexingMemoryControllerTests")
-                        .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                        .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)
-                        .put(EsExecutors.PROCESSORS, 1) // limit the number of threads created
-                        .put("http.enabled", false)
-                        .put("index.store.type", "ram")
-                        .put("gateway.type", "none")
-                        .put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true) // make sure we get what we set :)
-                        .put("indices.memory.interval", "100ms")
-                        .put(settings)
-        );
+        internalCluster().startNode(ImmutableSettings.builder().put(ClusterName.SETTING, "IndexingMemoryControllerTests").put("node.name", "IndexingMemoryControllerTests").put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0).put(EsExecutors.PROCESSORS, 1) // limit the number of threads created
+                        .put("http.enabled", false).put("index.store.type", "ram").put("gateway.type", "none").put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true) // make sure we get what we set :)
+                        .put("indices.memory.interval", "100ms").put(settings));
     }
 }

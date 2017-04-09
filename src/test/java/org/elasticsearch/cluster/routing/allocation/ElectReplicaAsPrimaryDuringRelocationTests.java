@@ -49,13 +49,9 @@ public class ElectReplicaAsPrimaryDuringRelocationTests extends ElasticsearchAll
 
         logger.info("Building initial routing table");
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(2).numberOfReplicas(1))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(2).numberOfReplicas(1)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 

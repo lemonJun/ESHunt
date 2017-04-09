@@ -58,8 +58,7 @@ public class MGetStress1 {
             @Override
             public void run() {
                 while (!done.get()) {
-                    client.prepareIndex("test", "type", Integer.toString(ThreadLocalRandom.current().nextInt(NUMBER_OF_DOCS)))
-                            .setSource("field", "value").execute().actionGet();
+                    client.prepareIndex("test", "type", Integer.toString(ThreadLocalRandom.current().nextInt(NUMBER_OF_DOCS))).setSource("field", "value").execute().actionGet();
                 }
             }
         });

@@ -114,8 +114,8 @@ public abstract class AbstractSnapshotTests extends ElasticsearchIntegrationTest
     }
 
     public static String blockNodeWithIndex(String index) {
-        for(String node : internalCluster().nodesInclude("test-idx")) {
-            ((MockRepository)internalCluster().getInstance(RepositoriesService.class, node).repository("test-repo")).blockOnDataFiles(true);
+        for (String node : internalCluster().nodesInclude("test-idx")) {
+            ((MockRepository) internalCluster().getInstance(RepositoriesService.class, node).repository("test-repo")).blockOnDataFiles(true);
             return node;
         }
         fail("No nodes for the index " + index + " found");
@@ -123,7 +123,7 @@ public abstract class AbstractSnapshotTests extends ElasticsearchIntegrationTest
     }
 
     public static void unblockNode(String node) {
-        ((MockRepository)internalCluster().getInstance(RepositoriesService.class, node).repository("test-repo")).unblock();
+        ((MockRepository) internalCluster().getInstance(RepositoriesService.class, node).repository("test-repo")).unblock();
     }
 
     protected void assertBusyPendingTasks(final String taskPrefix, final int expectedCount) throws Exception {
@@ -132,7 +132,7 @@ public abstract class AbstractSnapshotTests extends ElasticsearchIntegrationTest
             public void run() {
                 PendingClusterTasksResponse tasks = client().admin().cluster().preparePendingClusterTasks().get();
                 int count = 0;
-                for(PendingClusterTask task : tasks) {
+                for (PendingClusterTask task : tasks) {
                     logger.debug("--> pending task: " + task.getSource());
                     if (task.getSource().toString().startsWith(taskPrefix)) {
                         count++;
@@ -207,7 +207,7 @@ public abstract class AbstractSnapshotTests extends ElasticsearchIntegrationTest
             clusterService.submitStateUpdateTask("test_block", passThroughPriority, new ClusterStateUpdateTask() {
                 @Override
                 public ClusterState execute(ClusterState currentState) throws Exception {
-                    while(System.currentTimeMillis() < stopWaitingAt) {
+                    while (System.currentTimeMillis() < stopWaitingAt) {
                         for (PendingClusterTask task : clusterService.pendingTasks()) {
                             if (task.getSource().string().equals("test_block") == false && passThroughPriority.sameOrAfter(task.getPriority())) {
                                 // There are other higher priority tasks in the queue and let them pass through and then set the block again
@@ -218,7 +218,7 @@ public abstract class AbstractSnapshotTests extends ElasticsearchIntegrationTest
                         }
                         try {
                             logger.info("waiting....");
-                            if (latch.await(Math.min(100, timeout.millis()), TimeUnit.MILLISECONDS)){
+                            if (latch.await(Math.min(100, timeout.millis()), TimeUnit.MILLISECONDS)) {
                                 // Done waiting - unblock
                                 logger.info("unblocked");
                                 return currentState;

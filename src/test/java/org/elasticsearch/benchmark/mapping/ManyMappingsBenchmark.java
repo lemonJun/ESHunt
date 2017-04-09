@@ -39,44 +39,7 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
  */
 public class ManyMappingsBenchmark {
 
-    private static final String MAPPING = "{\n" +
-            "        \"dynamic_templates\": [\n" +
-            "          {\n" +
-            "            \"t1\": {\n" +
-            "              \"mapping\": {\n" +
-            "                \"store\": false,\n" +
-            "                \"norms\": {\n" +
-            "                  \"enabled\": false\n" +
-            "                },\n" +
-            "                \"type\": \"string\"\n" +
-            "              },\n" +
-            "              \"match\": \"*_ss\"\n" +
-            "            }\n" +
-            "          },\n" +
-            "          {\n" +
-            "            \"t2\": {\n" +
-            "              \"mapping\": {\n" +
-            "                \"store\": false,\n" +
-            "                \"type\": \"date\"\n" +
-            "              },\n" +
-            "              \"match\": \"*_dt\"\n" +
-            "            }\n" +
-            "          },\n" +
-            "          {\n" +
-            "            \"t3\": {\n" +
-            "              \"mapping\": {\n" +
-            "                \"store\": false,\n" +
-            "                \"type\": \"integer\"\n" +
-            "              },\n" +
-            "              \"match\": \"*_i\"\n" +
-            "            }\n" +
-            "          }\n" +
-            "        ],\n" +
-            "        \"_source\": {\n" +
-            "          \"enabled\": false\n" +
-            "        },\n" +
-            "        \"properties\": {}\n" +
-            "      }";
+    private static final String MAPPING = "{\n" + "        \"dynamic_templates\": [\n" + "          {\n" + "            \"t1\": {\n" + "              \"mapping\": {\n" + "                \"store\": false,\n" + "                \"norms\": {\n" + "                  \"enabled\": false\n" + "                },\n" + "                \"type\": \"string\"\n" + "              },\n" + "              \"match\": \"*_ss\"\n" + "            }\n" + "          },\n" + "          {\n" + "            \"t2\": {\n" + "              \"mapping\": {\n" + "                \"store\": false,\n" + "                \"type\": \"date\"\n" + "              },\n" + "              \"match\": \"*_dt\"\n" + "            }\n" + "          },\n" + "          {\n" + "            \"t3\": {\n" + "              \"mapping\": {\n" + "                \"store\": false,\n" + "                \"type\": \"integer\"\n" + "              },\n" + "              \"match\": \"*_i\"\n" + "            }\n" + "          }\n" + "        ],\n" + "        \"_source\": {\n" + "          \"enabled\": false\n" + "        },\n" + "        \"properties\": {}\n" + "      }";
 
     private static final String INDEX_NAME = "index";
     private static final String TYPE_NAME = "type";
@@ -87,30 +50,18 @@ public class ManyMappingsBenchmark {
     public static void main(String[] args) throws Exception {
         System.setProperty("es.logger.prefix", "");
         Bootstrap.initializeNatives(true, false);
-        Settings settings = settingsBuilder()
-                .put("gateway.type", "local")
-                .put(SETTING_NUMBER_OF_SHARDS, 5)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put("gateway.type", "local").put(SETTING_NUMBER_OF_SHARDS, 5).put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
         String clusterName = ManyMappingsBenchmark.class.getSimpleName();
-        Node node = nodeBuilder().clusterName(clusterName)
-                .settings(settingsBuilder().put(settings))
-                .node();
+        Node node = nodeBuilder().clusterName(clusterName).settings(settingsBuilder().put(settings)).node();
         if (TWO_NODES) {
-            Node node2 = nodeBuilder().clusterName(clusterName)
-                    .settings(settingsBuilder().put(settings))
-                    .node();
+            Node node2 = nodeBuilder().clusterName(clusterName).settings(settingsBuilder().put(settings)).node();
         }
 
         Client client = node.client();
 
-        client.admin().indices().prepareDelete(INDEX_NAME)
-                .setIndicesOptions(IndicesOptions.lenientExpandOpen())
-                .get();
-        client.admin().indices().prepareCreate(INDEX_NAME)
-                .addMapping(TYPE_NAME, MAPPING)
-                .get();
+        client.admin().indices().prepareDelete(INDEX_NAME).setIndicesOptions(IndicesOptions.lenientExpandOpen()).get();
+        client.admin().indices().prepareCreate(INDEX_NAME).addMapping(TYPE_NAME, MAPPING).get();
 
         BulkRequestBuilder builder = client.prepareBulk();
         int fieldCount = 0;
@@ -128,10 +79,7 @@ public class ManyMappingsBenchmark {
                 System.out.println("dynamic fields rolled up");
             }
 
-            builder.add(
-                    client.prepareIndex(INDEX_NAME, TYPE_NAME, String.valueOf(i))
-                            .setSource(sourceBuilder)
-            );
+            builder.add(client.prepareIndex(INDEX_NAME, TYPE_NAME, String.valueOf(i)).setSource(sourceBuilder));
 
             if (builder.numberOfActions() >= 1000) {
                 builder.get();
@@ -141,14 +89,12 @@ public class ManyMappingsBenchmark {
             if (i % PRINT == 0) {
                 long took = System.currentTimeMillis() - time;
                 time = System.currentTimeMillis();
-                System.out.println("Indexed " + i +  " docs, in " + TimeValue.timeValueMillis(took));
+                System.out.println("Indexed " + i + " docs, in " + TimeValue.timeValueMillis(took));
             }
         }
         if (builder.numberOfActions() > 0) {
             builder.get();
         }
-
-
 
     }
 

@@ -61,9 +61,7 @@ public class BroadcastActionsTests extends ElasticsearchIntegrationTest {
         // check count
         for (int i = 0; i < 5; i++) {
             // test successful
-            CountResponse countResponse = client().prepareCount("test")
-                    .setQuery(termQuery("_type", "type1"))
-                    .get();
+            CountResponse countResponse = client().prepareCount("test").setQuery(termQuery("_type", "type1")).get();
             assertThat(countResponse.getCount(), equalTo(2l));
             assertThat(countResponse.getTotalShards(), equalTo(numShards.numPrimaries));
             assertThat(countResponse.getSuccessfulShards(), equalTo(numShards.numPrimaries));

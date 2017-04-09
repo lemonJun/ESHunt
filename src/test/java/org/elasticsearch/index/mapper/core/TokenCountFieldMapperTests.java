@@ -41,27 +41,11 @@ import static org.hamcrest.Matchers.equalTo;
 public class TokenCountFieldMapperTests extends ElasticsearchSingleNodeTest {
     @Test
     public void testMerge() throws IOException {
-        String stage1Mapping = XContentFactory.jsonBuilder().startObject()
-                .startObject("person")
-                    .startObject("properties")
-                        .startObject("tc")
-                            .field("type", "token_count")
-                            .field("analyzer", "keyword")
-                        .endObject()
-                    .endObject()
-                .endObject().endObject().string();
+        String stage1Mapping = XContentFactory.jsonBuilder().startObject().startObject("person").startObject("properties").startObject("tc").field("type", "token_count").field("analyzer", "keyword").endObject().endObject().endObject().endObject().string();
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
         DocumentMapper stage1 = parser.parse(stage1Mapping);
 
-        String stage2Mapping = XContentFactory.jsonBuilder().startObject()
-                .startObject("person")
-                    .startObject("properties")
-                        .startObject("tc")
-                            .field("type", "token_count")
-                            .field("analyzer", "standard")
-                        .endObject()
-                    .endObject()
-                .endObject().endObject().string();
+        String stage2Mapping = XContentFactory.jsonBuilder().startObject().startObject("person").startObject("properties").startObject("tc").field("type", "token_count").field("analyzer", "standard").endObject().endObject().endObject().endObject().string();
         DocumentMapper stage2 = parser.parse(stage2Mapping);
 
         DocumentMapper.MergeResult mergeResult = stage1.merge(stage2, mergeFlags().simulate(true));
@@ -78,14 +62,14 @@ public class TokenCountFieldMapperTests extends ElasticsearchSingleNodeTest {
     @Test
     public void testCountPositions() throws IOException {
         // We're looking to make sure that we:
-        Token t1 = new Token();      // Don't count tokens without an increment
+        Token t1 = new Token(); // Don't count tokens without an increment
         t1.setPositionIncrement(0);
         Token t2 = new Token();
-        t2.setPositionIncrement(1);  // Count normal tokens with one increment
+        t2.setPositionIncrement(1); // Count normal tokens with one increment
         Token t3 = new Token();
-        t2.setPositionIncrement(2);  // Count funny tokens with more than one increment
+        t2.setPositionIncrement(2); // Count funny tokens with more than one increment
         int finalTokenIncrement = 4; // Count the final token increment on the rare token streams that have them
-        Token[] tokens = new Token[] {t1, t2, t3};
+        Token[] tokens = new Token[] { t1, t2, t3 };
         Collections.shuffle(Arrays.asList(tokens), getRandom());
         TokenStream tokenStream = new CannedTokenStream(finalTokenIncrement, 0, tokens);
         assertThat(TokenCountFieldMapper.countPositions(tokenStream), equalTo(7));

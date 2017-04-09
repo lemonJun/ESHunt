@@ -52,26 +52,10 @@ public class StoredNumericValuesTest extends ElasticsearchSingleNodeTest {
     public void testBytesAndNumericRepresentation() throws Exception {
         IndexWriter writer = new IndexWriter(new RAMDirectory(), new IndexWriterConfig(Lucene.VERSION, Lucene.STANDARD_ANALYZER));
 
-        String mapping = XContentFactory.jsonBuilder()
-                .startObject()
-                    .startObject("type")
-                        .startObject("properties")
-                            .startObject("field1").field("type", "integer").field("store", "yes").endObject()
-                            .startObject("field2").field("type", "float").field("store", "yes").endObject()
-                            .startObject("field3").field("type", "long").field("store", "yes").endObject()
-                        .endObject()
-                    .endObject()
-                .endObject()
-                .string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "integer").field("store", "yes").endObject().startObject("field2").field("type", "float").field("store", "yes").endObject().startObject("field3").field("type", "long").field("store", "yes").endObject().endObject().endObject().endObject().string();
         DocumentMapper mapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = mapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                    .field("field1", 1)
-                    .field("field2", 1.1)
-                    .startArray("field3").value(1).value(2).value(3).endArray()
-                .endObject()
-                .bytes());
+        ParsedDocument doc = mapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field1", 1).field("field2", 1.1).startArray("field3").value(1).value(2).value(3).endArray().endObject().bytes());
 
         writer.addDocument(doc.rootDoc(), doc.analyzer());
 

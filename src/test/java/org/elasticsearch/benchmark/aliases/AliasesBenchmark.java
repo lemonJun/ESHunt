@@ -44,12 +44,8 @@ public class AliasesBenchmark {
         int BASE_ALIAS_COUNT = 100000;
         int NUM_ADD_ALIAS_REQUEST = 1000;
 
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("gateway.type", "local")
-                .put("node.master", false).build();
-        Node node1 = NodeBuilder.nodeBuilder().settings(
-                ImmutableSettings.settingsBuilder().put(settings).put("node.master", true)
-        ).node();
+        Settings settings = ImmutableSettings.settingsBuilder().put("gateway.type", "local").put("node.master", false).build();
+        Node node1 = NodeBuilder.nodeBuilder().settings(ImmutableSettings.settingsBuilder().put(settings).put("node.master", true)).node();
 
         Node[] otherNodes = new Node[NUM_ADDITIONAL_NODES];
         for (int i = 0; i < otherNodes.length; i++) {
@@ -59,7 +55,8 @@ public class AliasesBenchmark {
         Client client = node1.client();
         try {
             client.admin().indices().prepareCreate(INDEX_NAME).execute().actionGet();
-        } catch (IndexAlreadyExistsException e) {}
+        } catch (IndexAlreadyExistsException e) {
+        }
         client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
         int numberOfAliases = countAliases(client);
         System.out.println("Number of aliases: " + numberOfAliases);
@@ -82,9 +79,7 @@ public class AliasesBenchmark {
             IndicesAliasesRequestBuilder builder = client.admin().indices().prepareAliases();
             int diff = numberOfAliases - BASE_ALIAS_COUNT;
             System.out.println("Removing " + diff + " aliases to get to the start amount of " + BASE_ALIAS_COUNT + " aliases");
-            List<AliasMetaData> aliases= client.admin().indices().prepareGetAliases("*")
-                    .addIndices(INDEX_NAME)
-                    .execute().actionGet().getAliases().get(INDEX_NAME);
+            List<AliasMetaData> aliases = client.admin().indices().prepareGetAliases("*").addIndices(INDEX_NAME).execute().actionGet().getAliases().get(INDEX_NAME);
             for (int i = 0; i <= diff; i++) {
                 builder.removeAlias(INDEX_NAME, aliases.get(i).alias());
                 if (i % 1000 == 0) {
@@ -105,14 +100,13 @@ public class AliasesBenchmark {
         for (int i = numberOfAliases; i <= max; i++) {
             if (i != numberOfAliases && i % 100 == 0) {
                 long avgTime = totalTime / 100;
-                System.out.println("Added [" + (i - numberOfAliases) + "] aliases. Avg create time: "  + avgTime + " ms");
+                System.out.println("Added [" + (i - numberOfAliases) + "] aliases. Avg create time: " + avgTime + " ms");
                 totalTime = 0;
             }
 
             long time = System.currentTimeMillis();
-//            String filter = termFilter("field" + i, "value" + i).toXContent(XContentFactory.jsonBuilder(), null).string();
-            client.admin().indices().prepareAliases().addAlias(INDEX_NAME, Strings.randomBase64UUID()/*, filter*/)
-                    .execute().actionGet();
+            //            String filter = termFilter("field" + i, "value" + i).toXContent(XContentFactory.jsonBuilder(), null).string();
+            client.admin().indices().prepareAliases().addAlias(INDEX_NAME, Strings.randomBase64UUID()/*, filter*/).execute().actionGet();
             totalTime += System.currentTimeMillis() - time;
         }
         System.out.println("Number of aliases: " + countAliases(client));
@@ -125,9 +119,7 @@ public class AliasesBenchmark {
     }
 
     private static int countAliases(Client client) {
-        GetAliasesResponse response = client.admin().indices().prepareGetAliases("*")
-                .addIndices(INDEX_NAME)
-                .execute().actionGet();
+        GetAliasesResponse response = client.admin().indices().prepareGetAliases("*").addIndices(INDEX_NAME).execute().actionGet();
         if (response.getAliases().isEmpty()) {
             return 0;
         } else {

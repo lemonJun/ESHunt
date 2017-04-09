@@ -148,11 +148,10 @@ public class RestUtilsTests extends ElasticsearchTestCase {
         assertThat(RestUtils.getCorsSettingRegex(settingsBuilder().put("http.cors.allow-origin", settingsValue).build()).toString(), is(pattern.toString()));
     }
 
-    private void assertCorsSettingRegexMatches(String settingsValue, boolean expectMatch, String ... candidates) {
+    private void assertCorsSettingRegexMatches(String settingsValue, boolean expectMatch, String... candidates) {
         Pattern pattern = RestUtils.getCorsSettingRegex(settingsBuilder().put("http.cors.allow-origin", settingsValue).build());
         for (String candidate : candidates) {
-            assertThat(String.format(Locale.ROOT, "Expected pattern %s to match against %s: %s", settingsValue, candidate, expectMatch),
-                    pattern.matcher(candidate).matches(), is(expectMatch));
+            assertThat(String.format(Locale.ROOT, "Expected pattern %s to match against %s: %s", settingsValue, candidate, expectMatch), pattern.matcher(candidate).matches(), is(expectMatch));
         }
     }
 }

@@ -42,23 +42,15 @@ public class PrimaryNotRelocatedWhileBeingRecoveredTests extends ElasticsearchAl
 
     private final ESLogger logger = Loggers.getLogger(PrimaryNotRelocatedWhileBeingRecoveredTests.class);
 
-
     @Test
     public void testPrimaryNotRelocatedWhileBeingRecoveredFrom() {
-        AllocationService strategy = createAllocationService(settingsBuilder()
-                .put("cluster.routing.allocation.node_concurrent_recoveries", 10)
-                .put("cluster.routing.allocation.node_initial_primaries_recoveries", 10)
-                .build());
+        AllocationService strategy = createAllocationService(settingsBuilder().put("cluster.routing.allocation.node_concurrent_recoveries", 10).put("cluster.routing.allocation.node_initial_primaries_recoveries", 10).build());
 
         logger.info("Building initial routing table");
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(5).numberOfReplicas(1))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(5).numberOfReplicas(1)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 

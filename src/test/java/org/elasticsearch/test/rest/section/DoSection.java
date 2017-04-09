@@ -94,7 +94,7 @@ public class DoSection implements ExecutableSection {
                 }
                 fail(formatStatusCodeMessage(restResponse, catchStatusCode));
             }
-        } catch(RestException e) {
+        } catch (RestException e) {
             if (!Strings.hasLength(catchParam)) {
                 fail(formatStatusCodeMessage(e.restResponse(), "2xx"));
             } else if (catches.containsKey(catchParam)) {
@@ -106,8 +106,7 @@ public class DoSection implements ExecutableSection {
                 assertThat("error was expected in the response", error, notNullValue());
                 //remove delimiters from regex
                 String regex = catchParam.substring(1, catchParam.length() - 1);
-                assertThat("the error message was expected to match the provided regex but didn't",
-                        error.toString(), matches(regex));
+                assertThat("the error message was expected to match the provided regex but didn't", error.toString(), matches(regex));
             } else {
                 throw new UnsupportedOperationException("catch value [" + catchParam + "] not supported");
             }
@@ -116,13 +115,11 @@ public class DoSection implements ExecutableSection {
 
     private void assertStatusCode(RestResponse restResponse) {
         Tuple<String, org.hamcrest.Matcher<Integer>> stringMatcherTuple = catches.get(catchParam);
-        assertThat(formatStatusCodeMessage(restResponse, stringMatcherTuple.v1()),
-                restResponse.getStatusCode(), stringMatcherTuple.v2());
+        assertThat(formatStatusCodeMessage(restResponse, stringMatcherTuple.v1()), restResponse.getStatusCode(), stringMatcherTuple.v2());
     }
 
     private String formatStatusCodeMessage(RestResponse restResponse, String expected) {
-        return "expected [" + expected + "] status code but api [" + apiCallSection.getApi() + "] returned ["
-                + restResponse.getStatusCode() + " " + restResponse.getReasonPhrase() + "] [" + restResponse.getBodyAsString() + "]";
+        return "expected [" + expected + "] status code but api [" + apiCallSection.getApi() + "] returned [" + restResponse.getStatusCode() + " " + restResponse.getReasonPhrase() + "] [" + restResponse.getBodyAsString() + "]";
     }
 
     private static Map<String, Tuple<String, org.hamcrest.Matcher<Integer>>> catches = Maps.newHashMap();

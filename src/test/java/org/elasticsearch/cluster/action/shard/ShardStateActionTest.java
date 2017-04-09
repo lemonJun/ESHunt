@@ -36,30 +36,16 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
 
-
 public class ShardStateActionTest extends ElasticsearchTestCase {
 
     public void testShardFiltering() {
-        final IndexMetaData indexMetaData = IndexMetaData.builder("test")
-                .settings(ImmutableSettings.builder()
-                        .put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT)
-                        .put(IndexMetaData.SETTING_UUID, "test_uuid"))
-                .numberOfShards(2).numberOfReplicas(0)
-                .build();
-        ClusterState.Builder stateBuilder = ClusterState.builder(ClusterName.DEFAULT)
-                .nodes(DiscoveryNodes.builder()
-                                .put(new DiscoveryNode("node1", DummyTransportAddress.INSTANCE, Version.CURRENT)).masterNodeId("node1")
-                                .put(new DiscoveryNode("node2", DummyTransportAddress.INSTANCE, Version.CURRENT))
-                )
-                .metaData(MetaData.builder().put(indexMetaData, false));
+        final IndexMetaData indexMetaData = IndexMetaData.builder("test").settings(ImmutableSettings.builder().put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).put(IndexMetaData.SETTING_UUID, "test_uuid")).numberOfShards(2).numberOfReplicas(0).build();
+        ClusterState.Builder stateBuilder = ClusterState.builder(ClusterName.DEFAULT).nodes(DiscoveryNodes.builder().put(new DiscoveryNode("node1", DummyTransportAddress.INSTANCE, Version.CURRENT)).masterNodeId("node1").put(new DiscoveryNode("node2", DummyTransportAddress.INSTANCE, Version.CURRENT))).metaData(MetaData.builder().put(indexMetaData, false));
 
         final ImmutableShardRouting initShard = new ImmutableShardRouting("test", 0, "node1", randomBoolean(), ShardRoutingState.INITIALIZING, 1);
         final ImmutableShardRouting startedShard = new ImmutableShardRouting("test", 1, "node2", randomBoolean(), ShardRoutingState.STARTED, 1);
         final ImmutableShardRouting relocatingShard = new ImmutableShardRouting("test", 2, "node1", "node2", randomBoolean(), ShardRoutingState.RELOCATING, 1);
-        stateBuilder.routingTable(RoutingTable.builder().add(IndexRoutingTable.builder("test")
-                .addIndexShard(new IndexShardRoutingTable.Builder(initShard.shardId(), true).addShard(initShard).build())
-                .addIndexShard(new IndexShardRoutingTable.Builder(startedShard.shardId(), true).addShard(startedShard).build())
-                .addIndexShard(new IndexShardRoutingTable.Builder(relocatingShard.shardId(), true).addShard(relocatingShard).build())));
+        stateBuilder.routingTable(RoutingTable.builder().add(IndexRoutingTable.builder("test").addIndexShard(new IndexShardRoutingTable.Builder(initShard.shardId(), true).addShard(initShard).build()).addIndexShard(new IndexShardRoutingTable.Builder(startedShard.shardId(), true).addShard(startedShard).build()).addIndexShard(new IndexShardRoutingTable.Builder(relocatingShard.shardId(), true).addShard(relocatingShard).build())));
 
         ClusterState state = stateBuilder.build();
 
@@ -74,8 +60,7 @@ public class ShardStateActionTest extends ElasticsearchTestCase {
         listToFilter.add(new ShardStateAction.ShardRoutingEntry(startedShard, indexMetaData.uuid(), "started shard"));
         expectedToBeApplied.add(listToFilter.get(listToFilter.size() - 1));
 
-        listToFilter.add(new ShardStateAction.ShardRoutingEntry(new ImmutableShardRouting(initShard.index() + "_NA", initShard.id(),
-                initShard.currentNodeId(), initShard.primary(), initShard.state(), initShard.version()), indexMetaData.uuid(), "wrong_uuid"));
+        listToFilter.add(new ShardStateAction.ShardRoutingEntry(new ImmutableShardRouting(initShard.index() + "_NA", initShard.id(), initShard.currentNodeId(), initShard.primary(), initShard.state(), initShard.version()), indexMetaData.uuid(), "wrong_uuid"));
 
         List<ShardStateAction.ShardRoutingEntry> toBeApplied = ShardStateAction.extractShardsToBeApplied(listToFilter, "for testing", state.metaData(), logger);
         if (toBeApplied.size() != expectedToBeApplied.size()) {

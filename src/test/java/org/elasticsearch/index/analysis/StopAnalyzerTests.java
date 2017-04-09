@@ -44,11 +44,7 @@ public class StopAnalyzerTests extends ElasticsearchTokenStreamTestCase {
         Index index = new Index("test");
         Settings settings = settingsBuilder().loadFromClasspath("org/elasticsearch/index/analysis/stop.json").put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).build();
         Injector parentInjector = new ModulesBuilder().add(new SettingsModule(settings), new EnvironmentModule(new Environment(settings)), new IndicesAnalysisModule()).createInjector();
-        Injector injector = new ModulesBuilder().add(
-                new IndexSettingsModule(index, settings),
-                new IndexNameModule(index),
-                new AnalysisModule(settings, parentInjector.getInstance(IndicesAnalysisService.class)))
-                .createChildInjector(parentInjector);
+        Injector injector = new ModulesBuilder().add(new IndexSettingsModule(index, settings), new IndexNameModule(index), new AnalysisModule(settings, parentInjector.getInstance(IndicesAnalysisService.class))).createChildInjector(parentInjector);
 
         AnalysisService analysisService = injector.getInstance(AnalysisService.class);
 

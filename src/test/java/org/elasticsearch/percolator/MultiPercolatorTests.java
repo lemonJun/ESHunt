@@ -50,39 +50,13 @@ public class MultiPercolatorTests extends ElasticsearchIntegrationTest {
         ensureGreen();
 
         logger.info("--> register a queries");
-        client().prepareIndex("test", PercolatorService.TYPE_NAME, "1")
-                .setSource(jsonBuilder().startObject().field("query", matchQuery("field1", "b")).field("a", "b").endObject())
-                .execute().actionGet();
-        client().prepareIndex("test", PercolatorService.TYPE_NAME, "2")
-                .setSource(jsonBuilder().startObject().field("query", matchQuery("field1", "c")).endObject())
-                .execute().actionGet();
-        client().prepareIndex("test", PercolatorService.TYPE_NAME, "3")
-                .setSource(jsonBuilder().startObject().field("query", boolQuery()
-                        .must(matchQuery("field1", "b"))
-                        .must(matchQuery("field1", "c"))
-                ).endObject())
-                .execute().actionGet();
-        client().prepareIndex("test", PercolatorService.TYPE_NAME, "4")
-                .setSource(jsonBuilder().startObject().field("query", matchAllQuery()).endObject())
-                .execute().actionGet();
+        client().prepareIndex("test", PercolatorService.TYPE_NAME, "1").setSource(jsonBuilder().startObject().field("query", matchQuery("field1", "b")).field("a", "b").endObject()).execute().actionGet();
+        client().prepareIndex("test", PercolatorService.TYPE_NAME, "2").setSource(jsonBuilder().startObject().field("query", matchQuery("field1", "c")).endObject()).execute().actionGet();
+        client().prepareIndex("test", PercolatorService.TYPE_NAME, "3").setSource(jsonBuilder().startObject().field("query", boolQuery().must(matchQuery("field1", "b")).must(matchQuery("field1", "c"))).endObject()).execute().actionGet();
+        client().prepareIndex("test", PercolatorService.TYPE_NAME, "4").setSource(jsonBuilder().startObject().field("query", matchAllQuery()).endObject()).execute().actionGet();
 
-        MultiPercolateResponse response = client().prepareMultiPercolate()
-                .add(client().preparePercolate()
-                        .setIndices("test").setDocumentType("type")
-                        .setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field1", "b").endObject())))
-                .add(client().preparePercolate()
-                        .setIndices("test").setDocumentType("type")
-                        .setPercolateDoc(docBuilder().setDoc(yamlBuilder().startObject().field("field1", "c").endObject())))
-                .add(client().preparePercolate()
-                        .setIndices("test").setDocumentType("type")
-                        .setPercolateDoc(docBuilder().setDoc(smileBuilder().startObject().field("field1", "b c").endObject())))
-                .add(client().preparePercolate()
-                        .setIndices("test").setDocumentType("type")
-                        .setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field1", "d").endObject())))
-                .add(client().preparePercolate() // non existing doc, so error element
-                        .setIndices("test").setDocumentType("type")
-                        .setGetRequest(Requests.getRequest("test").type("type").id("5")))
-                .execute().actionGet();
+        MultiPercolateResponse response = client().prepareMultiPercolate().add(client().preparePercolate().setIndices("test").setDocumentType("type").setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field1", "b").endObject()))).add(client().preparePercolate().setIndices("test").setDocumentType("type").setPercolateDoc(docBuilder().setDoc(yamlBuilder().startObject().field("field1", "c").endObject()))).add(client().preparePercolate().setIndices("test").setDocumentType("type").setPercolateDoc(docBuilder().setDoc(smileBuilder().startObject().field("field1", "b c").endObject()))).add(client().preparePercolate().setIndices("test").setDocumentType("type").setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field1", "d").endObject()))).add(client().preparePercolate() // non existing doc, so error element
+                        .setIndices("test").setDocumentType("type").setGetRequest(Requests.getRequest("test").type("type").id("5"))).execute().actionGet();
 
         MultiPercolateResponse.Item item = response.getItems()[0];
         assertMatchCount(item.response(), 2l);
@@ -120,48 +94,13 @@ public class MultiPercolatorTests extends ElasticsearchIntegrationTest {
         ensureGreen();
 
         logger.info("--> register a queries");
-        client().prepareIndex("test", PercolatorService.TYPE_NAME, "1")
-                .setRouting("a")
-                .setSource(jsonBuilder().startObject().field("query", matchQuery("field1", "b")).field("a", "b").endObject())
-                .execute().actionGet();
-        client().prepareIndex("test", PercolatorService.TYPE_NAME, "2")
-                .setRouting("a")
-                .setSource(jsonBuilder().startObject().field("query", matchQuery("field1", "c")).endObject())
-                .execute().actionGet();
-        client().prepareIndex("test", PercolatorService.TYPE_NAME, "3")
-                .setRouting("a")
-                .setSource(jsonBuilder().startObject().field("query", boolQuery()
-                                .must(matchQuery("field1", "b"))
-                                .must(matchQuery("field1", "c"))
-                ).endObject())
-                .execute().actionGet();
-        client().prepareIndex("test", PercolatorService.TYPE_NAME, "4")
-                .setRouting("a")
-                .setSource(jsonBuilder().startObject().field("query", matchAllQuery()).endObject())
-                .execute().actionGet();
+        client().prepareIndex("test", PercolatorService.TYPE_NAME, "1").setRouting("a").setSource(jsonBuilder().startObject().field("query", matchQuery("field1", "b")).field("a", "b").endObject()).execute().actionGet();
+        client().prepareIndex("test", PercolatorService.TYPE_NAME, "2").setRouting("a").setSource(jsonBuilder().startObject().field("query", matchQuery("field1", "c")).endObject()).execute().actionGet();
+        client().prepareIndex("test", PercolatorService.TYPE_NAME, "3").setRouting("a").setSource(jsonBuilder().startObject().field("query", boolQuery().must(matchQuery("field1", "b")).must(matchQuery("field1", "c"))).endObject()).execute().actionGet();
+        client().prepareIndex("test", PercolatorService.TYPE_NAME, "4").setRouting("a").setSource(jsonBuilder().startObject().field("query", matchAllQuery()).endObject()).execute().actionGet();
 
-        MultiPercolateResponse response = client().prepareMultiPercolate()
-                .add(client().preparePercolate()
-                        .setIndices("test").setDocumentType("type")
-                        .setRouting("a")
-                        .setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field1", "b").endObject())))
-                .add(client().preparePercolate()
-                        .setIndices("test").setDocumentType("type")
-                        .setRouting("a")
-                        .setPercolateDoc(docBuilder().setDoc(yamlBuilder().startObject().field("field1", "c").endObject())))
-                .add(client().preparePercolate()
-                        .setIndices("test").setDocumentType("type")
-                        .setRouting("a")
-                        .setPercolateDoc(docBuilder().setDoc(smileBuilder().startObject().field("field1", "b c").endObject())))
-                .add(client().preparePercolate()
-                        .setIndices("test").setDocumentType("type")
-                        .setRouting("a")
-                        .setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field1", "d").endObject())))
-                .add(client().preparePercolate() // non existing doc, so error element
-                        .setIndices("test").setDocumentType("type")
-                        .setRouting("a")
-                        .setGetRequest(Requests.getRequest("test").type("type").id("5")))
-                .execute().actionGet();
+        MultiPercolateResponse response = client().prepareMultiPercolate().add(client().preparePercolate().setIndices("test").setDocumentType("type").setRouting("a").setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field1", "b").endObject()))).add(client().preparePercolate().setIndices("test").setDocumentType("type").setRouting("a").setPercolateDoc(docBuilder().setDoc(yamlBuilder().startObject().field("field1", "c").endObject()))).add(client().preparePercolate().setIndices("test").setDocumentType("type").setRouting("a").setPercolateDoc(docBuilder().setDoc(smileBuilder().startObject().field("field1", "b c").endObject()))).add(client().preparePercolate().setIndices("test").setDocumentType("type").setRouting("a").setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field1", "d").endObject()))).add(client().preparePercolate() // non existing doc, so error element
+                        .setIndices("test").setDocumentType("type").setRouting("a").setGetRequest(Requests.getRequest("test").type("type").id("5"))).execute().actionGet();
 
         MultiPercolateResponse.Item item = response.getItems()[0];
         assertMatchCount(item.response(), 2l);
@@ -200,22 +139,15 @@ public class MultiPercolatorTests extends ElasticsearchIntegrationTest {
         int numQueries = randomIntBetween(50, 100);
         logger.info("--> register a queries");
         for (int i = 0; i < numQueries; i++) {
-            client().prepareIndex("test", PercolatorService.TYPE_NAME, Integer.toString(i))
-                    .setSource(jsonBuilder().startObject().field("query", matchAllQuery()).endObject())
-                    .execute().actionGet();
+            client().prepareIndex("test", PercolatorService.TYPE_NAME, Integer.toString(i)).setSource(jsonBuilder().startObject().field("query", matchAllQuery()).endObject()).execute().actionGet();
         }
 
-        client().prepareIndex("test", "type", "1")
-                .setSource(jsonBuilder().startObject().field("field", "a"))
-                .execute().actionGet();
+        client().prepareIndex("test", "type", "1").setSource(jsonBuilder().startObject().field("field", "a")).execute().actionGet();
 
         MultiPercolateRequestBuilder builder = client().prepareMultiPercolate();
         int numPercolateRequest = randomIntBetween(50, 100);
         for (int i = 0; i < numPercolateRequest; i++) {
-            builder.add(
-                    client().preparePercolate()
-                            .setGetRequest(Requests.getRequest("test").type("type").id("1"))
-                            .setIndices("test").setDocumentType("type"));
+            builder.add(client().preparePercolate().setGetRequest(Requests.getRequest("test").type("type").id("1")).setIndices("test").setDocumentType("type"));
         }
 
         MultiPercolateResponse response = builder.execute().actionGet();
@@ -229,10 +161,7 @@ public class MultiPercolatorTests extends ElasticsearchIntegrationTest {
         // Non existing doc
         builder = client().prepareMultiPercolate();
         for (int i = 0; i < numPercolateRequest; i++) {
-            builder.add(
-                    client().preparePercolate()
-                            .setGetRequest(Requests.getRequest("test").type("type").id("2"))
-                            .setIndices("test").setDocumentType("type"));
+            builder.add(client().preparePercolate().setGetRequest(Requests.getRequest("test").type("type").id("2")).setIndices("test").setDocumentType("type"));
         }
 
         response = builder.execute().actionGet();
@@ -246,15 +175,9 @@ public class MultiPercolatorTests extends ElasticsearchIntegrationTest {
         // One existing doc
         builder = client().prepareMultiPercolate();
         for (int i = 0; i < numPercolateRequest; i++) {
-            builder.add(
-                    client().preparePercolate()
-                            .setGetRequest(Requests.getRequest("test").type("type").id("2"))
-                            .setIndices("test").setDocumentType("type"));
+            builder.add(client().preparePercolate().setGetRequest(Requests.getRequest("test").type("type").id("2")).setIndices("test").setDocumentType("type"));
         }
-        builder.add(
-                client().preparePercolate()
-                        .setGetRequest(Requests.getRequest("test").type("type").id("1"))
-                        .setIndices("test").setDocumentType("type"));
+        builder.add(client().preparePercolate().setGetRequest(Requests.getRequest("test").type("type").id("1")).setIndices("test").setDocumentType("type"));
 
         response = builder.execute().actionGet();
         assertThat(response.items().length, equalTo(numPercolateRequest + 1));
@@ -273,18 +196,13 @@ public class MultiPercolatorTests extends ElasticsearchIntegrationTest {
         int numQueries = randomIntBetween(50, 100);
         logger.info("--> register a queries");
         for (int i = 0; i < numQueries; i++) {
-            client().prepareIndex("test", PercolatorService.TYPE_NAME, Integer.toString(i))
-                    .setSource(jsonBuilder().startObject().field("query", matchAllQuery()).endObject())
-                    .execute().actionGet();
+            client().prepareIndex("test", PercolatorService.TYPE_NAME, Integer.toString(i)).setSource(jsonBuilder().startObject().field("query", matchAllQuery()).endObject()).execute().actionGet();
         }
 
         MultiPercolateRequestBuilder builder = client().prepareMultiPercolate();
         int numPercolateRequest = randomIntBetween(50, 100);
         for (int i = 0; i < numPercolateRequest; i++) {
-            builder.add(
-                    client().preparePercolate()
-                            .setIndices("test").setDocumentType("type")
-                            .setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field", "a").endObject())));
+            builder.add(client().preparePercolate().setIndices("test").setDocumentType("type").setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field", "a").endObject())));
         }
 
         MultiPercolateResponse response = builder.execute().actionGet();
@@ -298,10 +216,7 @@ public class MultiPercolatorTests extends ElasticsearchIntegrationTest {
         // All illegal json
         builder = client().prepareMultiPercolate();
         for (int i = 0; i < numPercolateRequest; i++) {
-            builder.add(
-                    client().preparePercolate()
-                            .setIndices("test").setDocumentType("type")
-                            .setSource("illegal json"));
+            builder.add(client().preparePercolate().setIndices("test").setDocumentType("type").setSource("illegal json"));
         }
 
         response = builder.execute().actionGet();
@@ -319,15 +234,9 @@ public class MultiPercolatorTests extends ElasticsearchIntegrationTest {
         // one valid request
         builder = client().prepareMultiPercolate();
         for (int i = 0; i < numPercolateRequest; i++) {
-            builder.add(
-                    client().preparePercolate()
-                            .setIndices("test").setDocumentType("type")
-                            .setSource("illegal json"));
+            builder.add(client().preparePercolate().setIndices("test").setDocumentType("type").setSource("illegal json"));
         }
-        builder.add(
-                client().preparePercolate()
-                        .setIndices("test").setDocumentType("type")
-                        .setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field", "a").endObject())));
+        builder.add(client().preparePercolate().setIndices("test").setDocumentType("type").setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field", "a").endObject())));
 
         response = builder.execute().actionGet();
         assertThat(response.items().length, equalTo(numPercolateRequest + 1));
@@ -336,11 +245,10 @@ public class MultiPercolatorTests extends ElasticsearchIntegrationTest {
         assertThat(response.items()[numPercolateRequest].getResponse().getMatches().length, equalTo(numQueries));
     }
 
-
     @Test
     public void testNestedMultiPercolation() throws IOException {
         initNestedIndexAndPercolation();
-        MultiPercolateRequestBuilder mpercolate= client().prepareMultiPercolate();
+        MultiPercolateRequestBuilder mpercolate = client().prepareMultiPercolate();
         mpercolate.add(client().preparePercolate().setPercolateDoc(new PercolateSourceBuilder.DocBuilder().setDoc(getNotMatchingNestedDoc())).setIndices("nestedindex").setDocumentType("company"));
         mpercolate.add(client().preparePercolate().setPercolateDoc(new PercolateSourceBuilder.DocBuilder().setDoc(getMatchingNestedDoc())).setIndices("nestedindex").setDocumentType("company"));
         MultiPercolateResponse response = mpercolate.get();
@@ -351,16 +259,12 @@ public class MultiPercolatorTests extends ElasticsearchIntegrationTest {
 
     void initNestedIndexAndPercolation() throws IOException {
         XContentBuilder mapping = XContentFactory.jsonBuilder();
-        mapping.startObject().startObject("properties").startObject("companyname").field("type", "string").endObject()
-                .startObject("employee").field("type", "nested").startObject("properties")
-                .startObject("name").field("type", "string").endObject().endObject().endObject().endObject()
-                .endObject();
+        mapping.startObject().startObject("properties").startObject("companyname").field("type", "string").endObject().startObject("employee").field("type", "nested").startObject("properties").startObject("name").field("type", "string").endObject().endObject().endObject().endObject().endObject();
 
         assertAcked(client().admin().indices().prepareCreate("nestedindex").addMapping("company", mapping));
         ensureGreen("nestedindex");
 
-        client().prepareIndex("nestedindex", PercolatorService.TYPE_NAME, "Q").setSource(jsonBuilder().startObject()
-                .field("query", QueryBuilders.nestedQuery("employee", QueryBuilders.matchQuery("employee.name", "virginia potts").operator(MatchQueryBuilder.Operator.AND)).scoreMode("avg")).endObject()).get();
+        client().prepareIndex("nestedindex", PercolatorService.TYPE_NAME, "Q").setSource(jsonBuilder().startObject().field("query", QueryBuilders.nestedQuery("employee", QueryBuilders.matchQuery("employee.name", "virginia potts").operator(MatchQueryBuilder.Operator.AND)).scoreMode("avg")).endObject()).get();
 
         refresh();
 
@@ -368,19 +272,13 @@ public class MultiPercolatorTests extends ElasticsearchIntegrationTest {
 
     XContentBuilder getMatchingNestedDoc() throws IOException {
         XContentBuilder doc = XContentFactory.jsonBuilder();
-        doc.startObject().field("companyname", "stark").startArray("employee")
-                .startObject().field("name", "virginia potts").endObject()
-                .startObject().field("name", "tony stark").endObject()
-                .endArray().endObject();
+        doc.startObject().field("companyname", "stark").startArray("employee").startObject().field("name", "virginia potts").endObject().startObject().field("name", "tony stark").endObject().endArray().endObject();
         return doc;
     }
 
     XContentBuilder getNotMatchingNestedDoc() throws IOException {
         XContentBuilder doc = XContentFactory.jsonBuilder();
-        doc.startObject().field("companyname", "notstark").startArray("employee")
-                .startObject().field("name", "virginia stark").endObject()
-                .startObject().field("name", "tony potts").endObject()
-                .endArray().endObject();
+        doc.startObject().field("companyname", "notstark").startArray("employee").startObject().field("name", "virginia stark").endObject().startObject().field("name", "tony potts").endObject().endArray().endObject();
         return doc;
     }
 

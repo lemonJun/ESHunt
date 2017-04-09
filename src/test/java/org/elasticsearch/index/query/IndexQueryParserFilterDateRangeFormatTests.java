@@ -19,7 +19,6 @@
 
 package org.elasticsearch.index.query;
 
-
 import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 import org.elasticsearch.common.bytes.BytesArray;
@@ -96,7 +95,8 @@ public class IndexQueryParserFilterDateRangeFormatTests extends ElasticsearchSin
             SearchContext.setCurrent(new TestSearchContext());
             parsedQuery = queryParser.parse(query).query();
         } finally {
-            SearchContext.removeCurrent();;
+            SearchContext.removeCurrent();
+            ;
         }
         assertThat(parsedQuery, instanceOf(NumericRangeQuery.class));
 

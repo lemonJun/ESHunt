@@ -26,8 +26,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
-
-
 public class RoundingTests extends ElasticsearchTestCase {
 
     public void testInterval() {
@@ -71,7 +69,7 @@ public class RoundingTests extends ElasticsearchTestCase {
         final long interval = randomIntBetween(1, 100);
         Rounding.Interval internalRounding = new Rounding.Interval(interval);
         final long offset = randomIntBetween(-100, 100);
-        Rounding.PrePostRounding  rounding = new Rounding.PrePostRounding(internalRounding, -offset, offset);
+        Rounding.PrePostRounding rounding = new Rounding.PrePostRounding(internalRounding, -offset, offset);
         long safetyMargin = Math.abs(interval) + Math.abs(offset); // to prevent range overflow / underflow
         for (int i = 0; i < 100000; ++i) {
             long value = Math.max(randomLong() - safetyMargin, Long.MIN_VALUE + safetyMargin);

@@ -44,7 +44,7 @@ final class MockInternalEngine extends InternalEngine {
 
     @Override
     public void close() throws IOException {
-        switch(support().flushOrClose(this, MockEngineSupport.CloseAction.CLOSE)) {
+        switch (support().flushOrClose(this, MockEngineSupport.CloseAction.CLOSE)) {
             case FLUSH_AND_CLOSE:
                 super.flushAndClose();
                 break;
@@ -57,7 +57,7 @@ final class MockInternalEngine extends InternalEngine {
 
     @Override
     public void flushAndClose() throws IOException {
-        switch(support().flushOrClose(this, MockEngineSupport.CloseAction.FLUSH_AND_CLOSE)) {
+        switch (support().flushOrClose(this, MockEngineSupport.CloseAction.FLUSH_AND_CLOSE)) {
             case FLUSH_AND_CLOSE:
                 super.flushAndClose();
                 break;
@@ -75,7 +75,6 @@ final class MockInternalEngine extends InternalEngine {
         // pass the original searcher to the super.newSearcher() method to make sure this is the searcher that will
         // be released later on. If we wrap an index reader here must not pass the wrapped version to the manager
         // on release otherwise the reader will be closed too early. - good news, stuff will fail all over the place if we don't get this right here
-        return new AssertingSearcher(assertingIndexSearcher,
-                super.newSearcher(source, searcher, manager), shardId, MockEngineSupport.INFLIGHT_ENGINE_SEARCHERS, logger);
+        return new AssertingSearcher(assertingIndexSearcher, super.newSearcher(source, searcher, manager), shardId, MockEngineSupport.INFLIGHT_ENGINE_SEARCHERS, logger);
     }
 }

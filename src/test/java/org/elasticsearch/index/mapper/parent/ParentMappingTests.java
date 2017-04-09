@@ -36,16 +36,10 @@ public class ParentMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void parentNotMapped() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").endObject().endObject().string();
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = docMapper.parse(SourceToParse.source(XContentFactory.jsonBuilder()
-                .startObject()
-                .field("_parent", "1122")
-                .field("x_field", "x_value")
-                .endObject()
-                .bytes()).type("type").id("1"));
+        ParsedDocument doc = docMapper.parse(SourceToParse.source(XContentFactory.jsonBuilder().startObject().field("_parent", "1122").field("x_field", "x_value").endObject().bytes()).type("type").id("1"));
 
         // no _parent mapping, used as a simple field
         assertThat(doc.parent(), nullValue());
@@ -54,17 +48,10 @@ public class ParentMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void parentSetInDocNotExternally() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_parent").field("type", "p_type").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_parent").field("type", "p_type").endObject().endObject().endObject().string();
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = docMapper.parse(SourceToParse.source(XContentFactory.jsonBuilder()
-                .startObject()
-                .field("_parent", "1122")
-                .field("x_field", "x_value")
-                .endObject()
-                .bytes()).type("type").id("1"));
+        ParsedDocument doc = docMapper.parse(SourceToParse.source(XContentFactory.jsonBuilder().startObject().field("_parent", "1122").field("x_field", "x_value").endObject().bytes()).type("type").id("1"));
 
         assertThat(doc.parent(), equalTo("1122"));
         assertThat(doc.rootDoc().get("_parent"), equalTo(Uid.createUid("p_type", "1122")));
@@ -72,33 +59,20 @@ public class ParentMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void parentNotSetInDocSetExternally() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_parent").field("type", "p_type").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_parent").field("type", "p_type").endObject().endObject().endObject().string();
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = docMapper.parse(SourceToParse.source(XContentFactory.jsonBuilder()
-                .startObject()
-                .field("x_field", "x_value")
-                .endObject()
-                .bytes()).type("type").id("1").parent("1122"));
+        ParsedDocument doc = docMapper.parse(SourceToParse.source(XContentFactory.jsonBuilder().startObject().field("x_field", "x_value").endObject().bytes()).type("type").id("1").parent("1122"));
 
         assertThat(doc.rootDoc().get("_parent"), equalTo(Uid.createUid("p_type", "1122")));
     }
 
     @Test
     public void parentSetInDocSetExternally() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_parent").field("type", "p_type").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_parent").field("type", "p_type").endObject().endObject().endObject().string();
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = docMapper.parse(SourceToParse.source(XContentFactory.jsonBuilder()
-                .startObject()
-                .field("_parent", "1122")
-                .field("x_field", "x_value")
-                .endObject()
-                .bytes()).type("type").id("1").parent("1122"));
+        ParsedDocument doc = docMapper.parse(SourceToParse.source(XContentFactory.jsonBuilder().startObject().field("_parent", "1122").field("x_field", "x_value").endObject().bytes()).type("type").id("1").parent("1122"));
 
         assertThat(doc.rootDoc().get("_parent"), equalTo(Uid.createUid("p_type", "1122")));
     }

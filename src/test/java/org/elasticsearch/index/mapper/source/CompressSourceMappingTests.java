@@ -36,32 +36,22 @@ public class CompressSourceMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testCompressDisabled() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_source").field("compress", false).endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_source").field("compress", false).endObject().endObject().endObject().string();
 
         DocumentMapper documentMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field1", "value1")
-                .field("field2", "value2")
-                .endObject().bytes());
+        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field1", "value1").field("field2", "value2").endObject().bytes());
         BytesRef bytes = doc.rootDoc().getBinaryValue("_source");
         assertThat(CompressorFactory.isCompressed(bytes.bytes, bytes.offset, bytes.length), equalTo(false));
     }
 
     @Test
     public void testCompressEnabled() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_source").field("compress", true).endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_source").field("compress", true).endObject().endObject().endObject().string();
 
         DocumentMapper documentMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field1", "value1")
-                .field("field2", "value2")
-                .endObject().bytes());
+        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field1", "value1").field("field2", "value2").endObject().bytes());
 
         BytesRef bytes = doc.rootDoc().getBinaryValue("_source");
         assertThat(CompressorFactory.isCompressed(bytes.bytes, bytes.offset, bytes.length), equalTo(true));
@@ -69,26 +59,16 @@ public class CompressSourceMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testCompressThreshold() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_source").field("compress_threshold", "200b").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_source").field("compress_threshold", "200b").endObject().endObject().endObject().string();
 
         DocumentMapper documentMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field1", "value1")
-                .endObject().bytes());
+        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field1", "value1").endObject().bytes());
 
         BytesRef bytes = doc.rootDoc().getBinaryValue("_source");
         assertThat(CompressorFactory.isCompressed(bytes.bytes, bytes.offset, bytes.length), equalTo(false));
 
-        doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field1", "value1")
-                .field("field2", "value2 xxxxxxxxxxxxxx yyyyyyyyyyyyyyyyyyy zzzzzzzzzzzzzzzzz")
-                .field("field2", "value2 xxxxxxxxxxxxxx yyyyyyyyyyyyyyyyyyy zzzzzzzzzzzzzzzzz")
-                .field("field2", "value2 xxxxxxxxxxxxxx yyyyyyyyyyyyyyyyyyy zzzzzzzzzzzzzzzzz")
-                .field("field2", "value2 xxxxxxxxxxxxxx yyyyyyyyyyyyyyyyyyy zzzzzzzzzzzzzzzzz")
-                .endObject().bytes());
+        doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field1", "value1").field("field2", "value2 xxxxxxxxxxxxxx yyyyyyyyyyyyyyyyyyy zzzzzzzzzzzzzzzzz").field("field2", "value2 xxxxxxxxxxxxxx yyyyyyyyyyyyyyyyyyy zzzzzzzzzzzzzzzzz").field("field2", "value2 xxxxxxxxxxxxxx yyyyyyyyyyyyyyyyyyy zzzzzzzzzzzzzzzzz").field("field2", "value2 xxxxxxxxxxxxxx yyyyyyyyyyyyyyyyyyy zzzzzzzzzzzzzzzzz").endObject().bytes());
 
         bytes = doc.rootDoc().getBinaryValue("_source");
         assertThat(CompressorFactory.isCompressed(bytes.bytes, bytes.offset, bytes.length), equalTo(true));

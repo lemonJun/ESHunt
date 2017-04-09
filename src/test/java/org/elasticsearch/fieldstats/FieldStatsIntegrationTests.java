@@ -41,10 +41,7 @@ import static org.hamcrest.Matchers.nullValue;
 public class FieldStatsIntegrationTests extends ElasticsearchIntegrationTest {
 
     public void testRandom() throws Exception {
-        assertAcked(prepareCreate("test").addMapping(
-                "test", "string", "type=string", "date", "type=date", "double", "type=double", "double", "type=double",
-                "float", "type=float", "long", "type=long", "integer", "type=integer", "short", "type=short", "byte", "type=byte"
-        ));
+        assertAcked(prepareCreate("test").addMapping("test", "string", "type=string", "date", "type=date", "double", "type=double", "double", "type=double", "float", "type=float", "long", "type=long", "integer", "type=integer", "short", "type=short", "byte", "type=byte"));
         ensureGreen("test");
 
         byte minByte = Byte.MAX_VALUE;
@@ -91,9 +88,7 @@ public class FieldStatsIntegrationTests extends ElasticsearchIntegrationTest {
                 maxString = str;
             }
 
-            request.add(client().prepareIndex("test", "test", Integer.toString(doc))
-                            .setSource("byte", b, "short", s, "integer", i, "long", l, "float", f, "double", d, "string", str)
-            );
+            request.add(client().prepareIndex("test", "test", Integer.toString(doc)).setSource("byte", b, "short", s, "integer", i, "long", l, "float", f, "double", d, "string", str));
         }
         indexRandom(true, false, request);
 
@@ -121,15 +116,9 @@ public class FieldStatsIntegrationTests extends ElasticsearchIntegrationTest {
     }
 
     public void testFieldStatsIndexLevel() throws Exception {
-        assertAcked(prepareCreate("test1").addMapping(
-                "test", "value", "type=long"
-        ));
-        assertAcked(prepareCreate("test2").addMapping(
-                "test", "value", "type=long"
-        ));
-        assertAcked(prepareCreate("test3").addMapping(
-                "test", "value", "type=long"
-        ));
+        assertAcked(prepareCreate("test1").addMapping("test", "value", "type=long"));
+        assertAcked(prepareCreate("test2").addMapping("test", "value", "type=long"));
+        assertAcked(prepareCreate("test3").addMapping("test", "value", "type=long"));
         ensureGreen("test1", "test2", "test3");
 
         indexRange("test1", -10, 100);
@@ -176,12 +165,8 @@ public class FieldStatsIntegrationTests extends ElasticsearchIntegrationTest {
     }
 
     public void testIncompatibleFieldTypes() {
-        assertAcked(prepareCreate("test1").addMapping(
-                "test", "value", "type=long"
-        ));
-        assertAcked(prepareCreate("test2").addMapping(
-                "test", "value", "type=string"
-        ));
+        assertAcked(prepareCreate("test1").addMapping("test", "value", "type=long"));
+        assertAcked(prepareCreate("test2").addMapping("test", "value", "type=string"));
         ensureGreen("test1", "test2");
 
         client().prepareIndex("test1", "test").setSource("value", 1l).get();
@@ -193,7 +178,7 @@ public class FieldStatsIntegrationTests extends ElasticsearchIntegrationTest {
         try {
             client().prepareFieldStats().setFields("value").get();
             fail();
-        } catch (ElasticsearchIllegalStateException e){
+        } catch (ElasticsearchIllegalStateException e) {
             assertThat(e.getMessage(), containsString("trying to merge the field stats of field [value]"));
         }
 

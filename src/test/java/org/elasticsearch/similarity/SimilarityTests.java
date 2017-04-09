@@ -29,8 +29,7 @@ import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 
-public class SimilarityTests  extends ElasticsearchIntegrationTest {
-    
+public class SimilarityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testCustomBM25Similarity() throws Exception {
@@ -40,31 +39,9 @@ public class SimilarityTests  extends ElasticsearchIntegrationTest {
             // ignore
         }
 
-        client().admin().indices().prepareCreate("test")
-                .addMapping("type1", jsonBuilder().startObject()
-                        .startObject("type1")
-                            .startObject("properties")
-                                .startObject("field1")
-                                    .field("similarity", "custom")
-                                    .field("type", "string")
-                                .endObject()
-                                .startObject("field2")
-                                    .field("similarity", "default")
-                                    .field("type", "string")
-                            .endObject()
-                        .endObject()
-                    .endObject())
-                .setSettings(ImmutableSettings.settingsBuilder()
-                        .put("index.number_of_shards", 1)
-                        .put("index.number_of_replicas", 0)
-                        .put("similarity.custom.type", "BM25")
-                        .put("similarity.custom.k1", 2.0f)
-                        .put("similarity.custom.b", 1.5f)
-                ).execute().actionGet();
+        client().admin().indices().prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("similarity", "custom").field("type", "string").endObject().startObject("field2").field("similarity", "default").field("type", "string").endObject().endObject().endObject()).setSettings(ImmutableSettings.settingsBuilder().put("index.number_of_shards", 1).put("index.number_of_replicas", 0).put("similarity.custom.type", "BM25").put("similarity.custom.k1", 2.0f).put("similarity.custom.b", 1.5f)).execute().actionGet();
 
-        client().prepareIndex("test", "type1", "1").setSource("field1", "the quick brown fox jumped over the lazy dog",
-                                                            "field2", "the quick brown fox jumped over the lazy dog")
-                .setRefresh(true).execute().actionGet();
+        client().prepareIndex("test", "type1", "1").setSource("field1", "the quick brown fox jumped over the lazy dog", "field2", "the quick brown fox jumped over the lazy dog").setRefresh(true).execute().actionGet();
 
         SearchResponse bm25SearchResponse = client().prepareSearch().setQuery(matchQuery("field1", "quick brown fox")).execute().actionGet();
         assertThat(bm25SearchResponse.getHits().totalHits(), equalTo(1l));

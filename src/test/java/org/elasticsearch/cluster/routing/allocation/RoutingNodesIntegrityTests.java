@@ -47,16 +47,11 @@ public class RoutingNodesIntegrityTests extends ElasticsearchAllocationTestCase 
 
     @Test
     public void testBalanceAllNodesStarted() {
-        AllocationService strategy = createAllocationService(settingsBuilder()
-                .put("cluster.routing.allocation.node_concurrent_recoveries", 10)
-                .put("cluster.routing.allocation.node_initial_primaries_recoveries", 10)
-                .put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, "always")
-                .put("cluster.routing.allocation.cluster_concurrent_rebalance", -1).build());
+        AllocationService strategy = createAllocationService(settingsBuilder().put("cluster.routing.allocation.node_concurrent_recoveries", 10).put("cluster.routing.allocation.node_initial_primaries_recoveries", 10).put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, "always").put("cluster.routing.allocation.cluster_concurrent_rebalance", -1).build());
 
         logger.info("Building initial routing table");
 
-        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(3).numberOfReplicas(1))
-                .put(IndexMetaData.builder("test1").numberOfShards(3).numberOfReplicas(1)).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(3).numberOfReplicas(1)).put(IndexMetaData.builder("test1").numberOfShards(3).numberOfReplicas(1)).build();
 
         RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).addAsNew(metaData.index("test1")).build();
 
@@ -64,8 +59,7 @@ public class RoutingNodesIntegrityTests extends ElasticsearchAllocationTestCase 
         RoutingNodes routingNodes = clusterState.routingNodes();
 
         logger.info("Adding three node and performing rerouting");
-        clusterState = ClusterState.builder(clusterState)
-                .nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2")).put(newNode("node3"))).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2")).put(newNode("node3"))).build();
         routingNodes = clusterState.routingNodes();
 
         assertThat(assertShardStats(routingNodes), equalTo(true));
@@ -120,16 +114,11 @@ public class RoutingNodesIntegrityTests extends ElasticsearchAllocationTestCase 
 
     @Test
     public void testBalanceIncrementallyStartNodes() {
-        AllocationService strategy = createAllocationService(settingsBuilder()
-                .put("cluster.routing.allocation.node_concurrent_recoveries", 10)
-                .put("cluster.routing.allocation.node_initial_primaries_recoveries", 10)
-                .put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, "always")
-                .put("cluster.routing.allocation.cluster_concurrent_rebalance", -1).build());
+        AllocationService strategy = createAllocationService(settingsBuilder().put("cluster.routing.allocation.node_concurrent_recoveries", 10).put("cluster.routing.allocation.node_initial_primaries_recoveries", 10).put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, "always").put("cluster.routing.allocation.cluster_concurrent_rebalance", -1).build());
 
         logger.info("Building initial routing table");
 
-        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(3).numberOfReplicas(1))
-                .put(IndexMetaData.builder("test1").numberOfShards(3).numberOfReplicas(1)).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(3).numberOfReplicas(1)).put(IndexMetaData.builder("test1").numberOfShards(3).numberOfReplicas(1)).build();
 
         RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).addAsNew(metaData.index("test1")).build();
 
@@ -143,8 +132,7 @@ public class RoutingNodesIntegrityTests extends ElasticsearchAllocationTestCase 
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
 
         logger.info("Add another node and perform rerouting, nothing will happen since primary not started");
-        clusterState = ClusterState.builder(clusterState)
-                .nodes(DiscoveryNodes.builder(clusterState.nodes()).put(newNode("node2"))).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder(clusterState.nodes()).put(newNode("node2"))).build();
         prevRoutingTable = routingTable;
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
@@ -171,8 +159,7 @@ public class RoutingNodesIntegrityTests extends ElasticsearchAllocationTestCase 
         routingNodes = clusterState.routingNodes();
 
         logger.info("Add another node and perform rerouting, nothing will happen since primary not started");
-        clusterState = ClusterState.builder(clusterState)
-                .nodes(DiscoveryNodes.builder(clusterState.nodes()).put(newNode("node3"))).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder(clusterState.nodes()).put(newNode("node3"))).build();
         prevRoutingTable = routingTable;
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
@@ -213,11 +200,7 @@ public class RoutingNodesIntegrityTests extends ElasticsearchAllocationTestCase 
 
     @Test
     public void testBalanceAllNodesStartedAddIndex() {
-        AllocationService strategy = createAllocationService(settingsBuilder()
-                .put("cluster.routing.allocation.node_concurrent_recoveries", 1)
-                .put("cluster.routing.allocation.node_initial_primaries_recoveries", 3)
-                .put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, "always")
-                .put("cluster.routing.allocation.cluster_concurrent_rebalance", -1).build());
+        AllocationService strategy = createAllocationService(settingsBuilder().put("cluster.routing.allocation.node_concurrent_recoveries", 1).put("cluster.routing.allocation.node_initial_primaries_recoveries", 3).put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, "always").put("cluster.routing.allocation.cluster_concurrent_rebalance", -1).build());
 
         logger.info("Building initial routing table");
 
@@ -228,8 +211,7 @@ public class RoutingNodesIntegrityTests extends ElasticsearchAllocationTestCase 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
         logger.info("Adding three node and performing rerouting");
-        clusterState = ClusterState.builder(clusterState)
-                .nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2")).put(newNode("node3"))).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2")).put(newNode("node3"))).build();
 
         RoutingNodes routingNodes = clusterState.routingNodes();
         assertThat(assertShardStats(routingNodes), equalTo(true));
@@ -301,15 +283,8 @@ public class RoutingNodesIntegrityTests extends ElasticsearchAllocationTestCase 
         logger.info("Add new index 3 shards 1 replica");
 
         prevRoutingTable = routingTable;
-        metaData = MetaData.builder(metaData)
-                .put(IndexMetaData.builder("test1").settings(ImmutableSettings.settingsBuilder()
-                        .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 3)
-                        .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                ))
-                .build();
-        routingTable = RoutingTable.builder(routingTable)
-                .addAsNew(metaData.index("test1"))
-                .build();
+        metaData = MetaData.builder(metaData).put(IndexMetaData.builder("test1").settings(ImmutableSettings.settingsBuilder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 3).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1))).build();
+        routingTable = RoutingTable.builder(routingTable).addAsNew(metaData.index("test1")).build();
         clusterState = ClusterState.builder(clusterState).metaData(metaData).routingTable(routingTable).build();
         routingNodes = clusterState.routingNodes();
 
@@ -361,7 +336,6 @@ public class RoutingNodesIntegrityTests extends ElasticsearchAllocationTestCase 
         assertThat(routingNodes.hasInactiveShards(), equalTo(false));
         assertThat(routingNodes.hasInactivePrimaries(), equalTo(false));
         assertThat(routingNodes.hasUnassignedPrimaries(), equalTo(false));
-
 
         assertThat(routingNodes.node("node1").numberOfShardsWithState(STARTED), equalTo(4));
         assertThat(routingNodes.node("node2").numberOfShardsWithState(STARTED), equalTo(4));

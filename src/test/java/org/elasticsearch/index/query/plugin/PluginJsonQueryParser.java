@@ -50,7 +50,7 @@ public class PluginJsonQueryParser extends AbstractIndexComponent implements Que
 
     @Override
     public String[] names() {
-        return new String[]{this.name};
+        return new String[] { this.name };
     }
 
     @Override

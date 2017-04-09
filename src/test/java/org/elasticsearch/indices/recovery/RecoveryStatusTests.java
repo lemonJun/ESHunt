@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 /**
  */
 public class RecoveryStatusTests extends ElasticsearchSingleNodeTest {
-    
+
     public void testRenameTempFiles() throws IOException {
         IndexService service = createIndex("foo");
 

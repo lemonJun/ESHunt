@@ -51,13 +51,7 @@ public class CorsRegexTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put(SETTING_CORS_ALLOW_ORIGIN, "/https?:\\/\\/localhost(:[0-9]+)?/")
-                .put(SETTING_CORS_ALLOW_CREDENTIALS, true)
-                .put(SETTING_CORS_ENABLED, true)
-                .put(InternalNode.HTTP_ENABLED, true)
-                .build();
+        return ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put(SETTING_CORS_ALLOW_ORIGIN, "/https?:\\/\\/localhost(:[0-9]+)?/").put(SETTING_CORS_ALLOW_CREDENTIALS, true).put(SETTING_CORS_ENABLED, true).put(InternalNode.HTTP_ENABLED, true).build();
     }
 
     @Test

@@ -43,11 +43,7 @@ public abstract class AbstractNumericTests extends ElasticsearchIntegrationTest 
 
         final int numDocs = 10;
         for (int i = 0; i < numDocs; i++) { // TODO randomize the size and the params in here?
-            builders.add(client().prepareIndex("idx", "type", ""+i).setSource(jsonBuilder()
-                    .startObject()
-                    .field("value", i+1)
-                    .startArray("values").value(i+2).value(i+3).endArray()
-                    .endObject()));
+            builders.add(client().prepareIndex("idx", "type", "" + i).setSource(jsonBuilder().startObject().field("value", i + 1).startArray("values").value(i + 2).value(i + 3).endArray().endObject()));
         }
         minValue = 1;
         minValues = 2;
@@ -62,10 +58,7 @@ public abstract class AbstractNumericTests extends ElasticsearchIntegrationTest 
         prepareCreate("empty_bucket_idx").addMapping("type", "value", "type=integer").execute().actionGet();
         builders = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
-            builders.add(client().prepareIndex("empty_bucket_idx", "type", ""+i).setSource(jsonBuilder()
-                    .startObject()
-                    .field("value", i*2)
-                    .endObject()));
+            builders.add(client().prepareIndex("empty_bucket_idx", "type", "" + i).setSource(jsonBuilder().startObject().field("value", i * 2).endObject()));
         }
         indexRandom(true, builders);
         ensureSearchable();
@@ -100,6 +93,5 @@ public abstract class AbstractNumericTests extends ElasticsearchIntegrationTest 
     public abstract void testScript_ExplicitMultiValued() throws Exception;
 
     public abstract void testScript_MultiValued_WithParams() throws Exception;
-
 
 }

@@ -43,9 +43,7 @@ public class SimpleDeleteMappingTests extends ElasticsearchIntegrationTest {
     public void simpleDeleteMapping() throws Exception {
         assertAcked(prepareCreate("test").addMapping("type1", "value", "type=string").execute().actionGet());
         for (int i = 0; i < 10; i++) {
-            client().prepareIndex("test", "type1", Integer.toString(i)).setSource(jsonBuilder().startObject()
-                    .field("value", "test" + i)
-                    .endObject()).execute().actionGet();
+            client().prepareIndex("test", "type1", Integer.toString(i)).setSource(jsonBuilder().startObject().field("value", "test" + i).endObject()).execute().actionGet();
         }
 
         ensureGreen();
@@ -76,8 +74,7 @@ public class SimpleDeleteMappingTests extends ElasticsearchIntegrationTest {
             }
         });
     }
-    
-    
+
     @Test
     public void deleteMappingAllowNoBlankIndexAndNoEmptyStrings() throws Exception {
         assertAcked(client().admin().indices().prepareCreate("index1").addMapping("1", "field1", "type=string").get());
@@ -88,23 +85,27 @@ public class SimpleDeleteMappingTests extends ElasticsearchIntegrationTest {
         try {
             client().admin().indices().prepareDeleteMapping("_all").get();
             fail();
-        } catch (ActionRequestValidationException e) {}
-        
+        } catch (ActionRequestValidationException e) {
+        }
+
         try {
             client().admin().indices().prepareDeleteMapping("_all").setType("").get();
             fail();
-        } catch (ActionRequestValidationException e) {}
-        
+        } catch (ActionRequestValidationException e) {
+        }
+
         try {
             client().admin().indices().prepareDeleteMapping().setType("1").get();
             fail();
-        } catch (ActionRequestValidationException e) {}
-        
+        } catch (ActionRequestValidationException e) {
+        }
+
         try {
             client().admin().indices().prepareDeleteMapping("").setType("1").get();
             fail();
-        } catch (ActionRequestValidationException e) {}
+        } catch (ActionRequestValidationException e) {
+        }
 
     }
-    
+
 }

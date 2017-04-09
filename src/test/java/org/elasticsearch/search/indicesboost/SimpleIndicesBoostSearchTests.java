@@ -50,10 +50,8 @@ public class SimpleIndicesBoostSearchTests extends ElasticsearchIntegrationTest 
 
         createIndex("test1", "test2");
         ensureGreen();
-        client().index(indexRequest("test1").type("type1").id("1")
-                .source(jsonBuilder().startObject().field("test", "value check").endObject())).actionGet();
-        client().index(indexRequest("test2").type("type1").id("1")
-                .source(jsonBuilder().startObject().field("test", "value beck").endObject())).actionGet();
+        client().index(indexRequest("test1").type("type1").id("1").source(jsonBuilder().startObject().field("test", "value check").endObject())).actionGet();
+        client().index(indexRequest("test2").type("type1").id("1").source(jsonBuilder().startObject().field("test", "value beck").endObject())).actionGet();
         refresh();
 
         float indexBoost = 1.1f;
@@ -61,10 +59,7 @@ public class SimpleIndicesBoostSearchTests extends ElasticsearchIntegrationTest 
         logger.info("--- QUERY_THEN_FETCH");
 
         logger.info("Query with test1 boosted");
-        SearchResponse response = client().search(searchRequest()
-                .searchType(SearchType.QUERY_THEN_FETCH)
-                .source(searchSource().explain(true).indexBoost("test1", indexBoost).query(termQuery("test", "value")))
-        ).actionGet();
+        SearchResponse response = client().search(searchRequest().searchType(SearchType.QUERY_THEN_FETCH).source(searchSource().explain(true).indexBoost("test1", indexBoost).query(termQuery("test", "value")))).actionGet();
 
         assertThat(response.getHits().totalHits(), equalTo(2l));
         logger.info("Hit[0] {} Explanation {}", response.getHits().getAt(0).index(), response.getHits().getAt(0).explanation());
@@ -73,10 +68,7 @@ public class SimpleIndicesBoostSearchTests extends ElasticsearchIntegrationTest 
         assertThat(response.getHits().getAt(1).index(), equalTo("test2"));
 
         logger.info("Query with test2 boosted");
-        response = client().search(searchRequest()
-                .searchType(SearchType.QUERY_THEN_FETCH)
-                .source(searchSource().explain(true).indexBoost("test2", indexBoost).query(termQuery("test", "value")))
-        ).actionGet();
+        response = client().search(searchRequest().searchType(SearchType.QUERY_THEN_FETCH).source(searchSource().explain(true).indexBoost("test2", indexBoost).query(termQuery("test", "value")))).actionGet();
 
         assertThat(response.getHits().totalHits(), equalTo(2l));
         logger.info("Hit[0] {} Explanation {}", response.getHits().getAt(0).index(), response.getHits().getAt(0).explanation());
@@ -87,10 +79,7 @@ public class SimpleIndicesBoostSearchTests extends ElasticsearchIntegrationTest 
         logger.info("--- DFS_QUERY_THEN_FETCH");
 
         logger.info("Query with test1 boosted");
-        response = client().search(searchRequest()
-                .searchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .source(searchSource().explain(true).indexBoost("test1", indexBoost).query(termQuery("test", "value")))
-        ).actionGet();
+        response = client().search(searchRequest().searchType(SearchType.DFS_QUERY_THEN_FETCH).source(searchSource().explain(true).indexBoost("test1", indexBoost).query(termQuery("test", "value")))).actionGet();
 
         assertThat(response.getHits().totalHits(), equalTo(2l));
         logger.info("Hit[0] {} Explanation {}", response.getHits().getAt(0).index(), response.getHits().getAt(0).explanation());
@@ -99,10 +88,7 @@ public class SimpleIndicesBoostSearchTests extends ElasticsearchIntegrationTest 
         assertThat(response.getHits().getAt(1).index(), equalTo("test2"));
 
         logger.info("Query with test2 boosted");
-        response = client().search(searchRequest()
-                .searchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .source(searchSource().explain(true).indexBoost("test2", indexBoost).query(termQuery("test", "value")))
-        ).actionGet();
+        response = client().search(searchRequest().searchType(SearchType.DFS_QUERY_THEN_FETCH).source(searchSource().explain(true).indexBoost("test2", indexBoost).query(termQuery("test", "value")))).actionGet();
 
         assertThat(response.getHits().totalHits(), equalTo(2l));
         logger.info("Hit[0] {} Explanation {}", response.getHits().getAt(0).index(), response.getHits().getAt(0).explanation());

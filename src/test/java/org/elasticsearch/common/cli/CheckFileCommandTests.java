@@ -320,7 +320,7 @@ public class CheckFileCommandTests extends ElasticsearchTestCase {
 
         @Override
         protected Path[] pathsForPermissionsCheck(Settings settings, Environment env) throws Exception {
-            return new Path[] {pathToDelete};
+            return new Path[] { pathToDelete };
         }
     }
 }

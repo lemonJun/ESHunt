@@ -36,36 +36,19 @@ public class NullValueObjectMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testNullValueObject() throws IOException {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("obj1").field("type", "object").endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("obj1").field("type", "object").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .startObject("obj1").endObject()
-                .field("value1", "test1")
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().startObject("obj1").endObject().field("value1", "test1").endObject().bytes());
 
         assertThat(doc.rootDoc().get("value1"), equalTo("test1"));
 
-        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .nullField("obj1")
-                .field("value1", "test1")
-                .endObject()
-                .bytes());
+        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().nullField("obj1").field("value1", "test1").endObject().bytes());
 
         assertThat(doc.rootDoc().get("value1"), equalTo("test1"));
 
-        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .startObject("obj1").field("field", "value").endObject()
-                .field("value1", "test1")
-                .endObject()
-                .bytes());
+        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().startObject("obj1").field("field", "value").endObject().field("value1", "test1").endObject().bytes());
 
         assertThat(doc.rootDoc().get("obj1.field"), equalTo("value"));
         assertThat(doc.rootDoc().get("value1"), equalTo("test1"));

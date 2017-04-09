@@ -76,33 +76,19 @@ public class SimpleStringMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testLimit() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("field").field("type", "string").field("ignore_above", 5).endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", "string").field("ignore_above", 5).endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = parser.parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field", "1234")
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "1234").endObject().bytes());
 
         assertThat(doc.rootDoc().getField("field"), notNullValue());
 
-        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field", "12345")
-                .endObject()
-                .bytes());
+        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "12345").endObject().bytes());
 
         assertThat(doc.rootDoc().getField("field"), notNullValue());
 
-        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field", "123456")
-                .endObject()
-                .bytes());
+        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "123456").endObject().bytes());
 
         assertThat(doc.rootDoc().getField("field"), nullValue());
     }
@@ -126,29 +112,19 @@ public class SimpleStringMappingTests extends ElasticsearchSingleNodeTest {
     }
 
     private void assertParseIdemPotent(IndexableFieldType expected, DocumentMapper mapper) throws Exception {
-        String mapping = mapper.toXContent(XContentFactory.jsonBuilder().startObject(), new ToXContent.MapParams(ImmutableMap.<String, String>of())).endObject().string();
+        String mapping = mapper.toXContent(XContentFactory.jsonBuilder().startObject(), new ToXContent.MapParams(ImmutableMap.<String, String> of())).endObject().string();
         mapper = parser.parse(mapping);
-        ParsedDocument doc = mapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field", "2345")
-                .endObject()
-                .bytes());
+        ParsedDocument doc = mapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "2345").endObject().bytes());
         assertEquals(expected, doc.rootDoc().getField("field").fieldType());
     }
 
     @Test
     public void testDefaultsForAnalyzed() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("field").field("type", "string").endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", "string").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = parser.parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field", "1234")
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "1234").endObject().bytes());
 
         IndexableFieldType fieldType = doc.rootDoc().getField("field").fieldType();
         assertDefaultAnalyzedFieldType(fieldType);
@@ -157,17 +133,11 @@ public class SimpleStringMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testDefaultsForNotAnalyzed() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("field").field("type", "string").field("index", "not_analyzed").endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = parser.parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field", "1234")
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "1234").endObject().bytes());
 
         IndexableFieldType fieldType = doc.rootDoc().getField("field").fieldType();
         assertThat(fieldType.omitNorms(), equalTo(true));
@@ -180,17 +150,11 @@ public class SimpleStringMappingTests extends ElasticsearchSingleNodeTest {
 
         // now test it explicitly set
 
-        mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("field").field("type", "string").field("index", "not_analyzed").startObject("norms").field("enabled", true).endObject().field("index_options", "freqs").endObject().endObject()
-                .endObject().endObject().string();
+        mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", "string").field("index", "not_analyzed").startObject("norms").field("enabled", true).endObject().field("index_options", "freqs").endObject().endObject().endObject().endObject().string();
 
         defaultMapper = parser.parse(mapping);
 
-        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field", "1234")
-                .endObject()
-                .bytes());
+        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "1234").endObject().bytes());
 
         fieldType = doc.rootDoc().getField("field").fieldType();
         assertThat(fieldType.omitNorms(), equalTo(false));
@@ -203,90 +167,44 @@ public class SimpleStringMappingTests extends ElasticsearchSingleNodeTest {
 
         // also test the deprecated omit_norms
 
-        mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("field").field("type", "string").field("index", "not_analyzed").field("omit_norms", false).endObject().endObject()
-                .endObject().endObject().string();
+        mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", "string").field("index", "not_analyzed").field("omit_norms", false).endObject().endObject().endObject().endObject().string();
 
         defaultMapper = parser.parse(mapping);
 
-        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field", "1234")
-                .endObject()
-                .bytes());
+        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "1234").endObject().bytes());
 
         fieldType = doc.rootDoc().getField("field").fieldType();
         assertThat(fieldType.omitNorms(), equalTo(false));
         assertParseIdemPotent(fieldType, defaultMapper);
     }
-    
+
     @Test
     public void testSearchQuoteAnalyzerSerialization() throws Exception {
         // Cases where search_quote_analyzer should not be added to the mapping.
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("field1")
-                    .field("type", "string")
-                    .field("position_offset_gap", 1000)
-                .endObject()
-                .startObject("field2")
-                    .field("type", "string")
-                    .field("position_offset_gap", 1000)
-                    .field("analyzer", "standard")
-                .endObject()
-                .startObject("field3")
-                    .field("type", "string")
-                    .field("position_offset_gap", 1000)
-                    .field("index_analyzer", "standard")
-                    .field("search_analyzer", "simple")
-                .endObject()
-                .startObject("field4")
-                    .field("type", "string")
-                    .field("position_offset_gap", 1000)
-                    .field("index_analyzer", "standard")
-                    .field("search_analyzer", "simple")
-                    .field("search_quote_analyzer", "simple")
-                .endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "string").field("position_offset_gap", 1000).endObject().startObject("field2").field("type", "string").field("position_offset_gap", 1000).field("analyzer", "standard").endObject().startObject("field3").field("type", "string").field("position_offset_gap", 1000).field("index_analyzer", "standard").field("search_analyzer", "simple").endObject().startObject("field4").field("type", "string").field("position_offset_gap", 1000).field("index_analyzer", "standard").field("search_analyzer", "simple").field("search_quote_analyzer", "simple").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper mapper = parser.parse(mapping);
         for (String fieldName : Lists.newArrayList("field1", "field2", "field3", "field4")) {
             Map<String, Object> serializedMap = getSerializedMap(fieldName, mapper);
             assertFalse(serializedMap.containsKey("search_quote_analyzer"));
         }
-        
+
         // Cases where search_quote_analyzer should be present.
-        mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("field1")
-                    .field("type", "string")
-                    .field("position_offset_gap", 1000)
-                    .field("search_quote_analyzer", "simple")
-                .endObject()
-                .startObject("field2")
-                    .field("type", "string")
-                    .field("position_offset_gap", 1000)
-                    .field("analyzer", "standard")
-                    .field("search_analyzer", "standard")
-                    .field("search_quote_analyzer", "simple")
-                .endObject()
-                .endObject()
-                .endObject().endObject().string();
-        
+        mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "string").field("position_offset_gap", 1000).field("search_quote_analyzer", "simple").endObject().startObject("field2").field("type", "string").field("position_offset_gap", 1000).field("analyzer", "standard").field("search_analyzer", "standard").field("search_quote_analyzer", "simple").endObject().endObject().endObject().endObject().string();
+
         mapper = parser.parse(mapping);
         for (String fieldName : Lists.newArrayList("field1", "field2")) {
             Map<String, Object> serializedMap = getSerializedMap(fieldName, mapper);
             assertEquals(serializedMap.get("search_quote_analyzer"), "simple");
         }
     }
-    
+
     private Map<String, Object> getSerializedMap(String fieldName, DocumentMapper mapper) throws Exception {
         FieldMapper<?> fieldMapper = mapper.mappers().smartNameFieldMapper(fieldName);
         XContentBuilder builder = JsonXContent.contentBuilder().startObject();
         fieldMapper.toXContent(builder, ToXContent.EMPTY_PARAMS).endObject();
         builder.close();
-        
+
         Map<String, Object> fieldMap = JsonXContent.jsonXContent.createParser(builder.bytes()).mapAndClose();
         @SuppressWarnings("unchecked")
         Map<String, Object> result = (Map<String, Object>) fieldMap.get(fieldName);
@@ -295,47 +213,11 @@ public class SimpleStringMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testTermVectors() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("field1")
-                    .field("type", "string")
-                    .field("term_vector", "no")
-                .endObject()
-                .startObject("field2")
-                    .field("type", "string")
-                    .field("term_vector", "yes")
-                .endObject()
-                .startObject("field3")
-                    .field("type", "string")
-                    .field("term_vector", "with_offsets")
-                .endObject()
-                .startObject("field4")
-                    .field("type", "string")
-                    .field("term_vector", "with_positions")
-                .endObject()
-                .startObject("field5")
-                    .field("type", "string")
-                    .field("term_vector", "with_positions_offsets")
-                .endObject()
-                .startObject("field6")
-                    .field("type", "string")
-                    .field("term_vector", "with_positions_offsets_payloads")
-                .endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "string").field("term_vector", "no").endObject().startObject("field2").field("type", "string").field("term_vector", "yes").endObject().startObject("field3").field("type", "string").field("term_vector", "with_offsets").endObject().startObject("field4").field("type", "string").field("term_vector", "with_positions").endObject().startObject("field5").field("type", "string").field("term_vector", "with_positions_offsets").endObject().startObject("field6").field("type", "string").field("term_vector", "with_positions_offsets_payloads").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = parser.parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field1", "1234")
-                .field("field2", "1234")
-                .field("field3", "1234")
-                .field("field4", "1234")
-                .field("field5", "1234")
-                .field("field6", "1234")
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field1", "1234").field("field2", "1234").field("field3", "1234").field("field4", "1234").field("field5", "1234").field("field6", "1234").endObject().bytes());
 
         assertThat(doc.rootDoc().getField("field1").fieldType().storeTermVectors(), equalTo(false));
         assertThat(doc.rootDoc().getField("field1").fieldType().storeTermVectorOffsets(), equalTo(false));
@@ -374,7 +256,8 @@ public class SimpleStringMappingTests extends ElasticsearchSingleNodeTest {
         try {
             new StringFieldMapper.Builder("anything").fieldDataSettings(DOC_VALUES_SETTINGS).build(ctx);
             fail();
-        } catch (Exception e) { /* OK */ }
+        } catch (Exception e) {
+            /* OK */ }
         new StringFieldMapper.Builder("anything").tokenized(false).fieldDataSettings(DOC_VALUES_SETTINGS).build(ctx);
         new StringFieldMapper.Builder("anything").index(false).fieldDataSettings(DOC_VALUES_SETTINGS).build(ctx);
 
@@ -382,32 +265,11 @@ public class SimpleStringMappingTests extends ElasticsearchSingleNodeTest {
         assertTrue(new StringFieldMapper.Builder("anything").index(false).fieldDataSettings(DOC_VALUES_SETTINGS).build(ctx).hasDocValues());
         assertTrue(new StringFieldMapper.Builder("anything").index(false).docValues(true).build(ctx).hasDocValues());
 
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("str1")
-                    .field("type", "string")
-                    .startObject("fielddata")
-                        .field("format", "fst")
-                    .endObject()
-                .endObject()
-                .startObject("str2")
-                    .field("type", "string")
-                    .field("index", "not_analyzed")
-                    .startObject("fielddata")
-                        .field("format", "doc_values")
-                    .endObject()
-                .endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("str1").field("type", "string").startObject("fielddata").field("format", "fst").endObject().endObject().startObject("str2").field("type", "string").field("index", "not_analyzed").startObject("fielddata").field("format", "doc_values").endObject().endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = parser.parse(mapping);
 
-        ParsedDocument parsedDoc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("str1", "1234")
-                .field("str2", "1234")
-                .endObject()
-                .bytes());
+        ParsedDocument parsedDoc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("str1", "1234").field("str2", "1234").endObject().bytes());
         final Document doc = parsedDoc.rootDoc();
         assertEquals(null, docValuesType(doc, "str1"));
         assertEquals(DocValuesType.SORTED_SET, docValuesType(doc, "str2"));
@@ -424,39 +286,25 @@ public class SimpleStringMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testDisableNorms() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("field").field("type", "string").endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", "string").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = parser.parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field", "1234")
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "1234").endObject().bytes());
 
         IndexableFieldType fieldType = doc.rootDoc().getField("field").fieldType();
         assertEquals(false, fieldType.omitNorms());
 
-        String updatedMapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("field").field("type", "string").startObject("norms").field("enabled", false).endObject()
-                .endObject().endObject().endObject().endObject().string();
+        String updatedMapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", "string").startObject("norms").field("enabled", false).endObject().endObject().endObject().endObject().endObject().string();
         MergeResult mergeResult = defaultMapper.merge(parser.parse(updatedMapping), MergeFlags.mergeFlags().simulate(false));
         assertFalse(Arrays.toString(mergeResult.conflicts()), mergeResult.hasConflicts());
 
-        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field", "1234")
-                .endObject()
-                .bytes());
+        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "1234").endObject().bytes());
 
         fieldType = doc.rootDoc().getField("field").fieldType();
         assertEquals(true, fieldType.omitNorms());
 
-        updatedMapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("field").field("type", "string").startObject("norms").field("enabled", true).endObject()
-                .endObject().endObject().endObject().endObject().string();
+        updatedMapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", "string").startObject("norms").field("enabled", true).endObject().endObject().endObject().endObject().endObject().string();
         mergeResult = defaultMapper.merge(parser.parse(updatedMapping), MergeFlags.mergeFlags());
         assertTrue(mergeResult.hasConflicts());
         assertEquals(1, mergeResult.conflicts().length);
@@ -464,9 +312,7 @@ public class SimpleStringMappingTests extends ElasticsearchSingleNodeTest {
     }
 
     public void testTermsFilter() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("field").field("type", "string").field("index", "not_analyzed").endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = parser.parse(mapping);
         FieldMapper<?> mapper = defaultMapper.mappers().fullName("field").mapper();

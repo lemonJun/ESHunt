@@ -37,10 +37,7 @@ public class SumTests extends AbstractNumericTests {
     @Test
     public void testEmptyAggregation() throws Exception {
 
-        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0).subAggregation(sum("sum")))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx").setQuery(matchAllQuery()).addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0).subAggregation(sum("sum"))).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(2l));
         Histogram histo = searchResponse.getAggregations().get("histo");
@@ -56,10 +53,7 @@ public class SumTests extends AbstractNumericTests {
 
     @Test
     public void testUnmapped() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx_unmapped")
-                .setQuery(matchAllQuery())
-                .addAggregation(sum("sum").field("value"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx_unmapped").setQuery(matchAllQuery()).addAggregation(sum("sum").field("value")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(0l));
 
@@ -71,23 +65,19 @@ public class SumTests extends AbstractNumericTests {
 
     @Test
     public void testSingleValuedField() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(sum("sum").field("value"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(sum("sum").field("value")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
         Sum sum = searchResponse.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 1+2+3+4+5+6+7+8+9+10));
+        assertThat(sum.getValue(), equalTo((double) 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10));
     }
 
     @Test
     public void testSingleValuedField_WithFormatter() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery())
-                .addAggregation(sum("sum").format("0000.0").field("value")).execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(sum("sum").format("0000.0").field("value")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -100,185 +90,148 @@ public class SumTests extends AbstractNumericTests {
 
     @Override
     public void testSingleValuedField_PartiallyUnmapped() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx", "idx_unmapped")
-                .setQuery(matchAllQuery())
-                .addAggregation(sum("sum").field("value"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx", "idx_unmapped").setQuery(matchAllQuery()).addAggregation(sum("sum").field("value")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
         Sum sum = searchResponse.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 1+2+3+4+5+6+7+8+9+10));
+        assertThat(sum.getValue(), equalTo((double) 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10));
     }
 
     @Test
     public void testSingleValuedField_WithValueScript() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(sum("sum").field("value").script("_value + 1"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(sum("sum").field("value").script("_value + 1")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
         Sum sum = searchResponse.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 2+3+4+5+6+7+8+9+10+11));
+        assertThat(sum.getValue(), equalTo((double) 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11));
     }
 
     @Test
     public void testSingleValuedField_WithValueScript_WithParams() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(sum("sum").field("value").script("_value + increment").param("increment", 1))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(sum("sum").field("value").script("_value + increment").param("increment", 1)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
         Sum sum = searchResponse.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 2+3+4+5+6+7+8+9+10+11));
+        assertThat(sum.getValue(), equalTo((double) 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11));
     }
 
     @Test
     public void testScript_SingleValued() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(sum("sum").script("doc['value'].value"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(sum("sum").script("doc['value'].value")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
         Sum sum = searchResponse.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 1+2+3+4+5+6+7+8+9+10));
+        assertThat(sum.getValue(), equalTo((double) 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10));
     }
 
     @Test
     public void testScript_SingleValued_WithParams() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(sum("sum").script("doc['value'].value + inc").param("inc", 1))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(sum("sum").script("doc['value'].value + inc").param("inc", 1)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
         Sum sum = searchResponse.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 2+3+4+5+6+7+8+9+10+11));
+        assertThat(sum.getValue(), equalTo((double) 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11));
     }
 
     @Test
     public void testScript_ExplicitSingleValued_WithParams() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(sum("sum").script("doc['value'].value + inc").param("inc", 1))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(sum("sum").script("doc['value'].value + inc").param("inc", 1)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
         Sum sum = searchResponse.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 2+3+4+5+6+7+8+9+10+11));
+        assertThat(sum.getValue(), equalTo((double) 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11));
     }
-
 
     @Test
     public void testScript_MultiValued() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(sum("sum").script("[ doc['value'].value, doc['value'].value + 1 ]"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(sum("sum").script("[ doc['value'].value, doc['value'].value + 1 ]")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
         Sum sum = searchResponse.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 1+2+2+3+3+4+4+5+5+6+6+7+7+8+8+9+9+10+10+11));
+        assertThat(sum.getValue(), equalTo((double) 1 + 2 + 2 + 3 + 3 + 4 + 4 + 5 + 5 + 6 + 6 + 7 + 7 + 8 + 8 + 9 + 9 + 10 + 10 + 11));
     }
 
     @Test
     public void testScript_ExplicitMultiValued() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(sum("sum").script("[ doc['value'].value, doc['value'].value + 1 ]"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(sum("sum").script("[ doc['value'].value, doc['value'].value + 1 ]")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
         Sum sum = searchResponse.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 1+2+2+3+3+4+4+5+5+6+6+7+7+8+8+9+9+10+10+11));
+        assertThat(sum.getValue(), equalTo((double) 1 + 2 + 2 + 3 + 3 + 4 + 4 + 5 + 5 + 6 + 6 + 7 + 7 + 8 + 8 + 9 + 9 + 10 + 10 + 11));
     }
 
     @Test
     public void testScript_MultiValued_WithParams() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(sum("sum").script("[ doc['value'].value, doc['value'].value + inc ]").param("inc", 1))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(sum("sum").script("[ doc['value'].value, doc['value'].value + inc ]").param("inc", 1)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
         Sum sum = searchResponse.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 1+2+2+3+3+4+4+5+5+6+6+7+7+8+8+9+9+10+10+11));
+        assertThat(sum.getValue(), equalTo((double) 1 + 2 + 2 + 3 + 3 + 4 + 4 + 5 + 5 + 6 + 6 + 7 + 7 + 8 + 8 + 9 + 9 + 10 + 10 + 11));
     }
 
     @Test
     public void testMultiValuedField() throws Exception {
 
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(sum("sum").field("values"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(sum("sum").field("values")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
         Sum sum = searchResponse.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 2+3+3+4+4+5+5+6+6+7+7+8+8+9+9+10+10+11+11+12));
+        assertThat(sum.getValue(), equalTo((double) 2 + 3 + 3 + 4 + 4 + 5 + 5 + 6 + 6 + 7 + 7 + 8 + 8 + 9 + 9 + 10 + 10 + 11 + 11 + 12));
     }
 
     @Test
     public void testMultiValuedField_WithValueScript() throws Exception {
 
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(sum("sum").field("values").script("_value + 1"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(sum("sum").field("values").script("_value + 1")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
         Sum sum = searchResponse.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 3+4+4+5+5+6+6+7+7+8+8+9+9+10+10+11+11+12+12+13));
+        assertThat(sum.getValue(), equalTo((double) 3 + 4 + 4 + 5 + 5 + 6 + 6 + 7 + 7 + 8 + 8 + 9 + 9 + 10 + 10 + 11 + 11 + 12 + 12 + 13));
     }
 
     @Test
     public void testMultiValuedField_WithValueScript_WithParams() throws Exception {
 
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(sum("sum").field("values").script("_value + increment").param("increment", 1))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(sum("sum").field("values").script("_value + increment").param("increment", 1)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
         Sum sum = searchResponse.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 3+4+4+5+5+6+6+7+7+8+8+9+9+10+10+11+11+12+12+13));
+        assertThat(sum.getValue(), equalTo((double) 3 + 4 + 4 + 5 + 5 + 6 + 6 + 7 + 7 + 8 + 8 + 9 + 9 + 10 + 10 + 11 + 11 + 12 + 12 + 13));
     }
 }

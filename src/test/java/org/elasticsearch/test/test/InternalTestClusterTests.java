@@ -76,10 +76,10 @@ public class InternalTestClusterTests extends ElasticsearchTestCase {
         assertThat(entries0.size(), equalTo(entries1.size()));
         for (Map.Entry<String, String> entry : entries0) {
             if (compareClusterName == false) {
-                if(entry.getKey().equals(ClusterName.SETTING)) {
+                if (entry.getKey().equals(ClusterName.SETTING)) {
                     continue;
                 }
-                if(entry.getKey().equals("path.repo")) {
+                if (entry.getKey().equals("path.repo")) {
                     continue;
                 }
             }
@@ -94,7 +94,7 @@ public class InternalTestClusterTests extends ElasticsearchTestCase {
         final String clusterName = clusterName("shared", Integer.toString(CHILD_JVM_ID), clusterSeed);
         String clusterName1 = clusterName("shared", Integer.toString(CHILD_JVM_ID), clusterSeed);
         while (clusterName.equals(clusterName1)) {
-            clusterName1 = clusterName("shared", Integer.toString(CHILD_JVM_ID), clusterSeed);   // spin until the time changes
+            clusterName1 = clusterName("shared", Integer.toString(CHILD_JVM_ID), clusterSeed); // spin until the time changes
         }
         SettingsSource settingsSource = SettingsSource.EMPTY;
         int numClientNodes = randomIntBetween(0, 2);

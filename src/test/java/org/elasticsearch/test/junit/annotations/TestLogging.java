@@ -35,7 +35,7 @@ import static java.lang.annotation.ElementType.TYPE;
  * or just @TestLogging("_root:DEBUG,cluster.metadata:TRACE") since we start the test with -Des.logger.prefix=
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({PACKAGE, TYPE, METHOD})
+@Target({ PACKAGE, TYPE, METHOD })
 public @interface TestLogging {
     String value();
 }

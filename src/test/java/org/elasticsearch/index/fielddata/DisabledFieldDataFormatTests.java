@@ -51,8 +51,7 @@ public class DisabledFieldDataFormatTests extends ElasticsearchSingleNodeTest {
         // try to run something that relies on field data and make sure that it fails
         for (int i = 0; i < searchCycles; i++) {
             try {
-                resp = client().prepareSearch("test").setPreference(Integer.toString(i)).addAggregation(AggregationBuilders.terms("t").field("s")
-                        .collectMode(aggCollectionMode)).execute().actionGet();
+                resp = client().prepareSearch("test").setPreference(Integer.toString(i)).addAggregation(AggregationBuilders.terms("t").field("s").collectMode(aggCollectionMode)).execute().actionGet();
                 assertFailures(resp);
             } catch (SearchPhaseExecutionException e) {
                 // expected
@@ -64,8 +63,7 @@ public class DisabledFieldDataFormatTests extends ElasticsearchSingleNodeTest {
 
         // try to run something that relies on field data and make sure that it works
         for (int i = 0; i < searchCycles; i++) {
-            resp = client().prepareSearch("test").setPreference(Integer.toString(i)).addAggregation(AggregationBuilders.terms("t").field("s")
-                    .collectMode(aggCollectionMode)).execute().actionGet();
+            resp = client().prepareSearch("test").setPreference(Integer.toString(i)).addAggregation(AggregationBuilders.terms("t").field("s").collectMode(aggCollectionMode)).execute().actionGet();
             assertNoFailures(resp);
         }
 
@@ -74,8 +72,7 @@ public class DisabledFieldDataFormatTests extends ElasticsearchSingleNodeTest {
 
         // this time, it should work because segments are already loaded
         for (int i = 0; i < searchCycles; i++) {
-            resp = client().prepareSearch("test").setPreference(Integer.toString(i)).addAggregation(AggregationBuilders.terms("t").field("s")
-                    .collectMode(aggCollectionMode)).execute().actionGet();
+            resp = client().prepareSearch("test").setPreference(Integer.toString(i)).addAggregation(AggregationBuilders.terms("t").field("s").collectMode(aggCollectionMode)).execute().actionGet();
             assertNoFailures(resp);
         }
 
@@ -84,8 +81,7 @@ public class DisabledFieldDataFormatTests extends ElasticsearchSingleNodeTest {
         client().admin().indices().prepareRefresh().execute().actionGet();
         for (int i = 0; i < searchCycles; i++) {
             try {
-                resp = client().prepareSearch("test").setPreference(Integer.toString(i)).addAggregation(AggregationBuilders.terms("t").field("s")
-                        .collectMode(aggCollectionMode)).execute().actionGet();
+                resp = client().prepareSearch("test").setPreference(Integer.toString(i)).addAggregation(AggregationBuilders.terms("t").field("s").collectMode(aggCollectionMode)).execute().actionGet();
                 assertFailures(resp);
             } catch (SearchPhaseExecutionException e) {
                 // expected
@@ -95,18 +91,7 @@ public class DisabledFieldDataFormatTests extends ElasticsearchSingleNodeTest {
 
     private void updateFormat(final String format) throws Exception {
         logger.info(">> put mapping start {}", format);
-        assertAcked(client().admin().indices().preparePutMapping("test").setType("type").setSource(
-                XContentFactory.jsonBuilder().startObject().startObject("type")
-                        .startObject("properties")
-                            .startObject("s")
-                                .field("type", "string")
-                                .startObject("fielddata")
-                                    .field("format", format)
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                        .endObject()
-                        .endObject()).get());
+        assertAcked(client().admin().indices().preparePutMapping("test").setType("type").setSource(XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("s").field("type", "string").startObject("fielddata").field("format", format).endObject().endObject().endObject().endObject().endObject()).get());
         logger.info(">> put mapping end {}", format);
     }
 

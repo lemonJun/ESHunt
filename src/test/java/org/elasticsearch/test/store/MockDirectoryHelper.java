@@ -70,8 +70,7 @@ public class MockDirectoryHelper {
         crashIndex = indexSettings.getAsBoolean(CRASH_INDEX, true);
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Using MockDirWrapper with seed [{}] throttle: [{}] crashIndex: [{}]", SeedUtils.formatSeed(seed),
-                    throttle, crashIndex);
+            logger.debug("Using MockDirWrapper with seed [{}] throttle: [{}] crashIndex: [{}]", SeedUtils.formatSeed(seed), throttle, crashIndex);
         }
         this.indexSettings = indexSettings;
         this.shardId = shardId;
@@ -149,11 +148,9 @@ public class MockDirectoryHelper {
             }
         }
 
-
-
         public void awaitClosed(long timeout) throws InterruptedException {
             synchronized (lock) {
-                if(isOpen()) {
+                if (isOpen()) {
                     lock.wait(timeout);
                 }
             }

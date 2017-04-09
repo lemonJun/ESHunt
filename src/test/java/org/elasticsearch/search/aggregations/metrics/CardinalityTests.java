@@ -42,10 +42,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Override
     public Settings indexSettings() {
-        return ImmutableSettings.builder()
-                .put("index.number_of_shards", between(1, 5))
-                .put("index.number_of_replicas", between(0, 1))
-                .build();
+        return ImmutableSettings.builder().put("index.number_of_shards", between(1, 5)).put("index.number_of_replicas", between(0, 1)).build();
     }
 
     static long numDocs;
@@ -54,72 +51,13 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
     @Override
     public void setupSuiteScopeCluster() throws Exception {
 
-        prepareCreate("idx").addMapping("type",
-                jsonBuilder().startObject().startObject("type").startObject("properties")
-                    .startObject("str_value")
-                        .field("type", "string")
-                        .startObject("fields")
-                            .startObject("hash")
-                                .field("type", "murmur3")
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                    .startObject("str_values")
-                        .field("type", "string")
-                        .startObject("fields")
-                            .startObject("hash")
-                                .field("type", "murmur3")
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                    .startObject("l_value")
-                        .field("type", "long")
-                        .startObject("fields")
-                            .startObject("hash")
-                                .field("type", "murmur3")
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                    .startObject("l_values")
-                        .field("type", "long")
-                        .startObject("fields")
-                            .startObject("hash")
-                                .field("type", "murmur3")
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                        .startObject("d_value")
-                            .field("type", "double")
-                            .startObject("fields")
-                                .startObject("hash")
-                                    .field("type", "murmur3")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                        .startObject("d_values")
-                            .field("type", "double")
-                                .startObject("fields")
-                                    .startObject("hash")
-                                        .field("type", "murmur3")
-                                    .endObject()
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                        .endObject().endObject()).execute().actionGet();
+        prepareCreate("idx").addMapping("type", jsonBuilder().startObject().startObject("type").startObject("properties").startObject("str_value").field("type", "string").startObject("fields").startObject("hash").field("type", "murmur3").endObject().endObject().endObject().startObject("str_values").field("type", "string").startObject("fields").startObject("hash").field("type", "murmur3").endObject().endObject().endObject().startObject("l_value").field("type", "long").startObject("fields").startObject("hash").field("type", "murmur3").endObject().endObject().endObject().startObject("l_values").field("type", "long").startObject("fields").startObject("hash").field("type", "murmur3").endObject().endObject().endObject().startObject("d_value").field("type", "double").startObject("fields").startObject("hash").field("type", "murmur3").endObject().endObject().endObject().startObject("d_values").field("type", "double").startObject("fields").startObject("hash").field("type", "murmur3").endObject().endObject().endObject().endObject().endObject().endObject()).execute().actionGet();
 
         numDocs = randomIntBetween(2, 100);
         precisionThreshold = randomIntBetween(0, 1 << randomInt(20));
         IndexRequestBuilder[] builders = new IndexRequestBuilder[(int) numDocs];
         for (int i = 0; i < numDocs; ++i) {
-            builders[i] = client().prepareIndex("idx", "type").setSource(jsonBuilder()
-                    .startObject()
-                        .field("str_value", "s" + i)
-                        .field("str_values", new String[]{"s" + (i * 2), "s" + (i * 2 + 1)})
-                        .field("l_value", i)
-                        .field("l_values", new int[] {i * 2, i * 2 + 1})
-                        .field("d_value", i)
-                        .field("d_values", new double[]{i * 2, i * 2 + 1})
-                    .endObject());
+            builders[i] = client().prepareIndex("idx", "type").setSource(jsonBuilder().startObject().field("str_value", "s" + i).field("str_values", new String[] { "s" + (i * 2), "s" + (i * 2 + 1) }).field("l_value", i).field("l_values", new int[] { i * 2, i * 2 + 1 }).field("d_value", i).field("d_values", new double[] { i * 2, i * 2 + 1 }).endObject());
         }
         indexRandom(true, builders);
         createIndex("idx_unmapped");
@@ -142,7 +80,8 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
             assertThat(count.getValue(), greaterThan(0L));
         }
     }
-     private String singleNumericField(boolean hash) {
+
+    private String singleNumericField(boolean hash) {
         return (randomBoolean() ? "l_value" : "d_value") + (hash ? ".hash" : "");
     }
 
@@ -152,9 +91,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void unmapped() throws Exception {
-        SearchResponse response = client().prepareSearch("idx_unmapped").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_value"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx_unmapped").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_value")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -166,9 +103,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void partiallyUnmapped() throws Exception {
-        SearchResponse response = client().prepareSearch("idx", "idx_unmapped").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_value"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx", "idx_unmapped").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_value")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -180,9 +115,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedString() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_value"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_value")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -194,9 +127,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedStringHashed() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_value.hash"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_value.hash")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -208,9 +139,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedNumeric() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field(singleNumericField(false)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field(singleNumericField(false))).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -222,9 +151,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedNumericHashed() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field(singleNumericField(true)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field(singleNumericField(true))).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -236,9 +163,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedString() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_values"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_values")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -250,9 +175,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedStringHashed() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_values.hash"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_values.hash")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -264,9 +187,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedNumeric() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field(multiNumericField(false)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field(multiNumericField(false))).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -278,9 +199,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedNumericHashed() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field(multiNumericField(true)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field(multiNumericField(true))).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -292,9 +211,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedStringScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).script("doc['str_value'].value"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).script("doc['str_value'].value")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -306,9 +223,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedStringScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).script("doc['str_values'].values"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).script("doc['str_values'].values")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -320,9 +235,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedNumericScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).script("doc['" + singleNumericField(false) + "'].value"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).script("doc['" + singleNumericField(false) + "'].value")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -334,9 +247,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedNumericScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).script("doc['" + multiNumericField(false) + "'].values"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).script("doc['" + multiNumericField(false) + "'].values")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -348,9 +259,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedStringValueScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_value").script("_value"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_value").script("_value")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -362,9 +271,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedStringValueScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_values").script("_value"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_values").script("_value")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -376,9 +283,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedNumericValueScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field(singleNumericField(false)).script("_value"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field(singleNumericField(false)).script("_value")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -390,9 +295,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedNumericValueScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field(multiNumericField(false)).script("_value"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field(multiNumericField(false)).script("_value")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -404,11 +307,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void asSubAgg() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(terms("terms").field("str_value")
-                        .collectMode(randomFrom(SubAggCollectionMode.values()))
-                        .subAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_values")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(terms("terms").field("str_value").collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_values"))).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -423,11 +322,7 @@ public class CardinalityTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void asSubAggHashed() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(terms("terms").field("str_value")
-                        .collectMode(randomFrom(SubAggCollectionMode.values()))
-                        .subAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_values.hash")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(terms("terms").field("str_value").collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(cardinality("cardinality").precisionThreshold(precisionThreshold).field("str_values.hash"))).execute().actionGet();
 
         assertSearchResponse(response);
 

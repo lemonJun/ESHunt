@@ -32,7 +32,7 @@ public class InternalEngineSettingsTest extends ElasticsearchSingleNodeTest {
 
     public void testSettingsUpdate() {
         final IndexService service = createIndex("foo");
-        InternalEngine engine = ((InternalEngine)engine(service));
+        InternalEngine engine = ((InternalEngine) engine(service));
         // INDEX_COMPOUND_ON_FLUSH
         assertThat(engine.getCurrentIndexWriterConfig().getUseCompoundFile(), is(true));
         client().admin().indices().prepareUpdateSettings("foo").setSettings(ImmutableSettings.builder().put(EngineConfig.INDEX_COMPOUND_ON_FLUSH, false).build()).get();
@@ -64,20 +64,12 @@ public class InternalEngineSettingsTest extends ElasticsearchSingleNodeTest {
             long versionMapSizeInMB = randomIntBetween(10, 20);
             String versionMapString = versionMapAsPercent ? versionMapPercent + "%" : versionMapSizeInMB + "mb";
 
-            Settings build = ImmutableSettings.builder()
-                    .put(EngineConfig.INDEX_FAIL_ON_CORRUPTION_SETTING, failOnCorruption)
-                    .put(EngineConfig.INDEX_COMPOUND_ON_FLUSH, compoundOnFlush)
-                    .put(EngineConfig.INDEX_GC_DELETES_SETTING, gcDeletes)
-                    .put(EngineConfig.INDEX_FAIL_ON_MERGE_FAILURE_SETTING, failOnMerge)
-                    .put(EngineConfig.INDEX_CHECKSUM_ON_MERGE, checksumOnMerge)
-                    .put(EngineConfig.INDEX_VERSION_MAP_SIZE, versionMapString)
-                    .build();
+            Settings build = ImmutableSettings.builder().put(EngineConfig.INDEX_FAIL_ON_CORRUPTION_SETTING, failOnCorruption).put(EngineConfig.INDEX_COMPOUND_ON_FLUSH, compoundOnFlush).put(EngineConfig.INDEX_GC_DELETES_SETTING, gcDeletes).put(EngineConfig.INDEX_FAIL_ON_MERGE_FAILURE_SETTING, failOnMerge).put(EngineConfig.INDEX_CHECKSUM_ON_MERGE, checksumOnMerge).put(EngineConfig.INDEX_VERSION_MAP_SIZE, versionMapString).build();
 
             client().admin().indices().prepareUpdateSettings("foo").setSettings(build).get();
             LiveIndexWriterConfig currentIndexWriterConfig = engine.getCurrentIndexWriterConfig();
             assertEquals(engine.config().isCompoundOnFlush(), compoundOnFlush);
             assertEquals(currentIndexWriterConfig.getUseCompoundFile(), compoundOnFlush);
-
 
             assertEquals(engine.config().getGcDeletesInMillis(), gcDeletes);
             assertEquals(engine.getGcDeletesInMillis(), gcDeletes);
@@ -94,32 +86,23 @@ public class InternalEngineSettingsTest extends ElasticsearchSingleNodeTest {
             }
         }
 
-        Settings settings = ImmutableSettings.builder()
-                .put(EngineConfig.INDEX_GC_DELETES_SETTING, 1000)
-                .build();
+        Settings settings = ImmutableSettings.builder().put(EngineConfig.INDEX_GC_DELETES_SETTING, 1000).build();
         client().admin().indices().prepareUpdateSettings("foo").setSettings(settings).get();
         assertEquals(engine.getGcDeletesInMillis(), 1000);
         assertTrue(engine.config().isEnableGcDeletes());
 
-
-        settings = ImmutableSettings.builder()
-                .put(EngineConfig.INDEX_GC_DELETES_SETTING, "0ms")
-                .build();
+        settings = ImmutableSettings.builder().put(EngineConfig.INDEX_GC_DELETES_SETTING, "0ms").build();
 
         client().admin().indices().prepareUpdateSettings("foo").setSettings(settings).get();
         assertEquals(engine.getGcDeletesInMillis(), 0);
         assertTrue(engine.config().isEnableGcDeletes());
 
-        settings = ImmutableSettings.builder()
-                .put(EngineConfig.INDEX_GC_DELETES_SETTING, 1000)
-                .build();
+        settings = ImmutableSettings.builder().put(EngineConfig.INDEX_GC_DELETES_SETTING, 1000).build();
         client().admin().indices().prepareUpdateSettings("foo").setSettings(settings).get();
         assertEquals(engine.getGcDeletesInMillis(), 1000);
         assertTrue(engine.config().isEnableGcDeletes());
 
-        settings = ImmutableSettings.builder()
-                .put(EngineConfig.INDEX_VERSION_MAP_SIZE, "sdfasfd")
-                .build();
+        settings = ImmutableSettings.builder().put(EngineConfig.INDEX_VERSION_MAP_SIZE, "sdfasfd").build();
         try {
             client().admin().indices().prepareUpdateSettings("foo").setSettings(settings).get();
             fail("settings update didn't fail, but should have");
@@ -127,9 +110,7 @@ public class InternalEngineSettingsTest extends ElasticsearchSingleNodeTest {
             // good
         }
 
-        settings = ImmutableSettings.builder()
-                .put(EngineConfig.INDEX_VERSION_MAP_SIZE, "-12%")
-                .build();
+        settings = ImmutableSettings.builder().put(EngineConfig.INDEX_VERSION_MAP_SIZE, "-12%").build();
         try {
             client().admin().indices().prepareUpdateSettings("foo").setSettings(settings).get();
             fail("settings update didn't fail, but should have");
@@ -137,9 +118,7 @@ public class InternalEngineSettingsTest extends ElasticsearchSingleNodeTest {
             // good
         }
 
-        settings = ImmutableSettings.builder()
-                .put(EngineConfig.INDEX_VERSION_MAP_SIZE, "130%")
-                .build();
+        settings = ImmutableSettings.builder().put(EngineConfig.INDEX_VERSION_MAP_SIZE, "130%").build();
         try {
             client().admin().indices().prepareUpdateSettings("foo").setSettings(settings).get();
             fail("settings update didn't fail, but should have");

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.elasticsearch.action.bulk;
 
 import com.google.common.base.Charsets;

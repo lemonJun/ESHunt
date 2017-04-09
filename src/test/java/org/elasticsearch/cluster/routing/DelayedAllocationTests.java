@@ -43,11 +43,7 @@ public class DelayedAllocationTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("gateway.type", "local")
-                .put(LocalIndexShardGateway.SYNC_INTERVAL, TimeValue.timeValueSeconds(5))
-                .build();
+        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal)).put("gateway.type", "local").put(LocalIndexShardGateway.SYNC_INTERVAL, TimeValue.timeValueSeconds(5)).build();
     }
 
     /**
@@ -57,11 +53,7 @@ public class DelayedAllocationTests extends ElasticsearchIntegrationTest {
     @Test
     public void testNoDelayedTimeout() throws Exception {
         internalCluster().startNodesAsync(3).get();
-        prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                .put(LocalIndexShardGateway.SYNC_INTERVAL, TimeValue.timeValueSeconds(5))
-                .put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, 0)).get();
+        prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1).put(LocalIndexShardGateway.SYNC_INTERVAL, TimeValue.timeValueSeconds(5)).put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, 0)).get();
         ensureGreen("test");
         indexRandomData();
         internalCluster().stopRandomNode(InternalTestCluster.nameFilter(findNodeWithShard()));
@@ -78,11 +70,7 @@ public class DelayedAllocationTests extends ElasticsearchIntegrationTest {
     @Test
     public void testDelayedAllocationNodeLeavesAndComesBack() throws Exception {
         internalCluster().startNodesAsync(3).get();
-        prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                .put(LocalIndexShardGateway.SYNC_INTERVAL, TimeValue.timeValueSeconds(5))
-                .put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, TimeValue.timeValueHours(1))).get();
+        prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1).put(LocalIndexShardGateway.SYNC_INTERVAL, TimeValue.timeValueSeconds(5)).put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, TimeValue.timeValueHours(1))).get();
         ensureGreen("test");
         indexRandomData();
         internalCluster().stopRandomNode(InternalTestCluster.nameFilter(findNodeWithShard()));
@@ -104,11 +92,7 @@ public class DelayedAllocationTests extends ElasticsearchIntegrationTest {
     @Test
     public void testDelayedAllocationTimesOut() throws Exception {
         internalCluster().startNodesAsync(3).get();
-        prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                .put(LocalIndexShardGateway.SYNC_INTERVAL, TimeValue.timeValueSeconds(5))
-                .put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, TimeValue.timeValueMillis(100))).get();
+        prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1).put(LocalIndexShardGateway.SYNC_INTERVAL, TimeValue.timeValueSeconds(5)).put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, TimeValue.timeValueMillis(100))).get();
         ensureGreen("test");
         indexRandomData();
         internalCluster().stopRandomNode(InternalTestCluster.nameFilter(findNodeWithShard()));
@@ -128,11 +112,7 @@ public class DelayedAllocationTests extends ElasticsearchIntegrationTest {
     @Test
     public void testDelayedAllocationChangeWithSettingTo100ms() throws Exception {
         internalCluster().startNodesAsync(3).get();
-        prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                .put(LocalIndexShardGateway.SYNC_INTERVAL, TimeValue.timeValueSeconds(5))
-                .put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, TimeValue.timeValueHours(1))).get();
+        prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1).put(LocalIndexShardGateway.SYNC_INTERVAL, TimeValue.timeValueSeconds(5)).put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, TimeValue.timeValueHours(1))).get();
         ensureGreen("test");
         indexRandomData();
         internalCluster().stopRandomNode(InternalTestCluster.nameFilter(findNodeWithShard()));
@@ -156,11 +136,7 @@ public class DelayedAllocationTests extends ElasticsearchIntegrationTest {
     @Test
     public void testDelayedAllocationChangeWithSettingTo0() throws Exception {
         internalCluster().startNodesAsync(3).get();
-        prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                .put(LocalIndexShardGateway.SYNC_INTERVAL, TimeValue.timeValueSeconds(5))
-                .put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, TimeValue.timeValueHours(1))).get();
+        prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1).put(LocalIndexShardGateway.SYNC_INTERVAL, TimeValue.timeValueSeconds(5)).put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, TimeValue.timeValueHours(1))).get();
         ensureGreen("test");
         indexRandomData();
         internalCluster().stopRandomNode(InternalTestCluster.nameFilter(findNodeWithShard()));
@@ -175,7 +151,6 @@ public class DelayedAllocationTests extends ElasticsearchIntegrationTest {
         ensureGreen("test");
         assertThat(client().admin().cluster().prepareHealth().get().getDelayedUnassignedShards(), equalTo(0));
     }
-
 
     private void indexRandomData() throws Exception {
         int numDocs = scaledRandomIntBetween(100, 1000);

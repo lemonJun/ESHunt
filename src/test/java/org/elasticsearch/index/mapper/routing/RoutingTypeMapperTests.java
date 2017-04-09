@@ -40,15 +40,10 @@ public class RoutingTypeMapperTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void simpleRoutingMapperTests() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").endObject().endObject().string();
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = docMapper.parse(SourceToParse.source(XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field", "value")
-                .endObject()
-                .bytes()).type("type").id("1").routing("routing_value"));
+        ParsedDocument doc = docMapper.parse(SourceToParse.source(XContentFactory.jsonBuilder().startObject().field("field", "value").endObject().bytes()).type("type").id("1").routing("routing_value"));
 
         assertThat(doc.rootDoc().get("_routing"), equalTo("routing_value"));
         assertThat(doc.rootDoc().get("field"), equalTo("value"));
@@ -56,13 +51,7 @@ public class RoutingTypeMapperTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testSetValues() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_routing")
-                .field("store", "no")
-                .field("index", "no")
-                .field("path", "route")
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_routing").field("store", "no").field("index", "no").field("path", "route").endObject().endObject().endObject().string();
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
         assertThat(docMapper.routingFieldMapper().fieldType().stored(), equalTo(false));
         assertThat(docMapper.routingFieldMapper().fieldType().indexed(), equalTo(false));
@@ -71,9 +60,7 @@ public class RoutingTypeMapperTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testThatSerializationWorksCorrectlyForIndexField() throws Exception {
-        String enabledMapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_routing").field("store", "no").field("index", "no").endObject()
-                .endObject().endObject().string();
+        String enabledMapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_routing").field("store", "no").field("index", "no").endObject().endObject().endObject().string();
         DocumentMapper enabledMapper = createIndex("test").mapperService().documentMapperParser().parse(enabledMapping);
 
         XContentBuilder builder = JsonXContent.contentBuilder().startObject();

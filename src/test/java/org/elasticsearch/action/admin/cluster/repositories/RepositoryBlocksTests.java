@@ -45,27 +45,18 @@ public class RepositoryBlocksTests extends ElasticsearchIntegrationTest {
         logger.info("-->  registering a repository is blocked when the cluster is read only");
         try {
             setClusterReadOnly(true);
-            assertBlocked(client().admin().cluster().preparePutRepository("test-repo-blocks")
-                    .setType("fs")
-                    .setVerify(false)
-                    .setSettings(ImmutableSettings.settingsBuilder().put("location", newTempDir())), MetaData.CLUSTER_READ_ONLY_BLOCK);
+            assertBlocked(client().admin().cluster().preparePutRepository("test-repo-blocks").setType("fs").setVerify(false).setSettings(ImmutableSettings.settingsBuilder().put("location", newTempDir())), MetaData.CLUSTER_READ_ONLY_BLOCK);
         } finally {
             setClusterReadOnly(false);
         }
 
         logger.info("-->  registering a repository is allowed when the cluster is not read only");
-        assertAcked(client().admin().cluster().preparePutRepository("test-repo-blocks")
-                .setType("fs")
-                .setVerify(false)
-                .setSettings(ImmutableSettings.settingsBuilder().put("location", newTempDir())));
+        assertAcked(client().admin().cluster().preparePutRepository("test-repo-blocks").setType("fs").setVerify(false).setSettings(ImmutableSettings.settingsBuilder().put("location", newTempDir())));
     }
 
     @Test
     public void testVerifyRepositoryWithBlocks() {
-        assertAcked(client().admin().cluster().preparePutRepository("test-repo-blocks")
-                .setType("fs")
-                .setVerify(false)
-                .setSettings(ImmutableSettings.settingsBuilder().put("location", newTempDir())));
+        assertAcked(client().admin().cluster().preparePutRepository("test-repo-blocks").setType("fs").setVerify(false).setSettings(ImmutableSettings.settingsBuilder().put("location", newTempDir())));
 
         // This test checks that the Get Repository operation is never blocked, even if the cluster is read only.
         try {
@@ -79,10 +70,7 @@ public class RepositoryBlocksTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testDeleteRepositoryWithBlocks() {
-        assertAcked(client().admin().cluster().preparePutRepository("test-repo-blocks")
-                .setType("fs")
-                .setVerify(false)
-                .setSettings(ImmutableSettings.settingsBuilder().put("location", newTempDir())));
+        assertAcked(client().admin().cluster().preparePutRepository("test-repo-blocks").setType("fs").setVerify(false).setSettings(ImmutableSettings.settingsBuilder().put("location", newTempDir())));
 
         logger.info("-->  deleting a repository is blocked when the cluster is read only");
         try {
@@ -98,10 +86,7 @@ public class RepositoryBlocksTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testGetRepositoryWithBlocks() {
-        assertAcked(client().admin().cluster().preparePutRepository("test-repo-blocks")
-                .setType("fs")
-                .setVerify(false)
-                .setSettings(ImmutableSettings.settingsBuilder().put("location", newTempDir())));
+        assertAcked(client().admin().cluster().preparePutRepository("test-repo-blocks").setType("fs").setVerify(false).setSettings(ImmutableSettings.settingsBuilder().put("location", newTempDir())));
 
         // This test checks that the Get Repository operation is never blocked, even if the cluster is read only.
         try {

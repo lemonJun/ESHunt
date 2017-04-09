@@ -188,21 +188,15 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         assertHits(searchResponse.getHits(), "1", "2", "3");
 
         logger.info("--> checking single filtering alias search with global facets");
-        searchResponse = client().prepareSearch("tests").setQuery(QueryBuilders.matchQuery("name", "bar"))
-                .addFacet(FacetBuilders.termsFacet("test").field("name").global(true))
-                .get();
+        searchResponse = client().prepareSearch("tests").setQuery(QueryBuilders.matchQuery("name", "bar")).addFacet(FacetBuilders.termsFacet("test").field("name").global(true)).get();
         assertThat(((TermsFacet) searchResponse.getFacets().facet("test")).getEntries().size(), equalTo(4));
 
         logger.info("--> checking single filtering alias search with global facets and sort");
-        searchResponse = client().prepareSearch("tests").setQuery(QueryBuilders.matchQuery("name", "bar"))
-                .addFacet(FacetBuilders.termsFacet("test").field("name").global(true))
-                .addSort("_uid", SortOrder.ASC).get();
+        searchResponse = client().prepareSearch("tests").setQuery(QueryBuilders.matchQuery("name", "bar")).addFacet(FacetBuilders.termsFacet("test").field("name").global(true)).addSort("_uid", SortOrder.ASC).get();
         assertThat(((TermsFacet) searchResponse.getFacets().facet("test")).getEntries().size(), equalTo(4));
 
         logger.info("--> checking single filtering alias search with non-global facets");
-        searchResponse = client().prepareSearch("tests").setQuery(QueryBuilders.matchQuery("name", "bar"))
-                .addFacet(FacetBuilders.termsFacet("test").field("name").global(false))
-                .addSort("_uid", SortOrder.ASC).get();
+        searchResponse = client().prepareSearch("tests").setQuery(QueryBuilders.matchQuery("name", "bar")).addFacet(FacetBuilders.termsFacet("test").field("name").global(false)).addSort("_uid", SortOrder.ASC).get();
         assertThat(((TermsFacet) searchResponse.getFacets().facet("test")).getEntries().size(), equalTo(2));
 
         searchResponse = client().prepareSearch("foos", "bars").setQuery(QueryBuilders.matchAllQuery()).get();
@@ -294,10 +288,7 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         logger.info("--> creating indices");
         createIndex("test1", "test2", "test3");
 
-        client().admin().indices().preparePutMapping("test1", "test2", "test3")
-                .setType("type1")
-                .setSource("name", "type=string")
-                .get();
+        client().admin().indices().preparePutMapping("test1", "test2", "test3").setType("type1").setSource("name", "type=string").get();
         waitForConcreteMappingsOnAll("test1", "type1", "name");
         waitForConcreteMappingsOnAll("test2", "type1", "name");
         waitForConcreteMappingsOnAll("test3", "type1", "name");
@@ -416,8 +407,6 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         assertHits(searchResponse.getHits(), "4");
     }
 
-    
-    
     @Test
     public void testDeleteAliases() throws Exception {
         logger.info("--> creating index [test1] and [test2]");
@@ -426,28 +415,20 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         ensureGreen();
 
         logger.info("--> adding filtering aliases to index [test1]");
-        assertAcked(admin().indices().prepareAliases().addAlias("test1", "aliasToTest1")
-                .addAlias("test1", "aliasToTests")
-                .addAlias("test1", "foos", termFilter("name", "foo"))
-                .addAlias("test1", "bars", termFilter("name", "bar"))
-                .addAlias("test1", "tests", termFilter("name", "test")));
+        assertAcked(admin().indices().prepareAliases().addAlias("test1", "aliasToTest1").addAlias("test1", "aliasToTests").addAlias("test1", "foos", termFilter("name", "foo")).addAlias("test1", "bars", termFilter("name", "bar")).addAlias("test1", "tests", termFilter("name", "test")));
 
         logger.info("--> adding filtering aliases to index [test2]");
-        assertAcked(admin().indices().prepareAliases().addAlias("test2", "aliasToTest2")
-                .addAlias("test2", "aliasToTests")
-                .addAlias("test2", "foos", termFilter("name", "foo"))
-                .addAlias("test2", "tests", termFilter("name", "test")));
-        
-        String[] indices = {"test1", "test2"}; 
-        String[] aliases = {"aliasToTest1", "foos", "bars", "tests", "aliasToTest2", "aliasToTests"};
-        
+        assertAcked(admin().indices().prepareAliases().addAlias("test2", "aliasToTest2").addAlias("test2", "aliasToTests").addAlias("test2", "foos", termFilter("name", "foo")).addAlias("test2", "tests", termFilter("name", "test")));
+
+        String[] indices = { "test1", "test2" };
+        String[] aliases = { "aliasToTest1", "foos", "bars", "tests", "aliasToTest2", "aliasToTests" };
+
         admin().indices().prepareAliases().removeAlias(indices, aliases).get();
-        
+
         AliasesExistResponse response = admin().indices().prepareAliasesExist(aliases).get();
         assertThat(response.exists(), equalTo(false));
     }
 
-    
     @Test
     public void testWaitForAliasCreationMultipleShards() throws Exception {
         logger.info("--> creating index [test]");
@@ -502,7 +483,6 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         }
     }
 
-
     @Test
     public void testSameAlias() throws Exception {
         logger.info("--> creating index [test]");
@@ -542,9 +522,8 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         assertAcked((admin().indices().prepareAliases().removeAlias("test", "alias1").setTimeout(timeout)));
         assertThat(stopWatch.stop().lastTaskTime().millis(), lessThan(timeout.millis()));
 
-        
     }
-    
+
     @Test(expected = AliasesMissingException.class)
     public void testIndicesRemoveNonExistingAliasResponds404() throws Exception {
         logger.info("--> creating index [test]");
@@ -564,8 +543,7 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         createIndex("foobarbaz");
         createIndex("bazbar");
 
-        client().admin().indices().preparePutMapping("foobar", "test", "test123", "foobarbaz", "bazbar")
-                .setType("type").setSource("field", "type=string").get();
+        client().admin().indices().preparePutMapping("foobar", "test", "test123", "foobarbaz", "bazbar").setType("type").setSource("field", "type=string").get();
         waitForConcreteMappingsOnAll("foobar", "type", "field");
         waitForConcreteMappingsOnAll("test", "type", "field");
         waitForConcreteMappingsOnAll("test123", "type", "field");
@@ -608,15 +586,10 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         existsResponse = admin().indices().prepareAliasesExist("alias*").get();
         assertThat(existsResponse.exists(), equalTo(true));
 
-
         logger.info("--> creating aliases [bar, baz, foo]");
-        assertAcked(admin().indices().prepareAliases()
-                .addAlias("bazbar", "bar")
-                .addAlias("bazbar", "bac", termFilter("field", "value"))
-                .addAlias("foobar", "foo"));
+        assertAcked(admin().indices().prepareAliases().addAlias("bazbar", "bar").addAlias("bazbar", "bac", termFilter("field", "value")).addAlias("foobar", "foo"));
 
-        assertAcked(admin().indices().prepareAliases()
-                .addAliasAction(new AliasAction(AliasAction.Type.ADD, "foobar", "bac").routing("bla")));
+        assertAcked(admin().indices().prepareAliases().addAliasAction(new AliasAction(AliasAction.Type.ADD, "foobar", "bac").routing("bla")));
 
         logger.info("--> getting bar and baz for index bazbar");
         getResponse = admin().indices().prepareGetAliases("bar", "bac").addIndices("bazbar").get();
@@ -635,8 +608,7 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         assertThat(getResponse.getAliases().get("bazbar").get(1).getFilter(), nullValue());
         assertThat(getResponse.getAliases().get("bazbar").get(1).getIndexRouting(), nullValue());
         assertThat(getResponse.getAliases().get("bazbar").get(1).getSearchRouting(), nullValue());
-        existsResponse = admin().indices().prepareAliasesExist("bar", "bac")
-                .addIndices("bazbar").get();
+        existsResponse = admin().indices().prepareAliasesExist("bar", "bac").addIndices("bazbar").get();
         assertThat(existsResponse.exists(), equalTo(true));
 
         logger.info("--> getting *b* for index baz*");
@@ -656,8 +628,7 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         assertThat(getResponse.getAliases().get("bazbar").get(1).getFilter(), nullValue());
         assertThat(getResponse.getAliases().get("bazbar").get(1).getIndexRouting(), nullValue());
         assertThat(getResponse.getAliases().get("bazbar").get(1).getSearchRouting(), nullValue());
-        existsResponse = admin().indices().prepareAliasesExist("*b*")
-                .addIndices("baz*").get();
+        existsResponse = admin().indices().prepareAliasesExist("*b*").addIndices("baz*").get();
         assertThat(existsResponse.exists(), equalTo(true));
 
         logger.info("--> getting *b* for index *bar");
@@ -682,8 +653,7 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         assertThat(getResponse.getAliases().get("foobar").get(0).getFilter(), nullValue());
         assertThat(getResponse.getAliases().get("foobar").get(0).getIndexRouting(), equalTo("bla"));
         assertThat(getResponse.getAliases().get("foobar").get(0).getSearchRouting(), equalTo("bla"));
-        existsResponse = admin().indices().prepareAliasesExist("b*")
-                .addIndices("*bar").get();
+        existsResponse = admin().indices().prepareAliasesExist("b*").addIndices("*bar").get();
         assertThat(existsResponse.exists(), equalTo(true));
 
         logger.info("--> getting f* for index *bar");
@@ -695,8 +665,7 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         assertThat(getResponse.getAliases().get("foobar").get(0).getFilter(), nullValue());
         assertThat(getResponse.getAliases().get("foobar").get(0).getIndexRouting(), nullValue());
         assertThat(getResponse.getAliases().get("foobar").get(0).getSearchRouting(), nullValue());
-        existsResponse = admin().indices().prepareAliasesExist("f*")
-                .addIndices("*bar").get();
+        existsResponse = admin().indices().prepareAliasesExist("f*").addIndices("*bar").get();
         assertThat(existsResponse.exists(), equalTo(true));
 
         // alias at work
@@ -710,8 +679,7 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         assertThat(getResponse.getAliases().get("foobar").get(0).getFilter(), nullValue());
         assertThat(getResponse.getAliases().get("foobar").get(0).getIndexRouting(), nullValue());
         assertThat(getResponse.getAliases().get("foobar").get(0).getSearchRouting(), nullValue());
-        existsResponse = admin().indices().prepareAliasesExist("foo")
-                .addIndices("*bac").get();
+        existsResponse = admin().indices().prepareAliasesExist("foo").addIndices("*bac").get();
         assertThat(existsResponse.exists(), equalTo(true));
 
         logger.info("--> getting foo for index foobar");
@@ -723,8 +691,7 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         assertThat(getResponse.getAliases().get("foobar").get(0).getFilter(), nullValue());
         assertThat(getResponse.getAliases().get("foobar").get(0).getIndexRouting(), nullValue());
         assertThat(getResponse.getAliases().get("foobar").get(0).getSearchRouting(), nullValue());
-        existsResponse = admin().indices().prepareAliasesExist("foo")
-                .addIndices("foobar").get();
+        existsResponse = admin().indices().prepareAliasesExist("foo").addIndices("foobar").get();
         assertThat(existsResponse.exists(), equalTo(true));
 
         // alias at work again
@@ -734,12 +701,10 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         assertThat(getResponse.getAliases().size(), equalTo(2));
         assertThat(getResponse.getAliases().get("foobar").size(), equalTo(4));
         assertThat(getResponse.getAliases().get("bazbar").size(), equalTo(2));
-        existsResponse = admin().indices().prepareAliasesExist("*")
-                .addIndices("*bac").get();
+        existsResponse = admin().indices().prepareAliasesExist("*").addIndices("*bac").get();
         assertThat(existsResponse.exists(), equalTo(true));
 
-        assertAcked(admin().indices().prepareAliases()
-                .removeAlias("foobar", "foo"));
+        assertAcked(admin().indices().prepareAliases().removeAlias("foobar", "foo"));
 
         getResponse = admin().indices().prepareGetAliases("foo").addIndices("foobar").get();
         assertThat(getResponse.getAliases().isEmpty(), equalTo(true));
@@ -753,8 +718,7 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
             assertAcked(admin().indices().prepareAliases().addAliasAction(AliasAction.newAddAliasAction(null, "alias1")));
             fail("create alias should have failed due to null index");
         } catch (ElasticsearchIllegalArgumentException e) {
-            assertThat("Exception text does not contain \"Alias action [add]: [index] may not be empty string\"",
-                    e.getMessage(), containsString("Alias action [add]: [index] may not be empty string"));
+            assertThat("Exception text does not contain \"Alias action [add]: [index] may not be empty string\"", e.getMessage(), containsString("Alias action [add]: [index] may not be empty string"));
         }
     }
 
@@ -770,8 +734,7 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
             assertAcked(admin().indices().prepareAliases().addAlias((String) null, "empty-alias"));
             fail("create alias should have failed due to null index");
         } catch (ElasticsearchIllegalArgumentException e) {
-            assertThat("Exception text does not contain \"Alias action [add]: [index] may not be empty string\"",
-                    e.getMessage(), containsString("Alias action [add]: [index] may not be empty string"));
+            assertThat("Exception text does not contain \"Alias action [add]: [index] may not be empty string\"", e.getMessage(), containsString("Alias action [add]: [index] may not be empty string"));
         }
     }
 
@@ -870,37 +833,21 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testCreateIndexWithAliases() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type", "field", "type=string")
-                .addAlias(new Alias("alias1"))
-                .addAlias(new Alias("alias2").filter(FilterBuilders.missingFilter("field")))
-                .addAlias(new Alias("alias3").indexRouting("index").searchRouting("search")));
+        assertAcked(prepareCreate("test").addMapping("type", "field", "type=string").addAlias(new Alias("alias1")).addAlias(new Alias("alias2").filter(FilterBuilders.missingFilter("field"))).addAlias(new Alias("alias3").indexRouting("index").searchRouting("search")));
 
         checkAliases();
     }
 
     @Test
     public void testCreateIndexWithAliasesInSource() throws Exception {
-        assertAcked(prepareCreate("test").setSource("{\n" +
-                "    \"aliases\" : {\n" +
-                "        \"alias1\" : {},\n" +
-                "        \"alias2\" : {\"filter\" : {\"match_all\": {}}},\n" +
-                "        \"alias3\" : { \"index_routing\" : \"index\", \"search_routing\" : \"search\"}\n" +
-                "    }\n" +
-                "}"));
+        assertAcked(prepareCreate("test").setSource("{\n" + "    \"aliases\" : {\n" + "        \"alias1\" : {},\n" + "        \"alias2\" : {\"filter\" : {\"match_all\": {}}},\n" + "        \"alias3\" : { \"index_routing\" : \"index\", \"search_routing\" : \"search\"}\n" + "    }\n" + "}"));
 
         checkAliases();
     }
 
     @Test
     public void testCreateIndexWithAliasesSource() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type", "field", "type=string")
-                .setAliases("{\n" +
-                        "        \"alias1\" : {},\n" +
-                        "        \"alias2\" : {\"filter\" : {\"term\": {\"field\":\"value\"}}},\n" +
-                        "        \"alias3\" : { \"index_routing\" : \"index\", \"search_routing\" : \"search\"}\n" +
-                        "}"));
+        assertAcked(prepareCreate("test").addMapping("type", "field", "type=string").setAliases("{\n" + "        \"alias1\" : {},\n" + "        \"alias2\" : {\"filter\" : {\"term\": {\"field\":\"value\"}}},\n" + "        \"alias3\" : { \"index_routing\" : \"index\", \"search_routing\" : \"search\"}\n" + "}"));
 
         checkAliases();
     }
@@ -933,26 +880,21 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
         assertAcked(prepareCreate("test"));
 
         try {
-            client().admin().indices().prepareAliases()
-                    .addAlias("test", "a", FilterBuilders.termFilter("field1", "term"))
-                    .get();
+            client().admin().indices().prepareAliases().addAlias("test", "a", FilterBuilders.termFilter("field1", "term")).get();
             fail();
         } catch (ElasticsearchIllegalArgumentException e) {
             assertThat(e.getRootCause(), instanceOf(QueryParsingException.class));
         }
 
         try {
-            client().admin().indices().prepareAliases()
-                    .addAlias("test", "a", FilterBuilders.rangeFilter("field2").from(0).to(1))
-                    .get();
+            client().admin().indices().prepareAliases().addAlias("test", "a", FilterBuilders.rangeFilter("field2").from(0).to(1)).get();
             fail();
         } catch (ElasticsearchIllegalArgumentException e) {
             assertThat(e.getRootCause(), instanceOf(QueryParsingException.class));
         }
 
-        client().admin().indices().prepareAliases()
-                .addAlias("test", "a", FilterBuilders.matchAllFilter()) // <-- no fail, b/c no field mentioned
-                .get();
+        client().admin().indices().prepareAliases().addAlias("test", "a", FilterBuilders.matchAllFilter()) // <-- no fail, b/c no field mentioned
+                        .get();
     }
 
     @Test
@@ -977,10 +919,7 @@ public class IndexAliasesTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testAliasesFilterWithHasChildQuery() throws Exception {
-        assertAcked(prepareCreate("my-index")
-                        .addMapping("parent")
-                        .addMapping("child", "_parent", "type=parent")
-        );
+        assertAcked(prepareCreate("my-index").addMapping("parent").addMapping("child", "_parent", "type=parent"));
         assertAcked(admin().indices().prepareAliases().addAlias("my-index", "filter1", hasChildFilter("child", matchAllQuery())));
         assertAcked(admin().indices().prepareAliases().addAlias("my-index", "filter2", hasParentFilter("child", matchAllQuery())));
     }

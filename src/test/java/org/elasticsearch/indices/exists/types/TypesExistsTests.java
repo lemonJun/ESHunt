@@ -40,16 +40,10 @@ public class TypesExistsTests extends ElasticsearchIntegrationTest {
     @Test
     public void testSimple() throws Exception {
         Client client = client();
-        client.admin().indices().prepareCreate("test1")
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1").endObject().endObject())
-                .addMapping("type2", jsonBuilder().startObject().startObject("type2").endObject().endObject())
-                .execute().actionGet();
-        client.admin().indices().prepareCreate("test2")
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1").endObject().endObject())
-                .execute().actionGet();
+        client.admin().indices().prepareCreate("test1").addMapping("type1", jsonBuilder().startObject().startObject("type1").endObject().endObject()).addMapping("type2", jsonBuilder().startObject().startObject("type2").endObject().endObject()).execute().actionGet();
+        client.admin().indices().prepareCreate("test2").addMapping("type1", jsonBuilder().startObject().startObject("type1").endObject().endObject()).execute().actionGet();
         client.admin().indices().prepareAliases().addAlias("test1", "alias1").execute().actionGet();
-        ClusterHealthResponse healthResponse = client.admin().cluster()
-                .prepareHealth("test1", "test2").setWaitForYellowStatus().execute().actionGet();
+        ClusterHealthResponse healthResponse = client.admin().cluster().prepareHealth("test1", "test2").setWaitForYellowStatus().execute().actionGet();
         assertThat(healthResponse.isTimedOut(), equalTo(false));
 
         TypesExistsResponse response = client.admin().indices().prepareTypesExists("test1").setTypes("type1").execute().actionGet();
@@ -61,11 +55,13 @@ public class TypesExistsTests extends ElasticsearchIntegrationTest {
         try {
             client.admin().indices().prepareTypesExists("notExist").setTypes("type1").execute().actionGet();
             fail("Exception should have been thrown");
-        } catch (IndexMissingException e) {}
+        } catch (IndexMissingException e) {
+        }
         try {
             client.admin().indices().prepareTypesExists("notExist").setTypes("type0").execute().actionGet();
             fail("Exception should have been thrown");
-        } catch (IndexMissingException e) {}
+        } catch (IndexMissingException e) {
+        }
         response = client.admin().indices().prepareTypesExists("alias1").setTypes("type1").execute().actionGet();
         assertThat(response.isExists(), equalTo(true));
         response = client.admin().indices().prepareTypesExists("*").setTypes("type1").execute().actionGet();

@@ -17,6 +17,7 @@
  * under the License.
  */
 package org.elasticsearch.common.lucene;
+
 import com.carrotsearch.randomizedtesting.RandomizedTest;
 import org.apache.lucene.analysis.MockAnalyzer;
 import org.apache.lucene.document.Document;
@@ -46,7 +47,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  */
 public class LuceneTest extends ElasticsearchLuceneTestCase {
-
 
     /*
      * simple test that ensures that we bump the version on Upgrade
@@ -321,25 +321,25 @@ public class LuceneTest extends ElasticsearchLuceneTestCase {
             TestUtil.unzip(backwardsIndex, indexDir);
             File luceneIndex = new File(indexDir, "data/bwc_index_0.20.6/nodes/0/indices/index-0.20.6/0/index");
             try (Directory dir = newFSDirectory(luceneIndex)) {
-                    SegmentInfos before = Lucene.readSegmentInfos(dir);
-                    assertTrue(before.getUserData().containsKey(Translog.TRANSLOG_ID_KEY));
-                    String key = before.getUserData().get(Translog.TRANSLOG_ID_KEY);
-                    assertNotNull(key);
+                SegmentInfos before = Lucene.readSegmentInfos(dir);
+                assertTrue(before.getUserData().containsKey(Translog.TRANSLOG_ID_KEY));
+                String key = before.getUserData().get(Translog.TRANSLOG_ID_KEY);
+                assertNotNull(key);
 
-                    for (int i = 0; i < 2; i++) {
-                        assertTrue(Lucene.indexNeeds3xUpgrading(dir));
-                    }
-
-                    Lucene.upgradeLucene3xSegmentsMetadata(dir);
-
-                    for (int i = 0; i < 2; i++) {
-                        assertFalse(Lucene.indexNeeds3xUpgrading(dir));
-                    }
-
-                    SegmentInfos after = Lucene.readSegmentInfos(dir);
-                    assertEquals(after.getUserData(), before.getUserData());
-                    assertEquals(key, after.getUserData().get(Translog.TRANSLOG_ID_KEY));
+                for (int i = 0; i < 2; i++) {
+                    assertTrue(Lucene.indexNeeds3xUpgrading(dir));
                 }
+
+                Lucene.upgradeLucene3xSegmentsMetadata(dir);
+
+                for (int i = 0; i < 2; i++) {
+                    assertFalse(Lucene.indexNeeds3xUpgrading(dir));
+                }
+
+                SegmentInfos after = Lucene.readSegmentInfos(dir);
+                assertEquals(after.getUserData(), before.getUserData());
+                assertEquals(key, after.getUserData().get(Translog.TRANSLOG_ID_KEY));
+            }
         } finally {
             OLD_FORMAT_IMPERSONATION_IS_ACTIVE = saveOldFormatImpersonationIsActive;
         }

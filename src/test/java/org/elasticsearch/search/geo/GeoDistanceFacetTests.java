@@ -45,72 +45,35 @@ public class GeoDistanceFacetTests extends ElasticsearchIntegrationTest {
         } catch (Exception e) {
             // ignore
         }
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("location").field("type", "geo_point").field("lat_lon", true).endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_point").field("lat_lon", true).endObject().endObject().endObject().endObject().string();
         client().admin().indices().prepareCreate("test").addMapping("type1", mapping).execute().actionGet();
         client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().execute().actionGet();
 
         // to NY: 0
-        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject()
-                .field("name", "New York")
-                .field("num", 1)
-                .startObject("location").field("lat", 40.7143528).field("lon", -74.0059731).endObject()
-                .endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject().field("name", "New York").field("num", 1).startObject("location").field("lat", 40.7143528).field("lon", -74.0059731).endObject().endObject()).execute().actionGet();
 
         // to NY: 5.286 km
-        client().prepareIndex("test", "type1", "2").setSource(jsonBuilder().startObject()
-                .field("name", "Times Square")
-                .field("num", 2)
-                .startObject("location").field("lat", 40.759011).field("lon", -73.9844722).endObject()
-                .endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "2").setSource(jsonBuilder().startObject().field("name", "Times Square").field("num", 2).startObject("location").field("lat", 40.759011).field("lon", -73.9844722).endObject().endObject()).execute().actionGet();
 
         // to NY: 0.4621 km
-        client().prepareIndex("test", "type1", "3").setSource(jsonBuilder().startObject()
-                .field("name", "Tribeca")
-                .field("num", 3)
-                .startObject("location").field("lat", 40.718266).field("lon", -74.007819).endObject()
-                .endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "3").setSource(jsonBuilder().startObject().field("name", "Tribeca").field("num", 3).startObject("location").field("lat", 40.718266).field("lon", -74.007819).endObject().endObject()).execute().actionGet();
 
         // to NY: 1.055 km
-        client().prepareIndex("test", "type1", "4").setSource(jsonBuilder().startObject()
-                .field("name", "Wall Street")
-                .field("num", 4)
-                .startObject("location").field("lat", 40.7051157).field("lon", -74.0088305).endObject()
-                .endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "4").setSource(jsonBuilder().startObject().field("name", "Wall Street").field("num", 4).startObject("location").field("lat", 40.7051157).field("lon", -74.0088305).endObject().endObject()).execute().actionGet();
 
         // to NY: 1.258 km
-        client().prepareIndex("test", "type1", "5").setSource(jsonBuilder().startObject()
-                .field("name", "Soho")
-                .field("num", 5)
-                .startObject("location").field("lat", 40.7247222).field("lon", -74).endObject()
-                .endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "5").setSource(jsonBuilder().startObject().field("name", "Soho").field("num", 5).startObject("location").field("lat", 40.7247222).field("lon", -74).endObject().endObject()).execute().actionGet();
 
         // to NY: 2.029 km
-        client().prepareIndex("test", "type1", "6").setSource(jsonBuilder().startObject()
-                .field("name", "Greenwich Village")
-                .field("num", 6)
-                .startObject("location").field("lat", 40.731033).field("lon", -73.9962255).endObject()
-                .endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "6").setSource(jsonBuilder().startObject().field("name", "Greenwich Village").field("num", 6).startObject("location").field("lat", 40.731033).field("lon", -73.9962255).endObject().endObject()).execute().actionGet();
 
         // to NY: 8.572 km
-        client().prepareIndex("test", "type1", "7").setSource(jsonBuilder().startObject()
-                .field("name", "Brooklyn")
-                .field("num", 7)
-                .startObject("location").field("lat", 40.65).field("lon", -73.95).endObject()
-                .endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "7").setSource(jsonBuilder().startObject().field("name", "Brooklyn").field("num", 7).startObject("location").field("lat", 40.65).field("lon", -73.95).endObject().endObject()).execute().actionGet();
 
         client().admin().indices().prepareRefresh().execute().actionGet();
 
         SearchResponse searchResponse = client().prepareSearch() // from NY
-                .setQuery(matchAllQuery())
-                .addFacet(geoDistanceFacet("geo1").field("location").point(40.7143528, -74.0059731).unit(DistanceUnit.KILOMETERS)
-                        .addUnboundedFrom(2)
-                        .addRange(0, 1)
-                        .addRange(0.5, 2.5)
-                        .addUnboundedTo(1)
-                )
-                .execute().actionGet();
+                        .setQuery(matchAllQuery()).addFacet(geoDistanceFacet("geo1").field("location").point(40.7143528, -74.0059731).unit(DistanceUnit.KILOMETERS).addUnboundedFrom(2).addRange(0, 1).addRange(0.5, 2.5).addUnboundedTo(1)).execute().actionGet();
 
         assertThat(searchResponse.getHits().totalHits(), equalTo(7l));
         GeoDistanceFacet facet = searchResponse.getFacets().facet("geo1");
@@ -134,16 +97,8 @@ public class GeoDistanceFacetTests extends ElasticsearchIntegrationTest {
         assertThat(facet.getEntries().get(3).getCount(), equalTo(5l));
         assertThat(facet.getEntries().get(3).getTotal(), not(closeTo(0, 0.00001)));
 
-
         searchResponse = client().prepareSearch() // from NY
-                .setQuery(matchAllQuery())
-                .addFacet(geoDistanceFacet("geo1").field("location").point(40.7143528, -74.0059731).unit(DistanceUnit.KILOMETERS).valueField("num")
-                        .addUnboundedFrom(2)
-                        .addRange(0, 1)
-                        .addRange(0.5, 2.5)
-                        .addUnboundedTo(1)
-                )
-                .execute().actionGet();
+                        .setQuery(matchAllQuery()).addFacet(geoDistanceFacet("geo1").field("location").point(40.7143528, -74.0059731).unit(DistanceUnit.KILOMETERS).valueField("num").addUnboundedFrom(2).addRange(0, 1).addRange(0.5, 2.5).addUnboundedTo(1)).execute().actionGet();
 
         assertThat(searchResponse.getHits().totalHits(), equalTo(7l));
         facet = searchResponse.getFacets().facet("geo1");
@@ -168,14 +123,7 @@ public class GeoDistanceFacetTests extends ElasticsearchIntegrationTest {
         assertThat(facet.getEntries().get(3).getTotal(), closeTo(24, 0.00001));
 
         searchResponse = client().prepareSearch() // from NY
-                .setQuery(matchAllQuery())
-                .addFacet(geoDistanceFacet("geo1").field("location").point(40.7143528, -74.0059731).unit(DistanceUnit.KILOMETERS).valueScript("doc['num'].value")
-                        .addUnboundedFrom(2)
-                        .addRange(0, 1)
-                        .addRange(0.5, 2.5)
-                        .addUnboundedTo(1)
-                )
-                .execute().actionGet();
+                        .setQuery(matchAllQuery()).addFacet(geoDistanceFacet("geo1").field("location").point(40.7143528, -74.0059731).unit(DistanceUnit.KILOMETERS).valueScript("doc['num'].value").addUnboundedFrom(2).addRange(0, 1).addRange(0.5, 2.5).addUnboundedTo(1)).execute().actionGet();
 
         assertThat(searchResponse.getHits().totalHits(), equalTo(7l));
         facet = searchResponse.getFacets().facet("geo1");
@@ -207,42 +155,26 @@ public class GeoDistanceFacetTests extends ElasticsearchIntegrationTest {
         } catch (Exception e) {
             // ignore
         }
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("location").field("type", "geo_point").field("lat_lon", true).endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_point").field("lat_lon", true).endObject().endObject().endObject().endObject().string();
         client().admin().indices().prepareCreate("test").addMapping("type1", mapping).execute().actionGet();
         client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().execute().actionGet();
 
-        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject()
-                .field("num", 1)
-                .startArray("location")
+        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject().field("num", 1).startArray("location")
                         // to NY: 0
-                .startObject().field("lat", 40.7143528).field("lon", -74.0059731).endObject()
+                        .startObject().field("lat", 40.7143528).field("lon", -74.0059731).endObject()
                         // to NY: 5.286 km
-                .startObject().field("lat", 40.759011).field("lon", -73.9844722).endObject()
-                .endArray()
-                .endObject()).execute().actionGet();
+                        .startObject().field("lat", 40.759011).field("lon", -73.9844722).endObject().endArray().endObject()).execute().actionGet();
 
-        client().prepareIndex("test", "type1", "3").setSource(jsonBuilder().startObject()
-                .field("num", 3)
-                .startArray("location")
+        client().prepareIndex("test", "type1", "3").setSource(jsonBuilder().startObject().field("num", 3).startArray("location")
                         // to NY: 0.4621 km
-                .startObject().field("lat", 40.718266).field("lon", -74.007819).endObject()
+                        .startObject().field("lat", 40.718266).field("lon", -74.007819).endObject()
                         // to NY: 1.055 km
-                .startObject().field("lat", 40.7051157).field("lon", -74.0088305).endObject()
-                .endArray()
-                .endObject()).execute().actionGet();
-
+                        .startObject().field("lat", 40.7051157).field("lon", -74.0088305).endObject().endArray().endObject()).execute().actionGet();
 
         client().admin().indices().prepareRefresh().execute().actionGet();
 
         SearchResponse searchResponse = client().prepareSearch() // from NY
-                .setQuery(matchAllQuery())
-                .addFacet(geoDistanceFacet("geo1").field("location").point(40.7143528, -74.0059731).unit(DistanceUnit.KILOMETERS)
-                        .addRange(0, 2)
-                        .addRange(2, 10)
-                )
-                .execute().actionGet();
+                        .setQuery(matchAllQuery()).addFacet(geoDistanceFacet("geo1").field("location").point(40.7143528, -74.0059731).unit(DistanceUnit.KILOMETERS).addRange(0, 2).addRange(2, 10)).execute().actionGet();
 
         assertNoFailures(searchResponse);
 

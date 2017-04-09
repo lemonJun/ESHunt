@@ -37,7 +37,6 @@ import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertAcke
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertNoFailures;
 import static org.hamcrest.Matchers.*;
 
-
 public class RandomScoreFunctionTests extends ElasticsearchIntegrationTest {
 
     public void testConsistentHitsWithSameSeed() throws Exception {
@@ -60,11 +59,8 @@ public class RandomScoreFunctionTests extends ElasticsearchIntegrationTest {
             int innerIters = scaledRandomIntBetween(2, 5);
             SearchHit[] hits = null;
             for (int i = 0; i < innerIters; i++) {
-                SearchResponse searchResponse = client().prepareSearch()
-                        .setSize(docCount) // get all docs otherwise we are prone to tie-breaking
-                        .setPreference(preference)
-                        .setQuery(functionScoreQuery(matchAllQuery(), randomFunction(seed)))
-                        .execute().actionGet();
+                SearchResponse searchResponse = client().prepareSearch().setSize(docCount) // get all docs otherwise we are prone to tie-breaking
+                                .setPreference(preference).setQuery(functionScoreQuery(matchAllQuery(), randomFunction(seed))).execute().actionGet();
                 assertThat("Failures " + Arrays.toString(searchResponse.getShardFailures()), searchResponse.getShardFailures().length, CoreMatchers.equalTo(0));
                 final int hitCount = searchResponse.getHits().getHits().length;
                 final SearchHit[] currentHits = searchResponse.getHits().getHits();
@@ -91,7 +87,7 @@ public class RandomScoreFunctionTests extends ElasticsearchIntegrationTest {
                 // randomly change some docs to get them in different segments
                 int numDocsToChange = randomIntBetween(20, 50);
                 while (numDocsToChange > 0) {
-                    int doc = randomInt(docCount-1);// watch out this is inclusive the max values!
+                    int doc = randomInt(docCount - 1);// watch out this is inclusive the max values!
                     index("test", "type", "" + doc, jsonBuilder().startObject().endObject());
                     --numDocsToChange;
                 }
@@ -102,8 +98,7 @@ public class RandomScoreFunctionTests extends ElasticsearchIntegrationTest {
     }
 
     public void testScoreAccessWithinScript() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type", "body", "type=string", "index", "type=" + randomFrom(new String[]{"short", "float", "long", "integer", "double"})));
+        assertAcked(prepareCreate("test").addMapping("type", "body", "type=string", "index", "type=" + randomFrom(new String[] { "short", "float", "long", "integer", "double" })));
         ensureYellow();
 
         int docCount = randomIntBetween(100, 200);
@@ -113,55 +108,31 @@ public class RandomScoreFunctionTests extends ElasticsearchIntegrationTest {
         refresh();
 
         // Test for accessing _score
-        SearchResponse resp = client().prepareSearch("test")
-                .setQuery(functionScoreQuery(matchQuery("body", "foo"))
-                        .add(fieldValueFactorFunction("index").factor(2))
-                        .add(scriptFunction("log(doc['index'].value + (factor * _score))").param("factor", randomIntBetween(2, 4))))
-                .get();
+        SearchResponse resp = client().prepareSearch("test").setQuery(functionScoreQuery(matchQuery("body", "foo")).add(fieldValueFactorFunction("index").factor(2)).add(scriptFunction("log(doc['index'].value + (factor * _score))").param("factor", randomIntBetween(2, 4)))).get();
         assertNoFailures(resp);
         SearchHit firstHit = resp.getHits().getAt(0);
         assertThat(firstHit.getScore(), greaterThan(1f));
 
         // Test for accessing _score.intValue()
-        resp = client().prepareSearch("test")
-                .setQuery(functionScoreQuery(matchQuery("body", "foo"))
-                        .add(fieldValueFactorFunction("index").factor(2))
-                        .add(scriptFunction("log(doc['index'].value + (factor * _score.intValue()))")
-                                .param("factor", randomIntBetween(2, 4))))
-                .get();
+        resp = client().prepareSearch("test").setQuery(functionScoreQuery(matchQuery("body", "foo")).add(fieldValueFactorFunction("index").factor(2)).add(scriptFunction("log(doc['index'].value + (factor * _score.intValue()))").param("factor", randomIntBetween(2, 4)))).get();
         assertNoFailures(resp);
         firstHit = resp.getHits().getAt(0);
         assertThat(firstHit.getScore(), greaterThan(1f));
 
         // Test for accessing _score.longValue()
-        resp = client().prepareSearch("test")
-                .setQuery(functionScoreQuery(matchQuery("body", "foo"))
-                        .add(fieldValueFactorFunction("index").factor(2))
-                        .add(scriptFunction("log(doc['index'].value + (factor * _score.longValue()))")
-                                .param("factor", randomIntBetween(2, 4))))
-                .get();
+        resp = client().prepareSearch("test").setQuery(functionScoreQuery(matchQuery("body", "foo")).add(fieldValueFactorFunction("index").factor(2)).add(scriptFunction("log(doc['index'].value + (factor * _score.longValue()))").param("factor", randomIntBetween(2, 4)))).get();
         assertNoFailures(resp);
         firstHit = resp.getHits().getAt(0);
         assertThat(firstHit.getScore(), greaterThan(1f));
 
         // Test for accessing _score.floatValue()
-        resp = client().prepareSearch("test")
-                .setQuery(functionScoreQuery(matchQuery("body", "foo"))
-                        .add(fieldValueFactorFunction("index").factor(2))
-                        .add(scriptFunction("log(doc['index'].value + (factor * _score.floatValue()))")
-                                .param("factor", randomIntBetween(2, 4))))
-                .get();
+        resp = client().prepareSearch("test").setQuery(functionScoreQuery(matchQuery("body", "foo")).add(fieldValueFactorFunction("index").factor(2)).add(scriptFunction("log(doc['index'].value + (factor * _score.floatValue()))").param("factor", randomIntBetween(2, 4)))).get();
         assertNoFailures(resp);
         firstHit = resp.getHits().getAt(0);
         assertThat(firstHit.getScore(), greaterThan(1f));
 
         // Test for accessing _score.doubleValue()
-        resp = client().prepareSearch("test")
-                .setQuery(functionScoreQuery(matchQuery("body", "foo"))
-                        .add(fieldValueFactorFunction("index").factor(2))
-                        .add(scriptFunction("log(doc['index'].value + (factor * _score.doubleValue()))")
-                                .param("factor", randomIntBetween(2, 4))))
-                .get();
+        resp = client().prepareSearch("test").setQuery(functionScoreQuery(matchQuery("body", "foo")).add(fieldValueFactorFunction("index").factor(2)).add(scriptFunction("log(doc['index'].value + (factor * _score.doubleValue()))").param("factor", randomIntBetween(2, 4)))).get();
         assertNoFailures(resp);
         firstHit = resp.getHits().getAt(0);
         assertThat(firstHit.getScore(), greaterThan(1f));
@@ -176,10 +147,7 @@ public class RandomScoreFunctionTests extends ElasticsearchIntegrationTest {
 
         int seed = 12345678;
 
-        SearchResponse resp = client().prepareSearch("test")
-            .setQuery(functionScoreQuery(matchAllQuery(), randomFunction(seed)))
-            .setExplain(true)
-            .get();
+        SearchResponse resp = client().prepareSearch("test").setQuery(functionScoreQuery(matchAllQuery(), randomFunction(seed))).setExplain(true).get();
         assertNoFailures(resp);
         assertEquals(1, resp.getHits().totalHits());
         SearchHit firstHit = resp.getHits().getAt(0);
@@ -190,9 +158,7 @@ public class RandomScoreFunctionTests extends ElasticsearchIntegrationTest {
         createIndex("test");
         ensureGreen();
 
-        SearchResponse resp = client().prepareSearch("test")
-            .setQuery(functionScoreQuery(matchAllQuery(), randomFunction(1234)))
-            .get();
+        SearchResponse resp = client().prepareSearch("test").setQuery(functionScoreQuery(matchAllQuery(), randomFunction(1234))).get();
         assertNoFailures(resp);
         assertEquals(0, resp.getHits().totalHits());
     }
@@ -211,10 +177,7 @@ public class RandomScoreFunctionTests extends ElasticsearchIntegrationTest {
         int iters = scaledRandomIntBetween(10, 20);
         for (int i = 0; i < iters; ++i) {
             int seed = randomInt();
-            SearchResponse searchResponse = client().prepareSearch()
-                .setQuery(functionScoreQuery(matchAllQuery(), randomFunction(seed)))
-                .setSize(docCount)
-                .execute().actionGet();
+            SearchResponse searchResponse = client().prepareSearch().setQuery(functionScoreQuery(matchAllQuery(), randomFunction(seed))).setSize(docCount).execute().actionGet();
 
             assertNoFailures(searchResponse);
             for (SearchHit hit : searchResponse.getHits().getHits()) {
@@ -222,7 +185,7 @@ public class RandomScoreFunctionTests extends ElasticsearchIntegrationTest {
             }
         }
     }
-    
+
     public void testSeeds() throws Exception {
         createIndex("test");
         ensureGreen();
@@ -232,20 +195,14 @@ public class RandomScoreFunctionTests extends ElasticsearchIntegrationTest {
         }
         flushAndRefresh();
 
-        assertNoFailures(client().prepareSearch()
-            .setSize(docCount) // get all docs otherwise we are prone to tie-breaking
-            .setQuery(functionScoreQuery(matchAllQuery(), randomFunction(randomInt())))
-            .execute().actionGet());
+        assertNoFailures(client().prepareSearch().setSize(docCount) // get all docs otherwise we are prone to tie-breaking
+                        .setQuery(functionScoreQuery(matchAllQuery(), randomFunction(randomInt()))).execute().actionGet());
 
-        assertNoFailures(client().prepareSearch()
-            .setSize(docCount) // get all docs otherwise we are prone to tie-breaking
-            .setQuery(functionScoreQuery(matchAllQuery(), randomFunction(randomLong())))
-            .execute().actionGet());
+        assertNoFailures(client().prepareSearch().setSize(docCount) // get all docs otherwise we are prone to tie-breaking
+                        .setQuery(functionScoreQuery(matchAllQuery(), randomFunction(randomLong()))).execute().actionGet());
 
-        assertNoFailures(client().prepareSearch()
-            .setSize(docCount) // get all docs otherwise we are prone to tie-breaking
-            .setQuery(functionScoreQuery(matchAllQuery(), randomFunction(randomRealisticUnicodeOfLengthBetween(10, 20))))
-            .execute().actionGet());
+        assertNoFailures(client().prepareSearch().setSize(docCount) // get all docs otherwise we are prone to tie-breaking
+                        .setQuery(functionScoreQuery(matchAllQuery(), randomFunction(randomRealisticUnicodeOfLengthBetween(10, 20)))).execute().actionGet());
     }
 
     @Ignore
@@ -266,9 +223,7 @@ public class RandomScoreFunctionTests extends ElasticsearchIntegrationTest {
 
         for (int i = 0; i < count; i++) {
 
-            SearchResponse searchResponse = client().prepareSearch()
-                    .setQuery(functionScoreQuery(matchAllQuery(), new RandomScoreFunctionBuilder()))
-                    .execute().actionGet();
+            SearchResponse searchResponse = client().prepareSearch().setQuery(functionScoreQuery(matchAllQuery(), new RandomScoreFunctionBuilder())).execute().actionGet();
 
             matrix[Integer.valueOf(searchResponse.getHits().getAt(0).id())]++;
         }

@@ -89,7 +89,7 @@ public class HotThreadsTest extends ElasticsearchIntegrationTest {
                     boolean success = false;
                     try {
                         assertThat(nodeHotThreads, notNullValue());
-                        Map<String,NodeHotThreads> nodesMap = nodeHotThreads.getNodesMap();
+                        Map<String, NodeHotThreads> nodesMap = nodeHotThreads.getNodesMap();
                         assertThat(nodesMap.size(), equalTo(cluster().size()));
                         for (NodeHotThreads ht : nodeHotThreads) {
                             assertNotNull(ht.getHotThreads());
@@ -113,21 +113,10 @@ public class HotThreadsTest extends ElasticsearchIntegrationTest {
                 }
             });
 
-            indexRandom(true,
-                    client().prepareIndex("test", "type1", "1").setSource("field1", "value1"),
-                    client().prepareIndex("test", "type1", "2").setSource("field1", "value2"),
-                    client().prepareIndex("test", "type1", "3").setSource("field1", "value3"));
+            indexRandom(true, client().prepareIndex("test", "type1", "1").setSource("field1", "value1"), client().prepareIndex("test", "type1", "2").setSource("field1", "value2"), client().prepareIndex("test", "type1", "3").setSource("field1", "value3"));
             ensureSearchable();
-            while(latch.getCount() > 0) {
-                assertHitCount(
-                        client().prepareSearch()
-                                .setQuery(matchAllQuery())
-                                .setPostFilter(
-                                        andFilter(
-                                                queryFilter(matchAllQuery()),
-                                                notFilter(andFilter(queryFilter(termQuery("field1", "value1")),
-                                                        queryFilter(termQuery("field1", "value2")))))).get(),
-                        3l);
+            while (latch.getCount() > 0) {
+                assertHitCount(client().prepareSearch().setQuery(matchAllQuery()).setPostFilter(andFilter(queryFilter(matchAllQuery()), notFilter(andFilter(queryFilter(termQuery("field1", "value1")), queryFilter(termQuery("field1", "value2")))))).get(), 3l);
             }
             latch.await();
             assertThat(hasErrors.get(), is(false));

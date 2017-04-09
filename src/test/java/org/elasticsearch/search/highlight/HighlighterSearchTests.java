@@ -68,25 +68,13 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         // test the kibana case with * as fieldname that will try highlight all fields including meta fields
         XContentBuilder mappings = jsonBuilder();
         mappings.startObject();
-        mappings.startObject("type")
-                .startObject("properties")
-                .startObject("text")
-                .field("type", "string")
-                .field("analyzer", "keyword")
-                .field("index_options", "offsets")
-                .field("term_vector", "with_positions_offsets")
-                .endObject()
-                .endObject()
-                .endObject();
+        mappings.startObject("type").startObject("properties").startObject("text").field("type", "string").field("analyzer", "keyword").field("index_options", "offsets").field("term_vector", "with_positions_offsets").endObject().endObject().endObject();
         mappings.endObject();
-        assertAcked(prepareCreate("test")
-                .addMapping("type", mappings));
+        assertAcked(prepareCreate("test").addMapping("type", mappings));
         ensureYellow();
-        client().prepareIndex("test", "type", "1")
-                .setSource(jsonBuilder().startObject().field("text", "text").endObject())
-                .get();
+        client().prepareIndex("test", "type", "1").setSource(jsonBuilder().startObject().field("text", "text").endObject()).get();
         refresh();
-        String highlighter = randomFrom(new String[]{"plain", "postings", "fvh"});
+        String highlighter = randomFrom(new String[] { "plain", "postings", "fvh" });
         SearchResponse search = client().prepareSearch().setQuery(constantScoreQuery(matchQuery("text", "text"))).addHighlightedField(new Field("*").highlighterType(highlighter)).get();
         assertHighlight(search, 0, "text", 0, equalTo("<em>text</em>"));
     }
@@ -95,26 +83,9 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
     public void testPlainHighlighterWithLongUnanalyzedStringTerm() throws IOException {
         XContentBuilder mappings = jsonBuilder();
         mappings.startObject();
-        mappings.startObject("type")
-                .startObject("properties")
-                .startObject("long_text")
-                .field("type", "string")
-                .field("analyzer", "keyword")
-                .field("index_options", "offsets")
-                .field("term_vector", "with_positions_offsets")
-                .field("ignore_above", 1)
-                .endObject()
-                .startObject("text")
-                .field("type", "string")
-                .field("analyzer", "keyword")
-                .field("index_options", "offsets")
-                .field("term_vector", "with_positions_offsets")
-                .endObject()
-                .endObject()
-                .endObject();
+        mappings.startObject("type").startObject("properties").startObject("long_text").field("type", "string").field("analyzer", "keyword").field("index_options", "offsets").field("term_vector", "with_positions_offsets").field("ignore_above", 1).endObject().startObject("text").field("type", "string").field("analyzer", "keyword").field("index_options", "offsets").field("term_vector", "with_positions_offsets").endObject().endObject().endObject();
         mappings.endObject();
-        assertAcked(prepareCreate("test")
-                .addMapping("type", mappings));
+        assertAcked(prepareCreate("test").addMapping("type", mappings));
         ensureYellow();
         // crate a term that is larger than the allowed 32766, index it and then try highlight on it
         // the search request should still succeed
@@ -122,11 +93,9 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         for (int i = 0; i < 32767; i++) {
             builder.append('a');
         }
-        client().prepareIndex("test", "type", "1")
-                .setSource(jsonBuilder().startObject().field("long_text", builder.toString()).field("text", "text").endObject())
-                .get();
+        client().prepareIndex("test", "type", "1").setSource(jsonBuilder().startObject().field("long_text", builder.toString()).field("text", "text").endObject()).get();
         refresh();
-        String highlighter = randomFrom(new String[]{"plain", "postings", "fvh"});
+        String highlighter = randomFrom(new String[] { "plain", "postings", "fvh" });
         SearchResponse search = client().prepareSearch().setQuery(constantScoreQuery(matchQuery("text", "text"))).addHighlightedField(new Field("*").highlighterType(highlighter)).get();
         assertHighlight(search, 0, "text", 0, equalTo("<em>text</em>"));
         search = client().prepareSearch().setQuery(constantScoreQuery(matchQuery("text", "text"))).addHighlightedField(new Field("long_text").highlighterType(highlighter)).get();
@@ -142,34 +111,13 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
     public void testHighlightingWhenFieldsAreNotStoredThereIsNoSource() throws IOException {
         XContentBuilder mappings = jsonBuilder();
         mappings.startObject();
-        mappings.startObject("type")
-                .startObject("_source")
-                .field("enabled", false)
-                .endObject()
-                .startObject("properties")
-                .startObject("unstored_field")
-                .field("index_options", "offsets")
-                .field("term_vector", "with_positions_offsets")
-                .field("type", "string")
-                .field("store", "no")
-                .endObject()
-                .startObject("text")
-                .field("index_options", "offsets")
-                .field("term_vector", "with_positions_offsets")
-                .field("type", "string")
-                .field("store", "yes")
-                .endObject()
-                .endObject()
-                .endObject();
+        mappings.startObject("type").startObject("_source").field("enabled", false).endObject().startObject("properties").startObject("unstored_field").field("index_options", "offsets").field("term_vector", "with_positions_offsets").field("type", "string").field("store", "no").endObject().startObject("text").field("index_options", "offsets").field("term_vector", "with_positions_offsets").field("type", "string").field("store", "yes").endObject().endObject().endObject();
         mappings.endObject();
-        assertAcked(prepareCreate("test")
-                .addMapping("type", mappings));
+        assertAcked(prepareCreate("test").addMapping("type", mappings));
         ensureYellow();
-        client().prepareIndex("test", "type", "1")
-                .setSource(jsonBuilder().startObject().field("unstored_text", "text").field("text", "text").endObject())
-                .get();
+        client().prepareIndex("test", "type", "1").setSource(jsonBuilder().startObject().field("unstored_text", "text").field("text", "text").endObject()).get();
         refresh();
-        String highlighter = randomFrom(new String[]{"plain", "postings", "fvh"});
+        String highlighter = randomFrom(new String[] { "plain", "postings", "fvh" });
         SearchResponse search = client().prepareSearch().setQuery(constantScoreQuery(matchQuery("text", "text"))).addHighlightedField(new Field("*").highlighterType(highlighter)).get();
         assertHighlight(search, 0, "text", 0, equalTo("<em>text</em>"));
         search = client().prepareSearch().setQuery(constantScoreQuery(matchQuery("text", "text"))).addHighlightedField(new Field("unstored_text")).get();
@@ -177,20 +125,16 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertThat(search.getHits().getAt(0).getHighlightFields().size(), equalTo(0));
     }
 
-
     @Test
     // see #3486
     public void testHighTermFrequencyDoc() throws ElasticsearchException, IOException {
-        assertAcked(prepareCreate("test")
-                .addMapping("test", "name", "type=string,term_vector=with_positions_offsets,store=" + (randomBoolean() ? "yes" : "no")));
+        assertAcked(prepareCreate("test").addMapping("test", "name", "type=string,term_vector=with_positions_offsets,store=" + (randomBoolean() ? "yes" : "no")));
         ensureYellow();
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < 6000; i++) {
             builder.append("abc").append(" ");
         }
-        client().prepareIndex("test", "test", "1")
-            .setSource("name", builder.toString())
-            .get();
+        client().prepareIndex("test", "test", "1").setSource("name", builder.toString()).get();
         refresh();
         SearchResponse search = client().prepareSearch().setQuery(constantScoreQuery(matchQuery("name", "abc"))).addHighlightedField("name").get();
         assertHighlight(search, 0, "name", 0, startsWith("<em>abc</em> <em>abc</em> <em>abc</em> <em>abc</em>"));
@@ -198,55 +142,13 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testNgramHighlightingWithBrokenPositions() throws ElasticsearchException, IOException {
-        assertAcked(prepareCreate("test")
-                .addMapping("test", jsonBuilder()
-                        .startObject()
-                        .startObject("test")
-                        .startObject("properties")
-                        .startObject("name")
-                        .startObject("fields")
-                        .startObject("autocomplete")
-                        .field("type", "string")
-                        .field("index_analyzer", "autocomplete")
-                        .field("search_analyzer", "search_autocomplete")
-                        .field("term_vector", "with_positions_offsets")
-                        .endObject()
-                        .startObject("name")
-                        .field("type", "string")
-                        .endObject()
-                        .endObject()
-                        .field("type", "multi_field")
-                        .endObject()
-                        .endObject()
-                        .endObject())
-                .setSettings(settingsBuilder()
-                        .put(indexSettings())
-                        .put("analysis.tokenizer.autocomplete.max_gram", 20)
-                        .put("analysis.tokenizer.autocomplete.min_gram", 1)
-                        .put("analysis.tokenizer.autocomplete.token_chars", "letter,digit")
-                        .put("analysis.tokenizer.autocomplete.type", "nGram")
-                        .put("analysis.filter.wordDelimiter.type", "word_delimiter")
-                        .putArray("analysis.filter.wordDelimiter.type_table",
-                                "& => ALPHANUM", "| => ALPHANUM", "! => ALPHANUM",
-                                "? => ALPHANUM", ". => ALPHANUM", "- => ALPHANUM", "# => ALPHANUM", "% => ALPHANUM",
-                                "+ => ALPHANUM", ", => ALPHANUM", "~ => ALPHANUM", ": => ALPHANUM", "/ => ALPHANUM",
-                                "^ => ALPHANUM", "$ => ALPHANUM", "@ => ALPHANUM", ") => ALPHANUM", "( => ALPHANUM",
-                                "] => ALPHANUM", "[ => ALPHANUM", "} => ALPHANUM", "{ => ALPHANUM")
+        assertAcked(prepareCreate("test").addMapping("test", jsonBuilder().startObject().startObject("test").startObject("properties").startObject("name").startObject("fields").startObject("autocomplete").field("type", "string").field("index_analyzer", "autocomplete").field("search_analyzer", "search_autocomplete").field("term_vector", "with_positions_offsets").endObject().startObject("name").field("type", "string").endObject().endObject().field("type", "multi_field").endObject().endObject().endObject()).setSettings(settingsBuilder().put(indexSettings()).put("analysis.tokenizer.autocomplete.max_gram", 20).put("analysis.tokenizer.autocomplete.min_gram", 1).put("analysis.tokenizer.autocomplete.token_chars", "letter,digit").put("analysis.tokenizer.autocomplete.type", "nGram").put("analysis.filter.wordDelimiter.type", "word_delimiter").putArray("analysis.filter.wordDelimiter.type_table", "& => ALPHANUM", "| => ALPHANUM", "! => ALPHANUM", "? => ALPHANUM", ". => ALPHANUM", "- => ALPHANUM", "# => ALPHANUM", "% => ALPHANUM", "+ => ALPHANUM", ", => ALPHANUM", "~ => ALPHANUM", ": => ALPHANUM", "/ => ALPHANUM", "^ => ALPHANUM", "$ => ALPHANUM", "@ => ALPHANUM", ") => ALPHANUM", "( => ALPHANUM", "] => ALPHANUM", "[ => ALPHANUM", "} => ALPHANUM", "{ => ALPHANUM")
 
-                        .put("analysis.filter.wordDelimiter.type.split_on_numerics", false)
-                        .put("analysis.filter.wordDelimiter.generate_word_parts", true)
-                        .put("analysis.filter.wordDelimiter.generate_number_parts", false)
-                        .put("analysis.filter.wordDelimiter.catenate_words", true)
-                        .put("analysis.filter.wordDelimiter.catenate_numbers", true)
-                        .put("analysis.filter.wordDelimiter.catenate_all", false)
+                        .put("analysis.filter.wordDelimiter.type.split_on_numerics", false).put("analysis.filter.wordDelimiter.generate_word_parts", true).put("analysis.filter.wordDelimiter.generate_number_parts", false).put("analysis.filter.wordDelimiter.catenate_words", true).put("analysis.filter.wordDelimiter.catenate_numbers", true).put("analysis.filter.wordDelimiter.catenate_all", false)
 
-                        .put("analysis.analyzer.autocomplete.tokenizer", "autocomplete")
-                        .putArray("analysis.analyzer.autocomplete.filter", "lowercase", "wordDelimiter")
-                        .put("analysis.analyzer.search_autocomplete.tokenizer", "whitespace")
-                        .putArray("analysis.analyzer.search_autocomplete.filter", "lowercase", "wordDelimiter")));
+                        .put("analysis.analyzer.autocomplete.tokenizer", "autocomplete").putArray("analysis.analyzer.autocomplete.filter", "lowercase", "wordDelimiter").put("analysis.analyzer.search_autocomplete.tokenizer", "whitespace").putArray("analysis.analyzer.search_autocomplete.filter", "lowercase", "wordDelimiter")));
         ensureYellow();
-        client().prepareIndex("test", "test", "1")
-            .setSource("name", "ARCOTEL Hotels Deutschland").get();
+        client().prepareIndex("test", "test", "1").setSource("name", "ARCOTEL Hotels Deutschland").get();
         refresh();
         SearchResponse search = client().prepareSearch("test").setTypes("test").setQuery(matchQuery("name.autocomplete", "deut tel").operator(Operator.OR)).addHighlightedField("name.autocomplete").execute().actionGet();
         assertHighlight(search, 0, "name.autocomplete", 0, equalTo("ARCO<em>TEL</em> Ho<em>tel</em>s <em>Deut</em>schland"));
@@ -258,25 +160,10 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
          * MultiPhraseQuery can literally kill an entire node if there are too many terms in the
          * query. We cut off and extract terms if there are more than 16 terms in the query
          */
-        assertAcked(prepareCreate("test")
-                .addMapping("test", "body", "type=string,index_analyzer=custom_analyzer,search_analyzer=custom_analyzer,term_vector=with_positions_offsets")
-                .setSettings(
-                        settingsBuilder().put(indexSettings())
-                                .put("analysis.filter.wordDelimiter.type", "word_delimiter")
-                                .put("analysis.filter.wordDelimiter.type.split_on_numerics", false)
-                                .put("analysis.filter.wordDelimiter.generate_word_parts", true)
-                                .put("analysis.filter.wordDelimiter.generate_number_parts", true)
-                                .put("analysis.filter.wordDelimiter.catenate_words", true)
-                                .put("analysis.filter.wordDelimiter.catenate_numbers", true)
-                                .put("analysis.filter.wordDelimiter.catenate_all", false)
-                                .put("analysis.analyzer.custom_analyzer.tokenizer", "whitespace")
-                                .putArray("analysis.analyzer.custom_analyzer.filter", "lowercase", "wordDelimiter"))
-        );
+        assertAcked(prepareCreate("test").addMapping("test", "body", "type=string,index_analyzer=custom_analyzer,search_analyzer=custom_analyzer,term_vector=with_positions_offsets").setSettings(settingsBuilder().put(indexSettings()).put("analysis.filter.wordDelimiter.type", "word_delimiter").put("analysis.filter.wordDelimiter.type.split_on_numerics", false).put("analysis.filter.wordDelimiter.generate_word_parts", true).put("analysis.filter.wordDelimiter.generate_number_parts", true).put("analysis.filter.wordDelimiter.catenate_words", true).put("analysis.filter.wordDelimiter.catenate_numbers", true).put("analysis.filter.wordDelimiter.catenate_all", false).put("analysis.analyzer.custom_analyzer.tokenizer", "whitespace").putArray("analysis.analyzer.custom_analyzer.filter", "lowercase", "wordDelimiter")));
 
         ensureGreen();
-        client().prepareIndex("test", "test", "1")
-            .setSource("body", "Test: http://www.facebook.com http://elasticsearch.org http://xing.com http://cnn.com http://quora.com http://twitter.com this is a test for highlighting feature Test: http://www.facebook.com http://elasticsearch.org http://xing.com http://cnn.com http://quora.com http://twitter.com this is a test for highlighting feature")
-            .get();
+        client().prepareIndex("test", "test", "1").setSource("body", "Test: http://www.facebook.com http://elasticsearch.org http://xing.com http://cnn.com http://quora.com http://twitter.com this is a test for highlighting feature Test: http://www.facebook.com http://elasticsearch.org http://xing.com http://cnn.com http://quora.com http://twitter.com this is a test for highlighting feature").get();
         refresh();
         SearchResponse search = client().prepareSearch().setQuery(matchQuery("body", "Test: http://www.facebook.com ").type(Type.PHRASE)).addHighlightedField("body").execute().actionGet();
         assertHighlight(search, 0, "body", 0, startsWith("<em>Test: http://www.facebook.com</em>"));
@@ -287,93 +174,41 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
     @Test
     public void testNgramHighlightingPreLucene42() throws ElasticsearchException, IOException {
 
-        assertAcked(prepareCreate("test")
-                .addMapping("test",
-                        "name", "type=string,index_analyzer=name_index_analyzer,search_analyzer=name_search_analyzer," + randomStoreField() + "term_vector=with_positions_offsets",
-                        "name2", "type=string,index_analyzer=name2_index_analyzer,search_analyzer=name_search_analyzer," + randomStoreField() + "term_vector=with_positions_offsets")
-                .setSettings(settingsBuilder()
-                        .put(indexSettings())
-                        .put("analysis.filter.my_ngram.max_gram", 20)
-                        .put("analysis.filter.my_ngram.version", "4.1")
-                        .put("analysis.filter.my_ngram.min_gram", 1)
-                        .put("analysis.filter.my_ngram.type", "ngram")
-                        .put("analysis.tokenizer.my_ngramt.max_gram", 20)
-                        .put("analysis.tokenizer.my_ngramt.version", "4.1")
-                        .put("analysis.tokenizer.my_ngramt.min_gram", 1)
-                        .put("analysis.tokenizer.my_ngramt.type", "ngram")
-                        .put("analysis.analyzer.name_index_analyzer.tokenizer", "my_ngramt")
-                        .put("analysis.analyzer.name2_index_analyzer.tokenizer", "whitespace")
-                        .putArray("analysis.analyzer.name2_index_analyzer.filter", "lowercase", "my_ngram")
-                        .put("analysis.analyzer.name_search_analyzer.tokenizer", "whitespace")
-                        .put("analysis.analyzer.name_search_analyzer.filter", "lowercase")));
+        assertAcked(prepareCreate("test").addMapping("test", "name", "type=string,index_analyzer=name_index_analyzer,search_analyzer=name_search_analyzer," + randomStoreField() + "term_vector=with_positions_offsets", "name2", "type=string,index_analyzer=name2_index_analyzer,search_analyzer=name_search_analyzer," + randomStoreField() + "term_vector=with_positions_offsets").setSettings(settingsBuilder().put(indexSettings()).put("analysis.filter.my_ngram.max_gram", 20).put("analysis.filter.my_ngram.version", "4.1").put("analysis.filter.my_ngram.min_gram", 1).put("analysis.filter.my_ngram.type", "ngram").put("analysis.tokenizer.my_ngramt.max_gram", 20).put("analysis.tokenizer.my_ngramt.version", "4.1").put("analysis.tokenizer.my_ngramt.min_gram", 1).put("analysis.tokenizer.my_ngramt.type", "ngram").put("analysis.analyzer.name_index_analyzer.tokenizer", "my_ngramt").put("analysis.analyzer.name2_index_analyzer.tokenizer", "whitespace").putArray("analysis.analyzer.name2_index_analyzer.filter", "lowercase", "my_ngram").put("analysis.analyzer.name_search_analyzer.tokenizer", "whitespace").put("analysis.analyzer.name_search_analyzer.filter", "lowercase")));
         ensureYellow();
-        client().prepareIndex("test", "test", "1")
-            .setSource("name", "logicacmg ehemals avinci - the know how company",
-                    "name2", "logicacmg ehemals avinci - the know how company").get();
-        client().prepareIndex("test", "test", "2")
-            .setSource("name", "avinci, unilog avinci, logicacmg, logica",
-                    "name2", "avinci, unilog avinci, logicacmg, logica").get();
+        client().prepareIndex("test", "test", "1").setSource("name", "logicacmg ehemals avinci - the know how company", "name2", "logicacmg ehemals avinci - the know how company").get();
+        client().prepareIndex("test", "test", "2").setSource("name", "avinci, unilog avinci, logicacmg, logica", "name2", "avinci, unilog avinci, logicacmg, logica").get();
         refresh();
 
         SearchResponse search = client().prepareSearch().setQuery(constantScoreQuery(matchQuery("name", "logica m"))).addHighlightedField("name").get();
-        assertHighlight(search, 0, "name", 0, anyOf(equalTo("<em>logica</em>c<em>m</em>g ehe<em>m</em>als avinci - the know how co<em>m</em>pany"),
-                equalTo("avinci, unilog avinci, <em>logica</em>c<em>m</em>g, <em>logica</em>")));
-        assertHighlight(search, 1, "name", 0, anyOf(equalTo("<em>logica</em>c<em>m</em>g ehe<em>m</em>als avinci - the know how co<em>m</em>pany"),
-                equalTo("avinci, unilog avinci, <em>logica</em>c<em>m</em>g, <em>logica</em>")));
+        assertHighlight(search, 0, "name", 0, anyOf(equalTo("<em>logica</em>c<em>m</em>g ehe<em>m</em>als avinci - the know how co<em>m</em>pany"), equalTo("avinci, unilog avinci, <em>logica</em>c<em>m</em>g, <em>logica</em>")));
+        assertHighlight(search, 1, "name", 0, anyOf(equalTo("<em>logica</em>c<em>m</em>g ehe<em>m</em>als avinci - the know how co<em>m</em>pany"), equalTo("avinci, unilog avinci, <em>logica</em>c<em>m</em>g, <em>logica</em>")));
 
         search = client().prepareSearch().setQuery(constantScoreQuery(matchQuery("name", "logica ma"))).addHighlightedField("name").get();
-        assertHighlight(search, 0, "name", 0, anyOf(equalTo("<em>logica</em>cmg ehe<em>ma</em>ls avinci - the know how company"),
-                equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
-        assertHighlight(search, 1, "name", 0, anyOf(equalTo("<em>logica</em>cmg ehe<em>ma</em>ls avinci - the know how company"),
-                equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
+        assertHighlight(search, 0, "name", 0, anyOf(equalTo("<em>logica</em>cmg ehe<em>ma</em>ls avinci - the know how company"), equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
+        assertHighlight(search, 1, "name", 0, anyOf(equalTo("<em>logica</em>cmg ehe<em>ma</em>ls avinci - the know how company"), equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
 
         search = client().prepareSearch().setQuery(constantScoreQuery(matchQuery("name", "logica"))).addHighlightedField("name").get();
-        assertHighlight(search, 0, "name", 0, anyOf(equalTo("<em>logica</em>cmg ehemals avinci - the know how company"),
-                equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
-        assertHighlight(search, 0, "name", 0, anyOf(equalTo("<em>logica</em>cmg ehemals avinci - the know how company"),
-                equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
+        assertHighlight(search, 0, "name", 0, anyOf(equalTo("<em>logica</em>cmg ehemals avinci - the know how company"), equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
+        assertHighlight(search, 0, "name", 0, anyOf(equalTo("<em>logica</em>cmg ehemals avinci - the know how company"), equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
 
         search = client().prepareSearch().setQuery(constantScoreQuery(matchQuery("name2", "logica m"))).addHighlightedField("name2").get();
-        assertHighlight(search, 0, "name2", 0, anyOf(equalTo("<em>logica</em>c<em>m</em>g ehe<em>m</em>als avinci - the know how co<em>m</em>pany"),
-                equalTo("avinci, unilog avinci, <em>logica</em>c<em>m</em>g, <em>logica</em>")));
-        assertHighlight(search, 1, "name2", 0, anyOf(equalTo("<em>logica</em>c<em>m</em>g ehe<em>m</em>als avinci - the know how co<em>m</em>pany"),
-                equalTo("avinci, unilog avinci, <em>logica</em>c<em>m</em>g, <em>logica</em>")));
+        assertHighlight(search, 0, "name2", 0, anyOf(equalTo("<em>logica</em>c<em>m</em>g ehe<em>m</em>als avinci - the know how co<em>m</em>pany"), equalTo("avinci, unilog avinci, <em>logica</em>c<em>m</em>g, <em>logica</em>")));
+        assertHighlight(search, 1, "name2", 0, anyOf(equalTo("<em>logica</em>c<em>m</em>g ehe<em>m</em>als avinci - the know how co<em>m</em>pany"), equalTo("avinci, unilog avinci, <em>logica</em>c<em>m</em>g, <em>logica</em>")));
 
         search = client().prepareSearch().setQuery(constantScoreQuery(matchQuery("name2", "logica ma"))).addHighlightedField("name2").get();
-        assertHighlight(search, 0, "name2", 0, anyOf(equalTo("<em>logica</em>cmg ehe<em>ma</em>ls avinci - the know how company"),
-                equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
-        assertHighlight(search, 1, "name2", 0, anyOf(equalTo("<em>logica</em>cmg ehe<em>ma</em>ls avinci - the know how company"),
-                equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
+        assertHighlight(search, 0, "name2", 0, anyOf(equalTo("<em>logica</em>cmg ehe<em>ma</em>ls avinci - the know how company"), equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
+        assertHighlight(search, 1, "name2", 0, anyOf(equalTo("<em>logica</em>cmg ehe<em>ma</em>ls avinci - the know how company"), equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
 
         search = client().prepareSearch().setQuery(constantScoreQuery(matchQuery("name2", "logica"))).addHighlightedField("name2").get();
-        assertHighlight(search, 0, "name2", 0, anyOf(equalTo("<em>logica</em>cmg ehemals avinci - the know how company"),
-                equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
-        assertHighlight(search, 1, "name2", 0, anyOf(equalTo("<em>logica</em>cmg ehemals avinci - the know how company"),
-                equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
+        assertHighlight(search, 0, "name2", 0, anyOf(equalTo("<em>logica</em>cmg ehemals avinci - the know how company"), equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
+        assertHighlight(search, 1, "name2", 0, anyOf(equalTo("<em>logica</em>cmg ehemals avinci - the know how company"), equalTo("avinci, unilog avinci, <em>logica</em>cmg, <em>logica</em>")));
     }
 
     @Test
     public void testNgramHighlighting() throws ElasticsearchException, IOException {
-        assertAcked(prepareCreate("test")
-                .addMapping("test",
-                        "name", "type=string,index_analyzer=name_index_analyzer,search_analyzer=name_search_analyzer,term_vector=with_positions_offsets",
-                        "name2", "type=string,index_analyzer=name2_index_analyzer,search_analyzer=name_search_analyzer,term_vector=with_positions_offsets")
-                .setSettings(settingsBuilder()
-                        .put(indexSettings())
-                        .put("analysis.filter.my_ngram.max_gram", 20)
-                        .put("analysis.filter.my_ngram.min_gram", 1)
-                        .put("analysis.filter.my_ngram.type", "ngram")
-                        .put("analysis.tokenizer.my_ngramt.max_gram", 20)
-                        .put("analysis.tokenizer.my_ngramt.min_gram", 1)
-                        .put("analysis.tokenizer.my_ngramt.token_chars", "letter,digit")
-                        .put("analysis.tokenizer.my_ngramt.type", "ngram")
-                        .put("analysis.analyzer.name_index_analyzer.tokenizer", "my_ngramt")
-                        .put("analysis.analyzer.name2_index_analyzer.tokenizer", "whitespace")
-                        .put("analysis.analyzer.name2_index_analyzer.filter", "my_ngram")
-                        .put("analysis.analyzer.name_search_analyzer.tokenizer", "whitespace")));
-        client().prepareIndex("test", "test", "1")
-            .setSource("name", "logicacmg ehemals avinci - the know how company",
-                       "name2", "logicacmg ehemals avinci - the know how company").get();
+        assertAcked(prepareCreate("test").addMapping("test", "name", "type=string,index_analyzer=name_index_analyzer,search_analyzer=name_search_analyzer,term_vector=with_positions_offsets", "name2", "type=string,index_analyzer=name2_index_analyzer,search_analyzer=name_search_analyzer,term_vector=with_positions_offsets").setSettings(settingsBuilder().put(indexSettings()).put("analysis.filter.my_ngram.max_gram", 20).put("analysis.filter.my_ngram.min_gram", 1).put("analysis.filter.my_ngram.type", "ngram").put("analysis.tokenizer.my_ngramt.max_gram", 20).put("analysis.tokenizer.my_ngramt.min_gram", 1).put("analysis.tokenizer.my_ngramt.token_chars", "letter,digit").put("analysis.tokenizer.my_ngramt.type", "ngram").put("analysis.analyzer.name_index_analyzer.tokenizer", "my_ngramt").put("analysis.analyzer.name2_index_analyzer.tokenizer", "whitespace").put("analysis.analyzer.name2_index_analyzer.filter", "my_ngram").put("analysis.analyzer.name_search_analyzer.tokenizer", "whitespace")));
+        client().prepareIndex("test", "test", "1").setSource("name", "logicacmg ehemals avinci - the know how company", "name2", "logicacmg ehemals avinci - the know how company").get();
         refresh();
         ensureGreen();
         SearchResponse search = client().prepareSearch().setQuery(matchQuery("name", "logica m")).addHighlightedField("name").get();
@@ -397,71 +232,43 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testEnsureNoNegativeOffsets() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1",
-                        "no_long_term", "type=string,term_vector=with_positions_offsets",
-                        "long_term", "type=string,term_vector=with_positions_offsets"));
+        assertAcked(prepareCreate("test").addMapping("type1", "no_long_term", "type=string,term_vector=with_positions_offsets", "long_term", "type=string,term_vector=with_positions_offsets"));
         ensureYellow();
 
-        client().prepareIndex("test", "type1", "1")
-                .setSource("no_long_term", "This is a test where foo is highlighed and should be highlighted",
-                        "long_term", "This is a test thisisaverylongwordandmakessurethisfails where foo is highlighed and should be highlighted")
-                .get();
+        client().prepareIndex("test", "type1", "1").setSource("no_long_term", "This is a test where foo is highlighed and should be highlighted", "long_term", "This is a test thisisaverylongwordandmakessurethisfails where foo is highlighed and should be highlighted").get();
         refresh();
 
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchQuery("long_term", "thisisaverylongwordandmakessurethisfails foo highlighed"))
-                .addHighlightedField("long_term", 18, 1)
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchQuery("long_term", "thisisaverylongwordandmakessurethisfails foo highlighed")).addHighlightedField("long_term", 18, 1).get();
         assertHighlight(search, 0, "long_term", 0, 1, equalTo("<em>thisisaverylongwordandmakessurethisfails</em>"));
 
-        search = client().prepareSearch()
-                .setQuery(matchQuery("no_long_term", "test foo highlighed").type(Type.PHRASE).slop(3))
-                .addHighlightedField("no_long_term", 18, 1).setHighlighterPostTags("</b>").setHighlighterPreTags("<b>")
-                .get();
+        search = client().prepareSearch().setQuery(matchQuery("no_long_term", "test foo highlighed").type(Type.PHRASE).slop(3)).addHighlightedField("no_long_term", 18, 1).setHighlighterPostTags("</b>").setHighlighterPreTags("<b>").get();
         assertNotHighlighted(search, 0, "no_long_term");
 
-        search = client().prepareSearch()
-                .setQuery(matchQuery("no_long_term", "test foo highlighed").type(Type.PHRASE).slop(3))
-                .addHighlightedField("no_long_term", 30, 1).setHighlighterPostTags("</b>").setHighlighterPreTags("<b>")
-                .get();
+        search = client().prepareSearch().setQuery(matchQuery("no_long_term", "test foo highlighed").type(Type.PHRASE).slop(3)).addHighlightedField("no_long_term", 30, 1).setHighlighterPostTags("</b>").setHighlighterPreTags("<b>").get();
 
         assertHighlight(search, 0, "no_long_term", 0, 1, equalTo("a <b>test</b> where <b>foo</b> is <b>highlighed</b> and"));
     }
 
     @Test
     public void testSourceLookupHighlightingUsingPlainHighlighter() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties")
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties")
                         // we don't store title and don't use term vector, now lets see if it works...
-                        .startObject("title").field("type", "string").field("store", "no").field("term_vector", "no").endObject()
-                        .startObject("attachments").startObject("properties").startObject("body").field("type", "string").field("store", "no").field("term_vector", "no").endObject().endObject().endObject()
-                        .endObject().endObject().endObject()));
+                        .startObject("title").field("type", "string").field("store", "no").field("term_vector", "no").endObject().startObject("attachments").startObject("properties").startObject("body").field("type", "string").field("store", "no").field("term_vector", "no").endObject().endObject().endObject().endObject().endObject().endObject()));
         ensureYellow();
 
         IndexRequestBuilder[] indexRequestBuilders = new IndexRequestBuilder[5];
         for (int i = 0; i < indexRequestBuilders.length; i++) {
-            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i))
-                    .setSource(XContentFactory.jsonBuilder().startObject()
-                            .field("title", "This is a test on the highlighting bug present in elasticsearch")
-                            .startArray("attachments").startObject().field("body", "attachment 1").endObject().startObject().field("body", "attachment 2").endObject().endArray()
-                            .endObject());
+            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i)).setSource(XContentFactory.jsonBuilder().startObject().field("title", "This is a test on the highlighting bug present in elasticsearch").startArray("attachments").startObject().field("body", "attachment 1").endObject().startObject().field("body", "attachment 2").endObject().endArray().endObject());
         }
         indexRandom(true, indexRequestBuilders);
 
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchQuery("title", "bug"))
-                .addHighlightedField("title", -1, 0)
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchQuery("title", "bug")).addHighlightedField("title", -1, 0).get();
 
         for (int i = 0; i < indexRequestBuilders.length; i++) {
             assertHighlight(search, i, "title", 0, equalTo("This is a test on the highlighting <em>bug</em> present in elasticsearch"));
         }
 
-        search = client().prepareSearch()
-                .setQuery(matchQuery("attachments.body", "attachment"))
-                .addHighlightedField("attachments.body", -1, 0)
-                .get();
+        search = client().prepareSearch().setQuery(matchQuery("attachments.body", "attachment")).addHighlightedField("attachments.body", -1, 0).get();
 
         for (int i = 0; i < indexRequestBuilders.length; i++) {
             assertHighlight(search, i, "attachments.body", 0, equalTo("<em>attachment</em> 1"));
@@ -471,37 +278,24 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testSourceLookupHighlightingUsingFastVectorHighlighter() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties")
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties")
                         // we don't store title, now lets see if it works...
-                        .startObject("title").field("type", "string").field("store", "no").field("term_vector", "with_positions_offsets").endObject()
-                        .startObject("attachments").startObject("properties").startObject("body").field("type", "string").field("store", "no").field("term_vector", "with_positions_offsets").endObject().endObject().endObject()
-                        .endObject().endObject().endObject()));
+                        .startObject("title").field("type", "string").field("store", "no").field("term_vector", "with_positions_offsets").endObject().startObject("attachments").startObject("properties").startObject("body").field("type", "string").field("store", "no").field("term_vector", "with_positions_offsets").endObject().endObject().endObject().endObject().endObject().endObject()));
         ensureYellow();
 
         IndexRequestBuilder[] indexRequestBuilders = new IndexRequestBuilder[5];
         for (int i = 0; i < indexRequestBuilders.length; i++) {
-            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i))
-                    .setSource(XContentFactory.jsonBuilder().startObject()
-                            .field("title", "This is a test on the highlighting bug present in elasticsearch")
-                            .startArray("attachments").startObject().field("body", "attachment 1").endObject().startObject().field("body", "attachment 2").endObject().endArray()
-                            .endObject());
+            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i)).setSource(XContentFactory.jsonBuilder().startObject().field("title", "This is a test on the highlighting bug present in elasticsearch").startArray("attachments").startObject().field("body", "attachment 1").endObject().startObject().field("body", "attachment 2").endObject().endArray().endObject());
         }
         indexRandom(true, indexRequestBuilders);
 
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchQuery("title", "bug"))
-                .addHighlightedField("title", -1, 0)
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchQuery("title", "bug")).addHighlightedField("title", -1, 0).get();
 
         for (int i = 0; i < indexRequestBuilders.length; i++) {
             assertHighlight(search, i, "title", 0, equalTo("This is a test on the highlighting <em>bug</em> present in elasticsearch"));
         }
 
-        search = client().prepareSearch()
-                .setQuery(matchQuery("attachments.body", "attachment"))
-                .addHighlightedField("attachments.body", -1, 2)
-                .execute().get();
+        search = client().prepareSearch().setQuery(matchQuery("attachments.body", "attachment")).addHighlightedField("attachments.body", -1, 2).execute().get();
 
         for (int i = 0; i < 5; i++) {
             assertHighlight(search, i, "attachments.body", 0, equalTo("<em>attachment</em> 1"));
@@ -511,49 +305,36 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testSourceLookupHighlightingUsingPostingsHighlighter() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties")
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties")
                         // we don't store title, now lets see if it works...
-                        .startObject("title").field("type", "string").field("store", "no").field("index_options", "offsets").endObject()
-                        .startObject("attachments").startObject("properties").startObject("body").field("type", "string").field("store", "no").field("index_options", "offsets").endObject().endObject().endObject()
-                        .endObject().endObject().endObject()));
+                        .startObject("title").field("type", "string").field("store", "no").field("index_options", "offsets").endObject().startObject("attachments").startObject("properties").startObject("body").field("type", "string").field("store", "no").field("index_options", "offsets").endObject().endObject().endObject().endObject().endObject().endObject()));
         ensureYellow();
 
         IndexRequestBuilder[] indexRequestBuilders = new IndexRequestBuilder[5];
         for (int i = 0; i < indexRequestBuilders.length; i++) {
-            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i))
-                    .setSource(XContentFactory.jsonBuilder().startObject()
-                            .array("title", "This is a test on the highlighting bug present in elasticsearch. Hopefully it works.",
-                                    "This is the second bug to perform highlighting on.")
-                            .startArray("attachments").startObject().field("body", "attachment for this test").endObject().startObject().field("body", "attachment 2").endObject().endArray()
-                            .endObject());
+            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i)).setSource(XContentFactory.jsonBuilder().startObject().array("title", "This is a test on the highlighting bug present in elasticsearch. Hopefully it works.", "This is the second bug to perform highlighting on.").startArray("attachments").startObject().field("body", "attachment for this test").endObject().startObject().field("body", "attachment 2").endObject().endArray().endObject());
         }
         indexRandom(true, indexRequestBuilders);
 
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchQuery("title", "bug"))
-                //asking for the whole field to be highlighted
-                .addHighlightedField("title", -1, 0).get();
+        SearchResponse search = client().prepareSearch().setQuery(matchQuery("title", "bug"))
+                        //asking for the whole field to be highlighted
+                        .addHighlightedField("title", -1, 0).get();
 
         for (int i = 0; i < indexRequestBuilders.length; i++) {
             assertHighlight(search, i, "title", 0, equalTo("This is a test on the highlighting <em>bug</em> present in elasticsearch. Hopefully it works."));
             assertHighlight(search, i, "title", 1, 2, equalTo("This is the second <em>bug</em> to perform highlighting on."));
         }
 
-        search = client().prepareSearch()
-                .setQuery(matchQuery("title", "bug"))
-                //sentences will be generated out of each value
-                .addHighlightedField("title").get();
+        search = client().prepareSearch().setQuery(matchQuery("title", "bug"))
+                        //sentences will be generated out of each value
+                        .addHighlightedField("title").get();
 
         for (int i = 0; i < indexRequestBuilders.length; i++) {
             assertHighlight(search, i, "title", 0, equalTo("This is a test on the highlighting <em>bug</em> present in elasticsearch."));
             assertHighlight(search, i, "title", 1, 2, equalTo("This is the second <em>bug</em> to perform highlighting on."));
         }
 
-        search = client().prepareSearch()
-                .setQuery(matchQuery("attachments.body", "attachment"))
-                .addHighlightedField("attachments.body", -1, 2)
-                .get();
+        search = client().prepareSearch().setQuery(matchQuery("attachments.body", "attachment")).addHighlightedField("attachments.body", -1, 2).get();
 
         for (int i = 0; i < indexRequestBuilders.length; i++) {
             assertHighlight(search, i, "attachments.body", 0, equalTo("<em>attachment</em> for this test"));
@@ -563,32 +344,21 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testHighlightIssue1994() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "title", "type=string,store=no", "titleTV", "type=string,store=no,term_vector=with_positions_offsets"));
+        assertAcked(prepareCreate("test").addMapping("type1", "title", "type=string,store=no", "titleTV", "type=string,store=no,term_vector=with_positions_offsets"));
         ensureYellow();
 
-        indexRandom(false, client().prepareIndex("test", "type1", "1")
-                .setSource("title", new String[]{"This is a test on the highlighting bug present in elasticsearch", "The bug is bugging us"},
-                        "titleTV", new String[]{"This is a test on the highlighting bug present in elasticsearch", "The bug is bugging us"}));
+        indexRandom(false, client().prepareIndex("test", "type1", "1").setSource("title", new String[] { "This is a test on the highlighting bug present in elasticsearch", "The bug is bugging us" }, "titleTV", new String[] { "This is a test on the highlighting bug present in elasticsearch", "The bug is bugging us" }));
 
-        indexRandom(true, client().prepareIndex("test", "type1", "2")
-                .setSource("titleTV", new String[]{"some text to highlight", "highlight other text"}));
+        indexRandom(true, client().prepareIndex("test", "type1", "2").setSource("titleTV", new String[] { "some text to highlight", "highlight other text" }));
 
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchQuery("title", "bug"))
-                .addHighlightedField("title", -1, 2)
-                .addHighlightedField("titleTV", -1, 2)
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchQuery("title", "bug")).addHighlightedField("title", -1, 2).addHighlightedField("titleTV", -1, 2).get();
 
-        assertHighlight(search, 0, "title", 0,  equalTo("This is a test on the highlighting <em>bug</em> present in elasticsearch"));
+        assertHighlight(search, 0, "title", 0, equalTo("This is a test on the highlighting <em>bug</em> present in elasticsearch"));
         assertHighlight(search, 0, "title", 1, 2, equalTo("The <em>bug</em> is bugging us"));
-        assertHighlight(search, 0, "titleTV", 0,  equalTo("This is a test on the highlighting <em>bug</em> present in elasticsearch"));
-        assertHighlight(search, 0, "titleTV", 1, 2,  equalTo("The <em>bug</em> is bugging us"));
+        assertHighlight(search, 0, "titleTV", 0, equalTo("This is a test on the highlighting <em>bug</em> present in elasticsearch"));
+        assertHighlight(search, 0, "titleTV", 1, 2, equalTo("The <em>bug</em> is bugging us"));
 
-        search = client().prepareSearch()
-                .setQuery(matchQuery("titleTV", "highlight"))
-                .addHighlightedField("titleTV", -1, 2)
-                .get();
+        search = client().prepareSearch().setQuery(matchQuery("titleTV", "highlight")).addHighlightedField("titleTV", -1, 2).get();
 
         assertHighlight(search, 0, "titleTV", 0, equalTo("some text to <em>highlight</em>"));
         assertHighlight(search, 0, "titleTV", 1, 2, equalTo("<em>highlight</em> other text"));
@@ -599,17 +369,11 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         createIndex("test");
         ensureGreen();
 
-        client().prepareIndex("test", "type1")
-                .setSource("field1", new String[]{"this is a test", "this is the second test"},
-                        "field2", new String[]{"this is another test", "yet another test"}).get();
+        client().prepareIndex("test", "type1").setSource("field1", new String[] { "this is a test", "this is the second test" }, "field2", new String[] { "this is another test", "yet another test" }).get();
         refresh();
 
         logger.info("--> highlighting and searching on field1 and field2 produces different tags");
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("field1", "test"))
-                .highlight(highlight().order("score").preTags("<global>").postTags("</global>").fragmentSize(1).numOfFragments(1)
-                        .field(new HighlightBuilder.Field("field1").numOfFragments(2))
-                        .field(new HighlightBuilder.Field("field2").preTags("<field2>").postTags("</field2>").fragmentSize(50)));
+        SearchSourceBuilder source = searchSource().query(termQuery("field1", "test")).highlight(highlight().order("score").preTags("<global>").postTags("</global>").fragmentSize(1).numOfFragments(1).field(new HighlightBuilder.Field("field1").numOfFragments(2)).field(new HighlightBuilder.Field("field2").preTags("<field2>").postTags("</field2>").fragmentSize(50)));
 
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
@@ -620,23 +384,14 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test //https://github.com/elasticsearch/elasticsearch/issues/5175
     public void testHighlightingOnWildcardFields() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1",
-                        "field-postings", "type=string,index_options=offsets",
-                        "field-fvh", "type=string,term_vector=with_positions_offsets",
-                        "field-plain", "type=string"));
+        assertAcked(prepareCreate("test").addMapping("type1", "field-postings", "type=string,index_options=offsets", "field-fvh", "type=string,term_vector=with_positions_offsets", "field-plain", "type=string"));
         ensureGreen();
 
-        client().prepareIndex("test", "type1")
-                .setSource("field-postings", "This is the first test sentence. Here is the second one.",
-                        "field-fvh", "This is the test with term_vectors",
-                        "field-plain", "This is the test for the plain highlighter").get();
+        client().prepareIndex("test", "type1").setSource("field-postings", "This is the first test sentence. Here is the second one.", "field-fvh", "This is the test with term_vectors", "field-plain", "This is the test for the plain highlighter").get();
         refresh();
 
         logger.info("--> highlighting and searching on field*");
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("field-plain", "test"))
-                .highlight(highlight().field("field*").preTags("<xxx>").postTags("</xxx>"));
+        SearchSourceBuilder source = searchSource().query(termQuery("field-plain", "test")).highlight(highlight().field("field*").preTags("<xxx>").postTags("</xxx>"));
 
         SearchResponse searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
@@ -648,56 +403,28 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
     @Test
     public void testForceSourceWithSourceDisabled() throws Exception {
 
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1")
-                        .startObject("_source").field("enabled", false).endObject()
-                        .startObject("properties")
-                        .startObject("field1").field("type", "string").field("store", "yes").field("index_options", "offsets")
-                        .field("term_vector", "with_positions_offsets").endObject()
-                        .endObject().endObject().endObject()));
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("_source").field("enabled", false).endObject().startObject("properties").startObject("field1").field("type", "string").field("store", "yes").field("index_options", "offsets").field("term_vector", "with_positions_offsets").endObject().endObject().endObject().endObject()));
 
         ensureGreen();
 
-        client().prepareIndex("test", "type1")
-                .setSource("field1", "The quick brown fox jumps over the lazy dog", "field2", "second field content").get();
+        client().prepareIndex("test", "type1").setSource("field1", "The quick brown fox jumps over the lazy dog", "field2", "second field content").get();
         refresh();
 
         //works using stored field
-        SearchResponse searchResponse = client().prepareSearch("test")
-                .setQuery(termQuery("field1", "quick"))
-                .addHighlightedField(new Field("field1").preTags("<xxx>").postTags("</xxx>"))
-                .get();
+        SearchResponse searchResponse = client().prepareSearch("test").setQuery(termQuery("field1", "quick")).addHighlightedField(new Field("field1").preTags("<xxx>").postTags("</xxx>")).get();
         assertHighlight(searchResponse, 0, "field1", 0, 1, equalTo("The <xxx>quick</xxx> brown fox jumps over the lazy dog"));
 
-        assertFailures(client().prepareSearch("test")
-                .setQuery(termQuery("field1", "quick"))
-                .addHighlightedField(new Field("field1").preTags("<xxx>").postTags("</xxx>").highlighterType("plain").forceSource(true)),
-                RestStatus.BAD_REQUEST,
-                containsString("source is forced for fields [field1] but type [type1] has disabled _source"));
+        assertFailures(client().prepareSearch("test").setQuery(termQuery("field1", "quick")).addHighlightedField(new Field("field1").preTags("<xxx>").postTags("</xxx>").highlighterType("plain").forceSource(true)), RestStatus.BAD_REQUEST, containsString("source is forced for fields [field1] but type [type1] has disabled _source"));
 
-        assertFailures(client().prepareSearch("test")
-                .setQuery(termQuery("field1", "quick"))
-                .addHighlightedField(new Field("field1").preTags("<xxx>").postTags("</xxx>").highlighterType("fvh").forceSource(true)),
-                RestStatus.BAD_REQUEST,
-                containsString("source is forced for fields [field1] but type [type1] has disabled _source"));
+        assertFailures(client().prepareSearch("test").setQuery(termQuery("field1", "quick")).addHighlightedField(new Field("field1").preTags("<xxx>").postTags("</xxx>").highlighterType("fvh").forceSource(true)), RestStatus.BAD_REQUEST, containsString("source is forced for fields [field1] but type [type1] has disabled _source"));
 
-        assertFailures(client().prepareSearch("test")
-                .setQuery(termQuery("field1", "quick"))
-                .addHighlightedField(new Field("field1").preTags("<xxx>").postTags("</xxx>").highlighterType("postings").forceSource(true)),
-                RestStatus.BAD_REQUEST,
-                containsString("source is forced for fields [field1] but type [type1] has disabled _source"));
+        assertFailures(client().prepareSearch("test").setQuery(termQuery("field1", "quick")).addHighlightedField(new Field("field1").preTags("<xxx>").postTags("</xxx>").highlighterType("postings").forceSource(true)), RestStatus.BAD_REQUEST, containsString("source is forced for fields [field1] but type [type1] has disabled _source"));
 
-        SearchSourceBuilder searchSource = SearchSourceBuilder.searchSource().query(termQuery("field1", "quick"))
-                .highlight(highlight().forceSource(true).field("field1"));
-        assertFailures(client().prepareSearch("test").setSource(searchSource.buildAsBytes()),
-                RestStatus.BAD_REQUEST,
-                containsString("source is forced for fields [field1] but type [type1] has disabled _source"));
+        SearchSourceBuilder searchSource = SearchSourceBuilder.searchSource().query(termQuery("field1", "quick")).highlight(highlight().forceSource(true).field("field1"));
+        assertFailures(client().prepareSearch("test").setSource(searchSource.buildAsBytes()), RestStatus.BAD_REQUEST, containsString("source is forced for fields [field1] but type [type1] has disabled _source"));
 
-        searchSource = SearchSourceBuilder.searchSource().query(termQuery("field1", "quick"))
-                .highlight(highlight().forceSource(true).field("field*"));
-        assertFailures(client().prepareSearch("test").setSource(searchSource.buildAsBytes()),
-                RestStatus.BAD_REQUEST,
-                matches("source is forced for fields \\[field\\d, field\\d\\] but type \\[type1\\] has disabled _source"));
+        searchSource = SearchSourceBuilder.searchSource().query(termQuery("field1", "quick")).highlight(highlight().forceSource(true).field("field*"));
+        assertFailures(client().prepareSearch("test").setSource(searchSource.buildAsBytes()), RestStatus.BAD_REQUEST, matches("source is forced for fields \\[field\\d, field\\d\\] but type \\[type1\\] has disabled _source"));
     }
 
     @Test
@@ -705,59 +432,46 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         createIndex("test");
         ensureGreen();
 
-        client().prepareIndex("test", "type1")
-                .setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog").get();
+        client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog").get();
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("field1", "test"))
-                .highlight(highlight().field("field1").order("score").preTags("<xxx>").postTags("</xxx>"));
+        SearchSourceBuilder source = searchSource().query(termQuery("field1", "test")).highlight(highlight().field("field1").order("score").preTags("<xxx>").postTags("</xxx>"));
 
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
         assertHighlight(searchResponse, 0, "field1", 0, 1, equalTo("this is a <xxx>test</xxx>"));
 
         logger.info("--> searching on _all, highlighting on field1");
-        source = searchSource()
-                .query(termQuery("_all", "test"))
-                .highlight(highlight().field("field1").order("score").preTags("<xxx>").postTags("</xxx>"));
+        source = searchSource().query(termQuery("_all", "test")).highlight(highlight().field("field1").order("score").preTags("<xxx>").postTags("</xxx>"));
 
         searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
         assertHighlight(searchResponse, 0, "field1", 0, 1, equalTo("this is a <xxx>test</xxx>"));
 
         logger.info("--> searching on _all, highlighting on field2");
-        source = searchSource()
-                .query(termQuery("_all", "quick"))
-                .highlight(highlight().field("field2").order("score").preTags("<xxx>").postTags("</xxx>"));
+        source = searchSource().query(termQuery("_all", "quick")).highlight(highlight().field("field2").order("score").preTags("<xxx>").postTags("</xxx>"));
 
         searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
         assertHighlight(searchResponse, 0, "field2", 0, 1, equalTo("The <xxx>quick</xxx> brown fox jumps over the lazy dog"));
 
         logger.info("--> searching on _all, highlighting on field2");
-        source = searchSource()
-                .query(prefixQuery("_all", "qui"))
-                .highlight(highlight().field("field2").order("score").preTags("<xxx>").postTags("</xxx>"));
+        source = searchSource().query(prefixQuery("_all", "qui")).highlight(highlight().field("field2").order("score").preTags("<xxx>").postTags("</xxx>"));
 
         searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
         assertHighlight(searchResponse, 0, "field2", 0, 1, equalTo("The <xxx>quick</xxx> brown fox jumps over the lazy dog"));
 
         logger.info("--> searching on _all with constant score, highlighting on field2");
-        source = searchSource()
-                .query(constantScoreQuery(prefixQuery("_all", "qui")))
-                .highlight(highlight().field("field2").order("score").preTags("<xxx>").postTags("</xxx>"));
+        source = searchSource().query(constantScoreQuery(prefixQuery("_all", "qui"))).highlight(highlight().field("field2").order("score").preTags("<xxx>").postTags("</xxx>"));
 
         searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
         assertHighlight(searchResponse, 0, "field2", 0, 1, equalTo("The <xxx>quick</xxx> brown fox jumps over the lazy dog"));
 
         logger.info("--> searching on _all with constant score, highlighting on field2");
-        source = searchSource()
-                .query(boolQuery().should(constantScoreQuery(prefixQuery("_all", "qui"))))
-                .highlight(highlight().field("field2").order("score").preTags("<xxx>").postTags("</xxx>"));
+        source = searchSource().query(boolQuery().should(constantScoreQuery(prefixQuery("_all", "qui")))).highlight(highlight().field("field2").order("score").preTags("<xxx>").postTags("</xxx>"));
 
         searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
         assertHighlight(searchResponse, 0, "field2", 0, 1, equalTo("The <xxx>quick</xxx> brown fox jumps over the lazy dog"));
@@ -765,69 +479,28 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testPlainHighlighterDocumentAnalyzer() throws Exception {
-        client().admin().indices().prepareCreate("test")
-        .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1")
-            .startObject("_analyzer")
-                .field("path", "language_analyzer")
-            .endObject()
-            .startObject("properties")
-                .startObject("language_analyzer")
-                    .field("type", "string")
-                    .field("index", "not_analyzed")
-                .endObject()
-                .startObject("text")
-                    .field("type", "string")
-                .endObject()
-            .endObject()
-            .endObject().endObject()).execute().actionGet();
+        client().admin().indices().prepareCreate("test").addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_analyzer").field("path", "language_analyzer").endObject().startObject("properties").startObject("language_analyzer").field("type", "string").field("index", "not_analyzed").endObject().startObject("text").field("type", "string").endObject().endObject().endObject().endObject()).execute().actionGet();
         ensureYellow();
 
-        index("test", "type1", "1",
-                "language_analyzer", "english",
-                "text", "Look at me, I'm eating cars.");
+        index("test", "type1", "1", "language_analyzer", "english", "text", "Look at me, I'm eating cars.");
         refresh();
 
-        SearchResponse response = client().prepareSearch("test")
-                .setQuery(QueryBuilders.matchQuery("text", "car"))
-                .addHighlightedField(
-                        new HighlightBuilder.Field("text").preTags("<1>").postTags("</1>").requireFieldMatch(true))
-                .get();
+        SearchResponse response = client().prepareSearch("test").setQuery(QueryBuilders.matchQuery("text", "car")).addHighlightedField(new HighlightBuilder.Field("text").preTags("<1>").postTags("</1>").requireFieldMatch(true)).get();
         assertHighlight(response, 0, "text", 0, 1, equalTo("Look at me, I'm eating <1>cars</1>."));
     }
 
     @Test
     public void testPlainHighlighterDocumentAnalyzerOverriddenByFieldAnalyzer() throws Exception {
-        client().admin().indices().prepareCreate("test")
-        .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1")
-            .startObject("_analyzer")
-                .field("path", "language_analyzer")
-            .endObject()
-            .startObject("properties")
-                .startObject("language_analyzer")
-                    .field("type", "string")
-                    .field("index", "not_analyzed")
-                .endObject()
-                .startObject("text")
-                    .field("type", "string")
-                .field("analyzer", "standard")
-                .endObject()
-            .endObject()
-            .endObject().endObject()).execute().actionGet();
+        client().admin().indices().prepareCreate("test").addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_analyzer").field("path", "language_analyzer").endObject().startObject("properties").startObject("language_analyzer").field("type", "string").field("index", "not_analyzed").endObject().startObject("text").field("type", "string").field("analyzer", "standard").endObject().endObject().endObject().endObject()).execute().actionGet();
         ensureYellow();
 
-        index("test", "type1", "1",
-                "language_analyzer", "english",
-                "text", "Look at me, I'm eating cars.");
+        index("test", "type1", "1", "language_analyzer", "english", "text", "Look at me, I'm eating cars.");
         refresh();
 
         // Make sure both "text" field and query string are analyzed by standard analyzer.
         // If english analyzer specified in "language_analyzer" field is used for "text" field, "cars" in the field is analyzed as "car",
         // which is different from analyzed query, "cars". As a result, there'll be no highlight (See #8943).
-        SearchResponse response = client().prepareSearch("test")
-                .setQuery(QueryBuilders.matchQuery("text", "cars"))
-                .addHighlightedField(
-                        new HighlightBuilder.Field("text").preTags("<1>").postTags("</1>").requireFieldMatch(true))
-                .get();
+        SearchResponse response = client().prepareSearch("test").setQuery(QueryBuilders.matchQuery("text", "cars")).addHighlightedField(new HighlightBuilder.Field("text").preTags("<1>").postTags("</1>").requireFieldMatch(true)).get();
         assertHighlight(response, 0, "text", 0, 1, equalTo("Look at me, I'm eating <1>cars</1>."));
     }
 
@@ -836,23 +509,18 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertAcked(prepareCreate("test").addMapping("type1", type1TermVectorMapping()));
         ensureGreen();
 
-        client().prepareIndex("test", "type1")
-                .setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog").get();
+        client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog").get();
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("field1", "test"))
-                .highlight(highlight().field("field1", 100, 0).order("score").preTags("<xxx>").postTags("</xxx>"));
+        SearchSourceBuilder source = searchSource().query(termQuery("field1", "test")).highlight(highlight().field("field1", 100, 0).order("score").preTags("<xxx>").postTags("</xxx>"));
 
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
         assertHighlight(searchResponse, 0, "field1", 0, 1, equalTo("this is a <xxx>test</xxx>"));
 
         logger.info("--> searching on _all, highlighting on field1");
-        source = searchSource()
-                .query(termQuery("_all", "test"))
-                .highlight(highlight().field("field1", 100, 0).order("score").preTags("<xxx>").postTags("</xxx>"));
+        source = searchSource().query(termQuery("_all", "test")).highlight(highlight().field("field1", 100, 0).order("score").preTags("<xxx>").postTags("</xxx>"));
 
         searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
@@ -860,9 +528,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertHighlight(searchResponse, 0, "field1", 0, 1, equalTo("this is a <xxx>test</xxx>"));
 
         logger.info("--> searching on _all, highlighting on field2");
-        source = searchSource()
-                .query(termQuery("_all", "quick"))
-                .highlight(highlight().field("field2", 100, 0).order("score").preTags("<xxx>").postTags("</xxx>"));
+        source = searchSource().query(termQuery("_all", "quick")).highlight(highlight().field("field2", 100, 0).order("score").preTags("<xxx>").postTags("</xxx>"));
 
         searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
@@ -870,9 +536,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertHighlight(searchResponse, 0, "field2", 0, 1, equalTo("The <xxx>quick</xxx> brown fox jumps over the lazy dog"));
 
         logger.info("--> searching on _all, highlighting on field2");
-        source = searchSource()
-                .query(prefixQuery("_all", "qui"))
-                .highlight(highlight().field("field2", 100, 0).order("score").preTags("<xxx>").postTags("</xxx>"));
+        source = searchSource().query(prefixQuery("_all", "qui")).highlight(highlight().field("field2", 100, 0).order("score").preTags("<xxx>").postTags("</xxx>"));
 
         searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
@@ -883,25 +547,21 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
     /**
      * The FHV can spend a long time highlighting degenerate documents if phraseLimit is not set.
      */
-    @Test(timeout=120000)
+    @Test(timeout = 120000)
     public void testFVHManyMatches() throws Exception {
         assertAcked(prepareCreate("test").addMapping("type1", type1TermVectorMapping()));
         ensureGreen();
 
         // Index one megabyte of "t   " over and over and over again
-        client().prepareIndex("test", "type1")
-                .setSource("field1", Joiner.on("").join(Iterables.limit(Iterables.cycle("t   "), 1024*256))).get();
+        client().prepareIndex("test", "type1").setSource("field1", Joiner.on("").join(Iterables.limit(Iterables.cycle("t   "), 1024 * 256))).get();
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("field1", "t"))
-                .highlight(highlight().highlighterType("fvh").field("field1", 20, 1).order("score").preTags("<xxx>").postTags("</xxx>"));
+        SearchSourceBuilder source = searchSource().query(termQuery("field1", "t")).highlight(highlight().highlighterType("fvh").field("field1", 20, 1).order("score").preTags("<xxx>").postTags("</xxx>"));
         SearchResponse searchResponse = client().search(searchRequest("test").source(source)).actionGet();
         assertHighlight(searchResponse, 0, "field1", 0, 1, containsString("<xxx>t</xxx>"));
         logger.info("--> done");
     }
-
 
     @Test
     public void testMatchedFieldsFvhRequireFieldMatch() throws Exception {
@@ -914,58 +574,16 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
     }
 
     private void checkMatchedFieldsCase(boolean requireFieldMatch) throws Exception {
-        assertAcked(prepareCreate("test")
-            .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties")
-                    .startObject("foo")
-                        .field("type", "multi_field")
-                        .startObject("fields")
-                            .startObject("foo")
-                                .field("type", "string")
-                                .field("termVector", "with_positions_offsets")
-                                .field("store", "yes")
-                                .field("analyzer", "english")
-                            .endObject()
-                            .startObject("plain")
-                                .field("type", "string")
-                                .field("termVector", "with_positions_offsets")
-                                .field("analyzer", "standard")
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                    .startObject("bar")
-                        .field("type", "multi_field")
-                        .startObject("fields")
-                            .startObject("bar")
-                                .field("type", "string")
-                                .field("termVector", "with_positions_offsets")
-                                .field("store", "yes")
-                                .field("analyzer", "english")
-                            .endObject()
-                            .startObject("plain")
-                                .field("type", "string")
-                                .field("termVector", "with_positions_offsets")
-                                .field("analyzer", "standard")
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                .endObject()));
+        assertAcked(prepareCreate("test").addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("foo").field("type", "multi_field").startObject("fields").startObject("foo").field("type", "string").field("termVector", "with_positions_offsets").field("store", "yes").field("analyzer", "english").endObject().startObject("plain").field("type", "string").field("termVector", "with_positions_offsets").field("analyzer", "standard").endObject().endObject().endObject().startObject("bar").field("type", "multi_field").startObject("fields").startObject("bar").field("type", "string").field("termVector", "with_positions_offsets").field("store", "yes").field("analyzer", "english").endObject().startObject("plain").field("type", "string").field("termVector", "with_positions_offsets").field("analyzer", "standard").endObject().endObject().endObject().endObject()));
         ensureGreen();
 
-        index("test", "type1", "1",
-                "foo", "running with scissors");
-        index("test", "type1", "2",
-                "foo", "cat cat junk junk junk junk junk junk junk cats junk junk",
-                "bar", "cat cat junk junk junk junk junk junk junk cats junk junk");
-        index("test", "type1", "3",
-                "foo", "weird",
-                "bar", "result");
+        index("test", "type1", "1", "foo", "running with scissors");
+        index("test", "type1", "2", "foo", "cat cat junk junk junk junk junk junk junk cats junk junk", "bar", "cat cat junk junk junk junk junk junk junk cats junk junk");
+        index("test", "type1", "3", "foo", "weird", "bar", "result");
         refresh();
 
-        Field fooField = new Field("foo").numOfFragments(1).order("score").fragmentSize(25)
-                .highlighterType("fvh").requireFieldMatch(requireFieldMatch);
-        Field barField = new Field("bar").numOfFragments(1).order("score").fragmentSize(25)
-                .highlighterType("fvh").requireFieldMatch(requireFieldMatch);
+        Field fooField = new Field("foo").numOfFragments(1).order("score").fragmentSize(25).highlighterType("fvh").requireFieldMatch(requireFieldMatch);
+        Field barField = new Field("bar").numOfFragments(1).order("score").fragmentSize(25).highlighterType("fvh").requireFieldMatch(requireFieldMatch);
         SearchRequestBuilder req = client().prepareSearch("test").addHighlightedField(fooField);
 
         // First check highlighting without any matched fields set
@@ -1017,8 +635,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertHighlight(resp, 0, "foo", 0, equalTo("junk junk <em>cats</em> junk junk"));
 
         // Speaking of two fields, you can have two fields, only one of which has matchedFields enabled
-        QueryBuilder twoFieldsQuery = queryStringQuery("cats").field("foo").field("foo.plain^5")
-                .field("bar").field("bar.plain^5");
+        QueryBuilder twoFieldsQuery = queryStringQuery("cats").field("foo").field("foo.plain^5").field("bar").field("bar.plain^5");
         resp = req.setQuery(twoFieldsQuery).addHighlightedField(barField).get();
         assertHighlight(resp, 0, "foo", 0, equalTo("junk junk <em>cats</em> junk junk"));
         assertHighlight(resp, 0, "bar", 0, equalTo("<em>cat</em> <em>cat</em> junk junk junk junk"));
@@ -1057,8 +674,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertHighlight(resp, 0, "foo", 0, equalTo("<em>weird</em>"));
         assertHighlight(resp, 0, "bar", 0, equalTo("<em>resul</em>t"));
 
-        assertFailures(req.setQuery(queryStringQuery("result").field("foo").field("foo.plain").field("bar").field("bar.plain")),
-                 RestStatus.INTERNAL_SERVER_ERROR, containsString("String index out of range"));
+        assertFailures(req.setQuery(queryStringQuery("result").field("foo").field("foo.plain").field("bar").field("bar.plain")), RestStatus.INTERNAL_SERVER_ERROR, containsString("String index out of range"));
     }
 
     @Test
@@ -1076,11 +692,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         indexRandom(true, indexRequestBuilders);
 
         logger.info("--> searching explicitly on field1 and highlighting on it");
-        SearchResponse searchResponse = client().prepareSearch()
-                .setSize(COUNT)
-                .setQuery(termQuery("field1", "test"))
-                .addHighlightedField("field1", 100, 0)
-                .get();
+        SearchResponse searchResponse = client().prepareSearch().setSize(COUNT).setQuery(termQuery("field1", "test")).addHighlightedField("field1", 100, 0).get();
         for (int i = 0; i < COUNT; i++) {
             SearchHit hit = searchResponse.getHits().getHits()[i];
             // LUCENE 3.1 UPGRADE: Caused adding the space at the end...
@@ -1088,11 +700,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         }
 
         logger.info("--> searching explicitly _all and highlighting on _all");
-        searchResponse = client().prepareSearch()
-                .setSize(COUNT)
-                .setQuery(termQuery("_all", "test"))
-                .addHighlightedField("_all", 100, 0)
-                .get();
+        searchResponse = client().prepareSearch().setSize(COUNT).setQuery(termQuery("_all", "test")).addHighlightedField("_all", 100, 0).get();
         for (int i = 0; i < COUNT; i++) {
             SearchHit hit = searchResponse.getHits().getHits()[i];
             assertHighlight(searchResponse, i, "_all", 0, 1, equalTo("<em>test</em> " + hit.id() + " "));
@@ -1100,32 +708,21 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
     }
 
     public XContentBuilder type1TermVectorMapping() throws IOException {
-        return XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("_all").field("store", "yes").field("termVector", "with_positions_offsets").endObject()
-                .startObject("properties")
-                .startObject("field1").field("type", "string").field("termVector", "with_positions_offsets").endObject()
-                .startObject("field2").field("type", "string").field("termVector", "with_positions_offsets").endObject()
-                .endObject()
-                .endObject().endObject();
+        return XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_all").field("store", "yes").field("termVector", "with_positions_offsets").endObject().startObject("properties").startObject("field1").field("type", "string").field("termVector", "with_positions_offsets").endObject().startObject("field2").field("type", "string").field("termVector", "with_positions_offsets").endObject().endObject().endObject().endObject();
     }
 
     @Test
     public void testSameContent() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "title", "type=string,store=yes,term_vector=with_positions_offsets"));
+        assertAcked(prepareCreate("test").addMapping("type1", "title", "type=string,store=yes,term_vector=with_positions_offsets"));
         ensureYellow();
 
         IndexRequestBuilder[] indexRequestBuilders = new IndexRequestBuilder[5];
         for (int i = 0; i < 5; i++) {
-            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i))
-                    .setSource("title", "This is a test on the highlighting bug present in elasticsearch");
+            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i)).setSource("title", "This is a test on the highlighting bug present in elasticsearch");
         }
         indexRandom(true, indexRequestBuilders);
 
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchQuery("title", "bug"))
-                .addHighlightedField("title", -1, 0)
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchQuery("title", "bug")).addHighlightedField("title", -1, 0).get();
 
         for (int i = 0; i < 5; i++) {
             assertHighlight(search, i, "title", 0, 1, equalTo("This is a test on the highlighting <em>bug</em> present in elasticsearch"));
@@ -1134,21 +731,16 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testFastVectorHighlighterOffsetParameter() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "title", "type=string,store=yes,term_vector=with_positions_offsets").get());
+        assertAcked(prepareCreate("test").addMapping("type1", "title", "type=string,store=yes,term_vector=with_positions_offsets").get());
         ensureYellow();
 
         IndexRequestBuilder[] indexRequestBuilders = new IndexRequestBuilder[5];
         for (int i = 0; i < 5; i++) {
-            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i))
-                    .setSource("title", "This is a test on the highlighting bug present in elasticsearch");
+            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i)).setSource("title", "This is a test on the highlighting bug present in elasticsearch");
         }
         indexRandom(true, indexRequestBuilders);
 
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchQuery("title", "bug"))
-                .addHighlightedField("title", 30, 1, 10)
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchQuery("title", "bug")).addHighlightedField("title", 30, 1, 10).get();
 
         for (int i = 0; i < 5; i++) {
             // LUCENE 3.1 UPGRADE: Caused adding the space at the end...
@@ -1158,22 +750,16 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testEscapeHtml() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "title", "type=string,store=yes"));
+        assertAcked(prepareCreate("test").addMapping("type1", "title", "type=string,store=yes"));
         ensureYellow();
 
         IndexRequestBuilder[] indexRequestBuilders = new IndexRequestBuilder[5];
         for (int i = 0; i < indexRequestBuilders.length; i++) {
-            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i))
-                    .setSource("title", "This is a html escaping highlighting test for *&? elasticsearch");
+            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i)).setSource("title", "This is a html escaping highlighting test for *&? elasticsearch");
         }
         indexRandom(true, indexRequestBuilders);
 
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchQuery("title", "test"))
-                .setHighlighterEncoder("html")
-                .addHighlightedField("title", 50, 1, 10)
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchQuery("title", "test")).setHighlighterEncoder("html").addHighlightedField("title", 50, 1, 10).get();
 
         for (int i = 0; i < indexRequestBuilders.length; i++) {
             assertHighlight(search, i, "title", 0, 1, equalTo("This is a html escaping highlighting <em>test</em> for *&amp;? elasticsearch"));
@@ -1182,22 +768,16 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testEscapeHtml_vector() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "title", "type=string,store=yes,term_vector=with_positions_offsets"));
+        assertAcked(prepareCreate("test").addMapping("type1", "title", "type=string,store=yes,term_vector=with_positions_offsets"));
         ensureYellow();
 
         IndexRequestBuilder[] indexRequestBuilders = new IndexRequestBuilder[5];
         for (int i = 0; i < 5; i++) {
-            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i))
-                    .setSource("title", "This is a html escaping highlighting test for *&? elasticsearch");
+            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i)).setSource("title", "This is a html escaping highlighting test for *&? elasticsearch");
         }
         indexRandom(true, indexRequestBuilders);
 
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchQuery("title", "test"))
-                .setHighlighterEncoder("html")
-                .addHighlightedField("title", 30, 1, 10)
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchQuery("title", "test")).setHighlighterEncoder("html").addHighlightedField("title", 30, 1, 10).get();
 
         for (int i = 0; i < 5; i++) {
             assertHighlight(search, i, "title", 0, 1, equalTo("highlighting <em>test</em> for *&amp;? elasticsearch"));
@@ -1206,183 +786,109 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testMultiMapperVectorWithStore() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("title").field("type", "multi_field").startObject("fields")
-                        .startObject("title").field("type", "string").field("store", "yes").field("term_vector", "with_positions_offsets").field("analyzer", "classic").endObject()
-                        .startObject("key").field("type", "string").field("store", "yes").field("term_vector", "with_positions_offsets").field("analyzer", "whitespace").endObject()
-                        .endObject().endObject()
-                        .endObject().endObject().endObject()));
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("title").field("type", "multi_field").startObject("fields").startObject("title").field("type", "string").field("store", "yes").field("term_vector", "with_positions_offsets").field("analyzer", "classic").endObject().startObject("key").field("type", "string").field("store", "yes").field("term_vector", "with_positions_offsets").field("analyzer", "whitespace").endObject().endObject().endObject().endObject().endObject().endObject()));
         ensureGreen();
         client().prepareIndex("test", "type1", "1").setSource("title", "this is a test").get();
         refresh();
         // simple search on body with standard analyzer with a simple field query
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchQuery("title", "this is a test"))
-                .setHighlighterEncoder("html")
-                .addHighlightedField("title", 50, 1)
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchQuery("title", "this is a test")).setHighlighterEncoder("html").addHighlightedField("title", 50, 1).get();
 
         assertHighlight(search, 0, "title", 0, 1, equalTo("this is a <em>test</em>"));
 
         // search on title.key and highlight on title
-        search = client().prepareSearch()
-                .setQuery(matchQuery("title.key", "this is a test"))
-                .setHighlighterEncoder("html")
-                .addHighlightedField("title.key", 50, 1)
-                .get();
+        search = client().prepareSearch().setQuery(matchQuery("title.key", "this is a test")).setHighlighterEncoder("html").addHighlightedField("title.key", 50, 1).get();
 
         assertHighlight(search, 0, "title.key", 0, 1, equalTo("<em>this</em> <em>is</em> <em>a</em> <em>test</em>"));
     }
 
     @Test
     public void testMultiMapperVectorFromSource() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("title").field("type", "multi_field").startObject("fields")
-                        .startObject("title").field("type", "string").field("store", "no").field("term_vector", "with_positions_offsets").field("analyzer", "classic").endObject()
-                        .startObject("key").field("type", "string").field("store", "no").field("term_vector", "with_positions_offsets").field("analyzer", "whitespace").endObject()
-                        .endObject().endObject()
-                        .endObject().endObject().endObject()));
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("title").field("type", "multi_field").startObject("fields").startObject("title").field("type", "string").field("store", "no").field("term_vector", "with_positions_offsets").field("analyzer", "classic").endObject().startObject("key").field("type", "string").field("store", "no").field("term_vector", "with_positions_offsets").field("analyzer", "whitespace").endObject().endObject().endObject().endObject().endObject().endObject()));
         ensureGreen();
 
         client().prepareIndex("test", "type1", "1").setSource("title", "this is a test").get();
         refresh();
 
         // simple search on body with standard analyzer with a simple field query
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchQuery("title", "this is a test"))
-                .setHighlighterEncoder("html")
-                .addHighlightedField("title", 50, 1)
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchQuery("title", "this is a test")).setHighlighterEncoder("html").addHighlightedField("title", 50, 1).get();
 
         assertHighlight(search, 0, "title", 0, 1, equalTo("this is a <em>test</em>"));
 
         // search on title.key and highlight on title.key
-        search = client().prepareSearch()
-                .setQuery(matchQuery("title.key", "this is a test"))
-                .setHighlighterEncoder("html")
-                .addHighlightedField("title.key", 50, 1)
-                .get();
+        search = client().prepareSearch().setQuery(matchQuery("title.key", "this is a test")).setHighlighterEncoder("html").addHighlightedField("title.key", 50, 1).get();
 
         assertHighlight(search, 0, "title.key", 0, 1, equalTo("<em>this</em> <em>is</em> <em>a</em> <em>test</em>"));
     }
 
     @Test
     public void testMultiMapperNoVectorWithStore() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("title").field("type", "multi_field").startObject("fields")
-                        .startObject("title").field("type", "string").field("store", "yes").field("term_vector", "no").field("analyzer", "classic").endObject()
-                        .startObject("key").field("type", "string").field("store", "yes").field("term_vector", "no").field("analyzer", "whitespace").endObject()
-                        .endObject().endObject()
-                        .endObject().endObject().endObject()));
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("title").field("type", "multi_field").startObject("fields").startObject("title").field("type", "string").field("store", "yes").field("term_vector", "no").field("analyzer", "classic").endObject().startObject("key").field("type", "string").field("store", "yes").field("term_vector", "no").field("analyzer", "whitespace").endObject().endObject().endObject().endObject().endObject().endObject()));
 
         ensureGreen();
         client().prepareIndex("test", "type1", "1").setSource("title", "this is a test").get();
         refresh();
 
         // simple search on body with standard analyzer with a simple field query
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchQuery("title", "this is a test"))
-                .setHighlighterEncoder("html")
-                .addHighlightedField("title", 50, 1)
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchQuery("title", "this is a test")).setHighlighterEncoder("html").addHighlightedField("title", 50, 1).get();
 
         assertHighlight(search, 0, "title", 0, 1, equalTo("this is a <em>test</em>"));
 
         // search on title.key and highlight on title
-        search = client().prepareSearch()
-                .setQuery(matchQuery("title.key", "this is a test"))
-                .setHighlighterEncoder("html")
-                .addHighlightedField("title.key", 50, 1)
-                .get();
+        search = client().prepareSearch().setQuery(matchQuery("title.key", "this is a test")).setHighlighterEncoder("html").addHighlightedField("title.key", 50, 1).get();
 
         assertHighlight(search, 0, "title.key", 0, 1, equalTo("<em>this</em> <em>is</em> <em>a</em> <em>test</em>"));
     }
 
     @Test
     public void testMultiMapperNoVectorFromSource() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("title").field("type", "multi_field").startObject("fields")
-                        .startObject("title").field("type", "string").field("store", "no").field("term_vector", "no").field("analyzer", "classic").endObject()
-                        .startObject("key").field("type", "string").field("store", "no").field("term_vector", "no").field("analyzer", "whitespace").endObject()
-                        .endObject().endObject()
-                        .endObject().endObject().endObject()));
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("title").field("type", "multi_field").startObject("fields").startObject("title").field("type", "string").field("store", "no").field("term_vector", "no").field("analyzer", "classic").endObject().startObject("key").field("type", "string").field("store", "no").field("term_vector", "no").field("analyzer", "whitespace").endObject().endObject().endObject().endObject().endObject().endObject()));
         ensureGreen();
         client().prepareIndex("test", "type1", "1").setSource("title", "this is a test").get();
         refresh();
 
         // simple search on body with standard analyzer with a simple field query
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchQuery("title", "this is a test"))
-                .setHighlighterEncoder("html")
-                .addHighlightedField("title", 50, 1)
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchQuery("title", "this is a test")).setHighlighterEncoder("html").addHighlightedField("title", 50, 1).get();
 
         assertHighlight(search, 0, "title", 0, 1, equalTo("this is a <em>test</em>"));
 
         // search on title.key and highlight on title.key
-        search = client().prepareSearch()
-                .setQuery(matchQuery("title.key", "this is a test"))
-                .setHighlighterEncoder("html")
-                .addHighlightedField("title.key", 50, 1)
-                .get();
+        search = client().prepareSearch().setQuery(matchQuery("title.key", "this is a test")).setHighlighterEncoder("html").addHighlightedField("title.key", 50, 1).get();
 
         assertHighlight(search, 0, "title.key", 0, 1, equalTo("<em>this</em> <em>is</em> <em>a</em> <em>test</em>"));
     }
 
     @Test
     public void testFastVectorHighlighterShouldFailIfNoTermVectors() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "title", "type=string,store=yes,term_vector=no"));
+        assertAcked(prepareCreate("test").addMapping("type1", "title", "type=string,store=yes,term_vector=no"));
         ensureGreen();
 
         IndexRequestBuilder[] indexRequestBuilders = new IndexRequestBuilder[5];
         for (int i = 0; i < 5; i++) {
-            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i))
-                    .setSource("title", "This is a test for the enabling fast vector highlighter");
+            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i)).setSource("title", "This is a test for the enabling fast vector highlighter");
         }
         indexRandom(true, indexRequestBuilders);
 
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchPhraseQuery("title", "this is a test"))
-                .addHighlightedField("title", 50, 1, 10)
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchPhraseQuery("title", "this is a test")).addHighlightedField("title", 50, 1, 10).get();
         assertNoFailures(search);
 
-        assertFailures(client().prepareSearch()
-                .setQuery(matchPhraseQuery("title", "this is a test"))
-                .addHighlightedField("title", 50, 1, 10)
-                .setHighlighterType("fast-vector-highlighter"),
-                RestStatus.BAD_REQUEST,
-                containsString("the field [title] should be indexed with term vector with position offsets to be used with fast vector highlighter"));
+        assertFailures(client().prepareSearch().setQuery(matchPhraseQuery("title", "this is a test")).addHighlightedField("title", 50, 1, 10).setHighlighterType("fast-vector-highlighter"), RestStatus.BAD_REQUEST, containsString("the field [title] should be indexed with term vector with position offsets to be used with fast vector highlighter"));
 
         //should not fail if there is a wildcard
-        assertNoFailures(client().prepareSearch()
-                .setQuery(matchPhraseQuery("title", "this is a test"))
-                .addHighlightedField("tit*", 50, 1, 10)
-                .setHighlighterType("fast-vector-highlighter").get());
+        assertNoFailures(client().prepareSearch().setQuery(matchPhraseQuery("title", "this is a test")).addHighlightedField("tit*", 50, 1, 10).setHighlighterType("fast-vector-highlighter").get());
     }
 
     @Test
     public void testDisableFastVectorHighlighter() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "title", "type=string,store=yes,term_vector=with_positions_offsets,analyzer=classic"));
+        assertAcked(prepareCreate("test").addMapping("type1", "title", "type=string,store=yes,term_vector=with_positions_offsets,analyzer=classic"));
         ensureGreen();
 
         IndexRequestBuilder[] indexRequestBuilders = new IndexRequestBuilder[5];
         for (int i = 0; i < indexRequestBuilders.length; i++) {
-            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i))
-                    .setSource("title", "This is a test for the workaround for the fast vector highlighting SOLR-3724");
+            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i)).setSource("title", "This is a test for the workaround for the fast vector highlighting SOLR-3724");
         }
         indexRandom(true, indexRequestBuilders);
 
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchPhraseQuery("title", "test for the workaround"))
-                .addHighlightedField("title", 50, 1, 10)
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchPhraseQuery("title", "test for the workaround")).addHighlightedField("title", 50, 1, 10).get();
 
         for (int i = 0; i < indexRequestBuilders.length; i++) {
             // Because of SOLR-3724 nothing is highlighted when FVH is used
@@ -1390,22 +896,14 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         }
 
         // Using plain highlighter instead of FVH
-        search = client().prepareSearch()
-                .setQuery(matchPhraseQuery("title", "test for the workaround"))
-                .addHighlightedField("title", 50, 1, 10)
-                .setHighlighterType("highlighter")
-                .get();
+        search = client().prepareSearch().setQuery(matchPhraseQuery("title", "test for the workaround")).addHighlightedField("title", 50, 1, 10).setHighlighterType("highlighter").get();
 
         for (int i = 0; i < indexRequestBuilders.length; i++) {
             assertHighlight(search, i, "title", 0, 1, equalTo("This is a <em>test</em> for the <em>workaround</em> for the fast vector highlighting SOLR-3724"));
         }
 
         // Using plain highlighter instead of FVH on the field level
-        search = client().prepareSearch()
-                .setQuery(matchPhraseQuery("title", "test for the workaround"))
-                .addHighlightedField(new HighlightBuilder.Field("title").highlighterType("highlighter"))
-                .setHighlighterType("highlighter")
-                .get();
+        search = client().prepareSearch().setQuery(matchPhraseQuery("title", "test for the workaround")).addHighlightedField(new HighlightBuilder.Field("title").highlighterType("highlighter")).setHighlighterType("highlighter").get();
 
         for (int i = 0; i < indexRequestBuilders.length; i++) {
             assertHighlight(search, i, "title", 0, 1, equalTo("This is a <em>test</em> for the <em>workaround</em> for the fast vector highlighting SOLR-3724"));
@@ -1414,18 +912,12 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testFSHHighlightAllMvFragments() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "tags", "type=string,term_vector=with_positions_offsets"));
+        assertAcked(prepareCreate("test").addMapping("type1", "tags", "type=string,term_vector=with_positions_offsets"));
         ensureGreen();
-        client().prepareIndex("test", "type1", "1")
-                .setSource("tags", new String[]{
-                        "this is a really long tag i would like to highlight",
-                        "here is another one that is very long and has the tag token near the end"}).get();
+        client().prepareIndex("test", "type1", "1").setSource("tags", new String[] { "this is a really long tag i would like to highlight", "here is another one that is very long and has the tag token near the end" }).get();
         refresh();
 
-        SearchResponse response = client().prepareSearch("test")
-                .setQuery(QueryBuilders.matchQuery("tags", "tag"))
-                .addHighlightedField("tags", -1, 0).get();
+        SearchResponse response = client().prepareSearch("test").setQuery(QueryBuilders.matchQuery("tags", "tag")).addHighlightedField("tags", -1, 0).get();
 
         assertHighlight(response, 0, "tags", 0, equalTo("this is a really long <em>tag</em> i would like to highlight"));
         assertHighlight(response, 0, "tags", 1, 2, equalTo("here is another one that is very long and has the <em>tag</em> token near the end"));
@@ -1435,14 +927,11 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
     public void testBoostingQuery() {
         createIndex("test");
         ensureGreen();
-        client().prepareIndex("test", "type1")
-                .setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog").get();
+        client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog").get();
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource()
-                .query(boostingQuery().positive(termQuery("field2", "brown")).negative(termQuery("field2", "foobar")).negativeBoost(0.5f))
-                .highlight(highlight().field("field2").order("score").preTags("<x>").postTags("</x>"));
+        SearchSourceBuilder source = searchSource().query(boostingQuery().positive(termQuery("field2", "brown")).negative(termQuery("field2", "foobar")).negativeBoost(0.5f)).highlight(highlight().field("field2").order("score").preTags("<x>").postTags("</x>"));
 
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
@@ -1453,14 +942,11 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
     public void testBoostingQueryTermVector() throws ElasticsearchException, IOException {
         assertAcked(prepareCreate("test").addMapping("type1", type1TermVectorMapping()));
         ensureGreen();
-        client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog")
-                .get();
+        client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog").get();
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource()
-                .query(boostingQuery().positive(termQuery("field2", "brown")).negative(termQuery("field2", "foobar")).negativeBoost(0.5f))
-                .highlight(highlight().field("field2").order("score").preTags("<x>").postTags("</x>"));
+        SearchSourceBuilder source = searchSource().query(boostingQuery().positive(termQuery("field2", "brown")).negative(termQuery("field2", "foobar")).negativeBoost(0.5f)).highlight(highlight().field("field2").order("score").preTags("<x>").postTags("</x>"));
 
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
@@ -1472,15 +958,11 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         createIndex("test");
         ensureGreen();
 
-        client().prepareIndex("test", "type1")
-                .setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog")
-                .get();
+        client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog").get();
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource()
-                .query(commonTermsQuery("field2", "quick brown").cutoffFrequency(100))
-                .highlight(highlight().field("field2").order("score").preTags("<x>").postTags("</x>"));
+        SearchSourceBuilder source = searchSource().query(commonTermsQuery("field2", "quick brown").cutoffFrequency(100)).highlight(highlight().field("field2").order("score").preTags("<x>").postTags("</x>"));
 
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
         assertHighlight(searchResponse, 0, "field2", 0, 1, equalTo("The <x>quick</x> <x>brown</x> fox jumps over the lazy dog"));
@@ -1494,8 +976,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog").get();
         refresh();
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource().query(commonTermsQuery("field2", "quick brown").cutoffFrequency(100))
-                .highlight(highlight().field("field2").order("score").preTags("<x>").postTags("</x>"));
+        SearchSourceBuilder source = searchSource().query(commonTermsQuery("field2", "quick brown").cutoffFrequency(100)).highlight(highlight().field("field2").order("score").preTags("<x>").postTags("</x>"));
 
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
@@ -1504,37 +985,23 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testPhrasePrefix() throws ElasticsearchException, IOException {
-        Builder builder = settingsBuilder()
-                .put(indexSettings())
-                .put("index.analysis.analyzer.synonym.tokenizer", "whitespace")
-                .putArray("index.analysis.analyzer.synonym.filter", "synonym", "lowercase")
-                .put("index.analysis.filter.synonym.type", "synonym")
-                .putArray("index.analysis.filter.synonym.synonyms", "quick => fast");
+        Builder builder = settingsBuilder().put(indexSettings()).put("index.analysis.analyzer.synonym.tokenizer", "whitespace").putArray("index.analysis.analyzer.synonym.filter", "synonym", "lowercase").put("index.analysis.filter.synonym.type", "synonym").putArray("index.analysis.filter.synonym.synonyms", "quick => fast");
 
-        assertAcked(prepareCreate("test").setSettings(builder.build()).addMapping("type1", type1TermVectorMapping())
-                .addMapping("type2", "_all", "store=yes,termVector=with_positions_offsets",
-                        "field4", "type=string,term_vector=with_positions_offsets,analyzer=synonym",
-                        "field3", "type=string,analyzer=synonym"));
+        assertAcked(prepareCreate("test").setSettings(builder.build()).addMapping("type1", type1TermVectorMapping()).addMapping("type2", "_all", "store=yes,termVector=with_positions_offsets", "field4", "type=string,term_vector=with_positions_offsets,analyzer=synonym", "field3", "type=string,analyzer=synonym"));
         ensureGreen();
 
-        client().prepareIndex("test", "type1", "0")
-                .setSource("field0", "The quick brown fox jumps over the lazy dog", "field1", "The quick brown fox jumps over the lazy dog").get();
-        client().prepareIndex("test", "type1", "1")
-                .setSource("field1", "The quick browse button is a fancy thing, right bro?").get();
+        client().prepareIndex("test", "type1", "0").setSource("field0", "The quick brown fox jumps over the lazy dog", "field1", "The quick brown fox jumps over the lazy dog").get();
+        client().prepareIndex("test", "type1", "1").setSource("field1", "The quick browse button is a fancy thing, right bro?").get();
         refresh();
         logger.info("--> highlighting and searching on field0");
-        SearchSourceBuilder source = searchSource()
-                .query(matchPhrasePrefixQuery("field0", "quick bro"))
-                .highlight(highlight().field("field0").order("score").preTags("<x>").postTags("</x>"));
+        SearchSourceBuilder source = searchSource().query(matchPhrasePrefixQuery("field0", "quick bro")).highlight(highlight().field("field0").order("score").preTags("<x>").postTags("</x>"));
 
         SearchResponse searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
         assertHighlight(searchResponse, 0, "field0", 0, 1, equalTo("The <x>quick</x> <x>brown</x> fox jumps over the lazy dog"));
 
         logger.info("--> highlighting and searching on field1");
-        source = searchSource()
-                .query(matchPhrasePrefixQuery("field1", "quick bro"))
-                .highlight(highlight().field("field1").order("score").preTags("<x>").postTags("</x>"));
+        source = searchSource().query(matchPhrasePrefixQuery("field1", "quick bro")).highlight(highlight().field("field1").order("score").preTags("<x>").postTags("</x>"));
 
         searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
@@ -1542,32 +1009,26 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertHighlight(searchResponse, 1, "field1", 0, 1, anyOf(equalTo("The <x>quick browse</x> button is a fancy thing, right bro?"), equalTo("The <x>quick brown</x> fox jumps over the lazy dog")));
 
         // with synonyms
-        client().prepareIndex("test", "type2", "0")
-                .setSource("field4", "The quick brown fox jumps over the lazy dog", "field3", "The quick brown fox jumps over the lazy dog").get();
-        client().prepareIndex("test", "type2", "1")
-                .setSource("field4", "The quick browse button is a fancy thing, right bro?").get();
-        client().prepareIndex("test", "type2", "2")
-                .setSource("field4", "a quick fast blue car").get();
+        client().prepareIndex("test", "type2", "0").setSource("field4", "The quick brown fox jumps over the lazy dog", "field3", "The quick brown fox jumps over the lazy dog").get();
+        client().prepareIndex("test", "type2", "1").setSource("field4", "The quick browse button is a fancy thing, right bro?").get();
+        client().prepareIndex("test", "type2", "2").setSource("field4", "a quick fast blue car").get();
         refresh();
 
-        source = searchSource().postFilter(typeFilter("type2")).query(matchPhrasePrefixQuery("field3", "fast bro"))
-                .highlight(highlight().field("field3").order("score").preTags("<x>").postTags("</x>"));
+        source = searchSource().postFilter(typeFilter("type2")).query(matchPhrasePrefixQuery("field3", "fast bro")).highlight(highlight().field("field3").order("score").preTags("<x>").postTags("</x>"));
 
         searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
         assertHighlight(searchResponse, 0, "field3", 0, 1, equalTo("The <x>quick</x> <x>brown</x> fox jumps over the lazy dog"));
 
         logger.info("--> highlighting and searching on field4");
-        source = searchSource().postFilter(typeFilter("type2")).query(matchPhrasePrefixQuery("field4", "the fast bro"))
-                .highlight(highlight().field("field4").order("score").preTags("<x>").postTags("</x>"));
+        source = searchSource().postFilter(typeFilter("type2")).query(matchPhrasePrefixQuery("field4", "the fast bro")).highlight(highlight().field("field4").order("score").preTags("<x>").postTags("</x>"));
         searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
         assertHighlight(searchResponse, 0, "field4", 0, 1, anyOf(equalTo("<x>The quick browse</x> button is a fancy thing, right bro?"), equalTo("<x>The quick brown</x> fox jumps over the lazy dog")));
         assertHighlight(searchResponse, 1, "field4", 0, 1, anyOf(equalTo("<x>The quick browse</x> button is a fancy thing, right bro?"), equalTo("<x>The quick brown</x> fox jumps over the lazy dog")));
 
         logger.info("--> highlighting and searching on field4");
-        source = searchSource().postFilter(typeFilter("type2")).query(matchPhrasePrefixQuery("field4", "a fast quick blue ca"))
-                .highlight(highlight().field("field4").order("score").preTags("<x>").postTags("</x>"));
+        source = searchSource().postFilter(typeFilter("type2")).query(matchPhrasePrefixQuery("field4", "a fast quick blue ca")).highlight(highlight().field("field4").order("score").preTags("<x>").postTags("</x>"));
         searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
         assertHighlight(searchResponse, 0, "field4", 0, 1, equalTo("<x>a quick fast blue car</x>"));
@@ -1575,37 +1036,22 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testPlainHighlightDifferentFragmenter() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "tags", "type=string"));
+        assertAcked(prepareCreate("test").addMapping("type1", "tags", "type=string"));
         ensureGreen();
-        client().prepareIndex("test", "type1", "1")
-                .setSource(jsonBuilder().startObject().field("tags",
-                        "this is a really long tag i would like to highlight",
-                        "here is another one that is very long tag and has the tag token near the end").endObject()).get();
+        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject().field("tags", "this is a really long tag i would like to highlight", "here is another one that is very long tag and has the tag token near the end").endObject()).get();
         refresh();
 
-        SearchResponse response = client().prepareSearch("test")
-                .setQuery(QueryBuilders.matchQuery("tags", "long tag").type(MatchQueryBuilder.Type.PHRASE))
-                .addHighlightedField(new HighlightBuilder.Field("tags")
-                        .fragmentSize(-1).numOfFragments(2).fragmenter("simple")).get();
+        SearchResponse response = client().prepareSearch("test").setQuery(QueryBuilders.matchQuery("tags", "long tag").type(MatchQueryBuilder.Type.PHRASE)).addHighlightedField(new HighlightBuilder.Field("tags").fragmentSize(-1).numOfFragments(2).fragmenter("simple")).get();
 
         assertHighlight(response, 0, "tags", 0, equalTo("this is a really <em>long</em> <em>tag</em> i would like to highlight"));
         assertHighlight(response, 0, "tags", 1, 2, equalTo("here is another one that is very <em>long</em> <em>tag</em> and has the tag token near the end"));
 
-        response = client().prepareSearch("test")
-                .setQuery(QueryBuilders.matchQuery("tags", "long tag").type(MatchQueryBuilder.Type.PHRASE))
-                .addHighlightedField(new HighlightBuilder.Field("tags")
-                        .fragmentSize(-1).numOfFragments(2).fragmenter("span")).get();
+        response = client().prepareSearch("test").setQuery(QueryBuilders.matchQuery("tags", "long tag").type(MatchQueryBuilder.Type.PHRASE)).addHighlightedField(new HighlightBuilder.Field("tags").fragmentSize(-1).numOfFragments(2).fragmenter("span")).get();
 
         assertHighlight(response, 0, "tags", 0, equalTo("this is a really <em>long</em> <em>tag</em> i would like to highlight"));
         assertHighlight(response, 0, "tags", 1, 2, equalTo("here is another one that is very <em>long</em> <em>tag</em> and has the tag token near the end"));
 
-        assertFailures(client().prepareSearch("test")
-                    .setQuery(QueryBuilders.matchQuery("tags", "long tag").type(MatchQueryBuilder.Type.PHRASE))
-                    .addHighlightedField(new HighlightBuilder.Field("tags")
-                            .fragmentSize(-1).numOfFragments(2).fragmenter("invalid")),
-                    RestStatus.BAD_REQUEST,
-                    containsString("unknown fragmenter option [invalid] for the field [tags]"));
+        assertFailures(client().prepareSearch("test").setQuery(QueryBuilders.matchQuery("tags", "long tag").type(MatchQueryBuilder.Type.PHRASE)).addHighlightedField(new HighlightBuilder.Field("tags").fragmentSize(-1).numOfFragments(2).fragmenter("invalid")), RestStatus.BAD_REQUEST, containsString("unknown fragmenter option [invalid] for the field [tags]"));
     }
 
     @Test
@@ -1616,75 +1062,46 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         index("test", "type1", "1", "field1", "The <b>quick<b> brown fox", "field2", "The <b>slow<b> brown fox");
         refresh();
 
-        SearchResponse response = client().prepareSearch("test")
-                .setQuery(QueryBuilders.matchQuery("field1", "fox"))
-                .addHighlightedField(new HighlightBuilder.Field("field1").preTags("<1>").postTags("</1>").requireFieldMatch(true))
-                .addHighlightedField(new HighlightBuilder.Field("field2").preTags("<2>").postTags("</2>").requireFieldMatch(false))
-                .get();
+        SearchResponse response = client().prepareSearch("test").setQuery(QueryBuilders.matchQuery("field1", "fox")).addHighlightedField(new HighlightBuilder.Field("field1").preTags("<1>").postTags("</1>").requireFieldMatch(true)).addHighlightedField(new HighlightBuilder.Field("field2").preTags("<2>").postTags("</2>").requireFieldMatch(false)).get();
         assertHighlight(response, 0, "field1", 0, 1, equalTo("The <b>quick<b> brown <1>fox</1>"));
         assertHighlight(response, 0, "field2", 0, 1, equalTo("The <b>slow<b> brown <2>fox</2>"));
     }
 
     @Test
     public void testFastVectorHighlighterMultipleFields() {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "field1", "type=string,term_vectors=with_positions_offsets", "field2", "type=string,term_vectors=with_positions_offsets"));
+        assertAcked(prepareCreate("test").addMapping("type1", "field1", "type=string,term_vectors=with_positions_offsets", "field2", "type=string,term_vectors=with_positions_offsets"));
         ensureGreen();
 
         index("test", "type1", "1", "field1", "The <b>quick<b> brown fox", "field2", "The <b>slow<b> brown fox");
         refresh();
 
-        SearchResponse response = client().prepareSearch("test")
-                .setQuery(QueryBuilders.matchQuery("field1", "fox"))
-                .addHighlightedField(new HighlightBuilder.Field("field1").preTags("<1>").postTags("</1>").requireFieldMatch(true))
-                .addHighlightedField(new HighlightBuilder.Field("field2").preTags("<2>").postTags("</2>").requireFieldMatch(false))
-                .get();
+        SearchResponse response = client().prepareSearch("test").setQuery(QueryBuilders.matchQuery("field1", "fox")).addHighlightedField(new HighlightBuilder.Field("field1").preTags("<1>").postTags("</1>").requireFieldMatch(true)).addHighlightedField(new HighlightBuilder.Field("field2").preTags("<2>").postTags("</2>").requireFieldMatch(false)).get();
         assertHighlight(response, 0, "field1", 0, 1, equalTo("The <b>quick<b> brown <1>fox</1>"));
         assertHighlight(response, 0, "field2", 0, 1, equalTo("The <b>slow<b> brown <2>fox</2>"));
     }
 
     @Test
     public void testMissingStoredField() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "highlight_field", "type=string,store=yes"));
+        assertAcked(prepareCreate("test").addMapping("type1", "highlight_field", "type=string,store=yes"));
         ensureGreen();
-        client().prepareIndex("test", "type1", "1")
-                .setSource(jsonBuilder().startObject()
-                        .field("field", "highlight")
-                        .endObject()).get();
+        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject().field("field", "highlight").endObject()).get();
         refresh();
 
         // This query used to fail when the field to highlight was absent
-        SearchResponse response = client().prepareSearch("test")
-                .setQuery(QueryBuilders.matchQuery("field", "highlight").type(MatchQueryBuilder.Type.BOOLEAN))
-                .addHighlightedField(new HighlightBuilder.Field("highlight_field")
-                        .fragmentSize(-1).numOfFragments(1).fragmenter("simple")).get();
+        SearchResponse response = client().prepareSearch("test").setQuery(QueryBuilders.matchQuery("field", "highlight").type(MatchQueryBuilder.Type.BOOLEAN)).addHighlightedField(new HighlightBuilder.Field("highlight_field").fragmentSize(-1).numOfFragments(1).fragmenter("simple")).get();
         assertThat(response.getHits().hits()[0].highlightFields().isEmpty(), equalTo(true));
     }
 
     @Test
     // https://github.com/elasticsearch/elasticsearch/issues/3211
     public void testNumericHighlighting() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("test", "text", "type=string,index=analyzed",
-                        "byte", "type=byte", "short", "type=short", "int", "type=integer", "long", "type=long",
-                        "float", "type=float", "double", "type=double"));
+        assertAcked(prepareCreate("test").addMapping("test", "text", "type=string,index=analyzed", "byte", "type=byte", "short", "type=short", "int", "type=integer", "long", "type=long", "float", "type=float", "double", "type=double"));
         ensureGreen();
 
-        client().prepareIndex("test", "test", "1").setSource("text", "elasticsearch test",
-                "byte", 25, "short", 42, "int", 100, "long", -1, "float", 3.2f, "double", 42.42).get();
+        client().prepareIndex("test", "test", "1").setSource("text", "elasticsearch test", "byte", 25, "short", 42, "int", 100, "long", -1, "float", 3.2f, "double", 42.42).get();
         refresh();
 
-        SearchResponse response = client().prepareSearch("test")
-                .setQuery(QueryBuilders.matchQuery("text", "test").type(MatchQueryBuilder.Type.BOOLEAN))
-                .addHighlightedField("text")
-                .addHighlightedField("byte")
-                .addHighlightedField("short")
-                .addHighlightedField("int")
-                .addHighlightedField("long")
-                .addHighlightedField("float")
-                .addHighlightedField("double")
-                .get();
+        SearchResponse response = client().prepareSearch("test").setQuery(QueryBuilders.matchQuery("text", "test").type(MatchQueryBuilder.Type.BOOLEAN)).addHighlightedField("text").addHighlightedField("byte").addHighlightedField("short").addHighlightedField("int").addHighlightedField("long").addHighlightedField("float").addHighlightedField("double").get();
         // Highlighting of numeric fields is not supported, but it should not raise errors
         // (this behavior is consistent with version 0.20)
         assertHitCount(response, 1l);
@@ -1693,29 +1110,19 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
     @Test
     // https://github.com/elasticsearch/elasticsearch/issues/3200
     public void testResetTwice() throws Exception {
-        assertAcked(prepareCreate("test")
-                .setSettings(settingsBuilder()
-                        .put(indexSettings())
-                        .put("analysis.analyzer.my_analyzer.type", "pattern")
-                        .put("analysis.analyzer.my_analyzer.pattern", "\\s+")
-                        .build())
-                .addMapping("type", "text", "type=string,analyzer=my_analyzer"));
+        assertAcked(prepareCreate("test").setSettings(settingsBuilder().put(indexSettings()).put("analysis.analyzer.my_analyzer.type", "pattern").put("analysis.analyzer.my_analyzer.pattern", "\\s+").build()).addMapping("type", "text", "type=string,analyzer=my_analyzer"));
         ensureGreen();
-        client().prepareIndex("test", "type", "1")
-                .setSource("text", "elasticsearch test").get();
+        client().prepareIndex("test", "type", "1").setSource("text", "elasticsearch test").get();
         refresh();
 
-        SearchResponse response = client().prepareSearch("test")
-                .setQuery(QueryBuilders.matchQuery("text", "test").type(MatchQueryBuilder.Type.BOOLEAN))
-                .addHighlightedField("text").execute().actionGet();
+        SearchResponse response = client().prepareSearch("test").setQuery(QueryBuilders.matchQuery("text", "test").type(MatchQueryBuilder.Type.BOOLEAN)).addHighlightedField("text").execute().actionGet();
         // PatternAnalyzer will throw an exception if it is resetted twice
         assertHitCount(response, 1l);
     }
 
     @Test
     public void testHighlightUsesHighlightQuery() throws IOException {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "text", "type=string," + randomStoreField() + "term_vector=with_positions_offsets,index_options=offsets"));
+        assertAcked(prepareCreate("test").addMapping("type1", "text", "type=string," + randomStoreField() + "term_vector=with_positions_offsets,index_options=offsets"));
         ensureGreen();
 
         index("test", "type1", "1", "text", "Testing the highlight query feature");
@@ -1723,8 +1130,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
         HighlightBuilder.Field field = new HighlightBuilder.Field("text");
 
-        SearchRequestBuilder search = client().prepareSearch("test").setQuery(QueryBuilders.matchQuery("text", "testing"))
-                .addHighlightedField(field);
+        SearchRequestBuilder search = client().prepareSearch("test").setQuery(QueryBuilders.matchQuery("text", "testing")).addHighlightedField(field);
         Matcher<String> searchQueryMatcher = equalTo("<em>Testing</em> the highlight query feature");
 
         field.highlighterType("plain");
@@ -1736,7 +1142,6 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         field.highlighterType("postings");
         response = search.get();
         assertHighlight(response, 0, "text", 0, searchQueryMatcher);
-
 
         Matcher<String> hlQueryMatcher = equalTo("Testing the highlight <em>query</em> feature");
         field.highlightQuery(matchQuery("text", "query"));
@@ -1777,8 +1182,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testHighlightNoMatchSize() throws IOException {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "text", "type=string," + randomStoreField() + "term_vector=with_positions_offsets,index_options=offsets"));
+        assertAcked(prepareCreate("test").addMapping("type1", "text", "type=string," + randomStoreField() + "term_vector=with_positions_offsets,index_options=offsets"));
         ensureGreen();
 
         String text = "I am pretty long so some of me should get cut off. Second sentence";
@@ -1786,10 +1190,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         refresh();
 
         // When you don't set noMatchSize you don't get any results if there isn't anything to highlight.
-        HighlightBuilder.Field field = new HighlightBuilder.Field("text")
-                .fragmentSize(21)
-                .numOfFragments(1)
-                .highlighterType("plain");
+        HighlightBuilder.Field field = new HighlightBuilder.Field("text").fragmentSize(21).numOfFragments(1).highlighterType("plain");
         SearchResponse response = client().prepareSearch("test").addHighlightedField(field).get();
         assertNotHighlighted(response, 0, "text");
 
@@ -1886,21 +1287,16 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testHighlightNoMatchSizeWithMultivaluedFields() throws IOException {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "text", "type=string," + randomStoreField() + "term_vector=with_positions_offsets,index_options=offsets"));
+        assertAcked(prepareCreate("test").addMapping("type1", "text", "type=string," + randomStoreField() + "term_vector=with_positions_offsets,index_options=offsets"));
         ensureGreen();
 
         String text1 = "I am pretty long so some of me should get cut off. We'll see how that goes.";
         String text2 = "I am short";
-        index("test", "type1", "1", "text", new String[] {text1, text2});
+        index("test", "type1", "1", "text", new String[] { text1, text2 });
         refresh();
 
         // The no match fragment should come from the first value of a multi-valued field
-        HighlightBuilder.Field field = new HighlightBuilder.Field("text")
-                .fragmentSize(21)
-                .numOfFragments(1)
-                .highlighterType("plain")
-                .noMatchSize(21);
+        HighlightBuilder.Field field = new HighlightBuilder.Field("text").fragmentSize(21).numOfFragments(1).highlighterType("plain").noMatchSize(21);
         SearchResponse response = client().prepareSearch("test").addHighlightedField(field).get();
         assertHighlight(response, 0, "text", 0, 1, equalTo("I am pretty long so"));
 
@@ -1914,26 +1310,20 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertHighlight(response, 0, "text", 0, 1, equalTo("I am pretty long so some of me should get cut off."));
 
         // And noMatchSize returns nothing when the first entry is empty string!
-        index("test", "type1", "2", "text", new String[] {"", text2});
+        index("test", "type1", "2", "text", new String[] { "", text2 });
         refresh();
 
         IdsQueryBuilder idsQueryBuilder = QueryBuilders.idsQuery("type1").addIds("2");
         field.highlighterType("plain");
-        response = client().prepareSearch("test")
-                .setQuery(idsQueryBuilder)
-                .addHighlightedField(field).get();
+        response = client().prepareSearch("test").setQuery(idsQueryBuilder).addHighlightedField(field).get();
         assertNotHighlighted(response, 0, "text");
 
         field.highlighterType("fvh");
-        response = client().prepareSearch("test")
-                .setQuery(idsQueryBuilder)
-                .addHighlightedField(field).get();
+        response = client().prepareSearch("test").setQuery(idsQueryBuilder).addHighlightedField(field).get();
         assertNotHighlighted(response, 0, "text");
 
         field.highlighterType("postings");
-        response = client().prepareSearch("test")
-                .setQuery(idsQueryBuilder)
-                .addHighlightedField(field).get();
+        response = client().prepareSearch("test").setQuery(idsQueryBuilder).addHighlightedField(field).get();
         assertNotHighlighted(response, 0, "text");
 
         // But if the field was actually empty then you should get no highlighting field
@@ -1941,21 +1331,15 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         refresh();
         idsQueryBuilder = QueryBuilders.idsQuery("type1").addIds("3");
         field.highlighterType("plain");
-        response = client().prepareSearch("test")
-                .setQuery(idsQueryBuilder)
-                .addHighlightedField(field).get();
+        response = client().prepareSearch("test").setQuery(idsQueryBuilder).addHighlightedField(field).get();
         assertNotHighlighted(response, 0, "text");
 
         field.highlighterType("fvh");
-        response = client().prepareSearch("test")
-                .setQuery(idsQueryBuilder)
-                .addHighlightedField(field).get();
+        response = client().prepareSearch("test").setQuery(idsQueryBuilder).addHighlightedField(field).get();
         assertNotHighlighted(response, 0, "text");
 
         field.highlighterType("postings");
-        response = client().prepareSearch("test")
-                .setQuery(idsQueryBuilder)
-                .addHighlightedField(field).get();
+        response = client().prepareSearch("test").setQuery(idsQueryBuilder).addHighlightedField(field).get();
         assertNotHighlighted(response, 0, "text");
 
         // Same for if the field doesn't even exist on the document
@@ -1964,27 +1348,19 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
         idsQueryBuilder = QueryBuilders.idsQuery("type1").addIds("4");
         field.highlighterType("plain");
-        response = client().prepareSearch("test")
-                .setQuery(idsQueryBuilder)
-                .addHighlightedField(field).get();
+        response = client().prepareSearch("test").setQuery(idsQueryBuilder).addHighlightedField(field).get();
         assertNotHighlighted(response, 0, "text");
 
         field.highlighterType("fvh");
-        response = client().prepareSearch("test")
-                .setQuery(idsQueryBuilder)
-                .addHighlightedField(field).get();
+        response = client().prepareSearch("test").setQuery(idsQueryBuilder).addHighlightedField(field).get();
         assertNotHighlighted(response, 0, "text");
 
         field.highlighterType("fvh");
-        response = client().prepareSearch("test")
-                .setQuery(idsQueryBuilder)
-                .addHighlightedField(field).get();
+        response = client().prepareSearch("test").setQuery(idsQueryBuilder).addHighlightedField(field).get();
         assertNotHighlighted(response, 0, "postings");
 
         // Again same if the field isn't mapped
-        field = new HighlightBuilder.Field("unmapped")
-                .highlighterType("plain")
-                .noMatchSize(21);
+        field = new HighlightBuilder.Field("unmapped").highlighterType("plain").noMatchSize(21);
         response = client().prepareSearch("test").addHighlightedField(field).get();
         assertNotHighlighted(response, 0, "text");
 
@@ -1999,22 +1375,17 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testHighlightNoMatchSizeNumberOfFragments() throws IOException {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "text", "type=string," + randomStoreField() + "term_vector=with_positions_offsets,index_options=offsets"));
+        assertAcked(prepareCreate("test").addMapping("type1", "text", "type=string," + randomStoreField() + "term_vector=with_positions_offsets,index_options=offsets"));
         ensureGreen();
 
         String text1 = "This is the first sentence. This is the second sentence.";
         String text2 = "This is the third sentence. This is the fourth sentence.";
         String text3 = "This is the fifth sentence";
-        index("test", "type1", "1", "text", new String[] {text1, text2, text3});
+        index("test", "type1", "1", "text", new String[] { text1, text2, text3 });
         refresh();
 
         // The no match fragment should come from the first value of a multi-valued field
-        HighlightBuilder.Field field = new HighlightBuilder.Field("text")
-                .fragmentSize(1)
-                .numOfFragments(0)
-                .highlighterType("plain")
-                .noMatchSize(20);
+        HighlightBuilder.Field field = new HighlightBuilder.Field("text").fragmentSize(1).numOfFragments(0).highlighterType("plain").noMatchSize(20);
         SearchResponse response = client().prepareSearch("test").addHighlightedField(field).get();
         assertHighlight(response, 0, "text", 0, 1, equalTo("This is the first"));
 
@@ -2050,40 +1421,31 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertAcked(prepareCreate("test").addMapping("type1", type1PostingsffsetsMapping()));
         ensureGreen();
 
-        client().prepareIndex("test", "type1")
-                .setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy quick dog").get();
+        client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy quick dog").get();
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("field1", "test"))
-                .highlight(highlight().field("field1").preTags("<xxx>").postTags("</xxx>"));
+        SearchSourceBuilder source = searchSource().query(termQuery("field1", "test")).highlight(highlight().field("field1").preTags("<xxx>").postTags("</xxx>"));
         SearchResponse searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
         assertHighlight(searchResponse, 0, "field1", 0, 1, equalTo("this is a <xxx>test</xxx>"));
 
         logger.info("--> searching on _all, highlighting on field1");
-        source = searchSource()
-                .query(termQuery("_all", "test"))
-                .highlight(highlight().field("field1").preTags("<xxx>").postTags("</xxx>"));
+        source = searchSource().query(termQuery("_all", "test")).highlight(highlight().field("field1").preTags("<xxx>").postTags("</xxx>"));
 
         searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
         assertHighlight(searchResponse, 0, "field1", 0, 1, equalTo("this is a <xxx>test</xxx>"));
 
         logger.info("--> searching on _all, highlighting on field2");
-        source = searchSource()
-                .query(termQuery("_all", "quick"))
-                .highlight(highlight().field("field2").order("score").preTags("<xxx>").postTags("</xxx>"));
+        source = searchSource().query(termQuery("_all", "quick")).highlight(highlight().field("field2").order("score").preTags("<xxx>").postTags("</xxx>"));
 
         searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
         assertHighlight(searchResponse, 0, "field2", 0, 1, equalTo("The <xxx>quick</xxx> brown fox jumps over the lazy <xxx>quick</xxx> dog"));
 
         logger.info("--> searching on _all, highlighting on field2");
-        source = searchSource()
-                .query(matchPhraseQuery("_all", "quick brown"))
-                .highlight(highlight().field("field2").preTags("<xxx>").postTags("</xxx>"));
+        source = searchSource().query(matchPhraseQuery("_all", "quick brown")).highlight(highlight().field("field2").preTags("<xxx>").postTags("</xxx>"));
 
         searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
@@ -2092,9 +1454,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
         //lets fall back to the standard highlighter then, what people would do to highlight query matches
         logger.info("--> searching on _all, highlighting on field2, falling back to the plain highlighter");
-        source = searchSource()
-                .query(matchPhraseQuery("_all", "quick brown"))
-                .highlight(highlight().field("field2").preTags("<xxx>").postTags("</xxx>").highlighterType("highlighter"));
+        source = searchSource().query(matchPhraseQuery("_all", "quick brown")).highlight(highlight().field("field2").preTags("<xxx>").postTags("</xxx>").highlighterType("highlighter"));
 
         searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
@@ -2109,11 +1469,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         index("test", "type1", "1", "field1", "The <b>quick<b> brown fox. Second sentence.", "field2", "The <b>slow<b> brown fox. Second sentence.");
         refresh();
 
-        SearchResponse response = client().prepareSearch("test")
-                .setQuery(QueryBuilders.matchQuery("field1", "fox"))
-                .addHighlightedField(new HighlightBuilder.Field("field1").preTags("<1>").postTags("</1>").requireFieldMatch(true))
-                .addHighlightedField(new HighlightBuilder.Field("field2").preTags("<2>").postTags("</2>").requireFieldMatch(false))
-                .get();
+        SearchResponse response = client().prepareSearch("test").setQuery(QueryBuilders.matchQuery("field1", "fox")).addHighlightedField(new HighlightBuilder.Field("field1").preTags("<1>").postTags("</1>").requireFieldMatch(true)).addHighlightedField(new HighlightBuilder.Field("field2").preTags("<2>").postTags("</2>").requireFieldMatch(false)).get();
         assertHighlight(response, 0, "field1", 0, 1, equalTo("The <b>quick<b> brown <1>fox</1>."));
         assertHighlight(response, 0, "field2", 0, 1, equalTo("The <b>slow<b> brown <2>fox</2>."));
     }
@@ -2123,17 +1479,11 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertAcked(prepareCreate("test").addMapping("type1", type1PostingsffsetsMapping()));
         ensureGreen();
 
-        client().prepareIndex("test", "type1", "1")
-                .setSource("field1", "The quick brown fox jumps over the lazy dog. The lazy red fox jumps over the quick dog. The quick brown dog jumps over the lazy fox.",
-                        "field2", "The quick brown fox jumps over the lazy dog. The lazy red fox jumps over the quick dog. The quick brown dog jumps over the lazy fox.").get();
+        client().prepareIndex("test", "type1", "1").setSource("field1", "The quick brown fox jumps over the lazy dog. The lazy red fox jumps over the quick dog. The quick brown dog jumps over the lazy fox.", "field2", "The quick brown fox jumps over the lazy dog. The lazy red fox jumps over the quick dog. The quick brown dog jumps over the lazy fox.").get();
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("field1", "fox"))
-                .highlight(highlight()
-                        .field(new HighlightBuilder.Field("field1").numOfFragments(5).preTags("<field1>").postTags("</field1>"))
-                        .field(new HighlightBuilder.Field("field2").numOfFragments(2).preTags("<field2>").postTags("</field2>")));
+        SearchSourceBuilder source = searchSource().query(termQuery("field1", "fox")).highlight(highlight().field(new HighlightBuilder.Field("field1").numOfFragments(5).preTags("<field1>").postTags("</field1>")).field(new HighlightBuilder.Field("field2").numOfFragments(2).preTags("<field2>").postTags("</field2>")));
 
         SearchResponse searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
@@ -2144,14 +1494,10 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertHighlight(searchResponse, 0, "field2", 0, equalTo("The quick brown <field2>fox</field2> jumps over the lazy dog."));
         assertHighlight(searchResponse, 0, "field2", 1, 2, equalTo("The lazy red <field2>fox</field2> jumps over the quick dog."));
 
-        client().prepareIndex("test", "type1", "2")
-                .setSource("field1", new String[]{"The quick brown fox jumps over the lazy dog. Second sentence not finished", "The lazy red fox jumps over the quick dog.", "The quick brown dog jumps over the lazy fox."}).get();
+        client().prepareIndex("test", "type1", "2").setSource("field1", new String[] { "The quick brown fox jumps over the lazy dog. Second sentence not finished", "The lazy red fox jumps over the quick dog.", "The quick brown dog jumps over the lazy fox." }).get();
         refresh();
 
-        source = searchSource()
-                .query(termQuery("field1", "fox"))
-                .highlight(highlight()
-                        .field(new HighlightBuilder.Field("field1").numOfFragments(0).preTags("<field1>").postTags("</field1>")));
+        source = searchSource().query(termQuery("field1", "fox")).highlight(highlight().field(new HighlightBuilder.Field("field1").numOfFragments(0).preTags("<field1>").postTags("</field1>")));
 
         searchResponse = client().search(searchRequest("test").source(source)).actionGet();
         assertHitCount(searchResponse, 2l);
@@ -2174,17 +1520,11 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertAcked(prepareCreate("test").addMapping("type1", type1PostingsffsetsMapping()));
         ensureGreen();
 
-        client().prepareIndex("test", "type1")
-                .setSource("field1", "The quick brown fox jumps over the lazy dog. The lazy red fox jumps over the quick dog. The quick brown dog jumps over the lazy fox.",
-                        "field2", "The quick brown fox jumps over the lazy dog. The lazy red fox jumps over the quick dog. The quick brown dog jumps over the lazy fox.").get();
+        client().prepareIndex("test", "type1").setSource("field1", "The quick brown fox jumps over the lazy dog. The lazy red fox jumps over the quick dog. The quick brown dog jumps over the lazy fox.", "field2", "The quick brown fox jumps over the lazy dog. The lazy red fox jumps over the quick dog. The quick brown dog jumps over the lazy fox.").get();
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("field1", "fox"))
-                .highlight(highlight()
-                        .field(new HighlightBuilder.Field("field1").requireFieldMatch(true).preTags("<field1>").postTags("</field1>"))
-                        .field(new HighlightBuilder.Field("field2").requireFieldMatch(true).preTags("<field2>").postTags("</field2>")));
+        SearchSourceBuilder source = searchSource().query(termQuery("field1", "fox")).highlight(highlight().field(new HighlightBuilder.Field("field1").requireFieldMatch(true).preTags("<field1>").postTags("</field1>")).field(new HighlightBuilder.Field("field2").requireFieldMatch(true).preTags("<field2>").postTags("</field2>")));
 
         SearchResponse searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
@@ -2195,11 +1535,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertHighlight(searchResponse, 0, "field1", 2, 3, equalTo("The quick brown dog jumps over the lazy <field1>fox</field1>."));
 
         logger.info("--> highlighting and searching on field1 and field2 - require field match set to false");
-        source = searchSource()
-                .query(termQuery("field1", "fox"))
-                .highlight(highlight()
-                        .field(new HighlightBuilder.Field("field1").requireFieldMatch(false).preTags("<field1>").postTags("</field1>"))
-                        .field(new HighlightBuilder.Field("field2").requireFieldMatch(false).preTags("<field2>").postTags("</field2>")));
+        source = searchSource().query(termQuery("field1", "fox")).highlight(highlight().field(new HighlightBuilder.Field("field1").requireFieldMatch(false).preTags("<field1>").postTags("</field1>")).field(new HighlightBuilder.Field("field2").requireFieldMatch(false).preTags("<field2>").postTags("</field2>")));
 
         searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
@@ -2213,11 +1549,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertHighlight(searchResponse, 0, "field2", 2, 3, equalTo("The quick brown dog jumps over the lazy <field2>fox</field2>."));
         logger.info("--> highlighting and searching on field1 and field2 via multi_match query");
         final MultiMatchQueryBuilder mmquery = multiMatchQuery("fox", "field1", "field2").type(RandomPicks.randomFrom(getRandom(), MultiMatchQueryBuilder.Type.values()));
-        source = searchSource()
-            .query(mmquery)
-            .highlight(highlight().highlightQuery(randomBoolean() ? mmquery : null)
-                    .field(new HighlightBuilder.Field("field1").requireFieldMatch(true).preTags("<field1>").postTags("</field1>"))
-                    .field(new HighlightBuilder.Field("field2").requireFieldMatch(true).preTags("<field2>").postTags("</field2>")));
+        source = searchSource().query(mmquery).highlight(highlight().highlightQuery(randomBoolean() ? mmquery : null).field(new HighlightBuilder.Field("field1").requireFieldMatch(true).preTags("<field1>").postTags("</field1>")).field(new HighlightBuilder.Field("field2").requireFieldMatch(true).preTags("<field2>").postTags("</field2>")));
         searchResponse = client().search(searchRequest("test").source(source)).actionGet();
         assertHitCount(searchResponse, 1l);
 
@@ -2232,34 +1564,22 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testMultiMatchQueryHighlight() throws IOException {
-        String[] highlighterTypes = new String[] {"fvh", "plain", "postings"};
-        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("_all").field("store", "yes").field("index_options", "offsets").endObject()
-                .startObject("properties")
-                .startObject("field1").field("type", "string").field("index_options", "offsets").field("term_vector", "with_positions_offsets").endObject()
-                .startObject("field2").field("type", "string").field("index_options", "offsets").field("term_vector", "with_positions_offsets").endObject()
-                .endObject()
-                .endObject().endObject();
+        String[] highlighterTypes = new String[] { "fvh", "plain", "postings" };
+        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_all").field("store", "yes").field("index_options", "offsets").endObject().startObject("properties").startObject("field1").field("type", "string").field("index_options", "offsets").field("term_vector", "with_positions_offsets").endObject().startObject("field2").field("type", "string").field("index_options", "offsets").field("term_vector", "with_positions_offsets").endObject().endObject().endObject().endObject();
         assertAcked(prepareCreate("test").addMapping("type1", mapping));
         ensureGreen();
-        client().prepareIndex("test", "type1")
-                .setSource("field1", "The quick brown fox jumps over",
-                        "field2", "The quick brown fox jumps over").get();
+        client().prepareIndex("test", "type1").setSource("field1", "The quick brown fox jumps over", "field2", "The quick brown fox jumps over").get();
         refresh();
         final int iters = scaledRandomIntBetween(20, 30);
         for (int i = 0; i < iters; i++) {
             MultiMatchQueryBuilder.Type matchQueryType = rarely() ? null : RandomPicks.randomFrom(getRandom(), MultiMatchQueryBuilder.Type.values());
             final MultiMatchQueryBuilder multiMatchQueryBuilder = multiMatchQuery("the quick brown fox", "field1", "field2").type(matchQueryType);
-            String type = rarely() ? null : RandomPicks.randomFrom(getRandom(),highlighterTypes);
-            SearchSourceBuilder source = searchSource()
-                    .query(multiMatchQueryBuilder)
-                    .highlight(highlight().highlightQuery(randomBoolean() ? multiMatchQueryBuilder : null).highlighterType(type)
-                            .field(new Field("field1").requireFieldMatch(true).preTags("<field1>").postTags("</field1>")));
+            String type = rarely() ? null : RandomPicks.randomFrom(getRandom(), highlighterTypes);
+            SearchSourceBuilder source = searchSource().query(multiMatchQueryBuilder).highlight(highlight().highlightQuery(randomBoolean() ? multiMatchQueryBuilder : null).highlighterType(type).field(new Field("field1").requireFieldMatch(true).preTags("<field1>").postTags("</field1>")));
             logger.info("Running multi-match type: [" + matchQueryType + "] highlight with type: [" + type + "]");
             SearchResponse searchResponse = client().search(searchRequest("test").source(source)).actionGet();
             assertHitCount(searchResponse, 1l);
-            assertHighlight(searchResponse, 0, "field1", 0, anyOf(equalTo("<field1>The quick brown fox</field1> jumps over"),
-                    equalTo("<field1>The</field1> <field1>quick</field1> <field1>brown</field1> <field1>fox</field1> jumps over")));
+            assertHighlight(searchResponse, 0, "field1", 0, anyOf(equalTo("<field1>The quick brown fox</field1> jumps over"), equalTo("<field1>The</field1> <field1>quick</field1> <field1>brown</field1> <field1>fox</field1> jumps over")));
         }
     }
 
@@ -2268,20 +1588,15 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertAcked(prepareCreate("test").addMapping("type1", type1PostingsffsetsMapping()));
         ensureGreen();
 
-        client().prepareIndex("test", "type1")
-                .setSource("field1", new String[]{"This sentence contains one match, not that short. This sentence contains two sentence matches. This one contains no matches.",
-                        "This is the second value's first sentence. This one contains no matches. This sentence contains three sentence occurrences (sentence).",
-                        "One sentence match here and scored lower since the text is quite long, not that appealing. This one contains no matches."}).get();
+        client().prepareIndex("test", "type1").setSource("field1", new String[] { "This sentence contains one match, not that short. This sentence contains two sentence matches. This one contains no matches.", "This is the second value's first sentence. This one contains no matches. This sentence contains three sentence occurrences (sentence).", "One sentence match here and scored lower since the text is quite long, not that appealing. This one contains no matches." }).get();
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("field1", "sentence"))
-                .highlight(highlight().field("field1").order("score"));
+        SearchSourceBuilder source = searchSource().query(termQuery("field1", "sentence")).highlight(highlight().field("field1").order("score"));
 
         SearchResponse searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
-        Map<String,HighlightField> highlightFieldMap = searchResponse.getHits().getAt(0).highlightFields();
+        Map<String, HighlightField> highlightFieldMap = searchResponse.getHits().getAt(0).highlightFields();
         assertThat(highlightFieldMap.size(), equalTo(1));
         HighlightField field1 = highlightFieldMap.get("field1");
         assertThat(field1.fragments().length, equalTo(5));
@@ -2292,9 +1607,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertThat(field1.fragments()[4].string(), equalTo("One <em>sentence</em> match here and scored lower since the text is quite long, not that appealing."));
 
         //lets use now number_of_fragments = 0, so that we highlight per value without breaking them into snippets, but we sort the values by score
-        source = searchSource()
-                .query(termQuery("field1", "sentence"))
-                .highlight(highlight().field("field1", -1, 0).order("score"));
+        source = searchSource().query(termQuery("field1", "sentence")).highlight(highlight().field("field1", -1, 0).order("score"));
 
         searchResponse = client().search(searchRequest("test").source(source)).actionGet();
         assertHighlight(searchResponse, 0, "field1", 0, equalTo("This is the second value's first <em>sentence</em>. This one contains no matches. This <em>sentence</em> contains three <em>sentence</em> occurrences (<em>sentence</em>)."));
@@ -2304,21 +1617,16 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testPostingsHighlighterEscapeHtml() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "title", "type=string," + randomStoreField() + "index_options=offsets"));
+        assertAcked(prepareCreate("test").addMapping("type1", "title", "type=string," + randomStoreField() + "index_options=offsets"));
         ensureYellow();
 
         IndexRequestBuilder[] indexRequestBuilders = new IndexRequestBuilder[5];
         for (int i = 0; i < 5; i++) {
-            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i))
-                    .setSource("title", "This is a html escaping highlighting test for *&? elasticsearch");
+            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i)).setSource("title", "This is a html escaping highlighting test for *&? elasticsearch");
         }
         indexRandom(true, indexRequestBuilders);
 
-        SearchResponse searchResponse = client().prepareSearch()
-                .setQuery(matchQuery("title", "test"))
-                .setHighlighterEncoder("html")
-                .addHighlightedField("title").get();
+        SearchResponse searchResponse = client().prepareSearch().setQuery(matchQuery("title", "test")).setHighlighterEncoder("html").addHighlightedField("title").get();
 
         for (int i = 0; i < indexRequestBuilders.length; i++) {
             assertHighlight(searchResponse, i, "title", 0, 1, equalTo("This is a html escaping highlighting <em>test</em> for *&amp;?"));
@@ -2327,24 +1635,16 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testPostingsHighlighterMultiMapperWithStore() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1")
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1")
                         //just to make sure that we hit the stored fields rather than the _source
-                        .startObject("_source").field("enabled", false).endObject()
-                        .startObject("properties")
-                        .startObject("title").field("type", "multi_field").startObject("fields")
-                        .startObject("title").field("type", "string").field("store", "yes").field("index_options", "offsets").field("analyzer", "classic").endObject()
-                        .startObject("key").field("type", "string").field("store", "yes").field("index_options", "offsets").field("analyzer", "whitespace").endObject()
-                        .endObject().endObject()
-                        .endObject().endObject().endObject()));
+                        .startObject("_source").field("enabled", false).endObject().startObject("properties").startObject("title").field("type", "multi_field").startObject("fields").startObject("title").field("type", "string").field("store", "yes").field("index_options", "offsets").field("analyzer", "classic").endObject().startObject("key").field("type", "string").field("store", "yes").field("index_options", "offsets").field("analyzer", "whitespace").endObject().endObject().endObject().endObject().endObject().endObject()));
         ensureGreen();
         client().prepareIndex("test", "type1", "1").setSource("title", "this is a test . Second sentence.").get();
         refresh();
         // simple search on body with standard analyzer with a simple field query
         SearchResponse searchResponse = client().prepareSearch()
-                //lets make sure we analyze the query and we highlight the resulting terms
-                .setQuery(matchQuery("title", "This is a Test"))
-                .addHighlightedField("title").get();
+                        //lets make sure we analyze the query and we highlight the resulting terms
+                        .setQuery(matchQuery("title", "This is a Test")).addHighlightedField("title").get();
 
         assertHitCount(searchResponse, 1l);
         SearchHit hit = searchResponse.getHits().getAt(0);
@@ -2353,9 +1653,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         assertHighlight(hit, "title", 0, 1, equalTo("this is a <em>test</em> ."));
 
         // search on title.key and highlight on title
-        searchResponse = client().prepareSearch()
-                .setQuery(matchQuery("title.key", "this is a test"))
-                .addHighlightedField("title.key").get();
+        searchResponse = client().prepareSearch().setQuery(matchQuery("title.key", "this is a test")).addHighlightedField("title.key").get();
         assertHitCount(searchResponse, 1l);
 
         //stopwords are now highlighted since we used only whitespace analyzer here
@@ -2364,90 +1662,54 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testPostingsHighlighterMultiMapperFromSource() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("title").field("type", "multi_field").startObject("fields")
-                        .startObject("title").field("type", "string").field("store", "no").field("index_options", "offsets").field("analyzer", "classic").endObject()
-                        .startObject("key").field("type", "string").field("store", "no").field("index_options", "offsets").field("analyzer", "whitespace").endObject()
-                        .endObject().endObject()
-                        .endObject().endObject().endObject()));
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("title").field("type", "multi_field").startObject("fields").startObject("title").field("type", "string").field("store", "no").field("index_options", "offsets").field("analyzer", "classic").endObject().startObject("key").field("type", "string").field("store", "no").field("index_options", "offsets").field("analyzer", "whitespace").endObject().endObject().endObject().endObject().endObject().endObject()));
         ensureGreen();
 
         client().prepareIndex("test", "type1", "1").setSource("title", "this is a test").get();
         refresh();
 
         // simple search on body with standard analyzer with a simple field query
-        SearchResponse searchResponse = client().prepareSearch()
-                .setQuery(matchQuery("title", "this is a test"))
-                .addHighlightedField("title")
-                .get();
+        SearchResponse searchResponse = client().prepareSearch().setQuery(matchQuery("title", "this is a test")).addHighlightedField("title").get();
 
         assertHighlight(searchResponse, 0, "title", 0, 1, equalTo("this is a <em>test</em>"));
 
         // search on title.key and highlight on title.key
-        searchResponse = client().prepareSearch()
-                .setQuery(matchQuery("title.key", "this is a test"))
-                .addHighlightedField("title.key").get();
+        searchResponse = client().prepareSearch().setQuery(matchQuery("title.key", "this is a test")).addHighlightedField("title.key").get();
 
         assertHighlight(searchResponse, 0, "title.key", 0, 1, equalTo("<em>this</em> <em>is</em> <em>a</em> <em>test</em>"));
     }
 
     @Test
     public void testPostingsHighlighterShouldFailIfNoOffsets() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("title").field("type", "string").field("store", "yes").field("index_options", "docs").endObject()
-                        .endObject().endObject().endObject()));
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("title").field("type", "string").field("store", "yes").field("index_options", "docs").endObject().endObject().endObject().endObject()));
         ensureGreen();
 
         IndexRequestBuilder[] indexRequestBuilders = new IndexRequestBuilder[5];
         for (int i = 0; i < indexRequestBuilders.length; i++) {
-            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i))
-                    .setSource("title", "This is a test for the postings highlighter");
+            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i)).setSource("title", "This is a test for the postings highlighter");
         }
         indexRandom(true, indexRequestBuilders);
 
-        SearchResponse search = client().prepareSearch()
-                .setQuery(matchQuery("title", "this is a test"))
-                .addHighlightedField("title")
-                .get();
+        SearchResponse search = client().prepareSearch().setQuery(matchQuery("title", "this is a test")).addHighlightedField("title").get();
         assertNoFailures(search);
 
-        assertFailures(client().prepareSearch()
-                .setQuery(matchQuery("title", "this is a test"))
-                .addHighlightedField("title")
-                .setHighlighterType("postings-highlighter"),
-                RestStatus.BAD_REQUEST,
-                containsString("the field [title] should be indexed with positions and offsets in the postings list to be used with postings highlighter"));
+        assertFailures(client().prepareSearch().setQuery(matchQuery("title", "this is a test")).addHighlightedField("title").setHighlighterType("postings-highlighter"), RestStatus.BAD_REQUEST, containsString("the field [title] should be indexed with positions and offsets in the postings list to be used with postings highlighter"));
 
-
-
-        assertFailures(client().prepareSearch()
-                .setQuery(matchQuery("title", "this is a test"))
-                .addHighlightedField("title")
-                .setHighlighterType("postings"),
-                RestStatus.BAD_REQUEST,
-                containsString("the field [title] should be indexed with positions and offsets in the postings list to be used with postings highlighter"));
+        assertFailures(client().prepareSearch().setQuery(matchQuery("title", "this is a test")).addHighlightedField("title").setHighlighterType("postings"), RestStatus.BAD_REQUEST, containsString("the field [title] should be indexed with positions and offsets in the postings list to be used with postings highlighter"));
 
         //should not fail if there is a wildcard
-        assertNoFailures(client().prepareSearch()
-                        .setQuery(matchQuery("title", "this is a test"))
-                        .addHighlightedField("tit*")
-                        .setHighlighterType("postings").get());
+        assertNoFailures(client().prepareSearch().setQuery(matchQuery("title", "this is a test")).addHighlightedField("tit*").setHighlighterType("postings").get());
     }
 
     @Test
     public void testPostingsHighlighterBoostingQuery() throws ElasticsearchException, IOException {
         assertAcked(prepareCreate("test").addMapping("type1", type1PostingsffsetsMapping()));
         ensureGreen();
-        client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog! Second sentence.")
-                .get();
+        client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog! Second sentence.").get();
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource()
-                .query(boostingQuery().positive(termQuery("field2", "brown")).negative(termQuery("field2", "foobar")).negativeBoost(0.5f))
-                .highlight(highlight().field("field2").preTags("<x>").postTags("</x>"));
+        SearchSourceBuilder source = searchSource().query(boostingQuery().positive(termQuery("field2", "brown")).negative(termQuery("field2", "foobar")).negativeBoost(0.5f)).highlight(highlight().field("field2").preTags("<x>").postTags("</x>"));
         SearchResponse searchResponse = client().search(searchRequest("test").source(source)).actionGet();
 
         assertHighlight(searchResponse, 0, "field2", 0, 1, equalTo("The quick <x>brown</x> fox jumps over the lazy dog!"));
@@ -2461,8 +1723,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog! Second sentence.").get();
         refresh();
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource().query(commonTermsQuery("field2", "quick brown").cutoffFrequency(100))
-                .highlight(highlight().field("field2").preTags("<x>").postTags("</x>"));
+        SearchSourceBuilder source = searchSource().query(commonTermsQuery("field2", "quick brown").cutoffFrequency(100)).highlight(highlight().field("field2").preTags("<x>").postTags("</x>"));
         SearchResponse searchResponse = client().search(searchRequest("test").source(source)).actionGet();
         assertHitCount(searchResponse, 1l);
 
@@ -2470,17 +1731,10 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
     }
 
     public XContentBuilder type1PostingsffsetsMapping() throws IOException {
-        return XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("_all").field("store", "yes").field("index_options", "offsets").endObject()
-                .startObject("properties")
-                .startObject("field1").field("type", "string").field("index_options", "offsets").endObject()
-                .startObject("field2").field("type", "string").field("index_options", "offsets").endObject()
-                .endObject()
-                .endObject().endObject();
+        return XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_all").field("store", "yes").field("index_options", "offsets").endObject().startObject("properties").startObject("field1").field("type", "string").field("index_options", "offsets").endObject().startObject("field2").field("type", "string").field("index_options", "offsets").endObject().endObject().endObject().endObject();
     }
 
-    private static final String[] REWRITE_METHODS = new String[]{"constant_score_auto", "scoring_boolean", "constant_score_boolean",
-            "constant_score_filter", "top_terms_boost_50", "top_terms_50"};
+    private static final String[] REWRITE_METHODS = new String[] { "constant_score_auto", "scoring_boolean", "constant_score_boolean", "constant_score_filter", "top_terms_boost_50", "top_terms_50" };
 
     @Test
     public void testPostingsHighlighterPrefixQuery() throws Exception {
@@ -2491,8 +1745,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         refresh();
         logger.info("--> highlighting and searching on field2");
 
-        SearchSourceBuilder source = searchSource().query(prefixQuery("field2", "qui").rewrite(randomFrom(REWRITE_METHODS)))
-                .highlight(highlight().field("field2"));
+        SearchSourceBuilder source = searchSource().query(prefixQuery("field2", "qui").rewrite(randomFrom(REWRITE_METHODS))).highlight(highlight().field("field2"));
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
         assertHighlight(searchResponse, 0, "field2", 0, 1, equalTo("The <em>quick</em> brown fox jumps over the lazy dog!"));
 
@@ -2506,8 +1759,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog! Second sentence.").get();
         refresh();
         logger.info("--> highlighting and searching on field2");
-        SearchSourceBuilder source = searchSource().query(fuzzyQuery("field2", "quck"))
-                .highlight(highlight().field("field2"));
+        SearchSourceBuilder source = searchSource().query(fuzzyQuery("field2", "quck")).highlight(highlight().field("field2"));
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
         assertHighlight(searchResponse, 0, "field2", 0, 1, equalTo("The <em>quick</em> brown fox jumps over the lazy dog!"));
@@ -2521,8 +1773,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog! Second sentence.").get();
         refresh();
         logger.info("--> highlighting and searching on field2");
-        SearchSourceBuilder source = searchSource().query(regexpQuery("field2", "qu[a-l]+k").rewrite(randomFrom(REWRITE_METHODS)))
-                .highlight(highlight().field("field2"));
+        SearchSourceBuilder source = searchSource().query(regexpQuery("field2", "qu[a-l]+k").rewrite(randomFrom(REWRITE_METHODS))).highlight(highlight().field("field2"));
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
         assertHighlight(searchResponse, 0, "field2", 0, 1, equalTo("The <em>quick</em> brown fox jumps over the lazy dog!"));
@@ -2536,14 +1787,12 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog! Second sentence.").get();
         refresh();
         logger.info("--> highlighting and searching on field2");
-        SearchSourceBuilder source = searchSource().query(wildcardQuery("field2", "qui*").rewrite(randomFrom(REWRITE_METHODS)))
-                .highlight(highlight().field("field2"));
+        SearchSourceBuilder source = searchSource().query(wildcardQuery("field2", "qui*").rewrite(randomFrom(REWRITE_METHODS))).highlight(highlight().field("field2"));
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
         assertHighlight(searchResponse, 0, "field2", 0, 1, equalTo("The <em>quick</em> brown fox jumps over the lazy dog!"));
 
-        source = searchSource().query(wildcardQuery("field2", "qu*k").rewrite(randomFrom(REWRITE_METHODS)))
-                .highlight(highlight().field("field2"));
+        source = searchSource().query(wildcardQuery("field2", "qu*k").rewrite(randomFrom(REWRITE_METHODS))).highlight(highlight().field("field2"));
         searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
         assertHitCount(searchResponse, 1l);
 
@@ -2558,8 +1807,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "aaab").get();
         refresh();
         logger.info("--> highlighting and searching on field2");
-        SearchSourceBuilder source = searchSource().query(rangeQuery("field2").gte("aaaa").lt("zzzz"))
-                .highlight(highlight().field("field2"));
+        SearchSourceBuilder source = searchSource().query(rangeQuery("field2").gte("aaaa").lt("zzzz")).highlight(highlight().field("field2"));
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
 
         assertHighlight(searchResponse, 0, "field2", 0, 1, equalTo("<em>aaab</em>"));
@@ -2573,8 +1821,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         client().prepareIndex("test", "type1").setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog! Second sentence.").get();
         refresh();
         logger.info("--> highlighting and searching on field2");
-        SearchSourceBuilder source = searchSource().query(queryStringQuery("qui*").defaultField("field2").rewrite(randomFrom(REWRITE_METHODS)))
-                .highlight(highlight().field("field2"));
+        SearchSourceBuilder source = searchSource().query(queryStringQuery("qui*").defaultField("field2").rewrite(randomFrom(REWRITE_METHODS))).highlight(highlight().field("field2"));
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
         assertHighlight(searchResponse, 0, "field2", 0, 1, equalTo("The <em>quick</em> brown fox jumps over the lazy dog!"));
     }
@@ -2589,8 +1836,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource().query(constantScoreQuery(regexpQuery("field1", "pho[a-z]+").rewrite(randomFrom(REWRITE_METHODS))))
-                .highlight(highlight().field("field1"));
+        SearchSourceBuilder source = searchSource().query(constantScoreQuery(regexpQuery("field1", "pho[a-z]+").rewrite(randomFrom(REWRITE_METHODS)))).highlight(highlight().field("field1"));
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
         assertHighlight(searchResponse, 0, "field1", 0, 1, equalTo("The <em>photography</em> word will get highlighted"));
     }
@@ -2605,11 +1851,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource().query(boolQuery()
-                .should(constantScoreQuery(FilterBuilders.missingFilter("field1")))
-                .should(matchQuery("field1", "test"))
-                .should(filteredQuery(queryStringQuery("field1:photo*").rewrite(randomFrom(REWRITE_METHODS)), null)))
-                .highlight(highlight().field("field1"));
+        SearchSourceBuilder source = searchSource().query(boolQuery().should(constantScoreQuery(FilterBuilders.missingFilter("field1"))).should(matchQuery("field1", "test")).should(filteredQuery(queryStringQuery("field1:photo*").rewrite(randomFrom(REWRITE_METHODS)), null))).highlight(highlight().field("field1"));
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
         assertHighlight(searchResponse, 0, "field1", 0, 1, equalTo("The <em>photography</em> word will get highlighted"));
     }
@@ -2624,8 +1866,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource().query(boolQuery().must(prefixQuery("field1", "photo").rewrite(randomFrom(REWRITE_METHODS))).should(matchQuery("field1", "test").minimumShouldMatch("0")))
-                .highlight(highlight().field("field1"));
+        SearchSourceBuilder source = searchSource().query(boolQuery().must(prefixQuery("field1", "photo").rewrite(randomFrom(REWRITE_METHODS))).should(matchQuery("field1", "test").minimumShouldMatch("0"))).highlight(highlight().field("field1"));
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
         assertHighlight(searchResponse, 0, "field1", 0, 1, equalTo("The <em>photography</em> word will get highlighted"));
     }
@@ -2640,8 +1881,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         refresh();
 
         logger.info("--> highlighting and searching on field1");
-        SearchSourceBuilder source = searchSource().query(filteredQuery(queryStringQuery("field1:photo*").rewrite(randomFrom(REWRITE_METHODS)), missingFilter("field_null")))
-                .highlight(highlight().field("field1"));
+        SearchSourceBuilder source = searchSource().query(filteredQuery(queryStringQuery("field1:photo*").rewrite(randomFrom(REWRITE_METHODS)), missingFilter("field_null"))).highlight(highlight().field("field1"));
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source.buildAsBytes()).get();
         assertHighlight(searchResponse, 0, "field1", 0, 1, equalTo("The <em>photography</em> word will get highlighted"));
     }
@@ -2661,20 +1901,15 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
             //(https://github.com/elasticsearch/elasticsearch/issues/4103)
             String prefix = randomAsciiOfLengthBetween(5, 30);
             prefixes.put(String.valueOf(i), prefix);
-            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i)).setSource("field1", "Sentence " + prefix
-                    + " test. Sentence two.");
+            indexRequestBuilders[i] = client().prepareIndex("test", "type1", Integer.toString(i)).setSource("field1", "Sentence " + prefix + " test. Sentence two.");
         }
         logger.info("--> indexing docs");
         indexRandom(true, indexRequestBuilders);
 
         logger.info("--> searching explicitly on field1 and highlighting on it");
-        SearchRequestBuilder searchRequestBuilder = client().prepareSearch()
-                .setSize(COUNT)
-                .setQuery(termQuery("field1", "test"))
-                .addHighlightedField("field1");
-        SearchResponse searchResponse =
-                searchRequestBuilder.get();
-        assertHitCount(searchResponse, (long)COUNT);
+        SearchRequestBuilder searchRequestBuilder = client().prepareSearch().setSize(COUNT).setQuery(termQuery("field1", "test")).addHighlightedField("field1");
+        SearchResponse searchResponse = searchRequestBuilder.get();
+        assertHitCount(searchResponse, (long) COUNT);
         assertThat(searchResponse.getHits().hits().length, equalTo(COUNT));
         for (SearchHit hit : searchResponse.getHits()) {
             String prefix = prefixes.get(hit.id());
@@ -2684,8 +1919,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test //https://github.com/elasticsearch/elasticsearch/issues/4116
     public void testPostingsHighlighterCustomIndexName() {
-        assertAcked(prepareCreate("test")
-            .addMapping("type1", "field1", "type=string,index_options=offsets,index_name=my_field"));
+        assertAcked(prepareCreate("test").addMapping("type1", "field1", "type=string,index_options=offsets,index_name=my_field"));
         ensureGreen();
 
         client().prepareIndex("test", "type1", "1").setSource("field1", "First sentence. Second sentence.").get();
@@ -2700,15 +1934,13 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         searchResponse = client().prepareSearch("test").setQuery(matchQuery("my_field", "first")).addHighlightedField("my_field").get();
         assertHighlight(searchResponse, 0, "my_field", 0, 1, equalTo("<em>First</em> sentence."));
 
-        searchResponse = client().prepareSearch("test").setQuery(matchQuery("my_field", "first"))
-                .addHighlightedField("field1").setHighlighterRequireFieldMatch(true).get();
+        searchResponse = client().prepareSearch("test").setQuery(matchQuery("my_field", "first")).addHighlightedField("field1").setHighlighterRequireFieldMatch(true).get();
         assertHighlight(searchResponse, 0, "field1", 0, 1, equalTo("<em>First</em> sentence."));
     }
 
     @Test
     public void testFastVectorHighlighterCustomIndexName() {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "field1", "type=string,term_vector=with_positions_offsets,index_name=my_field"));
+        assertAcked(prepareCreate("test").addMapping("type1", "field1", "type=string,term_vector=with_positions_offsets,index_name=my_field"));
         ensureGreen();
 
         client().prepareIndex("test", "type1", "1").setSource("field1", "First sentence. Second sentence.").get();
@@ -2723,15 +1955,13 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         searchResponse = client().prepareSearch("test").setQuery(matchQuery("my_field", "first")).addHighlightedField("my_field").get();
         assertHighlight(searchResponse, 0, "my_field", 0, 1, equalTo("<em>First</em> sentence. Second sentence."));
 
-        searchResponse = client().prepareSearch("test").setQuery(matchQuery("my_field", "first"))
-                .addHighlightedField("field1").setHighlighterRequireFieldMatch(true).get();
+        searchResponse = client().prepareSearch("test").setQuery(matchQuery("my_field", "first")).addHighlightedField("field1").setHighlighterRequireFieldMatch(true).get();
         assertHighlight(searchResponse, 0, "field1", 0, 1, equalTo("<em>First</em> sentence. Second sentence."));
     }
 
     @Test
     public void testPlainHighlighterCustomIndexName() {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "field1", "type=string,index_name=my_field"));
+        assertAcked(prepareCreate("test").addMapping("type1", "field1", "type=string,index_name=my_field"));
         ensureGreen();
 
         client().prepareIndex("test", "type1", "1").setSource("field1", "First sentence. Second sentence.").get();
@@ -2746,8 +1976,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         searchResponse = client().prepareSearch("test").setQuery(matchQuery("my_field", "first")).addHighlightedField("my_field").get();
         assertHighlight(searchResponse, 0, "my_field", 0, 1, equalTo("<em>First</em> sentence. Second sentence."));
 
-        searchResponse = client().prepareSearch("test").setQuery(matchQuery("my_field", "first"))
-                .addHighlightedField("field1").setHighlighterRequireFieldMatch(true).get();
+        searchResponse = client().prepareSearch("test").setQuery(matchQuery("my_field", "first")).addHighlightedField("field1").setHighlighterRequireFieldMatch(true).get();
         assertHighlight(searchResponse, 0, "field1", 0, 1, equalTo("<em>First</em> sentence. Second sentence."));
     }
 
@@ -2772,49 +2001,35 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         ensureGreen();
         StringBuilder text = new StringBuilder();
         text.append("words words junk junk junk junk junk junk junk junk highlight junk junk junk junk together junk\n");
-        for (int i = 0; i<10; i++) {
+        for (int i = 0; i < 10; i++) {
             text.append("junk junk junk junk junk junk junk junk junk junk junk junk junk junk junk junk junk junk junk junk\n");
         }
         text.append("highlight words together\n");
-        for (int i = 0; i<10; i++) {
+        for (int i = 0; i < 10; i++) {
             text.append("junk junk junk junk junk junk junk junk junk junk junk junk junk junk junk junk junk junk junk junk\n");
         }
         index("test", "type1", "1", "field1", text.toString());
         refresh();
 
         // Match queries
-        phraseBoostTestCaseForClauses(highlighterType, 100f,
-                matchQuery("field1", "highlight words together"),
-                matchPhraseQuery("field1", "highlight words together"));
+        phraseBoostTestCaseForClauses(highlighterType, 100f, matchQuery("field1", "highlight words together"), matchPhraseQuery("field1", "highlight words together"));
 
         // Query string with a single field
-        phraseBoostTestCaseForClauses(highlighterType, 100f,
-                queryStringQuery("highlight words together").field("field1"),
-                queryStringQuery("\"highlight words together\"").field("field1").autoGeneratePhraseQueries(true));
+        phraseBoostTestCaseForClauses(highlighterType, 100f, queryStringQuery("highlight words together").field("field1"), queryStringQuery("\"highlight words together\"").field("field1").autoGeneratePhraseQueries(true));
 
         // Query string with a single field without dismax
-        phraseBoostTestCaseForClauses(highlighterType, 100f,
-                queryStringQuery("highlight words together").field("field1").useDisMax(false),
-                queryStringQuery("\"highlight words together\"").field("field1").useDisMax(false).autoGeneratePhraseQueries(true));
+        phraseBoostTestCaseForClauses(highlighterType, 100f, queryStringQuery("highlight words together").field("field1").useDisMax(false), queryStringQuery("\"highlight words together\"").field("field1").useDisMax(false).autoGeneratePhraseQueries(true));
 
         // Query string with more than one field
-        phraseBoostTestCaseForClauses(highlighterType, 100f,
-                queryStringQuery("highlight words together").field("field1").field("field2"),
-                queryStringQuery("\"highlight words together\"").field("field1").field("field2").autoGeneratePhraseQueries(true));
+        phraseBoostTestCaseForClauses(highlighterType, 100f, queryStringQuery("highlight words together").field("field1").field("field2"), queryStringQuery("\"highlight words together\"").field("field1").field("field2").autoGeneratePhraseQueries(true));
 
         // Query string boosting the field
-        phraseBoostTestCaseForClauses(highlighterType, 1f,
-                queryStringQuery("highlight words together").field("field1"),
-                queryStringQuery("\"highlight words together\"").field("field1^100").autoGeneratePhraseQueries(true));
+        phraseBoostTestCaseForClauses(highlighterType, 1f, queryStringQuery("highlight words together").field("field1"), queryStringQuery("\"highlight words together\"").field("field1^100").autoGeneratePhraseQueries(true));
     }
 
-    private <P extends QueryBuilder & BoostableQueryBuilder<?>> void
-            phraseBoostTestCaseForClauses(String highlighterType, float boost, QueryBuilder terms, P phrase) {
-        Matcher<String> highlightedMatcher = Matchers.either(containsString("<em>highlight words together</em>")).or(
-                containsString("<em>highlight</em> <em>words</em> <em>together</em>"));
-        SearchRequestBuilder search = client().prepareSearch("test").setHighlighterRequireFieldMatch(true)
-                .setHighlighterOrder("score").setHighlighterType(highlighterType)
-                .addHighlightedField("field1", 100, 1);
+    private <P extends QueryBuilder & BoostableQueryBuilder<?>> void phraseBoostTestCaseForClauses(String highlighterType, float boost, QueryBuilder terms, P phrase) {
+        Matcher<String> highlightedMatcher = Matchers.either(containsString("<em>highlight words together</em>")).or(containsString("<em>highlight</em> <em>words</em> <em>together</em>"));
+        SearchRequestBuilder search = client().prepareSearch("test").setHighlighterRequireFieldMatch(true).setHighlighterOrder("score").setHighlighterType(highlighterType).addHighlightedField("field1", 100, 1);
 
         // Try with a bool query
         phrase.boost(boost);
@@ -2825,7 +2040,7 @@ public class HighlighterSearchTests extends ElasticsearchIntegrationTest {
         response = search.setQuery(boostingQuery().positive(phrase).negative(terms).boost(boost).negativeBoost(1)).get();
         assertHighlight(response, 0, "field1", 0, 1, highlightedMatcher);
         // Try with a boosting query using a negative boost
-        response = search.setQuery(boostingQuery().positive(phrase).negative(terms).boost(1).negativeBoost(1/boost)).get();
+        response = search.setQuery(boostingQuery().positive(phrase).negative(terms).boost(1).negativeBoost(1 / boost)).get();
         assertHighlight(response, 0, "field1", 0, 1, highlightedMatcher);
     }
 }

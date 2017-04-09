@@ -478,7 +478,6 @@ public class TestSearchContext extends SearchContext {
         this.size = size;
     }
 
-
     @Override
     public SearchContext size(int size) {
         return null;
@@ -724,8 +723,10 @@ public class TestSearchContext extends SearchContext {
     }
 
     @Override
-    public void copyHeadersFrom(HasHeaders from) {}
+    public void copyHeadersFrom(HasHeaders from) {
+    }
 
     @Override
-    public void copyContextAndHeadersFrom(HasContextAndHeaders other) {}
+    public void copyContextAndHeadersFrom(HasContextAndHeaders other) {
+    }
 }

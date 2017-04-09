@@ -71,13 +71,11 @@ public class FullRollingRestartTests extends ElasticsearchIntegrationTest {
         final String healthTimeout = "1m";
 
         for (int i = 0; i < 1000; i++) {
-            client().prepareIndex("test", "type1", Long.toString(i))
-                    .setSource(MapBuilder.<String, Object>newMapBuilder().put("test", "value" + i).map()).execute().actionGet();
+            client().prepareIndex("test", "type1", Long.toString(i)).setSource(MapBuilder.<String, Object> newMapBuilder().put("test", "value" + i).map()).execute().actionGet();
         }
         flush();
         for (int i = 1000; i < 2000; i++) {
-            client().prepareIndex("test", "type1", Long.toString(i))
-                    .setSource(MapBuilder.<String, Object>newMapBuilder().put("test", "value" + i).map()).execute().actionGet();
+            client().prepareIndex("test", "type1", Long.toString(i)).setSource(MapBuilder.<String, Object> newMapBuilder().put("test", "value" + i).map()).execute().actionGet();
         }
 
         logger.info("--> now start adding nodes");
@@ -153,8 +151,7 @@ public class FullRollingRestartTests extends ElasticsearchIntegrationTest {
         prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, "6").put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, "0").put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, TimeValue.timeValueMinutes(1))).get();
 
         for (int i = 0; i < 100; i++) {
-            client().prepareIndex("test", "type1", Long.toString(i))
-                    .setSource(MapBuilder.<String, Object>newMapBuilder().put("test", "value" + i).map()).execute().actionGet();
+            client().prepareIndex("test", "type1", Long.toString(i)).setSource(MapBuilder.<String, Object> newMapBuilder().put("test", "value" + i).map()).execute().actionGet();
         }
         ensureGreen();
         ClusterState state = client().admin().cluster().prepareState().get().getState();
@@ -170,7 +167,7 @@ public class FullRollingRestartTests extends ElasticsearchIntegrationTest {
         recoveryResponse = client().admin().indices().prepareRecoveries("test").get();
         for (ShardRecoveryResponse response : recoveryResponse.shardResponses().get("test")) {
             RecoveryState recoveryState = response.recoveryState();
-           assertTrue("relocated from: " + recoveryState.getSourceNode() + " to: " + recoveryState.getTargetNode()+ "-- \nbefore: \n" + state.prettyPrint() + "\nafter: \n" + afterState.prettyPrint(), recoveryState.getType() != RecoveryState.Type.RELOCATION);
+            assertTrue("relocated from: " + recoveryState.getSourceNode() + " to: " + recoveryState.getTargetNode() + "-- \nbefore: \n" + state.prettyPrint() + "\nafter: \n" + afterState.prettyPrint(), recoveryState.getType() != RecoveryState.Type.RELOCATION);
         }
     }
 }

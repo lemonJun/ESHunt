@@ -53,19 +53,10 @@ public class GlobalTests extends ElasticsearchIntegrationTest {
         List<IndexRequestBuilder> builders = new ArrayList<>();
         numDocs = randomIntBetween(3, 20);
         for (int i = 0; i < numDocs / 2; i++) {
-            builders.add(client().prepareIndex("idx", "type", ""+i+1).setSource(jsonBuilder()
-                    .startObject()
-                    .field("value", i + 1)
-                    .field("tag", "tag1")
-                    .endObject()));
+            builders.add(client().prepareIndex("idx", "type", "" + i + 1).setSource(jsonBuilder().startObject().field("value", i + 1).field("tag", "tag1").endObject()));
         }
         for (int i = numDocs / 2; i < numDocs; i++) {
-            builders.add(client().prepareIndex("idx", "type", ""+i+1).setSource(jsonBuilder()
-                    .startObject()
-                    .field("value", i + 1)
-                    .field("tag", "tag2")
-                    .field("name", "name" + i+1)
-                    .endObject()));
+            builders.add(client().prepareIndex("idx", "type", "" + i + 1).setSource(jsonBuilder().startObject().field("value", i + 1).field("tag", "tag2").field("name", "name" + i + 1).endObject()));
         }
         indexRandom(true, builders);
         ensureSearchable();
@@ -73,14 +64,9 @@ public class GlobalTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void withStatsSubAggregator() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .setQuery(QueryBuilders.termQuery("tag", "tag1"))
-                .addAggregation(global("global")
-                        .subAggregation(stats("value_stats").field("value")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setQuery(QueryBuilders.termQuery("tag", "tag1")).addAggregation(global("global").subAggregation(stats("value_stats").field("value"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Global global = response.getAggregations().get("global");
         assertThat(global, notNullValue());
@@ -107,14 +93,9 @@ public class GlobalTests extends ElasticsearchIntegrationTest {
 
         try {
 
-            client().prepareSearch("idx")
-                    .setQuery(QueryBuilders.termQuery("tag", "tag1"))
-                    .addAggregation(global("global")
-                            .subAggregation(global("inner_global")))
-                    .execute().actionGet();
+            client().prepareSearch("idx").setQuery(QueryBuilders.termQuery("tag", "tag1")).addAggregation(global("global").subAggregation(global("inner_global"))).execute().actionGet();
 
-            fail("expected to fail executing non-top-level global aggregator. global aggregations are only allowed as top level" +
-                    "aggregations");
+            fail("expected to fail executing non-top-level global aggregator. global aggregations are only allowed as top level" + "aggregations");
 
         } catch (ElasticsearchException ese) {
         }

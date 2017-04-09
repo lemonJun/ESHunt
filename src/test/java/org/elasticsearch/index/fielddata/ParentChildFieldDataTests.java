@@ -62,12 +62,8 @@ public class ParentChildFieldDataTests extends AbstractFieldDataTests {
 
     @Before
     public void before() throws Exception {
-        mapperService.merge(
-                childType, new CompressedString(PutMappingRequest.buildFromSimplifiedDef(childType, "_parent", "type=" + parentType).string()), true
-        );
-        mapperService.merge(
-                grandChildType, new CompressedString(PutMappingRequest.buildFromSimplifiedDef(grandChildType, "_parent", "type=" + childType).string()), true
-        );
+        mapperService.merge(childType, new CompressedString(PutMappingRequest.buildFromSimplifiedDef(childType, "_parent", "type=" + parentType).string()), true);
+        mapperService.merge(grandChildType, new CompressedString(PutMappingRequest.buildFromSimplifiedDef(grandChildType, "_parent", "type=" + childType).string()), true);
 
         Document d = new Document();
         d.add(new StringField(UidFieldMapper.NAME, Uid.createUid(parentType, "1"), Field.Store.NO));

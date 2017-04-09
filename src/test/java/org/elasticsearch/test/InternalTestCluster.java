@@ -210,14 +210,11 @@ public final class InternalTestCluster extends TestCluster {
 
     private ServiceDisruptionScheme activeDisruptionScheme;
 
-    public InternalTestCluster(long clusterSeed, int minNumDataNodes, int maxNumDataNodes, String clusterName, int numClientNodes,
-                               boolean enableHttpPipelining, int jvmOrdinal, String nodePrefix) {
+    public InternalTestCluster(long clusterSeed, int minNumDataNodes, int maxNumDataNodes, String clusterName, int numClientNodes, boolean enableHttpPipelining, int jvmOrdinal, String nodePrefix) {
         this(clusterSeed, minNumDataNodes, maxNumDataNodes, clusterName, DEFAULT_SETTINGS_SOURCE, numClientNodes, enableHttpPipelining, jvmOrdinal, nodePrefix);
     }
 
-    public InternalTestCluster(long clusterSeed,
-                               int minNumDataNodes, int maxNumDataNodes, String clusterName, SettingsSource settingsSource, int numClientNodes,
-                                boolean enableHttpPipelining, int jvmOrdinal, String nodePrefix) {
+    public InternalTestCluster(long clusterSeed, int minNumDataNodes, int maxNumDataNodes, String clusterName, SettingsSource settingsSource, int numClientNodes, boolean enableHttpPipelining, int jvmOrdinal, String nodePrefix) {
         super(clusterSeed);
         this.clusterName = clusterName;
 
@@ -277,11 +274,11 @@ public final class InternalTestCluster extends TestCluster {
             }
         }
         builder.put("bootstrap.sigar", rarely(random));
-        final int basePort = 9300 + (100 * (jvmOrdinal+1));
+        final int basePort = 9300 + (100 * (jvmOrdinal + 1));
         repoPath = new File(new File(new File("work").getAbsoluteFile(), "repos"), clusterName);
         builder.put("path.repo", repoPath.getAbsolutePath());
-        builder.put("transport.tcp.port", basePort + "-" + (basePort+100));
-        builder.put("http.port", basePort+101 + "-" + (basePort+200));
+        builder.put("transport.tcp.port", basePort + "-" + (basePort + 100));
+        builder.put("http.port", basePort + 101 + "-" + (basePort + 200));
         builder.put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true);
         builder.put("node.mode", NODE_MODE);
         builder.put("http.pipelining", enableHttpPipelining);
@@ -348,9 +345,7 @@ public final class InternalTestCluster extends TestCluster {
     }
 
     private Settings getSettings(int nodeOrdinal, long nodeSeed, Settings others) {
-        Builder builder = ImmutableSettings.settingsBuilder().put(defaultSettings)
-                .put(getRandomNodeSettings(nodeSeed))
-                .put(FilterCacheModule.FilterCacheSettings.FILTER_CACHE_TYPE, hasFilterCache() ? WeightedFilterCache.class : NoneFilterCache.class);
+        Builder builder = ImmutableSettings.settingsBuilder().put(defaultSettings).put(getRandomNodeSettings(nodeSeed)).put(FilterCacheModule.FilterCacheSettings.FILTER_CACHE_TYPE, hasFilterCache() ? WeightedFilterCache.class : NoneFilterCache.class);
         Settings settings = settingsSource.node(nodeOrdinal);
         if (settings != null) {
             if (settings.get(ClusterName.SETTING) != null) {
@@ -368,12 +363,11 @@ public final class InternalTestCluster extends TestCluster {
     private static Settings getRandomNodeSettings(long seed) {
         Random random = new Random(seed);
         Builder builder = ImmutableSettings.settingsBuilder()
-        /* use RAM directories in 10% of the runs */
-                //.put("index.store.type", random.nextInt(10) == 0 ? MockRamIndexStoreModule.class.getName() : MockFSIndexStoreModule.class.getName())
-                // decrease the routing schedule so new nodes will be added quickly - some random value between 30 and 80 ms
+                        /* use RAM directories in 10% of the runs */
+                        //.put("index.store.type", random.nextInt(10) == 0 ? MockRamIndexStoreModule.class.getName() : MockFSIndexStoreModule.class.getName())
+                        // decrease the routing schedule so new nodes will be added quickly - some random value between 30 and 80 ms
                         // default to non gateway
-                .put("gateway.type", "none")
-                .put(SETTING_CLUSTER_NODE_SEED, seed);
+                        .put("gateway.type", "none").put(SETTING_CLUSTER_NODE_SEED, seed);
         if (ENABLE_MOCK_MODULES && usually(random)) {
             builder.put("index.store.type", MockFSIndexStoreModule.class.getName()); // no RAM dir for now!
             builder.put(IndexShardModule.ENGINE_FACTORY, MockEngineFactory.class);
@@ -400,10 +394,7 @@ public final class InternalTestCluster extends TestCluster {
         }
         if (random.nextBoolean()) {
             // change threadpool types to make sure we don't have components that rely on the type of thread pools
-            for (String name : Arrays.asList(ThreadPool.Names.BULK, ThreadPool.Names.FLUSH, ThreadPool.Names.GET,
-                    ThreadPool.Names.INDEX, ThreadPool.Names.MANAGEMENT, ThreadPool.Names.MERGE, ThreadPool.Names.OPTIMIZE,
-                    ThreadPool.Names.PERCOLATE, ThreadPool.Names.REFRESH, ThreadPool.Names.SEARCH, ThreadPool.Names.SNAPSHOT,
-                    ThreadPool.Names.SUGGEST, ThreadPool.Names.WARMER)) {
+            for (String name : Arrays.asList(ThreadPool.Names.BULK, ThreadPool.Names.FLUSH, ThreadPool.Names.GET, ThreadPool.Names.INDEX, ThreadPool.Names.MANAGEMENT, ThreadPool.Names.MERGE, ThreadPool.Names.OPTIMIZE, ThreadPool.Names.PERCOLATE, ThreadPool.Names.REFRESH, ThreadPool.Names.SEARCH, ThreadPool.Names.SNAPSHOT, ThreadPool.Names.SUGGEST, ThreadPool.Names.WARMER)) {
                 if (random.nextBoolean()) {
                     final String type = RandomPicks.randomFrom(random, Arrays.asList("fixed", "cached", "scaling"));
                     builder.put(ThreadPool.THREADPOOL_GROUP + name + ".type", type);
@@ -490,7 +481,6 @@ public final class InternalTestCluster extends TestCluster {
         return getRandomNodeAndClient(all);
     }
 
-
     private synchronized NodeAndClient getRandomNodeAndClient(Predicate<NodeAndClient> predicate) {
         ensureOpen();
         Collection<NodeAndClient> values = Collections2.filter(nodes.values(), predicate);
@@ -542,8 +532,7 @@ public final class InternalTestCluster extends TestCluster {
             return;
         }
         // prevent killing the master if possible and client nodes
-        final Iterator<NodeAndClient> values = n == 0 ? nodes.values().iterator() : Iterators.filter(nodes.values().iterator(),
-                Predicates.and(new DataNodePredicate(), Predicates.not(new MasterNodePredicate(getMasterName()))));
+        final Iterator<NodeAndClient> values = n == 0 ? nodes.values().iterator() : Iterators.filter(nodes.values().iterator(), Predicates.and(new DataNodePredicate(), Predicates.not(new MasterNodePredicate(getMasterName()))));
 
         final Iterator<NodeAndClient> limit = Iterators.limit(values, size - n);
         logger.info("changing cluster size from {} to {}, {} data nodes", size(), n + numSharedClientNodes, n);
@@ -578,12 +567,7 @@ public final class InternalTestCluster extends TestCluster {
         settings = getSettings(nodeId, seed, settings);
         String name = buildNodeName(nodeId);
         assert !nodes.containsKey(name);
-        Settings finalSettings = settingsBuilder()
-                .put(settings)
-                .put("name", name)
-                .put("discovery.id.seed", seed)
-                .put("tests.mock.version", version)
-                .build();
+        Settings finalSettings = settingsBuilder().put(settings).put("name", name).put("discovery.id.seed", seed).put("tests.mock.version", version).build();
         Node node = nodeBuilder().settings(finalSettings).build();
         return new NodeAndClient(name, node);
     }
@@ -690,7 +674,6 @@ public final class InternalTestCluster extends TestCluster {
         Assert.fail("No node found with name: [" + nodeName + "]");
         return null; // can't happen
     }
-
 
     /**
      * Returns a "smart" node client to a random node in the cluster
@@ -841,7 +824,6 @@ public final class InternalTestCluster extends TestCluster {
             }
         }
 
-
         @Override
         public void close() throws IOException {
             resetClient();
@@ -881,17 +863,7 @@ public final class InternalTestCluster extends TestCluster {
         public Client client(Node node, String clusterName) {
             TransportAddress addr = ((InternalNode) node).injector().getInstance(TransportService.class).boundAddress().publishAddress();
             Settings nodeSettings = node.settings();
-            Builder builder = settingsBuilder()
-                    .put("client.transport.nodes_sampler_interval", "1s")
-                    .put("name", TRANSPORT_CLIENT_PREFIX + node.settings().get("name"))
-                    .put("plugins." + PluginsService.LOAD_PLUGIN_FROM_CLASSPATH, false)
-                    .put(ClusterName.SETTING, clusterName).put("client.transport.sniff", sniff)
-                    .put("node.mode", nodeSettings.get("node.mode", NODE_MODE))
-                    .put("node.local", nodeSettings.get("node.local", ""))
-                    .put("logger.prefix", nodeSettings.get("logger.prefix", ""))
-                    .put("logger.level", nodeSettings.get("logger.level", "INFO"))
-                    .put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true)
-                    .put(settings);
+            Builder builder = settingsBuilder().put("client.transport.nodes_sampler_interval", "1s").put("name", TRANSPORT_CLIENT_PREFIX + node.settings().get("name")).put("plugins." + PluginsService.LOAD_PLUGIN_FROM_CLASSPATH, false).put(ClusterName.SETTING, clusterName).put("client.transport.sniff", sniff).put("node.mode", nodeSettings.get("node.mode", NODE_MODE)).put("node.local", nodeSettings.get("node.local", "")).put("logger.prefix", nodeSettings.get("logger.prefix", "")).put("logger.level", nodeSettings.get("logger.level", "INFO")).put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true).put(settings);
 
             TransportClient client = new TransportClient(builder.build());
             client.addTransportAddress(addr);
@@ -924,7 +896,6 @@ public final class InternalTestCluster extends TestCluster {
             return;
         }
         logger.debug("Cluster is NOT consistent - restarting shared nodes - nodes: [{}] nextNodeId: [{}] numSharedNodes: [{}]", nodes.keySet(), nextNodeId.get(), sharedNodesSeeds.length);
-
 
         Set<NodeAndClient> sharedNodes = new HashSet<>();
         assert sharedNodesSeeds.length == numSharedDataNodes + numSharedClientNodes;
@@ -1149,7 +1120,7 @@ public final class InternalTestCluster extends TestCluster {
      * Returns a reference to a random nodes instances of the given class &gt;T&lt;
      */
     public synchronized <T> T getInstance(Class<T> clazz) {
-        return getInstance(clazz, Predicates.<NodeAndClient>alwaysTrue());
+        return getInstance(clazz, Predicates.<NodeAndClient> alwaysTrue());
     }
 
     private synchronized <T> T getInstanceFromNode(Class<T> clazz, InternalNode node) {
@@ -1244,7 +1215,7 @@ public final class InternalTestCluster extends TestCluster {
      * Restarts a random node in the cluster and calls the callback during restart.
      */
     public void restartRandomNode(RestartCallback callback) throws Exception {
-        restartRandomNode(Predicates.<NodeAndClient>alwaysTrue(), callback);
+        restartRandomNode(Predicates.<NodeAndClient> alwaysTrue(), callback);
     }
 
     /**
@@ -1329,7 +1300,6 @@ public final class InternalTestCluster extends TestCluster {
         }
     }
 
-
     private static final RestartCallback EMPTY_CALLBACK = new RestartCallback() {
         public Settings onNodeStopped(String node) {
             return null;
@@ -1363,7 +1333,6 @@ public final class InternalTestCluster extends TestCluster {
     public void fullRestart(RestartCallback function) throws Exception {
         restartAllNodes(false, function);
     }
-
 
     /**
      * Returns the name of the current master node in the cluster.
@@ -1603,8 +1572,7 @@ public final class InternalTestCluster extends TestCluster {
     private static final class DataOrMasterNodePredicate implements Predicate<NodeAndClient> {
         @Override
         public boolean apply(NodeAndClient nodeAndClient) {
-            return DiscoveryNode.dataNode(nodeAndClient.node.settings()) ||
-                    DiscoveryNode.masterNode(nodeAndClient.node.settings());
+            return DiscoveryNode.dataNode(nodeAndClient.node.settings()) || DiscoveryNode.masterNode(nodeAndClient.node.settings());
         }
     }
 
@@ -1675,7 +1643,6 @@ public final class InternalTestCluster extends TestCluster {
     private static final class NodeNamePredicate implements Predicate<Settings> {
         private final HashSet<String> nodeNames;
 
-
         public NodeNamePredicate(HashSet<String> nodeNames) {
             this.nodeNames = nodeNames;
         }
@@ -1686,7 +1653,6 @@ public final class InternalTestCluster extends TestCluster {
 
         }
     }
-
 
     /**
      * An abstract class that is called during {@link #rollingRestart(InternalTestCluster.RestartCallback)}
@@ -1716,7 +1682,6 @@ public final class InternalTestCluster extends TestCluster {
         public boolean clearData(String nodeName) {
             return false;
         }
-
 
         /**
          * If this returns <code>false</code> the node with the given node name will not be restarted. It will be

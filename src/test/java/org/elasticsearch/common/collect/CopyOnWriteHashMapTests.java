@@ -141,7 +141,7 @@ public class CopyOnWriteHashMapTests extends ElasticsearchTestCase {
         } catch (ElasticsearchIllegalArgumentException e) {
             // expected
         }
-        
+
         try {
             new CopyOnWriteHashMap<>().copyAndPut(null, "b");
             fail();

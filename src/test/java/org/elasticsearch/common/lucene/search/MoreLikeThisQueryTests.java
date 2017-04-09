@@ -47,7 +47,6 @@ public class MoreLikeThisQueryTests extends ElasticsearchTestCase {
         IndexWriter indexWriter = new IndexWriter(dir, new IndexWriterConfig(Lucene.VERSION, Lucene.STANDARD_ANALYZER));
         indexWriter.commit();
 
-
         Document document = new Document();
         document.add(new TextField("_id", "1", Field.Store.YES));
         document.add(new TextField("text", "lucene", Field.Store.YES));
@@ -61,7 +60,7 @@ public class MoreLikeThisQueryTests extends ElasticsearchTestCase {
         IndexReader reader = DirectoryReader.open(indexWriter, true);
         IndexSearcher searcher = new IndexSearcher(reader);
 
-        MoreLikeThisQuery mltQuery = new MoreLikeThisQuery("lucene", new String[]{"text"}, Lucene.STANDARD_ANALYZER);
+        MoreLikeThisQuery mltQuery = new MoreLikeThisQuery("lucene", new String[] { "text" }, Lucene.STANDARD_ANALYZER);
         mltQuery.setLikeText("lucene");
         mltQuery.setMinTermFrequency(1);
         mltQuery.setMinDocFreq(1);

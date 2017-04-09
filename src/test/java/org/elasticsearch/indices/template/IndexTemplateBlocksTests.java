@@ -37,14 +37,7 @@ public class IndexTemplateBlocksTests extends ElasticsearchIntegrationTest {
     @Test
     public void testIndexTemplatesWithBlocks() throws IOException {
         // creates a simple index template
-        client().admin().indices().preparePutTemplate("template_blocks")
-                .setTemplate("te*")
-                .setOrder(0)
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("field1").field("type", "string").field("store", "yes").endObject()
-                        .startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject()
-                        .endObject().endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().preparePutTemplate("template_blocks").setTemplate("te*").setOrder(0).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("type", "string").field("store", "yes").endObject().startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().endObject().endObject().endObject()).execute().actionGet();
 
         try {
             setClusterReadOnly(true);
@@ -52,10 +45,7 @@ public class IndexTemplateBlocksTests extends ElasticsearchIntegrationTest {
             GetIndexTemplatesResponse response = client().admin().indices().prepareGetTemplates("template_blocks").execute().actionGet();
             assertThat(response.getIndexTemplates(), hasSize(1));
 
-            assertBlocked(client().admin().indices().preparePutTemplate("template_blocks_2")
-                    .setTemplate("block*")
-                    .setOrder(0)
-                    .addAlias(new Alias("alias_1")));
+            assertBlocked(client().admin().indices().preparePutTemplate("template_blocks_2").setTemplate("block*").setOrder(0).addAlias(new Alias("alias_1")));
 
             assertBlocked(client().admin().indices().prepareDeleteTemplate("template_blocks"));
 

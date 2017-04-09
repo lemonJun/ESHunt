@@ -55,59 +55,33 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void simpleDistanceTests() throws Exception {
-        XContentBuilder xContentBuilder = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("location").field("type", "geo_point").field("lat_lon", true)
-                .startObject("fielddata").field("format", randomNumericFieldDataFormat()).endObject().endObject().endObject()
-                .endObject().endObject();
+        XContentBuilder xContentBuilder = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_point").field("lat_lon", true).startObject("fielddata").field("format", randomNumericFieldDataFormat()).endObject().endObject().endObject().endObject().endObject();
         assertAcked(prepareCreate("test").addMapping("type1", xContentBuilder));
         ensureGreen();
 
-        indexRandom(true, client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject()
-                .field("name", "New York")
-                .startObject("location").field("lat", 40.7143528).field("lon", -74.0059731).endObject()
-                .endObject()), 
-        // to NY: 5.286 km
-        client().prepareIndex("test", "type1", "2").setSource(jsonBuilder().startObject()
-                .field("name", "Times Square")
-                .startObject("location").field("lat", 40.759011).field("lon", -73.9844722).endObject()
-                .endObject()),
-        // to NY: 0.4621 km
-        client().prepareIndex("test", "type1", "3").setSource(jsonBuilder().startObject()
-                .field("name", "Tribeca")
-                .startObject("location").field("lat", 40.718266).field("lon", -74.007819).endObject()
-                .endObject()),
-        // to NY: 1.055 km
-        client().prepareIndex("test", "type1", "4").setSource(jsonBuilder().startObject()
-                .field("name", "Wall Street")
-                .startObject("location").field("lat", 40.7051157).field("lon", -74.0088305).endObject()
-                .endObject()),
-        // to NY: 1.258 km
-        client().prepareIndex("test", "type1", "5").setSource(jsonBuilder().startObject()
-                .field("name", "Soho")
-                .startObject("location").field("lat", 40.7247222).field("lon", -74).endObject()
-                .endObject()),
-        // to NY: 2.029 km
-        client().prepareIndex("test", "type1", "6").setSource(jsonBuilder().startObject()
-                .field("name", "Greenwich Village")
-                .startObject("location").field("lat", 40.731033).field("lon", -73.9962255).endObject()
-                .endObject()),
-        // to NY: 8.572 km
-        client().prepareIndex("test", "type1", "7").setSource(jsonBuilder().startObject()
-                .field("name", "Brooklyn")
-                .startObject("location").field("lat", 40.65).field("lon", -73.95).endObject()
-                .endObject()));
+        indexRandom(true, client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject().field("name", "New York").startObject("location").field("lat", 40.7143528).field("lon", -74.0059731).endObject().endObject()),
+                        // to NY: 5.286 km
+                        client().prepareIndex("test", "type1", "2").setSource(jsonBuilder().startObject().field("name", "Times Square").startObject("location").field("lat", 40.759011).field("lon", -73.9844722).endObject().endObject()),
+                        // to NY: 0.4621 km
+                        client().prepareIndex("test", "type1", "3").setSource(jsonBuilder().startObject().field("name", "Tribeca").startObject("location").field("lat", 40.718266).field("lon", -74.007819).endObject().endObject()),
+                        // to NY: 1.055 km
+                        client().prepareIndex("test", "type1", "4").setSource(jsonBuilder().startObject().field("name", "Wall Street").startObject("location").field("lat", 40.7051157).field("lon", -74.0088305).endObject().endObject()),
+                        // to NY: 1.258 km
+                        client().prepareIndex("test", "type1", "5").setSource(jsonBuilder().startObject().field("name", "Soho").startObject("location").field("lat", 40.7247222).field("lon", -74).endObject().endObject()),
+                        // to NY: 2.029 km
+                        client().prepareIndex("test", "type1", "6").setSource(jsonBuilder().startObject().field("name", "Greenwich Village").startObject("location").field("lat", 40.731033).field("lon", -73.9962255).endObject().endObject()),
+                        // to NY: 8.572 km
+                        client().prepareIndex("test", "type1", "7").setSource(jsonBuilder().startObject().field("name", "Brooklyn").startObject("location").field("lat", 40.65).field("lon", -73.95).endObject().endObject()));
 
         SearchResponse searchResponse = client().prepareSearch() // from NY
-                .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("3km").point(40.7143528, -74.0059731)))
-                .execute().actionGet();
+                        .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("3km").point(40.7143528, -74.0059731))).execute().actionGet();
         assertHitCount(searchResponse, 5);
         assertThat(searchResponse.getHits().hits().length, equalTo(5));
         for (SearchHit hit : searchResponse.getHits()) {
             assertThat(hit.id(), anyOf(equalTo("1"), equalTo("3"), equalTo("4"), equalTo("5"), equalTo("6")));
         }
         searchResponse = client().prepareSearch() // from NY
-                .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("3km").point(40.7143528, -74.0059731).optimizeBbox("indexed")))
-                .execute().actionGet();
+                        .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("3km").point(40.7143528, -74.0059731).optimizeBbox("indexed"))).execute().actionGet();
         assertHitCount(searchResponse, 5);
         assertThat(searchResponse.getHits().hits().length, equalTo(5));
         for (SearchHit hit : searchResponse.getHits()) {
@@ -116,8 +90,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
 
         // now with a PLANE type
         searchResponse = client().prepareSearch() // from NY
-                .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("3km").geoDistance(GeoDistance.PLANE).point(40.7143528, -74.0059731)))
-                .execute().actionGet();
+                        .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("3km").geoDistance(GeoDistance.PLANE).point(40.7143528, -74.0059731))).execute().actionGet();
         assertHitCount(searchResponse, 5);
         assertThat(searchResponse.getHits().hits().length, equalTo(5));
         for (SearchHit hit : searchResponse.getHits()) {
@@ -127,33 +100,14 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         // factor type is really too small for this resolution
 
         searchResponse = client().prepareSearch() // from NY
-                .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("2km").point(40.7143528, -74.0059731)))
-                .execute().actionGet();
+                        .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("2km").point(40.7143528, -74.0059731))).execute().actionGet();
         assertHitCount(searchResponse, 4);
         assertThat(searchResponse.getHits().hits().length, equalTo(4));
         for (SearchHit hit : searchResponse.getHits()) {
             assertThat(hit.id(), anyOf(equalTo("1"), equalTo("3"), equalTo("4"), equalTo("5")));
         }
         searchResponse = client().prepareSearch() // from NY
-                .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("2km").point(40.7143528, -74.0059731).optimizeBbox("indexed")))
-                .execute().actionGet();
-        assertHitCount(searchResponse, 4);
-        assertThat(searchResponse.getHits().hits().length, equalTo(4));
-        for (SearchHit hit : searchResponse.getHits()) {
-            assertThat(hit.id(), anyOf(equalTo("1"), equalTo("3"), equalTo("4"), equalTo("5")));
-        }
-
-        searchResponse = client().prepareSearch() // from NY
-                .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("1.242mi").point(40.7143528, -74.0059731)))
-                .execute().actionGet();
-        assertHitCount(searchResponse, 4);
-        assertThat(searchResponse.getHits().hits().length, equalTo(4));
-        for (SearchHit hit : searchResponse.getHits()) {
-            assertThat(hit.id(), anyOf(equalTo("1"), equalTo("3"), equalTo("4"), equalTo("5")));
-        }
-        searchResponse = client().prepareSearch() // from NY
-                .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("1.242mi").point(40.7143528, -74.0059731).optimizeBbox("indexed")))
-                .execute().actionGet();
+                        .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("2km").point(40.7143528, -74.0059731).optimizeBbox("indexed"))).execute().actionGet();
         assertHitCount(searchResponse, 4);
         assertThat(searchResponse.getHits().hits().length, equalTo(4));
         for (SearchHit hit : searchResponse.getHits()) {
@@ -161,16 +115,29 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         }
 
         searchResponse = client().prepareSearch() // from NY
-                .setQuery(filteredQuery(matchAllQuery(), geoDistanceRangeFilter("location").from("1.0km").to("2.0km").point(40.7143528, -74.0059731)))
-                .execute().actionGet();
+                        .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("1.242mi").point(40.7143528, -74.0059731))).execute().actionGet();
+        assertHitCount(searchResponse, 4);
+        assertThat(searchResponse.getHits().hits().length, equalTo(4));
+        for (SearchHit hit : searchResponse.getHits()) {
+            assertThat(hit.id(), anyOf(equalTo("1"), equalTo("3"), equalTo("4"), equalTo("5")));
+        }
+        searchResponse = client().prepareSearch() // from NY
+                        .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("1.242mi").point(40.7143528, -74.0059731).optimizeBbox("indexed"))).execute().actionGet();
+        assertHitCount(searchResponse, 4);
+        assertThat(searchResponse.getHits().hits().length, equalTo(4));
+        for (SearchHit hit : searchResponse.getHits()) {
+            assertThat(hit.id(), anyOf(equalTo("1"), equalTo("3"), equalTo("4"), equalTo("5")));
+        }
+
+        searchResponse = client().prepareSearch() // from NY
+                        .setQuery(filteredQuery(matchAllQuery(), geoDistanceRangeFilter("location").from("1.0km").to("2.0km").point(40.7143528, -74.0059731))).execute().actionGet();
         assertHitCount(searchResponse, 2);
         assertThat(searchResponse.getHits().hits().length, equalTo(2));
         for (SearchHit hit : searchResponse.getHits()) {
             assertThat(hit.id(), anyOf(equalTo("4"), equalTo("5")));
         }
         searchResponse = client().prepareSearch() // from NY
-                .setQuery(filteredQuery(matchAllQuery(), geoDistanceRangeFilter("location").from("1.0km").to("2.0km").point(40.7143528, -74.0059731).optimizeBbox("indexed")))
-                .execute().actionGet();
+                        .setQuery(filteredQuery(matchAllQuery(), geoDistanceRangeFilter("location").from("1.0km").to("2.0km").point(40.7143528, -74.0059731).optimizeBbox("indexed"))).execute().actionGet();
         assertHitCount(searchResponse, 2);
         assertThat(searchResponse.getHits().hits().length, equalTo(2));
         for (SearchHit hit : searchResponse.getHits()) {
@@ -178,29 +145,23 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         }
 
         searchResponse = client().prepareSearch() // from NY
-                .setQuery(filteredQuery(matchAllQuery(), geoDistanceRangeFilter("location").to("2.0km").point(40.7143528, -74.0059731)))
-                .execute().actionGet();
+                        .setQuery(filteredQuery(matchAllQuery(), geoDistanceRangeFilter("location").to("2.0km").point(40.7143528, -74.0059731))).execute().actionGet();
         assertHitCount(searchResponse, 4);
         assertThat(searchResponse.getHits().hits().length, equalTo(4));
 
         searchResponse = client().prepareSearch() // from NY
-                .setQuery(filteredQuery(matchAllQuery(), geoDistanceRangeFilter("location").from("2.0km").point(40.7143528, -74.0059731)))
-                .execute().actionGet();
+                        .setQuery(filteredQuery(matchAllQuery(), geoDistanceRangeFilter("location").from("2.0km").point(40.7143528, -74.0059731))).execute().actionGet();
         assertHitCount(searchResponse, 3);
         assertThat(searchResponse.getHits().hits().length, equalTo(3));
 
         // SORTING
 
-        searchResponse = client().prepareSearch().setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("location").point(40.7143528, -74.0059731).order(SortOrder.ASC))
-                .execute().actionGet();
+        searchResponse = client().prepareSearch().setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("location").point(40.7143528, -74.0059731).order(SortOrder.ASC)).execute().actionGet();
 
         assertHitCount(searchResponse, 7);
         assertOrderedSearchHits(searchResponse, "1", "3", "4", "5", "6", "2", "7");
 
-        searchResponse = client().prepareSearch().setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("location").point(40.7143528, -74.0059731).order(SortOrder.DESC))
-                .execute().actionGet();
+        searchResponse = client().prepareSearch().setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("location").point(40.7143528, -74.0059731).order(SortOrder.DESC)).execute().actionGet();
 
         assertHitCount(searchResponse, 7);
         assertOrderedSearchHits(searchResponse, "7", "2", "6", "5", "4", "3", "1");
@@ -208,56 +169,34 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testDistanceSortingMVFields() throws Exception {
-        XContentBuilder xContentBuilder = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("locations").field("type", "geo_point").field("lat_lon", true)
-                .startObject("fielddata").field("format", randomNumericFieldDataFormat()).endObject().endObject().endObject()
-                .endObject().endObject();
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", xContentBuilder));
+        XContentBuilder xContentBuilder = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("locations").field("type", "geo_point").field("lat_lon", true).startObject("fielddata").field("format", randomNumericFieldDataFormat()).endObject().endObject().endObject().endObject().endObject();
+        assertAcked(prepareCreate("test").addMapping("type1", xContentBuilder));
         ensureGreen();
 
-        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject()
-                .field("names", "New York")
-                .startObject("locations").field("lat", 40.7143528).field("lon", -74.0059731).endObject()
-                .endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject().field("names", "New York").startObject("locations").field("lat", 40.7143528).field("lon", -74.0059731).endObject().endObject()).execute().actionGet();
 
-        client().prepareIndex("test", "type1", "2").setSource(jsonBuilder().startObject()
-                .field("names", "Times Square", "Tribeca")
-                .startArray("locations")
+        client().prepareIndex("test", "type1", "2").setSource(jsonBuilder().startObject().field("names", "Times Square", "Tribeca").startArray("locations")
                         // to NY: 5.286 km
-                .startObject().field("lat", 40.759011).field("lon", -73.9844722).endObject()
+                        .startObject().field("lat", 40.759011).field("lon", -73.9844722).endObject()
                         // to NY: 0.4621 km
-                .startObject().field("lat", 40.718266).field("lon", -74.007819).endObject()
-                .endArray()
-                .endObject()).execute().actionGet();
+                        .startObject().field("lat", 40.718266).field("lon", -74.007819).endObject().endArray().endObject()).execute().actionGet();
 
-        client().prepareIndex("test", "type1", "3").setSource(jsonBuilder().startObject()
-                .field("names", "Wall Street", "Soho")
-                .startArray("locations")
+        client().prepareIndex("test", "type1", "3").setSource(jsonBuilder().startObject().field("names", "Wall Street", "Soho").startArray("locations")
                         // to NY: 1.055 km
-                .startObject().field("lat", 40.7051157).field("lon", -74.0088305).endObject()
+                        .startObject().field("lat", 40.7051157).field("lon", -74.0088305).endObject()
                         // to NY: 1.258 km
-                .startObject().field("lat", 40.7247222).field("lon", -74).endObject()
-                .endArray()
-                .endObject()).execute().actionGet();
+                        .startObject().field("lat", 40.7247222).field("lon", -74).endObject().endArray().endObject()).execute().actionGet();
 
-
-        client().prepareIndex("test", "type1", "4").setSource(jsonBuilder().startObject()
-                .field("names", "Greenwich Village", "Brooklyn")
-                .startArray("locations")
+        client().prepareIndex("test", "type1", "4").setSource(jsonBuilder().startObject().field("names", "Greenwich Village", "Brooklyn").startArray("locations")
                         // to NY: 2.029 km
-                .startObject().field("lat", 40.731033).field("lon", -73.9962255).endObject()
+                        .startObject().field("lat", 40.731033).field("lon", -73.9962255).endObject()
                         // to NY: 8.572 km
-                .startObject().field("lat", 40.65).field("lon", -73.95).endObject()
-                .endArray()
-                .endObject()).execute().actionGet();
+                        .startObject().field("lat", 40.65).field("lon", -73.95).endObject().endArray().endObject()).execute().actionGet();
 
         client().admin().indices().prepareRefresh().execute().actionGet();
 
         // Order: Asc
-        SearchResponse searchResponse = client().prepareSearch("test").setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).order(SortOrder.ASC))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("test").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).order(SortOrder.ASC)).execute().actionGet();
 
         assertHitCount(searchResponse, 4);
         assertOrderedSearchHits(searchResponse, "1", "2", "3", "4");
@@ -267,9 +206,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(((Number) searchResponse.getHits().getAt(3).sortValues()[0]).doubleValue(), closeTo(2029.0d, 10d));
 
         // Order: Asc, Mode: max
-        searchResponse = client().prepareSearch("test").setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).order(SortOrder.ASC).sortMode("max"))
-                .execute().actionGet();
+        searchResponse = client().prepareSearch("test").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).order(SortOrder.ASC).sortMode("max")).execute().actionGet();
 
         assertHitCount(searchResponse, 4);
         assertOrderedSearchHits(searchResponse, "1", "3", "2", "4");
@@ -279,9 +216,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(((Number) searchResponse.getHits().getAt(3).sortValues()[0]).doubleValue(), closeTo(8572.0d, 10d));
 
         // Order: Desc
-        searchResponse = client().prepareSearch("test").setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).order(SortOrder.DESC))
-                .execute().actionGet();
+        searchResponse = client().prepareSearch("test").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).order(SortOrder.DESC)).execute().actionGet();
 
         assertHitCount(searchResponse, 4);
         assertOrderedSearchHits(searchResponse, "4", "2", "3", "1");
@@ -291,9 +226,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(((Number) searchResponse.getHits().getAt(3).sortValues()[0]).doubleValue(), closeTo(0d, 10d));
 
         // Order: Desc, Mode: min
-        searchResponse = client().prepareSearch("test").setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).order(SortOrder.DESC).sortMode("min"))
-                .execute().actionGet();
+        searchResponse = client().prepareSearch("test").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).order(SortOrder.DESC).sortMode("min")).execute().actionGet();
 
         assertHitCount(searchResponse, 4);
         assertOrderedSearchHits(searchResponse, "4", "3", "2", "1");
@@ -302,9 +235,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(((Number) searchResponse.getHits().getAt(2).sortValues()[0]).doubleValue(), closeTo(462.1d, 10d));
         assertThat(((Number) searchResponse.getHits().getAt(3).sortValues()[0]).doubleValue(), closeTo(0d, 10d));
 
-        searchResponse = client().prepareSearch("test").setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).sortMode("avg").order(SortOrder.ASC))
-                .execute().actionGet();
+        searchResponse = client().prepareSearch("test").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).sortMode("avg").order(SortOrder.ASC)).execute().actionGet();
 
         assertHitCount(searchResponse, 4);
         assertOrderedSearchHits(searchResponse, "1", "3", "2", "4");
@@ -313,9 +244,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(((Number) searchResponse.getHits().getAt(2).sortValues()[0]).doubleValue(), closeTo(2874d, 10d));
         assertThat(((Number) searchResponse.getHits().getAt(3).sortValues()[0]).doubleValue(), closeTo(5301d, 10d));
 
-        searchResponse = client().prepareSearch("test").setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).sortMode("avg").order(SortOrder.DESC))
-                .execute().actionGet();
+        searchResponse = client().prepareSearch("test").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).sortMode("avg").order(SortOrder.DESC)).execute().actionGet();
 
         assertHitCount(searchResponse, 4);
         assertOrderedSearchHits(searchResponse, "4", "2", "3", "1");
@@ -324,42 +253,28 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(((Number) searchResponse.getHits().getAt(2).sortValues()[0]).doubleValue(), closeTo(1157.0d, 10d));
         assertThat(((Number) searchResponse.getHits().getAt(3).sortValues()[0]).doubleValue(), closeTo(0d, 10d));
 
-        assertFailures(client().prepareSearch("test").setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).sortMode("sum")),
-                RestStatus.BAD_REQUEST,
-                containsString("sort_mode [sum] isn't supported for sorting by geo distance"));
+        assertFailures(client().prepareSearch("test").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).sortMode("sum")), RestStatus.BAD_REQUEST, containsString("sort_mode [sum] isn't supported for sorting by geo distance"));
     }
 
     @Test
     // Regression bug: https://github.com/elasticsearch/elasticsearch/issues/2851
     public void testDistanceSortingWithMissingGeoPoint() throws Exception {
-        XContentBuilder xContentBuilder = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("locations").field("type", "geo_point").field("lat_lon", true)
-                .startObject("fielddata").field("format", randomNumericFieldDataFormat()).endObject().endObject().endObject()
-                .endObject().endObject();
+        XContentBuilder xContentBuilder = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("locations").field("type", "geo_point").field("lat_lon", true).startObject("fielddata").field("format", randomNumericFieldDataFormat()).endObject().endObject().endObject().endObject().endObject();
         assertAcked(prepareCreate("test").addMapping("type1", xContentBuilder));
         ensureGreen();
 
-        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject()
-                .field("names", "Times Square", "Tribeca")
-                .startArray("locations")
+        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject().field("names", "Times Square", "Tribeca").startArray("locations")
                         // to NY: 5.286 km
-                .startObject().field("lat", 40.759011).field("lon", -73.9844722).endObject()
+                        .startObject().field("lat", 40.759011).field("lon", -73.9844722).endObject()
                         // to NY: 0.4621 km
-                .startObject().field("lat", 40.718266).field("lon", -74.007819).endObject()
-                .endArray()
-                .endObject()).execute().actionGet();
+                        .startObject().field("lat", 40.718266).field("lon", -74.007819).endObject().endArray().endObject()).execute().actionGet();
 
-        client().prepareIndex("test", "type1", "2").setSource(jsonBuilder().startObject()
-                .field("names", "Wall Street", "Soho")
-                .endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "2").setSource(jsonBuilder().startObject().field("names", "Wall Street", "Soho").endObject()).execute().actionGet();
 
         refresh();
 
         // Order: Asc
-        SearchResponse searchResponse = client().prepareSearch("test").setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).order(SortOrder.ASC))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("test").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).order(SortOrder.ASC)).execute().actionGet();
 
         assertHitCount(searchResponse, 2);
         assertOrderedSearchHits(searchResponse, "1", "2");
@@ -367,13 +282,11 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(((Number) searchResponse.getHits().getAt(1).sortValues()[0]).doubleValue(), equalTo(Double.MAX_VALUE));
 
         // Order: Desc
-        searchResponse = client().prepareSearch("test").setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).order(SortOrder.DESC))
-                .execute().actionGet();
+        searchResponse = client().prepareSearch("test").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("locations").point(40.7143528, -74.0059731).order(SortOrder.DESC)).execute().actionGet();
 
         // Doc with missing geo point is first, is consistent with 0.20.x
         assertHitCount(searchResponse, 2);
-        assertOrderedSearchHits(searchResponse, "2", "1");        
+        assertOrderedSearchHits(searchResponse, "2", "1");
         assertThat(((Number) searchResponse.getHits().getAt(0).sortValues()[0]).doubleValue(), equalTo(Double.MAX_VALUE));
         assertThat(((Number) searchResponse.getHits().getAt(1).sortValues()[0]).doubleValue(), closeTo(5286d, 10d));
     }
@@ -385,16 +298,11 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         double target_lat = 32.81;
         double target_long = -117.21;
 
-        XContentBuilder xContentBuilder = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("location").field("type", "geo_point").field("lat_lon", true).endObject().endObject()
-                .endObject().endObject();
+        XContentBuilder xContentBuilder = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_point").field("lat_lon", true).endObject().endObject().endObject().endObject();
         assertAcked(prepareCreate("test").addMapping("type1", xContentBuilder));
         ensureGreen();
 
-        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject()
-                .field("name", "TestPosition")
-                .startObject("location").field("lat", source_lat).field("lon", source_long).endObject()
-                .endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject().field("name", "TestPosition").startObject("location").field("lat", source_lat).field("lon", source_long).endObject().endObject()).execute().actionGet();
 
         refresh();
 
@@ -433,76 +341,21 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testDistanceSortingNestedFields() throws Exception {
-        XContentBuilder xContentBuilder = XContentFactory.jsonBuilder().startObject().startObject("company")
-                .startObject("properties")
-                .startObject("name").field("type", "string").endObject()
-                .startObject("branches")
-                .field("type", "nested")
-                .startObject("properties")
-                .startObject("name").field("type", "string").endObject()
-                .startObject("location").field("type", "geo_point").field("lat_lon", true)
-                .startObject("fielddata").field("format", randomNumericFieldDataFormat()).endObject().endObject()
-                .endObject()
-                .endObject()
-                .endObject()
-                .endObject().endObject();
+        XContentBuilder xContentBuilder = XContentFactory.jsonBuilder().startObject().startObject("company").startObject("properties").startObject("name").field("type", "string").endObject().startObject("branches").field("type", "nested").startObject("properties").startObject("name").field("type", "string").endObject().startObject("location").field("type", "geo_point").field("lat_lon", true).startObject("fielddata").field("format", randomNumericFieldDataFormat()).endObject().endObject().endObject().endObject().endObject().endObject().endObject();
 
         assertAcked(prepareCreate("companies").addMapping("company", xContentBuilder));
         ensureGreen();
 
-        indexRandom(true, client().prepareIndex("companies", "company", "1").setSource(jsonBuilder().startObject()
-                .field("name", "company 1")
-                .startArray("branches")
-                    .startObject()
-                        .field("name", "New York")
-                        .startObject("location").field("lat", 40.7143528).field("lon", -74.0059731).endObject()
-                    .endObject()
-                .endArray()
-                .endObject()), 
-        client().prepareIndex("companies", "company", "2").setSource(jsonBuilder().startObject()
-                .field("name", "company 2")
-                .startArray("branches")
-                    .startObject()
-                        .field("name", "Times Square")
-                        .startObject("location").field("lat", 40.759011).field("lon", -73.9844722).endObject() // to NY: 5.286 km
-                    .endObject()
-                    .startObject()
-                        .field("name", "Tribeca")
-                        .startObject("location").field("lat", 40.718266).field("lon", -74.007819).endObject() // to NY: 0.4621 km
-                    .endObject()
-                .endArray()
-                .endObject()),
-        client().prepareIndex("companies", "company", "3").setSource(jsonBuilder().startObject()
-                .field("name", "company 3")
-                .startArray("branches")
-                    .startObject()
-                        .field("name", "Wall Street")
-                        .startObject("location").field("lat", 40.7051157).field("lon", -74.0088305).endObject() // to NY: 1.055 km
-                    .endObject()
-                    .startObject()
-                        .field("name", "Soho")
-                        .startObject("location").field("lat", 40.7247222).field("lon", -74).endObject() // to NY: 1.258 km
-                    .endObject()
-                .endArray()
-                .endObject()),
-        client().prepareIndex("companies", "company", "4").setSource(jsonBuilder().startObject()
-                .field("name", "company 4")
-                .startArray("branches")
-                    .startObject()
-                        .field("name", "Greenwich Village")
-                        .startObject("location").field("lat", 40.731033).field("lon", -73.9962255).endObject() // to NY: 2.029 km
-                    .endObject()
-                    .startObject()
-                        .field("name", "Brooklyn")
-                        .startObject("location").field("lat", 40.65).field("lon", -73.95).endObject() // to NY: 8.572 km
-                    .endObject()
-                .endArray()
-                .endObject()));
+        indexRandom(true, client().prepareIndex("companies", "company", "1").setSource(jsonBuilder().startObject().field("name", "company 1").startArray("branches").startObject().field("name", "New York").startObject("location").field("lat", 40.7143528).field("lon", -74.0059731).endObject().endObject().endArray().endObject()), client().prepareIndex("companies", "company", "2").setSource(jsonBuilder().startObject().field("name", "company 2").startArray("branches").startObject().field("name", "Times Square").startObject("location").field("lat", 40.759011).field("lon", -73.9844722).endObject() // to NY: 5.286 km
+                        .endObject().startObject().field("name", "Tribeca").startObject("location").field("lat", 40.718266).field("lon", -74.007819).endObject() // to NY: 0.4621 km
+                        .endObject().endArray().endObject()), client().prepareIndex("companies", "company", "3").setSource(jsonBuilder().startObject().field("name", "company 3").startArray("branches").startObject().field("name", "Wall Street").startObject("location").field("lat", 40.7051157).field("lon", -74.0088305).endObject() // to NY: 1.055 km
+                                        .endObject().startObject().field("name", "Soho").startObject("location").field("lat", 40.7247222).field("lon", -74).endObject() // to NY: 1.258 km
+                                        .endObject().endArray().endObject()), client().prepareIndex("companies", "company", "4").setSource(jsonBuilder().startObject().field("name", "company 4").startArray("branches").startObject().field("name", "Greenwich Village").startObject("location").field("lat", 40.731033).field("lon", -73.9962255).endObject() // to NY: 2.029 km
+                                                        .endObject().startObject().field("name", "Brooklyn").startObject("location").field("lat", 40.65).field("lon", -73.95).endObject() // to NY: 8.572 km
+                                                        .endObject().endArray().endObject()));
 
         // Order: Asc
-        SearchResponse searchResponse = client().prepareSearch("companies").setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("branches.location").point(40.7143528, -74.0059731).order(SortOrder.ASC))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("companies").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("branches.location").point(40.7143528, -74.0059731).order(SortOrder.ASC)).execute().actionGet();
 
         assertHitCount(searchResponse, 4);
         assertOrderedSearchHits(searchResponse, "1", "2", "3", "4");
@@ -512,9 +365,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(((Number) searchResponse.getHits().getAt(3).sortValues()[0]).doubleValue(), closeTo(2029.0d, 10d));
 
         // Order: Asc, Mode: max
-        searchResponse = client().prepareSearch("companies").setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("branches.location").point(40.7143528, -74.0059731).order(SortOrder.ASC).sortMode("max"))
-                .execute().actionGet();
+        searchResponse = client().prepareSearch("companies").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("branches.location").point(40.7143528, -74.0059731).order(SortOrder.ASC).sortMode("max")).execute().actionGet();
 
         assertHitCount(searchResponse, 4);
         assertOrderedSearchHits(searchResponse, "1", "3", "2", "4");
@@ -524,9 +375,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(((Number) searchResponse.getHits().getAt(3).sortValues()[0]).doubleValue(), closeTo(8572.0d, 10d));
 
         // Order: Desc
-        searchResponse = client().prepareSearch("companies").setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("branches.location").point(40.7143528, -74.0059731).order(SortOrder.DESC))
-                .execute().actionGet();
+        searchResponse = client().prepareSearch("companies").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("branches.location").point(40.7143528, -74.0059731).order(SortOrder.DESC)).execute().actionGet();
 
         assertHitCount(searchResponse, 4);
         assertOrderedSearchHits(searchResponse, "4", "2", "3", "1");
@@ -536,9 +385,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(((Number) searchResponse.getHits().getAt(3).sortValues()[0]).doubleValue(), closeTo(0d, 10d));
 
         // Order: Desc, Mode: min
-        searchResponse = client().prepareSearch("companies").setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("branches.location").point(40.7143528, -74.0059731).order(SortOrder.DESC).sortMode("min"))
-                .execute().actionGet();
+        searchResponse = client().prepareSearch("companies").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("branches.location").point(40.7143528, -74.0059731).order(SortOrder.DESC).sortMode("min")).execute().actionGet();
 
         assertHitCount(searchResponse, 4);
         assertOrderedSearchHits(searchResponse, "4", "3", "2", "1");
@@ -547,9 +394,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(((Number) searchResponse.getHits().getAt(2).sortValues()[0]).doubleValue(), closeTo(462.1d, 10d));
         assertThat(((Number) searchResponse.getHits().getAt(3).sortValues()[0]).doubleValue(), closeTo(0d, 10d));
 
-        searchResponse = client().prepareSearch("companies").setQuery(matchAllQuery())
-                .addSort(SortBuilders.geoDistanceSort("branches.location").point(40.7143528, -74.0059731).sortMode("avg").order(SortOrder.ASC))
-                .execute().actionGet();
+        searchResponse = client().prepareSearch("companies").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("branches.location").point(40.7143528, -74.0059731).sortMode("avg").order(SortOrder.ASC)).execute().actionGet();
 
         assertHitCount(searchResponse, 4);
         assertOrderedSearchHits(searchResponse, "1", "3", "2", "4");
@@ -558,12 +403,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(((Number) searchResponse.getHits().getAt(2).sortValues()[0]).doubleValue(), closeTo(2874.0d, 10d));
         assertThat(((Number) searchResponse.getHits().getAt(3).sortValues()[0]).doubleValue(), closeTo(5301.0d, 10d));
 
-        searchResponse = client().prepareSearch("companies").setQuery(matchAllQuery())
-                .addSort(
-                    SortBuilders.geoDistanceSort("branches.location").setNestedPath("branches")
-                            .point(40.7143528, -74.0059731).sortMode("avg").order(SortOrder.DESC)
-                )
-                .execute().actionGet();
+        searchResponse = client().prepareSearch("companies").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("branches.location").setNestedPath("branches").point(40.7143528, -74.0059731).sortMode("avg").order(SortOrder.DESC)).execute().actionGet();
 
         assertHitCount(searchResponse, 4);
         assertOrderedSearchHits(searchResponse, "4", "2", "3", "1");
@@ -572,12 +412,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(((Number) searchResponse.getHits().getAt(2).sortValues()[0]).doubleValue(), closeTo(1157.0d, 10d));
         assertThat(((Number) searchResponse.getHits().getAt(3).sortValues()[0]).doubleValue(), closeTo(0d, 10d));
 
-        searchResponse = client().prepareSearch("companies").setQuery(matchAllQuery())
-                .addSort(
-                        SortBuilders.geoDistanceSort("branches.location").setNestedFilter(termFilter("branches.name", "brooklyn"))
-                                .point(40.7143528, -74.0059731).sortMode("avg").order(SortOrder.ASC)
-                )
-                .execute().actionGet();
+        searchResponse = client().prepareSearch("companies").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("branches.location").setNestedFilter(termFilter("branches.name", "brooklyn")).point(40.7143528, -74.0059731).sortMode("avg").order(SortOrder.ASC)).execute().actionGet();
         assertHitCount(searchResponse, 4);
         assertFirstHit(searchResponse, hasId("4"));
         assertSearchHits(searchResponse, "1", "2", "3", "4");
@@ -586,12 +421,9 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(((Number) searchResponse.getHits().getAt(2).sortValues()[0]).doubleValue(), equalTo(Double.MAX_VALUE));
         assertThat(((Number) searchResponse.getHits().getAt(3).sortValues()[0]).doubleValue(), equalTo(Double.MAX_VALUE));
 
-        assertFailures(client().prepareSearch("companies").setQuery(matchAllQuery())
-                    .addSort(SortBuilders.geoDistanceSort("branches.location").point(40.7143528, -74.0059731).sortMode("sum")),
-                RestStatus.BAD_REQUEST,
-                containsString("sort_mode [sum] isn't supported for sorting by geo distance"));
+        assertFailures(client().prepareSearch("companies").setQuery(matchAllQuery()).addSort(SortBuilders.geoDistanceSort("branches.location").point(40.7143528, -74.0059731).sortMode("sum")), RestStatus.BAD_REQUEST, containsString("sort_mode [sum] isn't supported for sorting by geo distance"));
     }
-    
+
     /**
      * Issue 3073
      */
@@ -600,43 +432,19 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         double lat = 40.720611;
         double lon = -73.998776;
 
-        XContentBuilder mapping = JsonXContent.contentBuilder()
-                .startObject()
-                    .startObject("location")
-                        .startObject("properties")
-                            .startObject("pin")
-                                .field("type", "geo_point")
-                                .field("geohash", true)
-                                .field("geohash_precision", 24)
-                                .field("lat_lon", true)
-                                .startObject("fielddata")
-                                    .field("format", randomNumericFieldDataFormat())
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                .endObject();
+        XContentBuilder mapping = JsonXContent.contentBuilder().startObject().startObject("location").startObject("properties").startObject("pin").field("type", "geo_point").field("geohash", true).field("geohash_precision", 24).field("lat_lon", true).startObject("fielddata").field("format", randomNumericFieldDataFormat()).endObject().endObject().endObject().endObject().endObject();
 
-        XContentBuilder source = JsonXContent.contentBuilder()
-                .startObject()
-                    .field("pin", GeoHashUtils.encode(lat, lon))
-                .endObject();
+        XContentBuilder source = JsonXContent.contentBuilder().startObject().field("pin", GeoHashUtils.encode(lat, lon)).endObject();
 
         assertAcked(prepareCreate("locations").addMapping("location", mapping));
         client().prepareIndex("locations", "location", "1").setCreate(true).setSource(source).execute().actionGet();
         refresh();
         client().prepareGet("locations", "location", "1").execute().actionGet();
 
-        SearchResponse result = client().prepareSearch("locations")
-                .setQuery(QueryBuilders.matchAllQuery())
-                .setPostFilter(FilterBuilders.geoDistanceFilter("pin")
-                        .geoDistance(GeoDistance.ARC)
-                        .lat(lat).lon(lon)
-                        .distance("1m"))
-                .execute().actionGet();
+        SearchResponse result = client().prepareSearch("locations").setQuery(QueryBuilders.matchAllQuery()).setPostFilter(FilterBuilders.geoDistanceFilter("pin").geoDistance(GeoDistance.ARC).lat(lat).lon(lon).distance("1m")).execute().actionGet();
 
         assertHitCount(result, 1);
-    } 
+    }
 
     private double randomLon() {
         return randomDouble() * 360 - 180;
@@ -664,8 +472,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
                 logger.info("Now testing GeoDistance={}, distance={}, origin=({}, {})", geoDistance, distance, originLat, originLon);
                 long matches = -1;
                 for (String optimizeBbox : Arrays.asList("none", "memory", "indexed")) {
-                    SearchResponse resp = client().prepareSearch("index").setSearchType(SearchType.COUNT).setQuery(QueryBuilders.constantScoreQuery(
-                            FilterBuilders.geoDistanceFilter("location").point(originLat, originLon).distance(distance).geoDistance(geoDistance).optimizeBbox(optimizeBbox))).execute().actionGet();
+                    SearchResponse resp = client().prepareSearch("index").setSearchType(SearchType.COUNT).setQuery(QueryBuilders.constantScoreQuery(FilterBuilders.geoDistanceFilter("location").point(originLat, originLon).distance(distance).geoDistance(geoDistance).optimizeBbox(optimizeBbox))).execute().actionGet();
                     assertSearchResponse(resp);
                     logger.info("{} -> {} hits", optimizeBbox, resp.getHits().totalHits());
                     if (matches < 0) {

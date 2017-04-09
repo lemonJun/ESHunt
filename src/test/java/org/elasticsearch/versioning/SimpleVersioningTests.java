@@ -67,13 +67,9 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         assertThat(deleteResponse.isFound(), equalTo(false));
 
         // this should conflict with the delete command transaction which told us that the object was deleted at version 17.
-        assertThrows(
-                client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(13).setVersionType(VersionType.EXTERNAL).execute(),
-                VersionConflictEngineException.class
-        );
+        assertThrows(client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(13).setVersionType(VersionType.EXTERNAL).execute(), VersionConflictEngineException.class);
 
-        IndexResponse indexResponse = client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(18).
-                setVersionType(VersionType.EXTERNAL).execute().actionGet();
+        IndexResponse indexResponse = client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(18).setVersionType(VersionType.EXTERNAL).execute().actionGet();
         assertThat(indexResponse.getVersion(), equalTo(18L));
     }
 
@@ -102,7 +98,7 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         }
 
         // deleting with a lower version works.
-        long v= randomIntBetween(12,14);
+        long v = randomIntBetween(12, 14);
         DeleteResponse deleteResponse = client().prepareDelete("test", "type", "1").setVersion(v).setVersionType(VersionType.FORCE).get();
         assertThat(deleteResponse.isFound(), equalTo(true));
         assertThat(deleteResponse.getVersion(), equalTo(v));
@@ -121,8 +117,7 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         indexResponse = client().prepareIndex("test", "type", "1").setSource("field1", "value1_2").setVersion(14).setVersionType(VersionType.EXTERNAL_GTE).get();
         assertThat(indexResponse.getVersion(), equalTo(14l));
 
-        assertThrows(client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(13).setVersionType(VersionType.EXTERNAL_GTE),
-                VersionConflictEngineException.class);
+        assertThrows(client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(13).setVersionType(VersionType.EXTERNAL_GTE), VersionConflictEngineException.class);
 
         client().admin().indices().prepareRefresh().execute().actionGet();
         if (randomBoolean()) {
@@ -133,21 +128,16 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         }
 
         // deleting with a lower version fails.
-        assertThrows(
-                client().prepareDelete("test", "type", "1").setVersion(2).setVersionType(VersionType.EXTERNAL_GTE),
-                VersionConflictEngineException.class);
+        assertThrows(client().prepareDelete("test", "type", "1").setVersion(2).setVersionType(VersionType.EXTERNAL_GTE), VersionConflictEngineException.class);
 
         // Delete with a higher or equal version deletes all versions up to the given one.
-        long v= randomIntBetween(14,17);
+        long v = randomIntBetween(14, 17);
         DeleteResponse deleteResponse = client().prepareDelete("test", "type", "1").setVersion(v).setVersionType(VersionType.EXTERNAL_GTE).execute().actionGet();
         assertThat(deleteResponse.isFound(), equalTo(true));
         assertThat(deleteResponse.getVersion(), equalTo(v));
 
         // Deleting with a lower version keeps on failing after a delete.
-        assertThrows(
-                client().prepareDelete("test", "type", "1").setVersion(2).setVersionType(VersionType.EXTERNAL_GTE).execute(),
-                VersionConflictEngineException.class);
-
+        assertThrows(client().prepareDelete("test", "type", "1").setVersion(2).setVersionType(VersionType.EXTERNAL_GTE).execute(), VersionConflictEngineException.class);
 
         // But delete with a higher version is OK.
         deleteResponse = client().prepareDelete("test", "type", "1").setVersion(18).setVersionType(VersionType.EXTERNAL_GTE).execute().actionGet();
@@ -166,8 +156,7 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         indexResponse = client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(14).setVersionType(VersionType.EXTERNAL).execute().actionGet();
         assertThat(indexResponse.getVersion(), equalTo(14l));
 
-        assertThrows(client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(13).setVersionType(VersionType.EXTERNAL).execute(),
-                     VersionConflictEngineException.class);
+        assertThrows(client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(13).setVersionType(VersionType.EXTERNAL).execute(), VersionConflictEngineException.class);
 
         if (randomBoolean()) {
             refresh();
@@ -177,9 +166,7 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         }
 
         // deleting with a lower version fails.
-        assertThrows(
-            client().prepareDelete("test", "type", "1").setVersion(2).setVersionType(VersionType.EXTERNAL).execute(),
-            VersionConflictEngineException.class);
+        assertThrows(client().prepareDelete("test", "type", "1").setVersion(2).setVersionType(VersionType.EXTERNAL).execute(), VersionConflictEngineException.class);
 
         // Delete with a higher version deletes all versions up to the given one.
         DeleteResponse deleteResponse = client().prepareDelete("test", "type", "1").setVersion(17).setVersionType(VersionType.EXTERNAL).execute().actionGet();
@@ -187,29 +174,24 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         assertThat(deleteResponse.getVersion(), equalTo(17l));
 
         // Deleting with a lower version keeps on failing after a delete.
-        assertThrows(
-            client().prepareDelete("test", "type", "1").setVersion(2).setVersionType(VersionType.EXTERNAL).execute(),
-            VersionConflictEngineException.class);
-
+        assertThrows(client().prepareDelete("test", "type", "1").setVersion(2).setVersionType(VersionType.EXTERNAL).execute(), VersionConflictEngineException.class);
 
         // But delete with a higher version is OK.
         deleteResponse = client().prepareDelete("test", "type", "1").setVersion(18).setVersionType(VersionType.EXTERNAL).execute().actionGet();
         assertThat(deleteResponse.isFound(), equalTo(false));
         assertThat(deleteResponse.getVersion(), equalTo(18l));
 
-
         // TODO: This behavior breaks rest api returning http status 201, good news is that it this is only the case until deletes GC kicks in.
         indexResponse = client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(19).setVersionType(VersionType.EXTERNAL).execute().actionGet();
         assertThat(indexResponse.getVersion(), equalTo(19l));
-
 
         deleteResponse = client().prepareDelete("test", "type", "1").setVersion(20).setVersionType(VersionType.EXTERNAL).execute().actionGet();
         assertThat(deleteResponse.isFound(), equalTo(true));
         assertThat(deleteResponse.getVersion(), equalTo(20l));
 
         // Make sure that the next delete will be GC. Note we do it on the index settings so it will be cleaned up
-        HashMap<String,Object> newSettings = new HashMap<>();
-        newSettings.put("index.gc_deletes",-1);
+        HashMap<String, Object> newSettings = new HashMap<>();
+        newSettings.put("index.gc_deletes", -1);
         client().admin().indices().prepareUpdateSettings("test").setSettings(newSettings).execute().actionGet();
 
         Thread.sleep(300); // gc works based on estimated sampled time. Give it a chance...
@@ -224,14 +206,11 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         createIndex("test");
         ensureGreen();
 
-        assertThrows(client().prepareDelete("test", "type", "1").setVersion(17).execute(),
-                VersionConflictEngineException.class);
+        assertThrows(client().prepareDelete("test", "type", "1").setVersion(17).execute(), VersionConflictEngineException.class);
 
-        IndexResponse indexResponse = client().prepareIndex("test", "type", "1").setSource("field1", "value1_1")
-                .setCreate(true).execute().actionGet();
+        IndexResponse indexResponse = client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setCreate(true).execute().actionGet();
         assertThat(indexResponse.getVersion(), equalTo(1l));
     }
-
 
     @Test
     public void testInternalVersioning() throws Exception {
@@ -244,28 +223,15 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         indexResponse = client().prepareIndex("test", "type", "1").setSource("field1", "value1_2").setVersion(1).execute().actionGet();
         assertThat(indexResponse.getVersion(), equalTo(2l));
 
-        assertThrows(
-                client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(1).execute(),
-                VersionConflictEngineException.class);
+        assertThrows(client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(1).execute(), VersionConflictEngineException.class);
 
-        assertThrows(
-            client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(1).execute(),
-            VersionConflictEngineException.class);
+        assertThrows(client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(1).execute(), VersionConflictEngineException.class);
 
-        assertThrows(
-            client().prepareIndex("test", "type", "1").setCreate(true).setSource("field1", "value1_1").setVersion(1).execute(),
-                VersionConflictEngineException.class);
-        assertThrows(
-            client().prepareIndex("test", "type", "1").setCreate(true).setSource("field1", "value1_1").setVersion(1).execute(),
-                VersionConflictEngineException.class);
+        assertThrows(client().prepareIndex("test", "type", "1").setCreate(true).setSource("field1", "value1_1").setVersion(1).execute(), VersionConflictEngineException.class);
+        assertThrows(client().prepareIndex("test", "type", "1").setCreate(true).setSource("field1", "value1_1").setVersion(1).execute(), VersionConflictEngineException.class);
 
-        assertThrows(
-                client().prepareIndex("test", "type", "1").setCreate(true).setSource("field1", "value1_1").setVersion(2).execute(),
-                DocumentAlreadyExistsException.class);
-        assertThrows(
-                client().prepareIndex("test", "type", "1").setCreate(true).setSource("field1", "value1_1").setVersion(2).execute(),
-                DocumentAlreadyExistsException.class);
-
+        assertThrows(client().prepareIndex("test", "type", "1").setCreate(true).setSource("field1", "value1_1").setVersion(2).execute(), DocumentAlreadyExistsException.class);
+        assertThrows(client().prepareIndex("test", "type", "1").setCreate(true).setSource("field1", "value1_1").setVersion(2).execute(), DocumentAlreadyExistsException.class);
 
         assertThrows(client().prepareDelete("test", "type", "1").setVersion(1).execute(), VersionConflictEngineException.class);
         assertThrows(client().prepareDelete("test", "type", "1").setVersion(1).execute(), VersionConflictEngineException.class);
@@ -293,7 +259,6 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
 
         assertThrows(client().prepareDelete("test", "type", "1").setVersion(2).execute(), VersionConflictEngineException.class);
 
-
         // This is intricate - the object was deleted but a delete transaction was with the right version. We add another one
         // and thus the transaction is increased.
         deleteResponse = client().prepareDelete("test", "type", "1").setVersion(3).execute().actionGet();
@@ -316,16 +281,12 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
 
         client().admin().indices().prepareFlush().execute().actionGet();
 
-        assertThrows(client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(1).execute(),
-                VersionConflictEngineException.class);
+        assertThrows(client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(1).execute(), VersionConflictEngineException.class);
 
-        assertThrows(client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(1).execute(),
-                VersionConflictEngineException.class);
-        assertThrows(client().prepareIndex("test", "type", "1").setCreate(true).setSource("field1", "value1_1").setVersion(1).execute(),
-                VersionConflictEngineException.class);
+        assertThrows(client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(1).execute(), VersionConflictEngineException.class);
+        assertThrows(client().prepareIndex("test", "type", "1").setCreate(true).setSource("field1", "value1_1").setVersion(1).execute(), VersionConflictEngineException.class);
 
-        assertThrows(client().prepareIndex("test", "type", "1").setCreate(true).setSource("field1", "value1_1").setVersion(1).execute(),
-                VersionConflictEngineException.class);
+        assertThrows(client().prepareIndex("test", "type", "1").setCreate(true).setSource("field1", "value1_1").setVersion(1).execute(), VersionConflictEngineException.class);
 
         assertThrows(client().prepareDelete("test", "type", "1").setVersion(1).execute(), VersionConflictEngineException.class);
         assertThrows(client().prepareDelete("test", "type", "1").setVersion(1).execute(), VersionConflictEngineException.class);
@@ -353,7 +314,6 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         assertThat(indexResponse.getVersion(), equalTo(1l));
     }
 
-
     // Poached from Lucene's TestIDVersionPostingsFormat:
 
     private interface IDSource {
@@ -364,95 +324,98 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         IDSource ids;
         final Random random = getRandom();
         switch (random.nextInt(6)) {
-        case 0:
-            // random simple
-            if (VERBOSE) {
-                System.out.println("TEST: use random simple ids");
-            }
-            ids = new IDSource() {
+            case 0:
+                // random simple
+                if (VERBOSE) {
+                    System.out.println("TEST: use random simple ids");
+                }
+                ids = new IDSource() {
                     @Override
                     public String next() {
                         return TestUtil.randomSimpleString(random);
                     }
                 };
-            break;
-        case 1:
-            // random realistic unicode
-            if (VERBOSE) {
-                System.out.println("TEST: use random realistic unicode ids");
-            }
-            ids = new IDSource() {
+                break;
+            case 1:
+                // random realistic unicode
+                if (VERBOSE) {
+                    System.out.println("TEST: use random realistic unicode ids");
+                }
+                ids = new IDSource() {
                     @Override
                     public String next() {
                         return TestUtil.randomRealisticUnicodeString(random);
                     }
                 };
-            break;
-        case 2:
-            // sequential
-            if (VERBOSE) {
-                System.out.println("TEST: use seuquential ids");
-            }
-            ids = new IDSource() {
+                break;
+            case 2:
+                // sequential
+                if (VERBOSE) {
+                    System.out.println("TEST: use seuquential ids");
+                }
+                ids = new IDSource() {
                     int upto;
+
                     @Override
                     public String next() {
                         return Integer.toString(upto++);
                     }
                 };
-            break;
-        case 3:
-            // zero-pad sequential
-            if (VERBOSE) {
-                System.out.println("TEST: use zero-pad seuquential ids");
-            }
-            ids = new IDSource() {
+                break;
+            case 3:
+                // zero-pad sequential
+                if (VERBOSE) {
+                    System.out.println("TEST: use zero-pad seuquential ids");
+                }
+                ids = new IDSource() {
                     final int radix = TestUtil.nextInt(random, Character.MIN_RADIX, Character.MAX_RADIX);
                     final String zeroPad = String.format(Locale.ROOT, "%0" + TestUtil.nextInt(random, 4, 20) + "d", 0);
                     int upto;
+
                     @Override
                     public String next() {
                         String s = Integer.toString(upto++);
                         return zeroPad.substring(zeroPad.length() - s.length()) + s;
                     }
                 };
-            break;
-        case 4:
-            // random long
-            if (VERBOSE) {
-                System.out.println("TEST: use random long ids");
-            }
-            ids = new IDSource() {
+                break;
+            case 4:
+                // random long
+                if (VERBOSE) {
+                    System.out.println("TEST: use random long ids");
+                }
+                ids = new IDSource() {
                     final int radix = TestUtil.nextInt(random, Character.MIN_RADIX, Character.MAX_RADIX);
                     int upto;
+
                     @Override
                     public String next() {
                         return Long.toString(random.nextLong() & 0x3ffffffffffffffL, radix);
                     }
                 };
-            break;
-        case 5:
-            // zero-pad random long
-            if (VERBOSE) {
-                System.out.println("TEST: use zero-pad random long ids");
-            }
-            ids = new IDSource() {
+                break;
+            case 5:
+                // zero-pad random long
+                if (VERBOSE) {
+                    System.out.println("TEST: use zero-pad random long ids");
+                }
+                ids = new IDSource() {
                     final int radix = TestUtil.nextInt(random, Character.MIN_RADIX, Character.MAX_RADIX);
                     final String zeroPad = String.format(Locale.ROOT, "%015d", 0);
                     int upto;
+
                     @Override
                     public String next() {
                         return Long.toString(random.nextLong() & 0x3ffffffffffffffL, radix);
                     }
                 };
-            break;
-        default:
-            throw new AssertionError();
+                break;
+            default:
+                throw new AssertionError();
         }
 
         return ids;
     }
-
 
     private static class IDAndVersion {
         public String id;
@@ -517,11 +480,10 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
             } else {
                 sb.append("  response: null");
             }
-            
+
             return sb.toString();
         }
     }
-
 
     @Test
     @Slow
@@ -535,7 +497,7 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         // TODO: not great we don't test deletes GC here:
 
         // We test deletes, but can't rely on wall-clock delete GC:
-        HashMap<String,Object> newSettings = new HashMap<>();
+        HashMap<String, Object> newSettings = new HashMap<>();
         newSettings.put("index.gc_deletes", "1000000h");
         assertAcked(client().admin().indices().prepareUpdateSettings("test").setSettings(newSettings).execute().actionGet());
 
@@ -572,14 +534,14 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
 
         // Attach random versions to them:
         long version = 0;
-        final IDAndVersion[] idVersions = new IDAndVersion[TestUtil.nextInt(random, numIDs/2, numIDs*(isNightly() ? 8 : 2))];
-        final Map<String,IDAndVersion> truth = new HashMap<>();
+        final IDAndVersion[] idVersions = new IDAndVersion[TestUtil.nextInt(random, numIDs / 2, numIDs * (isNightly() ? 8 : 2))];
+        final Map<String, IDAndVersion> truth = new HashMap<>();
 
         if (VERBOSE) {
             System.out.println("TEST: use " + numIDs + " ids; " + idVersions.length + " operations");
         }
 
-        for(int i=0;i<idVersions.length;i++) {
+        for (int i = 0; i < idVersions.length; i++) {
 
             if (useMonotonicVersion) {
                 version += TestUtil.nextInt(random, 1, 10);
@@ -600,7 +562,7 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         }
 
         // Shuffle
-        for(int i = idVersions.length - 1; i > 0; i--) {
+        for (int i = idVersions.length - 1; i > 0; i--) {
             int index = random.nextInt(i + 1);
             IDAndVersion x = idVersions[index];
             idVersions[index] = idVersions[i];
@@ -608,7 +570,7 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         }
 
         if (VERBOSE) {
-            for(IDAndVersion idVersion : idVersions) {
+            for (IDAndVersion idVersion : idVersions) {
                 System.out.println("id=" + idVersion.id + " version=" + idVersion.version + " delete?=" + idVersion.delete + " truth?=" + (truth.get(idVersion.id) == idVersion));
             }
         }
@@ -617,109 +579,103 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         final CountDownLatch startingGun = new CountDownLatch(1);
         Thread[] threads = new Thread[TestUtil.nextInt(random, 1, isNightly() ? 20 : 5)];
         final long startTime = System.nanoTime();
-        for(int i=0;i<threads.length;i++) {
+        for (int i = 0; i < threads.length; i++) {
             final int threadID = i;
             threads[i] = new Thread() {
-                    @Override
-                    public void run() {
-                        try {
-                            //final Random threadRandom = RandomizedContext.current().getRandom();
-                            final Random threadRandom = getRandom();
-                            startingGun.await();
-                            while (true) {
+                @Override
+                public void run() {
+                    try {
+                        //final Random threadRandom = RandomizedContext.current().getRandom();
+                        final Random threadRandom = getRandom();
+                        startingGun.await();
+                        while (true) {
 
-                                // TODO: sometimes use bulk:
+                            // TODO: sometimes use bulk:
 
-                                int index = upto.getAndIncrement();
-                                if (index >= idVersions.length) {
-                                    break;
+                            int index = upto.getAndIncrement();
+                            if (index >= idVersions.length) {
+                                break;
+                            }
+                            if (VERBOSE && index % 100 == 0) {
+                                System.out.println(Thread.currentThread().getName() + ": index=" + index);
+                            }
+                            IDAndVersion idVersion = idVersions[index];
+
+                            String id = idVersion.id;
+                            idVersion.threadID = threadID;
+                            idVersion.indexStartTime = System.nanoTime() - startTime;
+                            long version = idVersion.version;
+                            if (idVersion.delete) {
+                                try {
+                                    idVersion.response = client().prepareDelete("test", "type", id).setVersion(version).setVersionType(VersionType.EXTERNAL).execute().actionGet();
+                                } catch (VersionConflictEngineException vcee) {
+                                    // OK: our version is too old
+                                    assertThat(version, lessThanOrEqualTo(truth.get(id).version));
+                                    idVersion.versionConflict = true;
                                 }
-                                if (VERBOSE && index % 100 == 0) {
-                                    System.out.println(Thread.currentThread().getName() + ": index=" + index);
-                                }
-                                IDAndVersion idVersion = idVersions[index];
+                            } else {
+                                for (int x = 0; x < 2; x++) {
+                                    // Try create first:
 
-                                String id = idVersion.id;
-                                idVersion.threadID = threadID;
-                                idVersion.indexStartTime = System.nanoTime()-startTime;
-                                long version = idVersion.version;
-                                if (idVersion.delete) {
+                                    IndexRequest.OpType op;
+                                    if (x == 0) {
+                                        op = IndexRequest.OpType.CREATE;
+                                    } else {
+                                        op = IndexRequest.OpType.INDEX;
+                                    }
+
+                                    // index document
                                     try {
-                                        idVersion.response = client().prepareDelete("test", "type", id)
-                                            .setVersion(version)
-                                            .setVersionType(VersionType.EXTERNAL).execute().actionGet();
+                                        idVersion.response = client().prepareIndex("test", "type", id).setSource("foo", "bar").setOpType(op).setVersion(version).setVersionType(VersionType.EXTERNAL).execute().actionGet();
+                                        break;
+                                    } catch (DocumentAlreadyExistsException daee) {
+                                        if (x == 0) {
+                                            // OK: id was already indexed by another thread, now use index:
+                                            idVersion.alreadyExists = true;
+                                        } else {
+                                            // Should not happen with op=INDEX:
+                                            throw daee;
+                                        }
                                     } catch (VersionConflictEngineException vcee) {
                                         // OK: our version is too old
                                         assertThat(version, lessThanOrEqualTo(truth.get(id).version));
                                         idVersion.versionConflict = true;
                                     }
-                                } else {
-                                    for (int x=0;x<2;x++) {
-                                        // Try create first:
-                                    
-                                        IndexRequest.OpType op;
-                                        if (x == 0) {
-                                            op = IndexRequest.OpType.CREATE;
-                                        } else {
-                                            op = IndexRequest.OpType.INDEX;
-                                        }
-                                    
-                                        // index document
-                                        try {
-                                            idVersion.response = client().prepareIndex("test", "type", id)
-                                                .setSource("foo", "bar")
-                                                .setOpType(op)
-                                                .setVersion(version)
-                                                .setVersionType(VersionType.EXTERNAL).execute().actionGet();
-                                            break;
-                                        } catch (DocumentAlreadyExistsException daee) {
-                                            if (x == 0) {
-                                                // OK: id was already indexed by another thread, now use index:
-                                                idVersion.alreadyExists = true;
-                                            } else {
-                                                // Should not happen with op=INDEX:
-                                                throw daee;
-                                            }
-                                        } catch (VersionConflictEngineException vcee) {
-                                            // OK: our version is too old
-                                            assertThat(version, lessThanOrEqualTo(truth.get(id).version));
-                                            idVersion.versionConflict = true;
-                                        }
-                                    }
-                                }
-                                idVersion.indexFinishTime = System.nanoTime()-startTime;
-
-                                if (threadRandom.nextInt(100) == 7) {
-                                    System.out.println(threadID + ": TEST: now refresh at " + (System.nanoTime()-startTime));
-                                    refresh();
-                                    System.out.println(threadID + ": TEST: refresh done at " + (System.nanoTime()-startTime));
-                                }
-                                if (threadRandom.nextInt(100) == 7) {
-                                    System.out.println(threadID + ": TEST: now flush at " + (System.nanoTime()-startTime));
-                                    try {
-                                        flush();
-                                    } catch (FlushNotAllowedEngineException fnaee) {
-                                        // OK
-                                    }
-                                    System.out.println(threadID + ": TEST: flush done at " + (System.nanoTime()-startTime));
                                 }
                             }
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
+                            idVersion.indexFinishTime = System.nanoTime() - startTime;
+
+                            if (threadRandom.nextInt(100) == 7) {
+                                System.out.println(threadID + ": TEST: now refresh at " + (System.nanoTime() - startTime));
+                                refresh();
+                                System.out.println(threadID + ": TEST: refresh done at " + (System.nanoTime() - startTime));
+                            }
+                            if (threadRandom.nextInt(100) == 7) {
+                                System.out.println(threadID + ": TEST: now flush at " + (System.nanoTime() - startTime));
+                                try {
+                                    flush();
+                                } catch (FlushNotAllowedEngineException fnaee) {
+                                    // OK
+                                }
+                                System.out.println(threadID + ": TEST: flush done at " + (System.nanoTime() - startTime));
+                            }
                         }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
-                };
+                }
+            };
             threads[i].start();
         }
 
         startingGun.countDown();
-        for(Thread thread : threads) {
+        for (Thread thread : threads) {
             thread.join();
         }
 
         // Verify against truth:
         boolean failed = false;
-        for(String id : ids) {
+        for (String id : ids) {
             long expected;
             IDAndVersion idVersion = truth.get(id);
             if (idVersion != null && idVersion.delete == false) {
@@ -736,7 +692,7 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
 
         if (failed) {
             System.out.println("All versions:");
-            for(int i=0;i<idVersions.length;i++) {
+            for (int i = 0; i < idVersions.length; i++) {
                 System.out.println("i=" + i + " " + idVersions[i]);
             }
             fail("wrong versions for some IDs");
@@ -748,37 +704,17 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
     public void testDeleteNotLost() throws Exception {
 
         // We require only one shard for this test, so that the 2nd delete provokes pruning the deletes map:
-        client()
-            .admin()
-            .indices()
-            .prepareCreate("test")
-            .setSettings(ImmutableSettings.settingsBuilder()
-                         .put("index.number_of_shards", 1))
-            .execute().
-            actionGet();
+        client().admin().indices().prepareCreate("test").setSettings(ImmutableSettings.settingsBuilder().put("index.number_of_shards", 1)).execute().actionGet();
 
         ensureGreen();
 
-        HashMap<String,Object> newSettings = new HashMap<>();
+        HashMap<String, Object> newSettings = new HashMap<>();
         newSettings.put("index.gc_deletes", "10ms");
         newSettings.put("index.refresh_interval", "-1");
-        client()
-            .admin()
-            .indices()
-            .prepareUpdateSettings("test")
-            .setSettings(newSettings)
-            .execute()
-            .actionGet();
+        client().admin().indices().prepareUpdateSettings("test").setSettings(newSettings).execute().actionGet();
 
         // Index a doc:
-        client()
-            .prepareIndex("test", "type", "id")
-            .setSource("foo", "bar")
-            .setOpType(IndexRequest.OpType.INDEX)
-            .setVersion(10)
-            .setVersionType(VersionType.EXTERNAL)
-            .execute()
-            .actionGet();
+        client().prepareIndex("test", "type", "id").setSource("foo", "bar").setOpType(IndexRequest.OpType.INDEX).setVersion(10).setVersionType(VersionType.EXTERNAL).execute().actionGet();
 
         if (randomBoolean()) {
             // Force refresh so the add is sometimes visible in the searcher:
@@ -786,42 +722,20 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         }
 
         // Delete it
-        client()
-            .prepareDelete("test", "type", "id")
-            .setVersion(11)
-            .setVersionType(VersionType.EXTERNAL)
-            .execute()
-            .actionGet();
+        client().prepareDelete("test", "type", "id").setVersion(11).setVersionType(VersionType.EXTERNAL).execute().actionGet();
 
         // Real-time get should reflect delete:
-        assertThat("doc should have been deleted",
-                   client()
-                   .prepareGet("test", "type", "id")
-                   .execute()
-                   .actionGet()
-                   .getVersion(),
-                   equalTo(-1L));
+        assertThat("doc should have been deleted", client().prepareGet("test", "type", "id").execute().actionGet().getVersion(), equalTo(-1L));
 
         // ThreadPool.estimatedTimeInMillis has default granularity of 200 msec, so we must sleep at least that long; sleep much longer in
         // case system is busy:
         Thread.sleep(1000);
 
         // Delete an unrelated doc (provokes pruning deletes from versionMap)
-        client()
-            .prepareDelete("test", "type", "id2")
-            .setVersion(11)
-            .setVersionType(VersionType.EXTERNAL)
-            .execute()
-            .actionGet();
+        client().prepareDelete("test", "type", "id2").setVersion(11).setVersionType(VersionType.EXTERNAL).execute().actionGet();
 
         // Real-time get should still reflect delete:
-        assertThat("doc should have been deleted",
-                   client()
-                   .prepareGet("test", "type", "id")
-                   .execute()
-                   .actionGet()
-                   .getVersion(),
-                   equalTo(-1L));
+        assertThat("doc should have been deleted", client().prepareGet("test", "type", "id").execute().actionGet().getVersion(), equalTo(-1L));
     }
 
     @Test
@@ -831,25 +745,12 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         ensureGreen();
 
         // We test deletes, but can't rely on wall-clock delete GC:
-        HashMap<String,Object> newSettings = new HashMap<>();
+        HashMap<String, Object> newSettings = new HashMap<>();
         newSettings.put("index.gc_deletes", "0ms");
-        client()
-            .admin()
-            .indices()
-            .prepareUpdateSettings("test")
-            .setSettings(newSettings)
-            .execute()
-            .actionGet();
+        client().admin().indices().prepareUpdateSettings("test").setSettings(newSettings).execute().actionGet();
 
         // Index a doc:
-        client()
-            .prepareIndex("test", "type", "id")
-            .setSource("foo", "bar")
-            .setOpType(IndexRequest.OpType.INDEX)
-            .setVersion(10)
-            .setVersionType(VersionType.EXTERNAL)
-            .execute()
-            .actionGet();
+        client().prepareIndex("test", "type", "id").setSource("foo", "bar").setOpType(IndexRequest.OpType.INDEX).setVersion(10).setVersionType(VersionType.EXTERNAL).execute().actionGet();
 
         if (randomBoolean()) {
             // Force refresh so the add is sometimes visible in the searcher:
@@ -857,20 +758,9 @@ public class SimpleVersioningTests extends ElasticsearchIntegrationTest {
         }
 
         // Delete it
-        client()
-            .prepareDelete("test", "type", "id")
-            .setVersion(11)
-            .setVersionType(VersionType.EXTERNAL)
-            .execute()
-            .actionGet();
+        client().prepareDelete("test", "type", "id").setVersion(11).setVersionType(VersionType.EXTERNAL).execute().actionGet();
 
         // Real-time get should reflect delete even though index.gc_deletes is 0:
-        assertThat("doc should have been deleted",
-                   client()
-                   .prepareGet("test", "type", "id")
-                   .execute()
-                   .actionGet()
-                   .getVersion(),
-                   equalTo(-1L));
+        assertThat("doc should have been deleted", client().prepareGet("test", "type", "id").execute().actionGet().getVersion(), equalTo(-1L));
     }
 }

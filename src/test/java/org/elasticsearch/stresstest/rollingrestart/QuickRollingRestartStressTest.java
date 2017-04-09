@@ -63,9 +63,7 @@ public class QuickRollingRestartStressTest {
             COUNT = SizeValue.parseSizeValue("100k").singles();
             System.out.println("--> indexing data...");
             for (long i = 0; i < COUNT; i++) {
-                client.client().prepareIndex("test", "type", Long.toString(i))
-                        .setSource("date", new Date(), "data", RandomStrings.randomAsciiOfLength(random, 10000))
-                        .execute().actionGet();
+                client.client().prepareIndex("test", "type", Long.toString(i)).setSource("date", new Date(), "data", RandomStrings.randomAsciiOfLength(random, 10000)).execute().actionGet();
             }
             System.out.println("--> done indexing data [" + COUNT + "]");
             client.client().admin().indices().prepareRefresh().execute().actionGet();

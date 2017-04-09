@@ -70,35 +70,26 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
 
         client().admin().indices().prepareRefresh().execute().actionGet();
 
-        SearchResponse searchResponse = client().prepareSearch()
-                .setQuery(matchAllQuery())
-                .setSize(35)
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .addSort("field", SortOrder.ASC)
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setQuery(matchAllQuery()).setSize(35).setScroll(TimeValue.timeValueMinutes(2)).addSort("field", SortOrder.ASC).execute().actionGet();
         try {
             long counter = 0;
-    
+
             assertThat(searchResponse.getHits().getTotalHits(), equalTo(100l));
             assertThat(searchResponse.getHits().hits().length, equalTo(35));
             for (SearchHit hit : searchResponse.getHits()) {
                 assertThat(((Number) hit.sortValues()[0]).longValue(), equalTo(counter++));
             }
-    
-            searchResponse = client().prepareSearchScroll(searchResponse.getScrollId())
-                    .setScroll(TimeValue.timeValueMinutes(2))
-                    .execute().actionGet();
-    
+
+            searchResponse = client().prepareSearchScroll(searchResponse.getScrollId()).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
+
             assertThat(searchResponse.getHits().getTotalHits(), equalTo(100l));
             assertThat(searchResponse.getHits().hits().length, equalTo(35));
             for (SearchHit hit : searchResponse.getHits()) {
                 assertThat(((Number) hit.sortValues()[0]).longValue(), equalTo(counter++));
             }
-    
-            searchResponse = client().prepareSearchScroll(searchResponse.getScrollId())
-                    .setScroll(TimeValue.timeValueMinutes(2))
-                    .execute().actionGet();
-    
+
+            searchResponse = client().prepareSearchScroll(searchResponse.getScrollId()).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
+
             assertThat(searchResponse.getHits().getTotalHits(), equalTo(100l));
             assertThat(searchResponse.getHits().hits().length, equalTo(30));
             for (SearchHit hit : searchResponse.getHits()) {
@@ -128,56 +119,44 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
 
         client().admin().indices().prepareRefresh().execute().actionGet();
 
-        SearchResponse searchResponse = client().prepareSearch()
-                .setSearchType(SearchType.QUERY_THEN_FETCH)
-                .setQuery(matchAllQuery())
-                .setSize(3)
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .addSort("field", SortOrder.ASC)
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setSearchType(SearchType.QUERY_THEN_FETCH).setQuery(matchAllQuery()).setSize(3).setScroll(TimeValue.timeValueMinutes(2)).addSort("field", SortOrder.ASC).execute().actionGet();
         try {
             long counter = 0;
-    
+
             assertThat(searchResponse.getHits().getTotalHits(), equalTo(100l));
             assertThat(searchResponse.getHits().hits().length, equalTo(3));
             for (SearchHit hit : searchResponse.getHits()) {
                 assertThat(((Number) hit.sortValues()[0]).longValue(), equalTo(counter++));
             }
-    
+
             for (int i = 0; i < 32; i++) {
-                searchResponse = client().prepareSearchScroll(searchResponse.getScrollId())
-                        .setScroll(TimeValue.timeValueMinutes(2))
-                        .execute().actionGet();
-    
+                searchResponse = client().prepareSearchScroll(searchResponse.getScrollId()).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
+
                 assertThat(searchResponse.getHits().getTotalHits(), equalTo(100l));
                 assertThat(searchResponse.getHits().hits().length, equalTo(3));
                 for (SearchHit hit : searchResponse.getHits()) {
                     assertThat(((Number) hit.sortValues()[0]).longValue(), equalTo(counter++));
                 }
             }
-    
+
             // and now, the last one is one
-            searchResponse = client().prepareSearchScroll(searchResponse.getScrollId())
-                    .setScroll(TimeValue.timeValueMinutes(2))
-                    .execute().actionGet();
-    
+            searchResponse = client().prepareSearchScroll(searchResponse.getScrollId()).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
+
             assertThat(searchResponse.getHits().getTotalHits(), equalTo(100l));
             assertThat(searchResponse.getHits().hits().length, equalTo(1));
             for (SearchHit hit : searchResponse.getHits()) {
                 assertThat(((Number) hit.sortValues()[0]).longValue(), equalTo(counter++));
             }
-    
+
             // a the last is zero
-            searchResponse = client().prepareSearchScroll(searchResponse.getScrollId())
-                    .setScroll(TimeValue.timeValueMinutes(2))
-                    .execute().actionGet();
-    
+            searchResponse = client().prepareSearchScroll(searchResponse.getScrollId()).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
+
             assertThat(searchResponse.getHits().getTotalHits(), equalTo(100l));
             assertThat(searchResponse.getHits().hits().length, equalTo(0));
             for (SearchHit hit : searchResponse.getHits()) {
                 assertThat(((Number) hit.sortValues()[0]).longValue(), equalTo(counter++));
             }
-            
+
         } finally {
             clearScroll(searchResponse.getScrollId());
         }
@@ -189,8 +168,7 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
         client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().execute().actionGet();
 
         for (int i = 0; i < 500; i++) {
-            client().prepareIndex("test", "tweet", Integer.toString(i)).setSource(
-                    jsonBuilder().startObject().field("user", "kimchy").field("postDate", System.currentTimeMillis()).field("message", "test").endObject()).execute().actionGet();
+            client().prepareIndex("test", "tweet", Integer.toString(i)).setSource(jsonBuilder().startObject().field("user", "kimchy").field("postDate", System.currentTimeMillis()).field("message", "test").endObject()).execute().actionGet();
         }
 
         client().admin().indices().prepareRefresh().execute().actionGet();
@@ -201,12 +179,7 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
         assertThat(client().prepareCount().setQuery(termQuery("message", "update")).execute().actionGet().getCount(), equalTo(0l));
         assertThat(client().prepareCount().setQuery(termQuery("message", "update")).execute().actionGet().getCount(), equalTo(0l));
 
-        SearchResponse searchResponse = client().prepareSearch()
-                .setQuery(queryStringQuery("user:kimchy"))
-                .setSize(35)
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .addSort("postDate", SortOrder.ASC)
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setQuery(queryStringQuery("user:kimchy")).setSize(35).setScroll(TimeValue.timeValueMinutes(2)).addSort("postDate", SortOrder.ASC).execute().actionGet();
         try {
             do {
                 for (SearchHit searchHit : searchResponse.getHits().hits()) {
@@ -216,7 +189,7 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
                 }
                 searchResponse = client().prepareSearchScroll(searchResponse.getScrollId()).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
             } while (searchResponse.getHits().hits().length > 0);
-    
+
             client().admin().indices().prepareRefresh().execute().actionGet();
             assertThat(client().prepareCount().setQuery(matchAllQuery()).execute().actionGet().getCount(), equalTo(500l));
             assertThat(client().prepareCount().setQuery(termQuery("message", "test")).execute().actionGet().getCount(), equalTo(0l));
@@ -241,21 +214,9 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
 
         client().admin().indices().prepareRefresh().execute().actionGet();
 
-        SearchResponse searchResponse1 = client().prepareSearch()
-                .setQuery(matchAllQuery())
-                .setSize(35)
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .setSearchType(SearchType.QUERY_THEN_FETCH)
-                .addSort("field", SortOrder.ASC)
-                .execute().actionGet();
+        SearchResponse searchResponse1 = client().prepareSearch().setQuery(matchAllQuery()).setSize(35).setScroll(TimeValue.timeValueMinutes(2)).setSearchType(SearchType.QUERY_THEN_FETCH).addSort("field", SortOrder.ASC).execute().actionGet();
 
-        SearchResponse searchResponse2 = client().prepareSearch()
-                .setQuery(matchAllQuery())
-                .setSize(35)
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .setSearchType(SearchType.QUERY_THEN_FETCH)
-                .addSort("field", SortOrder.ASC)
-                .execute().actionGet();
+        SearchResponse searchResponse2 = client().prepareSearch().setQuery(matchAllQuery()).setSize(35).setScroll(TimeValue.timeValueMinutes(2)).setSearchType(SearchType.QUERY_THEN_FETCH).addSort("field", SortOrder.ASC).execute().actionGet();
 
         long counter1 = 0;
         long counter2 = 0;
@@ -272,13 +233,9 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
             assertThat(((Number) hit.sortValues()[0]).longValue(), equalTo(counter2++));
         }
 
-        searchResponse1 = client().prepareSearchScroll(searchResponse1.getScrollId())
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .execute().actionGet();
+        searchResponse1 = client().prepareSearchScroll(searchResponse1.getScrollId()).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
 
-        searchResponse2 = client().prepareSearchScroll(searchResponse2.getScrollId())
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .execute().actionGet();
+        searchResponse2 = client().prepareSearchScroll(searchResponse2.getScrollId()).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
 
         assertThat(searchResponse1.getHits().getTotalHits(), equalTo(100l));
         assertThat(searchResponse1.getHits().hits().length, equalTo(35));
@@ -292,10 +249,7 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
             assertThat(((Number) hit.sortValues()[0]).longValue(), equalTo(counter2++));
         }
 
-        ClearScrollResponse clearResponse = client().prepareClearScroll()
-                .addScrollId(searchResponse1.getScrollId())
-                .addScrollId(searchResponse2.getScrollId())
-                .execute().actionGet();
+        ClearScrollResponse clearResponse = client().prepareClearScroll().addScrollId(searchResponse1.getScrollId()).addScrollId(searchResponse2.getScrollId()).execute().actionGet();
         assertThat(clearResponse.isSucceeded(), is(true));
         assertThat(clearResponse.getNumFreed(), greaterThan(0));
         assertThat(clearResponse.status(), equalTo(RestStatus.OK));
@@ -307,9 +261,7 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
     @Test
     public void testClearNonExistentScrollId() throws Exception {
         createIndex("idx");
-        ClearScrollResponse response = client().prepareClearScroll()
-                .addScrollId("cXVlcnlUaGVuRmV0Y2g7MzsyOlpBRC1qOUhrUjhhZ0NtQWUxU2FuWlE7MjpRcjRaNEJ2R1JZV1VEMW02ZGF1LW5ROzI6S0xUal9lZDRTd3lWNUhUU2VSb01CQTswOw==")
-                .get();
+        ClearScrollResponse response = client().prepareClearScroll().addScrollId("cXVlcnlUaGVuRmV0Y2g7MzsyOlpBRC1qOUhrUjhhZ0NtQWUxU2FuWlE7MjpRcjRaNEJ2R1JZV1VEMW02ZGF1LW5ROzI6S0xUal9lZDRTd3lWNUhUU2VSb01CQTswOw==").get();
         // Whether we actually clear a scroll, we can't know, since that information isn't serialized in the
         // free search context response, which is returned from each node we want to clear a particular scroll.
         assertThat(response.isSucceeded(), is(true));
@@ -353,21 +305,9 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
 
         client().admin().indices().prepareRefresh().execute().actionGet();
 
-        SearchResponse searchResponse1 = client().prepareSearch()
-                .setQuery(matchAllQuery())
-                .setSize(35)
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .setSearchType(SearchType.QUERY_THEN_FETCH)
-                .addSort("field", SortOrder.ASC)
-                .execute().actionGet();
+        SearchResponse searchResponse1 = client().prepareSearch().setQuery(matchAllQuery()).setSize(35).setScroll(TimeValue.timeValueMinutes(2)).setSearchType(SearchType.QUERY_THEN_FETCH).addSort("field", SortOrder.ASC).execute().actionGet();
 
-        SearchResponse searchResponse2 = client().prepareSearch()
-                .setQuery(matchAllQuery())
-                .setSize(35)
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .setSearchType(SearchType.QUERY_THEN_FETCH)
-                .addSort("field", SortOrder.ASC)
-                .execute().actionGet();
+        SearchResponse searchResponse2 = client().prepareSearch().setQuery(matchAllQuery()).setSize(35).setScroll(TimeValue.timeValueMinutes(2)).setSearchType(SearchType.QUERY_THEN_FETCH).addSort("field", SortOrder.ASC).execute().actionGet();
 
         long counter1 = 0;
         long counter2 = 0;
@@ -384,13 +324,9 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
             assertThat(((Number) hit.sortValues()[0]).longValue(), equalTo(counter2++));
         }
 
-        searchResponse1 = client().prepareSearchScroll(searchResponse1.getScrollId())
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .execute().actionGet();
+        searchResponse1 = client().prepareSearchScroll(searchResponse1.getScrollId()).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
 
-        searchResponse2 = client().prepareSearchScroll(searchResponse2.getScrollId())
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .execute().actionGet();
+        searchResponse2 = client().prepareSearchScroll(searchResponse2.getScrollId()).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
 
         assertThat(searchResponse1.getHits().getTotalHits(), equalTo(100l));
         assertThat(searchResponse1.getHits().hits().length, equalTo(35));
@@ -404,8 +340,7 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
             assertThat(((Number) hit.sortValues()[0]).longValue(), equalTo(counter2++));
         }
 
-        ClearScrollResponse clearResponse = client().prepareClearScroll().addScrollId("_all")
-                .execute().actionGet();
+        ClearScrollResponse clearResponse = client().prepareClearScroll().addScrollId("_all").execute().actionGet();
         assertThat(clearResponse.isSucceeded(), is(true));
         assertThat(clearResponse.getNumFreed(), greaterThan(0));
         assertThat(clearResponse.status(), equalTo(RestStatus.OK));
@@ -417,16 +352,10 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
     @Test
     // https://github.com/elasticsearch/elasticsearch/issues/4156
     public void testDeepPaginationWithOneDocIndexAndDoNotBlowUp() throws Exception {
-        client().prepareIndex("index", "type", "1")
-                .setSource("field", "value")
-                .setRefresh(true)
-                .execute().get();
+        client().prepareIndex("index", "type", "1").setSource("field", "value").setRefresh(true).execute().get();
 
         for (SearchType searchType : SearchType.values()) {
-            SearchRequestBuilder builder = client().prepareSearch("index")
-                    .setSearchType(searchType)
-                    .setQuery(QueryBuilders.matchAllQuery())
-                    .setSize(Integer.MAX_VALUE);
+            SearchRequestBuilder builder = client().prepareSearch("index").setSearchType(searchType).setQuery(QueryBuilders.matchAllQuery()).setSize(Integer.MAX_VALUE);
 
             if (searchType == SearchType.SCAN || searchType != SearchType.COUNT && randomBoolean()) {
                 builder.setScroll("1m");
@@ -460,17 +389,11 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testStringSortMissingAscTerminates() throws Exception {
-        assertAcked(prepareCreate("test")
-                .setSettings(ImmutableSettings.settingsBuilder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0))
-                .addMapping("test", "no_field", "type=string", "some_field", "type=string"));
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.settingsBuilder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)).addMapping("test", "no_field", "type=string", "some_field", "type=string"));
         client().prepareIndex("test", "test", "1").setSource("some_field", "test").get();
         refresh();
 
-        SearchResponse response = client().prepareSearch("test")
-                .setTypes("test")
-                .addSort(new FieldSortBuilder("no_field").order(SortOrder.ASC).missing("_last"))
-                .setScroll("1m")
-                .get();
+        SearchResponse response = client().prepareSearch("test").setTypes("test").addSort(new FieldSortBuilder("no_field").order(SortOrder.ASC).missing("_last")).setScroll("1m").get();
         assertHitCount(response, 1);
         assertSearchHits(response, "1");
 
@@ -479,11 +402,7 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
         assertHitCount(response, 1);
         assertNoSearchHits(response);
 
-        response = client().prepareSearch("test")
-                .setTypes("test")
-                .addSort(new FieldSortBuilder("no_field").order(SortOrder.ASC).missing("_first"))
-                .setScroll("1m")
-                .get();
+        response = client().prepareSearch("test").setTypes("test").addSort(new FieldSortBuilder("no_field").order(SortOrder.ASC).missing("_first")).setScroll("1m").get();
         assertHitCount(response, 1);
         assertSearchHits(response, "1");
 
@@ -498,12 +417,7 @@ public class SearchScrollTests extends ElasticsearchIntegrationTest {
             client().prepareIndex("test", "type1", Integer.toString(i)).setSource(jsonBuilder().startObject().field("field", i).endObject()).execute().actionGet();
         }
         refresh();
-        SearchResponse searchResponse = client().prepareSearch()
-                .setQuery(matchAllQuery())
-                .setSize(35)
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .addSort("field", SortOrder.ASC)
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setQuery(matchAllQuery()).setSize(35).setScroll(TimeValue.timeValueMinutes(2)).addSort("field", SortOrder.ASC).execute().actionGet();
         long counter = 0;
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(100l));
         assertThat(searchResponse.getHits().hits().length, equalTo(35));

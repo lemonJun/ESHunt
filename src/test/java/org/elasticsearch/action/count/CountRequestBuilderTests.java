@@ -110,15 +110,7 @@ public class CountRequestBuilderTests extends ElasticsearchTestCase {
 
     @Test
     public void testThatToStringDoesntWipeSource() {
-        String source = "{\n" +
-                "            \"query\" : {\n" +
-                "            \"match\" : {\n" +
-                "                \"field\" : {\n" +
-                "                    \"query\" : \"value\"" +
-                "                }\n" +
-                "            }\n" +
-                "        }\n" +
-                "        }";
+        String source = "{\n" + "            \"query\" : {\n" + "            \"match\" : {\n" + "                \"field\" : {\n" + "                    \"query\" : \"value\"" + "                }\n" + "            }\n" + "        }\n" + "        }";
         CountRequestBuilder countRequestBuilder = new CountRequestBuilder(client).setSource(new BytesArray(source));
         String preToString = countRequestBuilder.request().source().toUtf8();
         assertThat(countRequestBuilder.toString(), equalTo(source));

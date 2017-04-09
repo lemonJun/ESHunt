@@ -36,14 +36,12 @@ import static org.hamcrest.Matchers.*;
 
 /**
  */
-public class SimpleTimestampTests  extends ElasticsearchIntegrationTest {
+public class SimpleTimestampTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testSimpleTimestamp() throws Exception {
 
-        client().admin().indices().prepareCreate("test")
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("_timestamp").field("enabled", true).field("store", "yes").endObject().endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("_timestamp").field("enabled", true).field("store", "yes").endObject().endObject().endObject()).execute().actionGet();
         client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().execute().actionGet();
 
         logger.info("--> check with automatic timestamp");
@@ -134,7 +132,7 @@ public class SimpleTimestampTests  extends ElasticsearchIntegrationTest {
         GetMappingsResponse getMappingsResponse = client().admin().indices().prepareGetMappings(index).addTypes(type).get();
         MappingMetaData.Timestamp timestamp = getMappingsResponse.getMappings().get(index).get(type).timestamp();
         assertThat(timestamp, is(notNullValue()));
-        String errMsg = String.format(Locale.ROOT, "Expected timestamp field mapping to be "+ (enabled ? "enabled" : "disabled") +" for %s/%s", index, type);
+        String errMsg = String.format(Locale.ROOT, "Expected timestamp field mapping to be " + (enabled ? "enabled" : "disabled") + " for %s/%s", index, type);
         assertThat(errMsg, timestamp.enabled(), is(enabled));
     }
 }

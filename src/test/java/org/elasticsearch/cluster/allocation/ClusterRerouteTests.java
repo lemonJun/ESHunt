@@ -72,19 +72,13 @@ public class ClusterRerouteTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void rerouteWithCommands_disableAllocationSettings() throws Exception {
-        Settings commonSettings = settingsBuilder()
-                .put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_NEW_ALLOCATION, true)
-                .put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_ALLOCATION, true)
-                .build();
+        Settings commonSettings = settingsBuilder().put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_NEW_ALLOCATION, true).put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_ALLOCATION, true).build();
         rerouteWithCommands(commonSettings);
     }
 
     @Test
     public void rerouteWithCommands_enableAllocationSettings() throws Exception {
-        Settings commonSettings = settingsBuilder()
-                .put(EnableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ENABLE, EnableAllocationDecider.Allocation.NONE.name())
-                .put("gateway.type", "local")
-                .build();
+        Settings commonSettings = settingsBuilder().put(EnableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ENABLE, EnableAllocationDecider.Allocation.NONE.name()).put("gateway.type", "local").build();
         rerouteWithCommands(commonSettings);
     }
 
@@ -94,19 +88,13 @@ public class ClusterRerouteTests extends ElasticsearchIntegrationTest {
         final String node_2 = nodesIds.get(1);
 
         logger.info("--> create an index with 1 shard, 1 replica, nothing should allocate");
-        client().admin().indices().prepareCreate("test")
-                .setSettings(settingsBuilder().put("index.number_of_shards", 1))
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_shards", 1)).execute().actionGet();
 
         ClusterState state = client().admin().cluster().prepareState().execute().actionGet().getState();
         assertThat(state.routingNodes().unassigned().size(), equalTo(2));
 
         logger.info("--> explicitly allocate shard 1, *under dry_run*");
-        state = client().admin().cluster().prepareReroute()
-                .setExplain(randomBoolean())
-                .add(new AllocateAllocationCommand(new ShardId("test", 0), node_1, true))
-                .setDryRun(true)
-                .execute().actionGet().getState();
+        state = client().admin().cluster().prepareReroute().setExplain(randomBoolean()).add(new AllocateAllocationCommand(new ShardId("test", 0), node_1, true)).setDryRun(true).execute().actionGet().getState();
         assertThat(state.routingNodes().unassigned().size(), equalTo(1));
         assertThat(state.routingNodes().node(state.nodes().resolveNode(node_1).id()).get(0).state(), equalTo(ShardRoutingState.INITIALIZING));
 
@@ -115,10 +103,7 @@ public class ClusterRerouteTests extends ElasticsearchIntegrationTest {
         assertThat(state.routingNodes().unassigned().size(), equalTo(2));
 
         logger.info("--> explicitly allocate shard 1, actually allocating, no dry run");
-        state = client().admin().cluster().prepareReroute()
-                .setExplain(randomBoolean())
-                .add(new AllocateAllocationCommand(new ShardId("test", 0), node_1, true))
-                .execute().actionGet().getState();
+        state = client().admin().cluster().prepareReroute().setExplain(randomBoolean()).add(new AllocateAllocationCommand(new ShardId("test", 0), node_1, true)).execute().actionGet().getState();
         assertThat(state.routingNodes().unassigned().size(), equalTo(1));
         assertThat(state.routingNodes().node(state.nodes().resolveNode(node_1).id()).get(0).state(), equalTo(ShardRoutingState.INITIALIZING));
 
@@ -131,14 +116,10 @@ public class ClusterRerouteTests extends ElasticsearchIntegrationTest {
         assertThat(state.routingNodes().node(state.nodes().resolveNode(node_1).id()).get(0).state(), equalTo(ShardRoutingState.STARTED));
 
         logger.info("--> move shard 1 primary from node1 to node2");
-        state = client().admin().cluster().prepareReroute()
-                .setExplain(randomBoolean())
-                .add(new MoveAllocationCommand(new ShardId("test", 0), node_1, node_2))
-                .execute().actionGet().getState();
+        state = client().admin().cluster().prepareReroute().setExplain(randomBoolean()).add(new MoveAllocationCommand(new ShardId("test", 0), node_1, node_2)).execute().actionGet().getState();
 
         assertThat(state.routingNodes().node(state.nodes().resolveNode(node_1).id()).get(0).state(), equalTo(ShardRoutingState.RELOCATING));
         assertThat(state.routingNodes().node(state.nodes().resolveNode(node_2).id()).get(0).state(), equalTo(ShardRoutingState.INITIALIZING));
-
 
         healthResponse = client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForYellowStatus().setWaitForRelocatingShards(0).execute().actionGet();
         assertThat(healthResponse.isTimedOut(), equalTo(false));
@@ -151,20 +132,13 @@ public class ClusterRerouteTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void rerouteWithAllocateLocalGateway_disableAllocationSettings() throws Exception {
-        Settings commonSettings = settingsBuilder()
-                .put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_NEW_ALLOCATION, true)
-                .put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_ALLOCATION, true)
-                .put("gateway.type", "local")
-                .build();
+        Settings commonSettings = settingsBuilder().put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_NEW_ALLOCATION, true).put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_ALLOCATION, true).put("gateway.type", "local").build();
         rerouteWithAllocateLocalGateway(commonSettings);
     }
 
     @Test
     public void rerouteWithAllocateLocalGateway_enableAllocationSettings() throws Exception {
-        Settings commonSettings = settingsBuilder()
-                .put(EnableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ENABLE, EnableAllocationDecider.Allocation.NONE.name())
-                .put("gateway.type", "local")
-                .build();
+        Settings commonSettings = settingsBuilder().put(EnableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ENABLE, EnableAllocationDecider.Allocation.NONE.name()).put("gateway.type", "local").build();
         rerouteWithAllocateLocalGateway(commonSettings);
     }
 
@@ -175,10 +149,7 @@ public class ClusterRerouteTests extends ElasticsearchIntegrationTest {
     @Test
     @LuceneTestCase.Slow
     public void testDelayWithALargeAmountOfShards() throws Exception {
-        Settings commonSettings = settingsBuilder()
-                .put("gateway.type", "local")
-                .put(ThrottlingAllocationDecider.CLUSTER_ROUTING_ALLOCATION_CONCURRENT_RECOVERIES, 1)
-                .build();
+        Settings commonSettings = settingsBuilder().put("gateway.type", "local").put(ThrottlingAllocationDecider.CLUSTER_ROUTING_ALLOCATION_CONCURRENT_RECOVERIES, 1).build();
         logger.info("--> starting 4 nodes");
         String node_1 = internalCluster().startNode(commonSettings);
         internalCluster().startNode(commonSettings);
@@ -191,11 +162,7 @@ public class ClusterRerouteTests extends ElasticsearchIntegrationTest {
 
         logger.info("--> create indices");
         for (int i = 0; i < 25; i++) {
-            client().admin().indices().prepareCreate("test" + i)
-                    .setSettings(settingsBuilder()
-                            .put("index.number_of_shards", 5).put("index.number_of_replicas", 1)
-                            .put("index.unassigned.node_left.delayed_timeout", randomIntBetween(250, 1000) + "ms"))
-                    .execute().actionGet();
+            client().admin().indices().prepareCreate("test" + i).setSettings(settingsBuilder().put("index.number_of_shards", 5).put("index.number_of_replicas", 1).put("index.unassigned.node_left.delayed_timeout", randomIntBetween(250, 1000) + "ms")).execute().actionGet();
         }
 
         ensureGreen(TimeValue.timeValueMinutes(1));
@@ -216,18 +183,13 @@ public class ClusterRerouteTests extends ElasticsearchIntegrationTest {
         assertThat(healthResponse.isTimedOut(), equalTo(false));
 
         logger.info("--> create an index with 1 shard, 1 replica, nothing should allocate");
-        client().admin().indices().prepareCreate("test")
-                .setSettings(settingsBuilder().put("index.number_of_shards", 1))
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_shards", 1)).execute().actionGet();
 
         ClusterState state = client().admin().cluster().prepareState().execute().actionGet().getState();
         assertThat(state.routingNodes().unassigned().size(), equalTo(2));
 
         logger.info("--> explicitly allocate shard 1, actually allocating, no dry run");
-        state = client().admin().cluster().prepareReroute()
-                .setExplain(randomBoolean())
-                .add(new AllocateAllocationCommand(new ShardId("test", 0), node_1, true))
-                .execute().actionGet().getState();
+        state = client().admin().cluster().prepareReroute().setExplain(randomBoolean()).add(new AllocateAllocationCommand(new ShardId("test", 0), node_1, true)).execute().actionGet().getState();
         assertThat(state.routingNodes().unassigned().size(), equalTo(1));
         assertThat(state.routingNodes().node(state.nodes().resolveNode(node_1).id()).get(0).state(), equalTo(ShardRoutingState.INITIALIZING));
 
@@ -258,10 +220,7 @@ public class ClusterRerouteTests extends ElasticsearchIntegrationTest {
         client().admin().cluster().prepareReroute().get();
         assertThat(client().admin().cluster().prepareHealth().setWaitForNodes("2").execute().actionGet().getStatus(), equalTo(ClusterHealthStatus.RED));
         logger.info("--> explicitly allocate primary");
-        state = client().admin().cluster().prepareReroute()
-                .setExplain(randomBoolean())
-                .add(new AllocateAllocationCommand(new ShardId("test", 0), node_1, true))
-                .execute().actionGet().getState();
+        state = client().admin().cluster().prepareReroute().setExplain(randomBoolean()).add(new AllocateAllocationCommand(new ShardId("test", 0), node_1, true)).execute().actionGet().getState();
         assertThat(state.routingNodes().unassigned().size(), equalTo(1));
         assertThat(state.routingNodes().node(state.nodes().resolveNode(node_1).id()).get(0).state(), equalTo(ShardRoutingState.INITIALIZING));
 
@@ -287,16 +246,12 @@ public class ClusterRerouteTests extends ElasticsearchIntegrationTest {
         assertThat(healthResponse.isTimedOut(), equalTo(false));
 
         logger.info("--> create an index with 1 shard");
-        client().admin().indices().prepareCreate("test")
-                .setSettings(settingsBuilder().put("index.number_of_shards", 1).put("index.number_of_replicas", 0))
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_shards", 1).put("index.number_of_replicas", 0)).execute().actionGet();
 
         ensureGreen("test");
 
         logger.info("--> disable allocation");
-        Settings newSettings = settingsBuilder()
-                .put(EnableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ENABLE, EnableAllocationDecider.Allocation.NONE.name())
-                .build();
+        Settings newSettings = settingsBuilder().put(EnableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ENABLE, EnableAllocationDecider.Allocation.NONE.name()).build();
         client().admin().cluster().prepareUpdateSettings().setTransientSettings(newSettings).execute().actionGet();
 
         logger.info("--> starting a second node");
@@ -312,9 +267,9 @@ public class ClusterRerouteTests extends ElasticsearchIntegrationTest {
         assertThat(e.explanations().size(), equalTo(1));
         RerouteExplanation explanation = e.explanations().get(0);
         assertThat(explanation.command().name(), equalTo(cmd.name()));
-        assertThat(((MoveAllocationCommand)explanation.command()).shardId(), equalTo(cmd.shardId()));
-        assertThat(((MoveAllocationCommand)explanation.command()).fromNode(), equalTo(cmd.fromNode()));
-        assertThat(((MoveAllocationCommand)explanation.command()).toNode(), equalTo(cmd.toNode()));
+        assertThat(((MoveAllocationCommand) explanation.command()).shardId(), equalTo(cmd.shardId()));
+        assertThat(((MoveAllocationCommand) explanation.command()).fromNode(), equalTo(cmd.fromNode()));
+        assertThat(((MoveAllocationCommand) explanation.command()).toNode(), equalTo(cmd.toNode()));
         assertThat(explanation.decisions().type(), equalTo(Decision.Type.YES));
     }
 
@@ -346,8 +301,7 @@ public class ClusterRerouteTests extends ElasticsearchIntegrationTest {
         for (String blockSetting : Arrays.asList(SETTING_BLOCKS_READ, SETTING_BLOCKS_WRITE, SETTING_READ_ONLY, SETTING_BLOCKS_METADATA)) {
             try {
                 enableIndexBlock("test-blocks", blockSetting);
-                assertAcked(client().admin().cluster().prepareReroute()
-                        .add(new MoveAllocationCommand(new ShardId("test-blocks", 0), nodesIds.get(toggle % 2), nodesIds.get(++toggle % 2))));
+                assertAcked(client().admin().cluster().prepareReroute().add(new MoveAllocationCommand(new ShardId("test-blocks", 0), nodesIds.get(toggle % 2), nodesIds.get(++toggle % 2))));
 
                 ClusterHealthResponse healthResponse = client().admin().cluster().prepareHealth().setWaitForYellowStatus().setWaitForRelocatingShards(0).execute().actionGet();
                 assertThat(healthResponse.isTimedOut(), equalTo(false));
@@ -359,8 +313,7 @@ public class ClusterRerouteTests extends ElasticsearchIntegrationTest {
         // Rerouting shards is blocked when the cluster is read only
         try {
             setClusterReadOnly(true);
-            assertBlocked(client().admin().cluster().prepareReroute()
-                    .add(new MoveAllocationCommand(new ShardId("test-blocks", 1), nodesIds.get(toggle % 2), nodesIds.get(++toggle % 2))));
+            assertBlocked(client().admin().cluster().prepareReroute().add(new MoveAllocationCommand(new ShardId("test-blocks", 1), nodesIds.get(toggle % 2), nodesIds.get(++toggle % 2))));
         } finally {
             setClusterReadOnly(false);
         }

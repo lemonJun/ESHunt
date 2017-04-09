@@ -89,22 +89,9 @@ public class SimpleClusterStateTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testIndexTemplates() throws Exception {
-        client().admin().indices().preparePutTemplate("foo_template")
-                .setTemplate("te*")
-                .setOrder(0)
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("field1").field("type", "string").field("store", "yes").endObject()
-                        .startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject()
-                        .endObject().endObject().endObject())
-                .get();
+        client().admin().indices().preparePutTemplate("foo_template").setTemplate("te*").setOrder(0).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("type", "string").field("store", "yes").endObject().startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().endObject().endObject().endObject()).get();
 
-        client().admin().indices().preparePutTemplate("fuu_template")
-                .setTemplate("test*")
-                .setOrder(1)
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("field2").field("type", "string").field("store", "no").endObject()
-                        .endObject().endObject().endObject())
-                .get();
+        client().admin().indices().preparePutTemplate("fuu_template").setTemplate("test*").setOrder(1).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field2").field("type", "string").field("store", "no").endObject().endObject().endObject().endObject()).get();
 
         ClusterStateResponse clusterStateResponseUnfiltered = client().admin().cluster().prepareState().get();
         assertThat(clusterStateResponseUnfiltered.getState().metaData().templates().size(), is(greaterThanOrEqualTo(2)));
@@ -115,8 +102,7 @@ public class SimpleClusterStateTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testThatFilteringByIndexWorksForMetadataAndRoutingTable() throws Exception {
-        ClusterStateResponse clusterStateResponseFiltered = client().admin().cluster().prepareState().clear()
-                .setMetaData(true).setRoutingTable(true).setIndices("foo", "fuu", "non-existent").get();
+        ClusterStateResponse clusterStateResponseFiltered = client().admin().cluster().prepareState().clear().setMetaData(true).setRoutingTable(true).setIndices("foo", "fuu", "non-existent").get();
 
         // metadata
         assertThat(clusterStateResponseFiltered.getState().metaData().indices().size(), is(2));
@@ -148,10 +134,7 @@ public class SimpleClusterStateTests extends ElasticsearchIntegrationTest {
 
         int numberOfShards = scaledRandomIntBetween(1, cluster().numDataNodes());
         // if the create index is ack'ed, then all nodes have successfully processed the cluster state
-        assertAcked(client().admin().indices().prepareCreate("test")
-                .setSettings(IndexMetaData.SETTING_NUMBER_OF_SHARDS, numberOfShards, IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)
-                .addMapping("type", mapping)
-                .setTimeout("60s").get());
+        assertAcked(client().admin().indices().prepareCreate("test").setSettings(IndexMetaData.SETTING_NUMBER_OF_SHARDS, numberOfShards, IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0).addMapping("type", mapping).setTimeout("60s").get());
         ensureGreen(); // wait for green state, so its both green, and there are no more pending events
         MappingMetaData masterMappingMetaData = client().admin().indices().prepareGetMappings("test").setTypes("type").get().getMappings().get("test").get("type");
         for (Client client : clients()) {
@@ -163,8 +146,7 @@ public class SimpleClusterStateTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testIndicesOptions() throws Exception {
-        ClusterStateResponse clusterStateResponse = client().admin().cluster().prepareState().clear().setMetaData(true).setIndices("f*")
-                .get();
+        ClusterStateResponse clusterStateResponse = client().admin().cluster().prepareState().clear().setMetaData(true).setIndices("f*").get();
         assertThat(clusterStateResponse.getState().metaData().indices().size(), is(2));
 
         // close one index
@@ -175,33 +157,30 @@ public class SimpleClusterStateTests extends ElasticsearchIntegrationTest {
 
         // expand_wildcards_closed should toggle return only closed index fuu
         IndicesOptions expandCloseOptions = IndicesOptions.fromOptions(false, true, false, true);
-        clusterStateResponse = client().admin().cluster().prepareState().clear().setMetaData(true).setIndices("f*")
-                .setIndicesOptions(expandCloseOptions).get();
+        clusterStateResponse = client().admin().cluster().prepareState().clear().setMetaData(true).setIndices("f*").setIndicesOptions(expandCloseOptions).get();
         assertThat(clusterStateResponse.getState().metaData().indices().size(), is(1));
         assertThat(clusterStateResponse.getState().metaData().index("fuu").state(), equalTo(IndexMetaData.State.CLOSE));
 
         // ignore_unavailable set to true should not raise exception on fzzbzz
         IndicesOptions ignoreUnavailabe = IndicesOptions.fromOptions(true, true, true, false);
-        clusterStateResponse = client().admin().cluster().prepareState().clear().setMetaData(true).setIndices("fzzbzz")
-                .setIndicesOptions(ignoreUnavailabe).get();
+        clusterStateResponse = client().admin().cluster().prepareState().clear().setMetaData(true).setIndices("fzzbzz").setIndicesOptions(ignoreUnavailabe).get();
         assertThat(clusterStateResponse.getState().metaData().indices().isEmpty(), is(true));
 
         // empty wildcard expansion result should work when allowNoIndices is
         // turned on
         IndicesOptions allowNoIndices = IndicesOptions.fromOptions(false, true, true, false);
-        clusterStateResponse = client().admin().cluster().prepareState().clear().setMetaData(true).setIndices("a*")
-                .setIndicesOptions(allowNoIndices).get();
+        clusterStateResponse = client().admin().cluster().prepareState().clear().setMetaData(true).setIndices("a*").setIndicesOptions(allowNoIndices).get();
         assertThat(clusterStateResponse.getState().metaData().indices().isEmpty(), is(true));
     }
 
-    @Test(expected=IndexMissingException.class)
+    @Test(expected = IndexMissingException.class)
     public void testIndicesOptionsOnAllowNoIndicesFalse() throws Exception {
         // empty wildcard expansion throws exception when allowNoIndices is turned off
         IndicesOptions allowNoIndices = IndicesOptions.fromOptions(false, false, true, false);
         client().admin().cluster().prepareState().clear().setMetaData(true).setIndices("a*").setIndicesOptions(allowNoIndices).get();
     }
 
-    @Test(expected=IndexMissingException.class)
+    @Test(expected = IndexMissingException.class)
     public void testIndicesIgnoreUnavailableFalse() throws Exception {
         // ignore_unavailable set to false throws exception when allowNoIndices is turned off
         IndicesOptions allowNoIndices = IndicesOptions.fromOptions(false, true, true, false);

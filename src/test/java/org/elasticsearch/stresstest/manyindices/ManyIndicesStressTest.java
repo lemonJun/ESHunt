@@ -45,11 +45,7 @@ public class ManyIndicesStressTest {
         int numberOfIndices = 100;
         int numberOfDocs = 100;
 
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("index.shard.check_on_startup", false)
-                .put("gateway.type", "local")
-                .put("index.number_of_shards", 1)
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("index.shard.check_on_startup", false).put("gateway.type", "local").put("index.number_of_shards", 1).build();
         Node node = NodeBuilder.nodeBuilder().settings(settings).node();
 
         for (int i = 0; i < numberOfIndices; i++) {

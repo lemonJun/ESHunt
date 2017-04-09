@@ -45,10 +45,7 @@ public class MultiFieldsIntegrationTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testMultiFields() throws Exception {
-        assertAcked(
-            client().admin().indices().prepareCreate("my-index")
-                .addMapping("my-type", createTypeSource())
-        );
+        assertAcked(client().admin().indices().prepareCreate("my-index").addMapping("my-type", createTypeSource()));
 
         GetMappingsResponse getMappingsResponse = client().admin().indices().prepareGetMappings("my-index").get();
         MappingMetaData mappingMetaData = getMappingsResponse.mappings().get("my-index").get("my-type");
@@ -57,26 +54,16 @@ public class MultiFieldsIntegrationTests extends ElasticsearchIntegrationTest {
         Map titleFields = ((Map) XContentMapValues.extractValue("properties.title.fields", mappingSource));
         assertThat(titleFields.size(), equalTo(1));
         assertThat(titleFields.get("not_analyzed"), notNullValue());
-        assertThat(((Map)titleFields.get("not_analyzed")).get("index").toString(), equalTo("not_analyzed"));
+        assertThat(((Map) titleFields.get("not_analyzed")).get("index").toString(), equalTo("not_analyzed"));
 
-        client().prepareIndex("my-index", "my-type", "1")
-                .setSource("title", "Multi fields")
-                .setRefresh(true)
-                .get();
+        client().prepareIndex("my-index", "my-type", "1").setSource("title", "Multi fields").setRefresh(true).get();
 
-        SearchResponse searchResponse = client().prepareSearch("my-index")
-                .setQuery(matchQuery("title", "multi"))
-                .get();
+        SearchResponse searchResponse = client().prepareSearch("my-index").setQuery(matchQuery("title", "multi")).get();
         assertThat(searchResponse.getHits().totalHits(), equalTo(1l));
-        searchResponse = client().prepareSearch("my-index")
-                .setQuery(matchQuery("title.not_analyzed", "Multi fields"))
-                .get();
+        searchResponse = client().prepareSearch("my-index").setQuery(matchQuery("title.not_analyzed", "Multi fields")).get();
         assertThat(searchResponse.getHits().totalHits(), equalTo(1l));
 
-        assertAcked(
-                client().admin().indices().preparePutMapping("my-index").setType("my-type")
-                        .setSource(createPutMappingSource())
-                        .setIgnoreConflicts(true) // If updated with multi-field type, we need to ignore failures.
+        assertAcked(client().admin().indices().preparePutMapping("my-index").setType("my-type").setSource(createPutMappingSource()).setIgnoreConflicts(true) // If updated with multi-field type, we need to ignore failures.
         );
 
         getMappingsResponse = client().admin().indices().prepareGetMappings("my-index").get();
@@ -87,27 +74,19 @@ public class MultiFieldsIntegrationTests extends ElasticsearchIntegrationTest {
         titleFields = ((Map) XContentMapValues.extractValue("properties.title.fields", mappingSource));
         assertThat(titleFields.size(), equalTo(2));
         assertThat(titleFields.get("not_analyzed"), notNullValue());
-        assertThat(((Map)titleFields.get("not_analyzed")).get("index").toString(), equalTo("not_analyzed"));
+        assertThat(((Map) titleFields.get("not_analyzed")).get("index").toString(), equalTo("not_analyzed"));
         assertThat(titleFields.get("uncased"), notNullValue());
-        assertThat(((Map)titleFields.get("uncased")).get("analyzer").toString(), equalTo("whitespace"));
+        assertThat(((Map) titleFields.get("uncased")).get("analyzer").toString(), equalTo("whitespace"));
 
-        client().prepareIndex("my-index", "my-type", "1")
-                .setSource("title", "Multi fields")
-                .setRefresh(true)
-                .get();
+        client().prepareIndex("my-index", "my-type", "1").setSource("title", "Multi fields").setRefresh(true).get();
 
-        searchResponse = client().prepareSearch("my-index")
-                .setQuery(matchQuery("title.uncased", "Multi"))
-                .get();
+        searchResponse = client().prepareSearch("my-index").setQuery(matchQuery("title.uncased", "Multi")).get();
         assertThat(searchResponse.getHits().totalHits(), equalTo(1l));
     }
 
     @Test
     public void testGeoPointMultiField() throws Exception {
-        assertAcked(
-                client().admin().indices().prepareCreate("my-index")
-                        .addMapping("my-type", createMappingSource("geo_point"))
-        );
+        assertAcked(client().admin().indices().prepareCreate("my-index").addMapping("my-type", createMappingSource("geo_point")));
 
         GetMappingsResponse getMappingsResponse = client().admin().indices().prepareGetMappings("my-index").get();
         MappingMetaData mappingMetaData = getMappingsResponse.mappings().get("my-index").get("my-type");
@@ -124,9 +103,7 @@ public class MultiFieldsIntegrationTests extends ElasticsearchIntegrationTest {
         assertThat(bField.get("index").toString(), equalTo("not_analyzed"));
 
         client().prepareIndex("my-index", "my-type", "1").setSource("a", "51,19").setRefresh(true).get();
-        CountResponse countResponse = client().prepareCount("my-index")
-                .setQuery(constantScoreQuery(geoDistanceFilter("a").point(51, 19).distance(50, DistanceUnit.KILOMETERS)))
-                .get();
+        CountResponse countResponse = client().prepareCount("my-index").setQuery(constantScoreQuery(geoDistanceFilter("a").point(51, 19).distance(50, DistanceUnit.KILOMETERS))).get();
         assertThat(countResponse.getCount(), equalTo(1l));
         countResponse = client().prepareCount("my-index").setQuery(matchQuery("a.b", "51,19")).get();
         assertThat(countResponse.getCount(), equalTo(1l));
@@ -134,23 +111,7 @@ public class MultiFieldsIntegrationTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testTokenCountMultiField() throws Exception {
-        assertAcked(
-                client().admin().indices().prepareCreate("my-index")
-                        .addMapping("my-type", XContentFactory.jsonBuilder().startObject().startObject("my-type")
-                                .startObject("properties")
-                                .startObject("a")
-                                .field("type", "token_count")
-                                .field("analyzer", "simple")
-                                .startObject("fields")
-                                .startObject("b")
-                                .field("type", "string")
-                                .field("index", "not_analyzed")
-                                .endObject()
-                                .endObject()
-                                .endObject()
-                                .endObject()
-                                .endObject().endObject())
-        );
+        assertAcked(client().admin().indices().prepareCreate("my-index").addMapping("my-type", XContentFactory.jsonBuilder().startObject().startObject("my-type").startObject("properties").startObject("a").field("type", "token_count").field("analyzer", "simple").startObject("fields").startObject("b").field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject().endObject().endObject().endObject()));
 
         GetMappingsResponse getMappingsResponse = client().admin().indices().prepareGetMappings("my-index").get();
         MappingMetaData mappingMetaData = getMappingsResponse.mappings().get("my-index").get("my-type");
@@ -173,10 +134,7 @@ public class MultiFieldsIntegrationTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testCompletionMultiField() throws Exception {
-        assertAcked(
-                client().admin().indices().prepareCreate("my-index")
-                        .addMapping("my-type", createMappingSource("completion"))
-        );
+        assertAcked(client().admin().indices().prepareCreate("my-index").addMapping("my-type", createMappingSource("completion")));
 
         GetMappingsResponse getMappingsResponse = client().admin().indices().prepareGetMappings("my-index").get();
         MappingMetaData mappingMetaData = getMappingsResponse.mappings().get("my-index").get("my-type");
@@ -199,10 +157,7 @@ public class MultiFieldsIntegrationTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testIpMultiField() throws Exception {
-        assertAcked(
-                client().admin().indices().prepareCreate("my-index")
-                        .addMapping("my-type", createMappingSource("ip"))
-        );
+        assertAcked(client().admin().indices().prepareCreate("my-index").addMapping("my-type", createMappingSource("ip")));
 
         GetMappingsResponse getMappingsResponse = client().admin().indices().prepareGetMappings("my-index").get();
         MappingMetaData mappingMetaData = getMappingsResponse.mappings().get("my-index").get("my-type");
@@ -224,85 +179,22 @@ public class MultiFieldsIntegrationTests extends ElasticsearchIntegrationTest {
     }
 
     private XContentBuilder createMappingSource(String fieldType) throws IOException {
-        return XContentFactory.jsonBuilder().startObject().startObject("my-type")
-                .startObject("properties")
-                .startObject("a")
-                .field("type", fieldType)
-                .startObject("fields")
-                .startObject("b")
-                .field("type", "string")
-                .field("index", "not_analyzed")
-                .endObject()
-                .endObject()
-                .endObject()
-                .endObject()
-                .endObject().endObject();
+        return XContentFactory.jsonBuilder().startObject().startObject("my-type").startObject("properties").startObject("a").field("type", fieldType).startObject("fields").startObject("b").field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject().endObject().endObject().endObject();
     }
 
     private XContentBuilder createTypeSource() throws IOException {
         if (randomBoolean()) {
-            return XContentFactory.jsonBuilder().startObject().startObject("my-type")
-                    .startObject("properties")
-                    .startObject("title")
-                    .field("type", "string")
-                    .startObject("fields")
-                    .startObject("not_analyzed")
-                    .field("type", "string")
-                    .field("index", "not_analyzed")
-                    .endObject()
-                    .endObject()
-                    .endObject()
-                    .endObject()
-                    .endObject().endObject();
+            return XContentFactory.jsonBuilder().startObject().startObject("my-type").startObject("properties").startObject("title").field("type", "string").startObject("fields").startObject("not_analyzed").field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject().endObject().endObject().endObject();
         } else {
-            return XContentFactory.jsonBuilder().startObject().startObject("my-type")
-                    .startObject("properties")
-                    .startObject("title")
-                    .field("type", "multi_field")
-                    .startObject("fields")
-                    .startObject("title")
-                    .field("type", "string")
-                    .endObject()
-                    .startObject("not_analyzed")
-                    .field("type", "string")
-                    .field("index", "not_analyzed")
-                    .endObject()
-                    .endObject()
-                    .endObject()
-                    .endObject()
-                    .endObject().endObject();
+            return XContentFactory.jsonBuilder().startObject().startObject("my-type").startObject("properties").startObject("title").field("type", "multi_field").startObject("fields").startObject("title").field("type", "string").endObject().startObject("not_analyzed").field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject().endObject().endObject().endObject();
         }
     }
 
     private XContentBuilder createPutMappingSource() throws IOException {
         if (randomBoolean()) {
-            return XContentFactory.jsonBuilder().startObject().startObject("my-type")
-                    .startObject("properties")
-                    .startObject("title")
-                    .field("type", "string")
-                    .startObject("fields")
-                    .startObject("uncased")
-                    .field("type", "string")
-                    .field("analyzer", "whitespace")
-                    .endObject()
-                    .endObject()
-                    .endObject()
-                    .endObject()
-                    .endObject().endObject();
+            return XContentFactory.jsonBuilder().startObject().startObject("my-type").startObject("properties").startObject("title").field("type", "string").startObject("fields").startObject("uncased").field("type", "string").field("analyzer", "whitespace").endObject().endObject().endObject().endObject().endObject().endObject();
         } else {
-            return XContentFactory.jsonBuilder().startObject().startObject("my-type")
-                    .startObject("properties")
-                    .startObject("title")
-                    .field("type", "multi_field")
-                    .startObject("fields")
-                    .startObject("uncased")
-                    .field("type", "string")
-                    .field("analyzer", "whitespace")
-                    .endObject()
-                    .endObject()
-                    .endObject()
-                    .endObject()
-                    .endObject().endObject();
+            return XContentFactory.jsonBuilder().startObject().startObject("my-type").startObject("properties").startObject("title").field("type", "multi_field").startObject("fields").startObject("uncased").field("type", "string").field("analyzer", "whitespace").endObject().endObject().endObject().endObject().endObject().endObject();
         }
     }
 

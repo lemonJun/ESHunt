@@ -21,39 +21,32 @@ package org.elasticsearch.common.geo;
 import org.elasticsearch.test.ElasticsearchTestCase;
 import org.junit.Test;
 
-
-
 /**
  * Tests for {@link GeoHashUtils}
  */
 public class GeoHashTests extends ElasticsearchTestCase {
 
-
     @Test
-    public void testGeohashAsLongRoutines()  {
-        
+    public void testGeohashAsLongRoutines() {
+
         //Ensure that for all points at all supported levels of precision
         // that the long encoding of a geohash is compatible with its 
         // String based counterpart
-        for (double lat=-90;lat<90;lat++)
-        {
-            for (double lng=-180;lng<180;lng++)
-            {
-                for(int p=1;p<=12;p++)
-                {
-                    long geoAsLong = GeoHashUtils.encodeAsLong(lat,lng,p);
-                    String geohash = GeoHashUtils.encode(lat,lng,p);
-                    
-                    String geohashFromLong=GeoHashUtils.toString(geoAsLong);
+        for (double lat = -90; lat < 90; lat++) {
+            for (double lng = -180; lng < 180; lng++) {
+                for (int p = 1; p <= 12; p++) {
+                    long geoAsLong = GeoHashUtils.encodeAsLong(lat, lng, p);
+                    String geohash = GeoHashUtils.encode(lat, lng, p);
+
+                    String geohashFromLong = GeoHashUtils.toString(geoAsLong);
                     assertEquals(geohash, geohashFromLong);
-                    GeoPoint pos=GeoHashUtils.decode(geohash);
-                    GeoPoint pos2=GeoHashUtils.decode(geoAsLong);
+                    GeoPoint pos = GeoHashUtils.decode(geohash);
+                    GeoPoint pos2 = GeoHashUtils.decode(geoAsLong);
                     assertEquals(pos, pos2);
                 }
             }
-            
-        }        
-    }
 
+        }
+    }
 
 }

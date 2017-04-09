@@ -24,7 +24,6 @@ import org.elasticsearch.script.ScriptModule;
 
 public class NativeScriptExamplesPlugin extends AbstractPlugin {
 
-
     @Override
     public String name() {
         return "native-script-example";

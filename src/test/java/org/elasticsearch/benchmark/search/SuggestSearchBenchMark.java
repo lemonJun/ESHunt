@@ -51,10 +51,7 @@ public class SuggestSearchBenchMark {
     public static void main(String[] args) throws Exception {
         int SEARCH_ITERS = 200;
 
-        Settings settings = settingsBuilder()
-                .put(SETTING_NUMBER_OF_SHARDS, 1)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put(SETTING_NUMBER_OF_SHARDS, 1).put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
         Node[] nodes = new Node[1];
         for (int i = 0; i < nodes.length; i++) {
@@ -63,15 +60,7 @@ public class SuggestSearchBenchMark {
 
         Client client = nodes[0].client();
         try {
-            client.admin().indices().prepareCreate("test").setSettings(settings).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1")
-                    .startObject("_source").field("enabled", false).endObject()
-                    .startObject("_all").field("enabled", false).endObject()
-                    .startObject("_type").field("index", "no").endObject()
-                    .startObject("_id").field("index", "no").endObject()
-                    .startObject("properties")
-                    .startObject("field").field("type", "string").field("index", "not_analyzed").field("omit_norms", true).endObject()
-                    .endObject()
-                    .endObject().endObject()).execute().actionGet();
+            client.admin().indices().prepareCreate("test").setSettings(settings).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_source").field("enabled", false).endObject().startObject("_all").field("enabled", false).endObject().startObject("_type").field("index", "no").endObject().startObject("_id").field("index", "no").endObject().startObject("properties").startObject("field").field("type", "string").field("index", "not_analyzed").field("omit_norms", true).endObject().endObject().endObject().endObject()).execute().actionGet();
             ClusterHealthResponse clusterHealthResponse = client.admin().cluster().prepareHealth("test").setWaitForGreenStatus().execute().actionGet();
             if (clusterHealthResponse.isTimedOut()) {
                 System.err.println("--> Timed out waiting for cluster health");
@@ -111,15 +100,11 @@ public class SuggestSearchBenchMark {
             System.out.println("Count: " + client.prepareCount().setQuery(matchAllQuery()).execute().actionGet().getCount());
         }
 
-
         System.out.println("Warming up...");
         char startChar = 'a';
         for (int i = 0; i <= 20; i++) {
             String term = "prefix" + startChar;
-            SearchResponse response = client.prepareSearch()
-                    .setQuery(prefixQuery("field", term))
-                    .addSuggestion(SuggestBuilders.termSuggestion("field").field("field").text(term).suggestMode("always"))
-                    .execute().actionGet();
+            SearchResponse response = client.prepareSearch().setQuery(prefixQuery("field", term)).addSuggestion(SuggestBuilders.termSuggestion("field").field("field").text(term).suggestMode("always")).execute().actionGet();
             if (response.getHits().totalHits() == 0) {
                 System.err.println("No hits");
                 continue;
@@ -127,16 +112,12 @@ public class SuggestSearchBenchMark {
             startChar++;
         }
 
-
         System.out.println("Starting benchmarking suggestions.");
         startChar = 'a';
         long timeTaken = 0;
         for (int i = 0; i <= SEARCH_ITERS; i++) {
             String term = "prefix" + startChar;
-            SearchResponse response = client.prepareSearch()
-                    .setQuery(matchQuery("field", term))
-                    .addSuggestion(SuggestBuilders.termSuggestion("field").text(term).field("field").suggestMode("always"))
-                    .execute().actionGet();
+            SearchResponse response = client.prepareSearch().setQuery(matchQuery("field", term)).addSuggestion(SuggestBuilders.termSuggestion("field").text(term).field("field").suggestMode("always")).execute().actionGet();
             timeTaken += response.getTookInMillis();
             if (response.getSuggest() == null) {
                 System.err.println("No suggestions");
@@ -158,9 +139,7 @@ public class SuggestSearchBenchMark {
     }
 
     private static XContentBuilder source(String nameValue) throws IOException {
-        return jsonBuilder().startObject()
-                .field("field", nameValue)
-                .endObject();
+        return jsonBuilder().startObject().field("field", nameValue).endObject();
     }
 
 }

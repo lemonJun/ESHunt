@@ -41,7 +41,7 @@ public class Iterators2Tests extends ElasticsearchTestCase {
         }
         CollectionUtil.introSort(list);
         final List<String> deduplicated = Lists.newArrayList();
-        for (Iterator<String> it = Iterators2.deduplicateSorted(list.iterator(), Ordering.natural()); it.hasNext(); ) {
+        for (Iterator<String> it = Iterators2.deduplicateSorted(list.iterator(), Ordering.natural()); it.hasNext();) {
             deduplicated.add(it.next());
         }
         assertEquals(Lists.newArrayList(Sets.newTreeSet(list)), deduplicated);

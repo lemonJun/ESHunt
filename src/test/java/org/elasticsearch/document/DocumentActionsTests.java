@@ -59,7 +59,6 @@ public class DocumentActionsTests extends ElasticsearchIntegrationTest {
         createIndex(getConcreteIndexName());
     }
 
-
     protected String getConcreteIndexName() {
         return "test";
     }
@@ -209,13 +208,8 @@ public class DocumentActionsTests extends ElasticsearchIntegrationTest {
         logger.info("-> running Cluster Health");
         ensureGreen();
 
-        BulkResponse bulkResponse = client().prepareBulk()
-                .add(client().prepareIndex().setIndex("test").setType("type1").setId("1").setSource(source("1", "test")))
-                .add(client().prepareIndex().setIndex("test").setType("type1").setId("2").setSource(source("2", "test")).setCreate(true))
-                .add(client().prepareIndex().setIndex("test").setType("type1").setSource(source("3", "test")))
-                .add(client().prepareDelete().setIndex("test").setType("type1").setId("1"))
-                .add(client().prepareIndex().setIndex("test").setType("type1").setSource("{ xxx }")) // failure
-                .execute().actionGet();
+        BulkResponse bulkResponse = client().prepareBulk().add(client().prepareIndex().setIndex("test").setType("type1").setId("1").setSource(source("1", "test"))).add(client().prepareIndex().setIndex("test").setType("type1").setId("2").setSource(source("2", "test")).setCreate(true)).add(client().prepareIndex().setIndex("test").setType("type1").setSource(source("3", "test"))).add(client().prepareDelete().setIndex("test").setType("type1").setId("1")).add(client().prepareIndex().setIndex("test").setType("type1").setSource("{ xxx }")) // failure
+                        .execute().actionGet();
 
         assertThat(bulkResponse.hasFailures(), equalTo(true));
         assertThat(bulkResponse.getItems().length, equalTo(5));
@@ -254,7 +248,6 @@ public class DocumentActionsTests extends ElasticsearchIntegrationTest {
         assertNoFailures(refreshResponse);
         assertThat(refreshResponse.getSuccessfulShards(), equalTo(numShards.totalNumShards));
 
-
         for (int i = 0; i < 5; i++) {
             GetResponse getResult = client().get(getRequest("test").type("type1").id("1")).actionGet();
             assertThat(getResult.getIndex(), equalTo(getConcreteIndexName()));
@@ -272,23 +265,19 @@ public class DocumentActionsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testDeleteRoutingRequired() throws ExecutionException, InterruptedException, IOException {
-        assertAcked(prepareCreate("test").addMapping("test",
-                XContentFactory.jsonBuilder().startObject().startObject("test").startObject("_routing").field("required", true).endObject().endObject().endObject()));
+        assertAcked(prepareCreate("test").addMapping("test", XContentFactory.jsonBuilder().startObject().startObject("test").startObject("_routing").field("required", true).endObject().endObject().endObject()));
         ensureGreen();
 
         int numDocs = iterations(10, 50);
         IndexRequestBuilder[] indexRequestBuilders = new IndexRequestBuilder[numDocs];
         for (int i = 0; i < numDocs - 2; i++) {
-            indexRequestBuilders[i] = client().prepareIndex("test", "test", Integer.toString(i))
-                    .setRouting(randomAsciiOfLength(randomIntBetween(1, 10))).setSource("field", "value");
+            indexRequestBuilders[i] = client().prepareIndex("test", "test", Integer.toString(i)).setRouting(randomAsciiOfLength(randomIntBetween(1, 10))).setSource("field", "value");
         }
         String firstDocId = Integer.toString(numDocs - 2);
-        indexRequestBuilders[numDocs - 2] = client().prepareIndex("test", "test", firstDocId)
-                .setRouting("routing").setSource("field", "value");
+        indexRequestBuilders[numDocs - 2] = client().prepareIndex("test", "test", firstDocId).setRouting("routing").setSource("field", "value");
         String secondDocId = Integer.toString(numDocs - 1);
         String secondRouting = randomAsciiOfLength(randomIntBetween(1, 10));
-        indexRequestBuilders[numDocs - 1] = client().prepareIndex("test", "test", secondDocId)
-                .setRouting(secondRouting).setSource("field", "value");
+        indexRequestBuilders[numDocs - 1] = client().prepareIndex("test", "test", secondDocId).setRouting(secondRouting).setSource("field", "value");
 
         indexRandom(true, indexRequestBuilders);
 

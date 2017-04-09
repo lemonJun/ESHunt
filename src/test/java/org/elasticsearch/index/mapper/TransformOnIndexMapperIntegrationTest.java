@@ -99,10 +99,9 @@ public class TransformOnIndexMapperIntegrationTest extends ElasticsearchIntegrat
         XContentBuilder source = XContentFactory.contentBuilder(type);
         source.startObject().field("text", "findme").endObject();
         indexRandom(true, client().prepareIndex("test", "test", "findme").setSource(source));
-        SuggestResponse response = client().prepareSuggest("test").addSuggestion(
-                SuggestBuilders.completionSuggestion("test").field("suggest").text("findme")).get();
+        SuggestResponse response = client().prepareSuggest("test").addSuggestion(SuggestBuilders.completionSuggestion("test").field("suggest").text("findme")).get();
         assertSuggestion(response.getSuggest(), 0, 0, "test", "findme");
-        CompletionSuggestion.Entry.Option option = (CompletionSuggestion.Entry.Option)response.getSuggest().getSuggestion("test").getEntries().get(0).getOptions().get(0);
+        CompletionSuggestion.Entry.Option option = (CompletionSuggestion.Entry.Option) response.getSuggest().getSuggestion("test").getEntries().get(0).getOptions().get(0);
         // And it comes back in exactly that way.
         XContentBuilder expected = XContentFactory.contentBuilder(type);
         expected.startObject().field("display", "findme").field("display_detail", "on the fly").endObject();
@@ -149,9 +148,7 @@ public class TransformOnIndexMapperIntegrationTest extends ElasticsearchIntegrat
         }
         assertAcked(client().admin().indices().prepareCreate("test").addMapping("test", builder));
 
-        indexRandom(forceRefresh, client().prepareIndex("test", "test", "notitle").setSource("content", "findme"),
-                client().prepareIndex("test", "test", "badtitle").setSource("content", "findme", "title", "cat"),
-                client().prepareIndex("test", "test", "righttitle").setSource("content", "findme", "title", "table"));
+        indexRandom(forceRefresh, client().prepareIndex("test", "test", "notitle").setSource("content", "findme"), client().prepareIndex("test", "test", "badtitle").setSource("content", "findme", "title", "cat"), client().prepareIndex("test", "test", "righttitle").setSource("content", "findme", "title", "table"));
     }
 
     private void buildTransformScript(XContentBuilder builder) throws IOException {

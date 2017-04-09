@@ -102,7 +102,6 @@ public class PathTests extends ElasticsearchTestCase {
             return tokens.toArray(new OrderPath.Token[tokens.size()]);
         }
 
-
     }
 
 }

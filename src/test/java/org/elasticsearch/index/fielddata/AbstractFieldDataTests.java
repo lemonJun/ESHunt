@@ -42,7 +42,7 @@ import org.junit.Before;
 import static org.elasticsearch.index.fielddata.IndexFieldData.XFieldComparatorSource.Nested;
 
 // we might wanna cut this over to LuceneTestCase
-@SuppressCodecs({"Lucene3x", "Lucene40", "Lucene41", "Lucene42", "Lucene45", "Lucene46"}) 
+@SuppressCodecs({ "Lucene3x", "Lucene40", "Lucene41", "Lucene42", "Lucene45", "Lucene46" })
 // avoid codecs that do not support SortedNumerics, SortedSet, etc
 public abstract class AbstractFieldDataTests extends ElasticsearchSingleNodeTest {
 

@@ -37,11 +37,7 @@ public class DistributorTests extends ElasticsearchTestCase {
 
     @Test
     public void testLeastUsedDistributor() throws Exception {
-        FakeFsDirectory[] directories = new FakeFsDirectory[]{
-                new FakeFsDirectory("dir0", 10L),
-                new FakeFsDirectory("dir1", 20L),
-                new FakeFsDirectory("dir2", 30L)
-        };
+        FakeFsDirectory[] directories = new FakeFsDirectory[] { new FakeFsDirectory("dir0", 10L), new FakeFsDirectory("dir1", 20L), new FakeFsDirectory("dir2", 30L) };
         FakeDirectoryService directoryService = new FakeDirectoryService(directories);
 
         LeastUsedDistributor distributor = new LeastUsedDistributor(directoryService);
@@ -58,7 +54,6 @@ public class DistributorTests extends ElasticsearchTestCase {
         for (int i = 0; i < 5; i++) {
             assertThat(distributor.any(), equalTo((Directory) directories[0]));
         }
-
 
         directories[0].setUsableSpace(10L);
         directories[1].setUsableSpace(20L);
@@ -92,11 +87,7 @@ public class DistributorTests extends ElasticsearchTestCase {
 
     @Test
     public void testRandomWeightedDistributor() throws Exception {
-        FakeFsDirectory[] directories = new FakeFsDirectory[]{
-                new FakeFsDirectory("dir0", 10L),
-                new FakeFsDirectory("dir1", 20L),
-                new FakeFsDirectory("dir2", 30L)
-        };
+        FakeFsDirectory[] directories = new FakeFsDirectory[] { new FakeFsDirectory("dir0", 10L), new FakeFsDirectory("dir1", 20L), new FakeFsDirectory("dir2", 30L) };
         FakeDirectoryService directoryService = new FakeDirectoryService(directories);
 
         RandomWeightedDistributor randomWeightedDistributor = new RandomWeightedDistributor(directoryService);

@@ -43,28 +43,18 @@ public class CustomHighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("plugin.types", CustomHighlighterPlugin.class.getName())
-                .build();
+        return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("plugin.types", CustomHighlighterPlugin.class.getName()).build();
     }
 
     @Before
-    protected void setup() throws Exception{
-        indexRandom(true,
-                client().prepareIndex("test", "test", "1").setSource(
-                        "name", "arbitrary content", "other_name", "foo", "other_other_name", "bar"),
-                client().prepareIndex("test", "test", "2").setSource(
-                        "other_name", "foo", "other_other_name", "bar"));
+    protected void setup() throws Exception {
+        indexRandom(true, client().prepareIndex("test", "test", "1").setSource("name", "arbitrary content", "other_name", "foo", "other_other_name", "bar"), client().prepareIndex("test", "test", "2").setSource("other_name", "foo", "other_other_name", "bar"));
         ensureYellow();
     }
 
     @Test
     public void testThatCustomHighlightersAreSupported() throws IOException {
-        SearchResponse searchResponse = client().prepareSearch("test").setTypes("test")
-                .setQuery(QueryBuilders.matchAllQuery())
-                .addHighlightedField("name").setHighlighterType("test-custom")
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery()).addHighlightedField("name").setHighlighterType("test-custom").execute().actionGet();
         assertHighlight(searchResponse, 0, "name", 0, equalTo("standard response for name at position 1"));
     }
 
@@ -76,10 +66,7 @@ public class CustomHighlighterSearchTests extends ElasticsearchIntegrationTest {
         options.put("myFieldOption", "someValue");
         highlightConfig.options(options);
 
-        SearchResponse searchResponse = client().prepareSearch("test").setTypes("test")
-                .setQuery(QueryBuilders.matchAllQuery())
-                .addHighlightedField(highlightConfig)
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery()).addHighlightedField(highlightConfig).execute().actionGet();
 
         assertHighlight(searchResponse, 0, "name", 0, equalTo("standard response for name at position 1"));
         assertHighlight(searchResponse, 0, "name", 1, equalTo("field:myFieldOption:someValue"));
@@ -90,12 +77,7 @@ public class CustomHighlighterSearchTests extends ElasticsearchIntegrationTest {
         Map<String, Object> options = Maps.newHashMap();
         options.put("myGlobalOption", "someValue");
 
-        SearchResponse searchResponse = client().prepareSearch("test").setTypes("test")
-                .setQuery(QueryBuilders.matchAllQuery())
-                .setHighlighterOptions(options)
-                .setHighlighterType("test-custom")
-                .addHighlightedField("name")
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery()).setHighlighterOptions(options).setHighlighterType("test-custom").addHighlightedField("name").execute().actionGet();
 
         assertHighlight(searchResponse, 0, "name", 0, equalTo("standard response for name at position 1"));
         assertHighlight(searchResponse, 0, "name", 1, equalTo("field:myGlobalOption:someValue"));
@@ -103,15 +85,7 @@ public class CustomHighlighterSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testThatCustomHighlighterReceivesFieldsInOrder() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("test").setTypes("test")
-                .setQuery(QueryBuilders.boolQuery().must(QueryBuilders.matchAllQuery()).should(QueryBuilders
-                        .termQuery("name", "arbitrary")))
-                .setHighlighterType("test-custom")
-                .addHighlightedField("name")
-                .addHighlightedField("other_name")
-                .addHighlightedField("other_other_name")
-                .setHighlighterExplicitFieldOrder(true)
-                .get();
+        SearchResponse searchResponse = client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.boolQuery().must(QueryBuilders.matchAllQuery()).should(QueryBuilders.termQuery("name", "arbitrary"))).setHighlighterType("test-custom").addHighlightedField("name").addHighlightedField("other_name").addHighlightedField("other_other_name").setHighlighterExplicitFieldOrder(true).get();
 
         assertHighlight(searchResponse, 0, "name", 0, equalTo("standard response for name at position 1"));
         assertHighlight(searchResponse, 0, "other_name", 0, equalTo("standard response for other_name at position 2"));

@@ -63,30 +63,18 @@ public class CombiTests extends ElasticsearchIntegrationTest {
             String name = "name_" + randomIntBetween(1, 10);
             if (rarely()) {
                 missingValues++;
-                builders[i] = client().prepareIndex("idx", "type").setSource(jsonBuilder()
-                        .startObject()
-                        .field("name", name)
-                        .endObject());
+                builders[i] = client().prepareIndex("idx", "type").setSource(jsonBuilder().startObject().field("name", name).endObject());
             } else {
                 int value = randomIntBetween(1, 10);
                 values.put(value, values.getOrDefault(value, 0) + 1);
-                builders[i] = client().prepareIndex("idx", "type").setSource(jsonBuilder()
-                        .startObject()
-                        .field("name", name)
-                        .field("value", value)
-                        .endObject());
+                builders[i] = client().prepareIndex("idx", "type").setSource(jsonBuilder().startObject().field("name", name).field("value", value).endObject());
             }
         }
         indexRandom(true, builders);
         ensureSearchable();
 
-
         SubAggCollectionMode aggCollectionMode = randomFrom(SubAggCollectionMode.values());
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(missing("missing_values").field("value"))
-                .addAggregation(terms("values").field("value")
-                        .collectMode(aggCollectionMode ))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(missing("missing_values").field("value")).addAggregation(terms("values").field("value").collectMode(aggCollectionMode)).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -106,7 +94,6 @@ public class CombiTests extends ElasticsearchIntegrationTest {
         assertTrue(values.isEmpty());
     }
 
-
     /**
      * Some top aggs (eg. date_/histogram) that are executed on unmapped fields, will generate an estimate count of buckets - zero.
      * when the sub aggregator is then created, it will take this estimation into account. This used to cause
@@ -115,22 +102,12 @@ public class CombiTests extends ElasticsearchIntegrationTest {
     @Test
     public void subAggregationForTopAggregationOnUnmappedField() throws Exception {
 
-        prepareCreate("idx").addMapping("type", jsonBuilder()
-                .startObject()
-                .startObject("type").startObject("properties")
-                    .startObject("name").field("type", "string").endObject()
-                    .startObject("value").field("type", "integer").endObject()
-                .endObject().endObject()
-                .endObject()).execute().actionGet();
+        prepareCreate("idx").addMapping("type", jsonBuilder().startObject().startObject("type").startObject("properties").startObject("name").field("type", "string").endObject().startObject("value").field("type", "integer").endObject().endObject().endObject().endObject()).execute().actionGet();
 
         ensureSearchable("idx");
 
         SubAggCollectionMode aggCollectionMode = randomFrom(SubAggCollectionMode.values());
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .addAggregation(histogram("values").field("value1").interval(1)
-                        .subAggregation(terms("names").field("name")
-                                .collectMode(aggCollectionMode )))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").addAggregation(histogram("values").field("value1").interval(1).subAggregation(terms("names").field("name").collectMode(aggCollectionMode))).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), Matchers.equalTo(0l));
         Histogram values = searchResponse.getAggregations().get("values");

@@ -213,7 +213,6 @@ public class RecoveryStateTest extends ElasticsearchTestCase {
             index.reset();
         }
 
-
         // before we start we must report 0
         assertThat(index.recoveredFilesPercent(), equalTo((float) 0.0));
         assertThat(index.recoveredBytesPercent(), equalTo((float) 0.0));
@@ -236,7 +235,6 @@ public class RecoveryStateTest extends ElasticsearchTestCase {
         assertThat(index.recoveredBytes(), equalTo(0l));
         assertThat(index.recoveredFilesPercent(), equalTo(filesToRecover.size() == 0 ? 100.0f : 0.0f));
         assertThat(index.recoveredBytesPercent(), equalTo(filesToRecover.size() == 0 ? 100.0f : 0.0f));
-
 
         long bytesToRecover = totalFileBytes - totalReusedBytes;
         boolean completeRecovery = bytesToRecover == 0 || randomBoolean();
@@ -520,7 +518,7 @@ public class RecoveryStateTest extends ElasticsearchTestCase {
             if (f.equals(anotherFile)) {
                 assertEquals(f.hashCode(), anotherFile.hashCode());
             } else if (f.hashCode() != anotherFile.hashCode()) {
-               assertFalse(f.equals(anotherFile));
+                assertFalse(f.equals(anotherFile));
             }
         }
 

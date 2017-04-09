@@ -45,7 +45,7 @@ public class DummyAnalysisPlugin extends AbstractPlugin {
 
     @Override
     public Collection<Class<? extends Module>> modules() {
-        return ImmutableList.<Class<? extends Module>>of(DummyIndicesAnalysisModule.class);
+        return ImmutableList.<Class<? extends Module>> of(DummyIndicesAnalysisModule.class);
     }
 
     public void onModule(AnalysisModule module) {

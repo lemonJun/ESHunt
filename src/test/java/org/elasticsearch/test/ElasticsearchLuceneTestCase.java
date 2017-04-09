@@ -32,14 +32,10 @@ import org.apache.lucene.util.TimeUnits;
 import org.elasticsearch.test.junit.listeners.LoggingListener;
 import org.elasticsearch.test.junit.listeners.ReproduceInfoPrinter;
 
-
 /**
  * Base testcase for lucene based testing. This class should be used if low level lucene features are tested.
  */
-@Listeners({
-        ReproduceInfoPrinter.class,
-        LoggingListener.class
-})
+@Listeners({ ReproduceInfoPrinter.class, LoggingListener.class })
 @ThreadLeakScope(Scope.SUITE)
 @ThreadLeakLingering(linger = 5000) // 5 sec lingering
 @TimeoutSuite(millis = TimeUnits.HOUR)

@@ -38,7 +38,7 @@ import static org.elasticsearch.test.ElasticsearchIntegrationTest.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-@ClusterScope(scope= Scope.TEST, numDataNodes =1)
+@ClusterScope(scope = Scope.TEST, numDataNodes = 1)
 public class IndexTemplateFileLoadingTests extends ElasticsearchIntegrationTest {
 
     @Override

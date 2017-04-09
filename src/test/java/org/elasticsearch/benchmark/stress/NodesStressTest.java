@@ -117,11 +117,8 @@ public class NodesStressTest {
 
     public NodesStressTest build(Settings settings) throws Exception {
         settings = settingsBuilder()
-//                .put("index.refresh_interval", 1, TimeUnit.SECONDS)
-                .put(SETTING_NUMBER_OF_SHARDS, 5)
-                .put(SETTING_NUMBER_OF_REPLICAS, 1)
-                .put(settings)
-                .build();
+                        //                .put("index.refresh_interval", 1, TimeUnit.SECONDS)
+                        .put(SETTING_NUMBER_OF_SHARDS, 5).put(SETTING_NUMBER_OF_REPLICAS, 1).put(settings).build();
 
         nodes = new Node[numberOfNodes];
         clients = new Client[numberOfNodes];
@@ -209,10 +206,8 @@ public class NodesStressTest {
                     QueryBuilder query = termQuery("num", counter % fieldNumLimit);
                     query = constantScoreQuery(queryFilter(query));
 
-                    SearchResponse search = client.search(searchRequest()
-                            .source(searchSource().query(query)))
-                            .actionGet();
-//                    System.out.println("Got search response, hits [" + search.hits().totalHits() + "]");
+                    SearchResponse search = client.search(searchRequest().source(searchSource().query(query))).actionGet();
+                    //                    System.out.println("Got search response, hits [" + search.hits().totalHits() + "]");
                 }
             } catch (Exception e) {
                 System.err.println("Failed to search:");
@@ -247,11 +242,7 @@ public class NodesStressTest {
                 for (; counter < max; counter++) {
                     Client client = client(counter);
                     long id = idGenerator.incrementAndGet();
-                    client.index(Requests.indexRequest().index("test").type("type1").id(Long.toString(id))
-                            .source(XContentFactory.jsonBuilder().startObject()
-                                    .field("num", id % fieldNumLimit)
-                                    .endObject()))
-                            .actionGet();
+                    client.index(Requests.indexRequest().index("test").type("type1").id(Long.toString(id)).source(XContentFactory.jsonBuilder().startObject().field("num", id % fieldNumLimit).endObject())).actionGet();
                 }
                 System.out.println("Indexer [" + id + "]: Done");
             } catch (Exception e) {
@@ -268,15 +259,7 @@ public class NodesStressTest {
     }
 
     public static void main(String[] args) throws Exception {
-        NodesStressTest test = new NodesStressTest()
-                .numberOfNodes(2)
-                .indexThreads(5)
-                .indexIterations(10 * 1000)
-                .searcherThreads(5)
-                .searchIterations(10 * 1000)
-                .sleepBeforeClose(TimeValue.timeValueMinutes(10))
-                .sleepAfterDone(TimeValue.timeValueMinutes(10))
-                .build(EMPTY_SETTINGS);
+        NodesStressTest test = new NodesStressTest().numberOfNodes(2).indexThreads(5).indexIterations(10 * 1000).searcherThreads(5).searchIterations(10 * 1000).sleepBeforeClose(TimeValue.timeValueMinutes(10)).sleepAfterDone(TimeValue.timeValueMinutes(10)).build(EMPTY_SETTINGS);
 
         test.start();
     }

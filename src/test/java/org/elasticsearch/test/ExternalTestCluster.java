@@ -67,11 +67,8 @@ public final class ExternalTestCluster extends TestCluster {
 
     public ExternalTestCluster(TransportAddress... transportAddresses) {
         super(0);
-        Settings clientSettings = ImmutableSettings.settingsBuilder()
-                .put("name", InternalTestCluster.TRANSPORT_CLIENT_PREFIX + EXTERNAL_CLUSTER_PREFIX + counter.getAndIncrement())
-                .put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true) // prevents any settings to be replaced by system properties.
-                .put("client.transport.ignore_cluster_name", true)
-                .put("node.mode", "network").build(); // we require network here!
+        Settings clientSettings = ImmutableSettings.settingsBuilder().put("name", InternalTestCluster.TRANSPORT_CLIENT_PREFIX + EXTERNAL_CLUSTER_PREFIX + counter.getAndIncrement()).put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true) // prevents any settings to be replaced by system properties.
+                        .put("client.transport.ignore_cluster_name", true).put("node.mode", "network").build(); // we require network here!
 
         this.client = new TransportClient(clientSettings).addTransportAddresses(transportAddresses);
 
@@ -133,11 +130,9 @@ public final class ExternalTestCluster extends TestCluster {
     @Override
     public void ensureEstimatedStats() {
         if (size() > 0) {
-            NodesStatsResponse nodeStats = client().admin().cluster().prepareNodesStats()
-                    .clear().setBreaker(true).setIndices(true).execute().actionGet();
+            NodesStatsResponse nodeStats = client().admin().cluster().prepareNodesStats().clear().setBreaker(true).setIndices(true).execute().actionGet();
             for (NodeStats stats : nodeStats.getNodes()) {
-                assertThat("Fielddata breaker not reset to 0 on node: " + stats.getNode(),
-                        stats.getBreaker().getStats(CircuitBreaker.Name.FIELDDATA).getEstimated(), equalTo(0L));
+                assertThat("Fielddata breaker not reset to 0 on node: " + stats.getNode(), stats.getBreaker().getStats(CircuitBreaker.Name.FIELDDATA).getEstimated(), equalTo(0L));
                 // ExternalTestCluster does not check the request breaker,
                 // because checking it requires a network request, which in
                 // turn increments the breaker, making it non-0

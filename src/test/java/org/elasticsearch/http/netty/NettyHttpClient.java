@@ -71,7 +71,8 @@ public class NettyHttpClient implements Closeable {
     private final ClientBootstrap clientBootstrap;
 
     public NettyHttpClient() {
-        clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory());;
+        clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory());
+        ;
     }
 
     public synchronized Collection<HttpResponse> sendRequests(SocketAddress remoteAddress, String... uris) throws InterruptedException {
@@ -123,28 +124,25 @@ public class NettyHttpClient implements Closeable {
         @Override
         public ChannelPipeline getPipeline() throws Exception {
             final int maxBytes = new ByteSizeValue(100, ByteSizeUnit.MB).bytesAsInt();
-            return Channels.pipeline(
-                    new HttpClientCodec(),
-                    new HttpChunkAggregator(maxBytes),
-                    new SimpleChannelUpstreamHandler() {
-                        @Override
-                        public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) {
-                            final Object message = e.getMessage();
+            return Channels.pipeline(new HttpClientCodec(), new HttpChunkAggregator(maxBytes), new SimpleChannelUpstreamHandler() {
+                @Override
+                public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) {
+                    final Object message = e.getMessage();
 
-                            if (message instanceof HttpResponse) {
-                                HttpResponse response = (HttpResponse) message;
-                                content.add(response);
-                            }
+                    if (message instanceof HttpResponse) {
+                        HttpResponse response = (HttpResponse) message;
+                        content.add(response);
+                    }
 
-                            latch.countDown();
-                        }
+                    latch.countDown();
+                }
 
-                        @Override
-                        public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-                            super.exceptionCaught(ctx, e);
-                            latch.countDown();
-                        }
-                    });
+                @Override
+                public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+                    super.exceptionCaught(ctx, e);
+                    latch.countDown();
+                }
+            });
         }
     }
 

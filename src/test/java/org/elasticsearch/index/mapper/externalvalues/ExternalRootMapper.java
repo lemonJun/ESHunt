@@ -90,7 +90,7 @@ public class ExternalRootMapper implements RootMapper {
         public ExternalRootMapper build(BuilderContext context) {
             return new ExternalRootMapper();
         }
-        
+
     }
 
     public static class TypeParser implements Mapper.TypeParser {
@@ -99,7 +99,7 @@ public class ExternalRootMapper implements RootMapper {
         public Mapper.Builder<?, ?> parse(String name, Map<String, Object> node, ParserContext parserContext) throws MapperParsingException {
             return new Builder();
         }
-        
+
     }
 
 }

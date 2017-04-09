@@ -81,8 +81,7 @@ public class TransportSearchFailuresTests extends ElasticsearchIntegrationTest {
         assertThat(client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForNodes(">=2").execute().actionGet().isTimedOut(), equalTo(false));
 
         logger.info("Running Cluster Health");
-        ClusterHealthResponse clusterHealth = client().admin().cluster().health(clusterHealthRequest("test")
-                .waitForYellowStatus().waitForRelocatingShards(0).waitForActiveShards(test.totalNumShards)).actionGet();
+        ClusterHealthResponse clusterHealth = client().admin().cluster().health(clusterHealthRequest("test").waitForYellowStatus().waitForRelocatingShards(0).waitForActiveShards(test.totalNumShards)).actionGet();
         logger.info("Done Cluster Health, status " + clusterHealth.getStatus());
         assertThat(clusterHealth.isTimedOut(), equalTo(false));
         assertThat(clusterHealth.getStatus(), anyOf(equalTo(ClusterHealthStatus.YELLOW), equalTo(ClusterHealthStatus.GREEN)));
@@ -118,12 +117,6 @@ public class TransportSearchFailuresTests extends ElasticsearchIntegrationTest {
         for (int i = 0; i < age; i++) {
             multi.append(" ").append(nameValue);
         }
-        return jsonBuilder().startObject()
-                .field("id", id)
-                .field("name", nameValue + id)
-                .field("age", age)
-                .field("multi", multi.toString())
-                .field("_boost", age * 10)
-                .endObject();
+        return jsonBuilder().startObject().field("id", id).field("name", nameValue + id).field("age", age).field("multi", multi.toString()).field("_boost", age * 10).endObject();
     }
 }

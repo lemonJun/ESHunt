@@ -38,7 +38,6 @@ public class IntermittentLongGCDisruption extends LongGCDisruption {
     final long delayDurationMin;
     final long delayDurationMax;
 
-
     public IntermittentLongGCDisruption(Random random) {
         this(null, random);
     }
@@ -47,13 +46,11 @@ public class IntermittentLongGCDisruption extends LongGCDisruption {
         this(disruptedNode, random, 100, 200, 300, 20000);
     }
 
-    public IntermittentLongGCDisruption(String disruptedNode, Random random, long intervalBetweenDelaysMin,
-                                        long intervalBetweenDelaysMax, long delayDurationMin, long delayDurationMax) {
+    public IntermittentLongGCDisruption(String disruptedNode, Random random, long intervalBetweenDelaysMin, long intervalBetweenDelaysMax, long delayDurationMin, long delayDurationMax) {
         this(random, disruptedNode, intervalBetweenDelaysMin, intervalBetweenDelaysMax, delayDurationMin, delayDurationMax);
     }
 
-    public IntermittentLongGCDisruption(Random random, String disruptedNode, long intervalBetweenDelaysMin, long intervalBetweenDelaysMax,
-                                        long delayDurationMin, long delayDurationMax) {
+    public IntermittentLongGCDisruption(Random random, String disruptedNode, long intervalBetweenDelaysMin, long intervalBetweenDelaysMax, long delayDurationMin, long delayDurationMax) {
         super(random, disruptedNode);
         this.intervalBetweenDelaysMin = intervalBetweenDelaysMin;
         this.intervalBetweenDelaysMax = intervalBetweenDelaysMax;
@@ -95,7 +92,8 @@ public class IntermittentLongGCDisruption extends LongGCDisruption {
         logger.info("node [{}] goes into GC for for [{}]", disruptionNodeCopy, duration);
         final Set<Thread> nodeThreads = new HashSet<>();
         try {
-            while (stopNodeThreads(disruptionNodeCopy, nodeThreads)) ;
+            while (stopNodeThreads(disruptionNodeCopy, nodeThreads))
+                ;
             if (!nodeThreads.isEmpty()) {
                 Thread.sleep(duration.millis());
             }

@@ -73,10 +73,7 @@ public class IndicesOptionsTests extends ElasticsearchTestCase {
             boolean expandToClosedIndices = randomBoolean();
             boolean allowAliasesToMultipleIndices = randomBoolean();
             boolean forbidClosedIndices = randomBoolean();
-            IndicesOptions indicesOptions = IndicesOptions.fromOptions(
-                    ignoreUnavailable, allowNoIndices,expandToOpenIndices, expandToClosedIndices,
-                    allowAliasesToMultipleIndices, forbidClosedIndices
-            );
+            IndicesOptions indicesOptions = IndicesOptions.fromOptions(ignoreUnavailable, allowNoIndices, expandToOpenIndices, expandToClosedIndices, allowAliasesToMultipleIndices, forbidClosedIndices);
 
             assertThat(indicesOptions.ignoreUnavailable(), equalTo(ignoreUnavailable));
             assertThat(indicesOptions.allowNoIndices(), equalTo(allowNoIndices));

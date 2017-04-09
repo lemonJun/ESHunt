@@ -46,7 +46,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
  * Tests ported from Lucene.
  */
 public class XBooleanFilterLuceneTests extends ElasticsearchTestCase {
-    
+
     private Directory directory;
     private AtomicReader reader;
 
@@ -382,10 +382,7 @@ public class XBooleanFilterLuceneTests extends ElasticsearchTestCase {
         XBooleanFilter composedFilter = new XBooleanFilter();
         composedFilter.add(new FilterClause(orFilter, BooleanClause.Occur.MUST));
 
-        assertThat(
-                "BooleanFilter(+BooleanFilter(BooleanFilter(+inStock:Y +barCode:12345678) BooleanFilter(+isHeavy:N +isDamaged:Y)))",
-                equalTo(composedFilter.toString())
-        );
+        assertThat("BooleanFilter(+BooleanFilter(BooleanFilter(+inStock:Y +barCode:12345678) BooleanFilter(+isHeavy:N +isDamaged:Y)))", equalTo(composedFilter.toString()));
     }
 
 }

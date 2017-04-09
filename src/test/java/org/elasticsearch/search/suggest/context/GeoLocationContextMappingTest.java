@@ -49,7 +49,6 @@ public class GeoLocationContextMappingTest extends ElasticsearchTestCase {
         GeolocationContextMapping mapping = GeolocationContextMapping.load("foo", config);
         mapping.parseQuery("foo", parser);
     }
-    
 
     @Test
     public void testUseWithDefaultGeoHash() throws Exception {
@@ -63,8 +62,8 @@ public class GeoLocationContextMappingTest extends ElasticsearchTestCase {
         config.put("default", geohash);
         GeolocationContextMapping mapping = GeolocationContextMapping.load("foo", config);
         mapping.parseQuery("foo", parser);
-    }    
-    
+    }
+
     @Test
     public void testUseWithDefaultLatLon() throws Exception {
         XContentBuilder builder = jsonBuilder().startObject().field("lat", 52d).field("lon", 4d).endObject();
@@ -79,8 +78,8 @@ public class GeoLocationContextMappingTest extends ElasticsearchTestCase {
         config.put("default", pointAsMap);
         GeolocationContextMapping mapping = GeolocationContextMapping.load("foo", config);
         mapping.parseQuery("foo", parser);
-    } 
-    
+    }
+
     @Test
     public void testUseWithDefaultBadLatLon() throws Exception {
         XContentBuilder builder = jsonBuilder().startObject().field("lat", 52d).field("lon", 4d).endObject();
@@ -102,8 +101,8 @@ public class GeoLocationContextMappingTest extends ElasticsearchTestCase {
             expected = e;
         }
         assertNotNull(expected);
-    }  
-    
+    }
+
     @Test
     public void testUseWithMultiplePrecisions() throws Exception {
         XContentBuilder builder = jsonBuilder().startObject().field("lat", 52d).field("lon", 4d).endObject();
@@ -120,7 +119,7 @@ public class GeoLocationContextMappingTest extends ElasticsearchTestCase {
         GeolocationContextMapping mapping = GeolocationContextMapping.load("foo", config);
         mapping.parseQuery("foo", parser);
     }
-    
+
     @Test
     public void testHashcode() throws Exception {
         HashMap<String, Object> config = new HashMap<>();

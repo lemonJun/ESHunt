@@ -120,13 +120,8 @@ public class ShadowEngineTests extends ElasticsearchLuceneTestCase {
         } else {
             codecName = "default";
         }
-        defaultSettings = ImmutableSettings.builder()
-                .put(EngineConfig.INDEX_COMPOUND_ON_FLUSH, randomBoolean())
-                .put(EngineConfig.INDEX_GC_DELETES_SETTING, "1h") // make sure this doesn't kick in on us
-                .put(EngineConfig.INDEX_FAIL_ON_CORRUPTION_SETTING, randomBoolean())
-                .put(EngineConfig.INDEX_CODEC_SETTING, codecName)
-                .put(EngineConfig.INDEX_CONCURRENCY_SETTING, indexConcurrency)
-                .build(); // TODO randomize more settings
+        defaultSettings = ImmutableSettings.builder().put(EngineConfig.INDEX_COMPOUND_ON_FLUSH, randomBoolean()).put(EngineConfig.INDEX_GC_DELETES_SETTING, "1h") // make sure this doesn't kick in on us
+                        .put(EngineConfig.INDEX_FAIL_ON_CORRUPTION_SETTING, randomBoolean()).put(EngineConfig.INDEX_CODEC_SETTING, codecName).put(EngineConfig.INDEX_CONCURRENCY_SETTING, indexConcurrency).build(); // TODO randomize more settings
         threadPool = new ThreadPool(getClass().getName());
         dirPath = newTempDir(LifecycleScope.TEST).toPath();
         store = createStore(dirPath);
@@ -135,7 +130,7 @@ public class ShadowEngineTests extends ElasticsearchLuceneTestCase {
         Lucene.cleanLuceneIndex(storeReplica.directory());
         translog = createTranslog();
         primaryEngine = createInternalEngine(store, translog);
-        LiveIndexWriterConfig currentIndexWriterConfig = ((InternalEngine)primaryEngine).getCurrentIndexWriterConfig();
+        LiveIndexWriterConfig currentIndexWriterConfig = ((InternalEngine) primaryEngine).getCurrentIndexWriterConfig();
 
         assertEquals(primaryEngine.config().getCodec().getName(), codecService.codec(codecName).getName());
         assertEquals(currentIndexWriterConfig.getCodec().getName(), codecService.codec(codecName).getName());
@@ -157,7 +152,7 @@ public class ShadowEngineTests extends ElasticsearchLuceneTestCase {
         super.tearDown();
         replicaEngine.close();
         storeReplica.close();
-        
+
         translog.close();
         replicaTranslog.close();
 
@@ -176,14 +171,12 @@ public class ShadowEngineTests extends ElasticsearchLuceneTestCase {
         return new ParseContext.Document();
     }
 
-
     private ParsedDocument testParsedDocument(String uid, String id, String type, String routing, long timestamp, long ttl, ParseContext.Document document, BytesReference source, boolean mappingsModified) {
         Field uidField = new Field("_uid", uid, UidFieldMapper.Defaults.FIELD_TYPE);
         Field versionField = new NumericDocValuesField("_version", 0);
         document.add(uidField);
         document.add(versionField);
-        return new ParsedDocument(uidField, versionField, id, type, routing, timestamp, ttl,
-                Arrays.asList(document), Lucene.STANDARD_ANALYZER, source, mappingsModified);
+        return new ParsedDocument(uidField, versionField, id, type, routing, timestamp, ttl, Arrays.asList(document), Lucene.STANDARD_ANALYZER, source, mappingsModified);
     }
 
     protected Store createStore(Path p) throws IOException {
@@ -200,7 +193,7 @@ public class ShadowEngineTests extends ElasticsearchLuceneTestCase {
 
             @Override
             public Directory[] build() throws IOException {
-                return new Directory[]{ directory };
+                return new Directory[] { directory };
             }
 
             @Override
@@ -255,15 +248,12 @@ public class ShadowEngineTests extends ElasticsearchLuceneTestCase {
 
     public EngineConfig config(IndexSettingsService indexSettingsService, Store store, Translog translog, MergeSchedulerProvider mergeSchedulerProvider) {
         IndexWriterConfig iwc = newIndexWriterConfig(Lucene.STANDARD_ANALYZER);
-        EngineConfig config = new EngineConfig(shardId, false/*per default optimization for auto generated ids is disabled*/, threadPool, new ShardIndexingService(shardId, EMPTY_SETTINGS, new ShardSlowLogIndexingService(shardId, EMPTY_SETTINGS, indexSettingsService)), indexSettingsService
-                , null, store, createSnapshotDeletionPolicy(), translog, createMergePolicy(), mergeSchedulerProvider,
-                iwc.getAnalyzer(), iwc.getSimilarity() , new CodecService(shardId.index()), new Engine.FailedEngineListener() {
+        EngineConfig config = new EngineConfig(shardId, false/*per default optimization for auto generated ids is disabled*/, threadPool, new ShardIndexingService(shardId, EMPTY_SETTINGS, new ShardSlowLogIndexingService(shardId, EMPTY_SETTINGS, indexSettingsService)), indexSettingsService, null, store, createSnapshotDeletionPolicy(), translog, createMergePolicy(), mergeSchedulerProvider, iwc.getAnalyzer(), iwc.getSimilarity(), new CodecService(shardId.index()), new Engine.FailedEngineListener() {
             @Override
             public void onFailedEngine(ShardId shardId, String reason, @Nullable Throwable t) {
                 // we don't need to notify anybody in this test
             }
         });
-
 
         return config;
     }
@@ -272,9 +262,9 @@ public class ShadowEngineTests extends ElasticsearchLuceneTestCase {
         return new Term("_uid", id);
     }
 
-    protected static final BytesReference B_1 = new BytesArray(new byte[]{1});
-    protected static final BytesReference B_2 = new BytesArray(new byte[]{2});
-    protected static final BytesReference B_3 = new BytesArray(new byte[]{3});
+    protected static final BytesReference B_1 = new BytesArray(new byte[] { 1 });
+    protected static final BytesReference B_2 = new BytesArray(new byte[] { 2 });
+    protected static final BytesReference B_3 = new BytesArray(new byte[] { 3 });
 
     public void testCommitStats() {
         // create a doc and refresh
@@ -295,7 +285,6 @@ public class ShadowEngineTests extends ElasticsearchLuceneTestCase {
         assertThat(stats2.getUserData(), hasKey(Translog.TRANSLOG_ID_KEY));
         assertThat(stats2.getUserData().get(Translog.TRANSLOG_ID_KEY), not(equalTo(stats1.getUserData().get(Translog.TRANSLOG_ID_KEY))));
     }
-
 
     @Test
     public void testSegments() throws Exception {
@@ -353,7 +342,6 @@ public class ShadowEngineTests extends ElasticsearchLuceneTestCase {
         assertThat(segments.get(0).getNumDocs(), equalTo(2));
         assertThat(segments.get(0).getDeletedDocs(), equalTo(0));
         assertThat(segments.get(0).isCompound(), equalTo(defaultCompound));
-
 
         primaryEngine.config().setCompoundOnFlush(false);
 
@@ -454,7 +442,8 @@ public class ShadowEngineTests extends ElasticsearchLuceneTestCase {
         try {
             replicaEngine.create(new Engine.Create(null, newUid("1"), doc));
             fail("should have thrown an exception");
-        } catch (UnsupportedOperationException e) {}
+        } catch (UnsupportedOperationException e) {
+        }
         replicaEngine.refresh("test");
 
         // its not there...
@@ -473,7 +462,8 @@ public class ShadowEngineTests extends ElasticsearchLuceneTestCase {
         try {
             replicaEngine.index(new Engine.Index(null, newUid("1"), doc));
             fail("should have thrown an exception");
-        } catch (UnsupportedOperationException e) {}
+        } catch (UnsupportedOperationException e) {
+        }
         replicaEngine.refresh("test");
 
         // its still not there...
@@ -509,7 +499,8 @@ public class ShadowEngineTests extends ElasticsearchLuceneTestCase {
         try {
             replicaEngine.delete(new Engine.Delete("test", "1", newUid("1")));
             fail("should have thrown an exception");
-        } catch (UnsupportedOperationException e) {}
+        } catch (UnsupportedOperationException e) {
+        }
         replicaEngine.flush();
         replicaEngine.refresh("test");
         primaryEngine.refresh("test");
@@ -845,7 +836,7 @@ public class ShadowEngineTests extends ElasticsearchLuceneTestCase {
             wrapper.setRandomIOExceptionRateOnOpen(randomDouble());
             try (Store store = createStore(wrapper)) {
                 int refCount = store.refCount();
-                assertTrue("refCount: "+ store.refCount(), store.refCount() > 0);
+                assertTrue("refCount: " + store.refCount(), store.refCount() > 0);
                 Translog translog = createTranslog();
                 ShadowEngine holder;
                 try {
@@ -855,7 +846,7 @@ public class ShadowEngineTests extends ElasticsearchLuceneTestCase {
                     continue;
                 }
                 holder.config().setFailEngineOnCorruption(true);
-                assertEquals(store.refCount(), refCount+1);
+                assertEquals(store.refCount(), refCount + 1);
                 final int numStarts = scaledRandomIntBetween(1, 5);
                 for (int j = 0; j < numStarts; j++) {
                     try {

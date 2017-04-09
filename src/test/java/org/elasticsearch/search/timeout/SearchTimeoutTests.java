@@ -33,7 +33,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 /**
  */
-@ElasticsearchIntegrationTest.ClusterScope(scope=ElasticsearchIntegrationTest.Scope.SUITE)
+@ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.SUITE)
 public class SearchTimeoutTests extends ElasticsearchIntegrationTest {
 
     @Override
@@ -45,10 +45,7 @@ public class SearchTimeoutTests extends ElasticsearchIntegrationTest {
     public void simpleTimeoutTest() throws Exception {
         client().prepareIndex("test", "type", "1").setSource("field", "value").setRefresh(true).execute().actionGet();
 
-        SearchResponse searchResponse = client().prepareSearch("test")
-                .setTimeout("10ms")
-                .setQuery(filteredQuery(matchAllQuery(), scriptFilter("Thread.sleep(500); return true;")))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("test").setTimeout("10ms").setQuery(filteredQuery(matchAllQuery(), scriptFilter("Thread.sleep(500); return true;"))).execute().actionGet();
         assertThat(searchResponse.isTimedOut(), equalTo(true));
     }
 }

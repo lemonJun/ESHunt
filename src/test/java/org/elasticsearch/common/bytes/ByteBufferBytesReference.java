@@ -149,8 +149,7 @@ public class ByteBufferBytesReference implements BytesReference {
             return "";
         }
         final CharsetDecoder decoder = CharsetUtil.getDecoder(Charsets.UTF_8);
-        final CharBuffer dst = CharBuffer.allocate(
-                (int) ((double) buffer.remaining() * decoder.maxCharsPerByte()));
+        final CharBuffer dst = CharBuffer.allocate((int) ((double) buffer.remaining() * decoder.maxCharsPerByte()));
         try {
             CoderResult cr = decoder.decode(buffer, dst, true);
             if (!cr.isUnderflow()) {

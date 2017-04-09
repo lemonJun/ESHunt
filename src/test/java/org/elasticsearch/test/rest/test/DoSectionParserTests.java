@@ -39,12 +39,7 @@ public class DoSectionParserTests extends AbstractParserTests {
 
     @Test
     public void testParseDoSectionNoBody() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "get:\n" +
-                "    index:    test_index\n" +
-                "    type:    test_type\n" +
-                "    id:        1"
-        );
+        parser = YamlXContent.yamlXContent.createParser("get:\n" + "    index:    test_index\n" + "    type:    test_type\n" + "    id:        1");
 
         DoSectionParser doSectionParser = new DoSectionParser();
         DoSection doSection = doSectionParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -61,9 +56,7 @@ public class DoSectionParserTests extends AbstractParserTests {
 
     @Test
     public void testParseDoSectionNoParamsNoBody() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "cluster.node_info: {}"
-        );
+        parser = YamlXContent.yamlXContent.createParser("cluster.node_info: {}");
 
         DoSectionParser doSectionParser = new DoSectionParser();
         DoSection doSection = doSectionParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -78,13 +71,7 @@ public class DoSectionParserTests extends AbstractParserTests {
     @Test
     public void testParseDoSectionWithJsonBody() throws Exception {
         String body = "{ \"include\": { \"field1\": \"v1\", \"field2\": \"v2\" }, \"count\": 1 }";
-        parser = YamlXContent.yamlXContent.createParser(
-                "index:\n" +
-                "    index:  test_1\n" +
-                "    type:   test\n" +
-                "    id:     1\n" +
-                "    body:   " + body
-        );
+        parser = YamlXContent.yamlXContent.createParser("index:\n" + "    index:  test_1\n" + "    type:   test\n" + "    id:     1\n" + "    body:   " + body);
 
         DoSectionParser doSectionParser = new DoSectionParser();
         DoSection doSection = doSectionParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -103,21 +90,8 @@ public class DoSectionParserTests extends AbstractParserTests {
 
     @Test
     public void testParseDoSectionWithJsonMultipleBodiesAsLongString() throws Exception {
-        String bodies[] = new String[]{
-                "{ \"index\": { \"_index\":\"test_index\", \"_type\":\"test_type\", \"_id\":\"test_id\" } }\n",
-                "{ \"f1\":\"v1\", \"f2\":42 }\n",
-                "{ \"index\": { \"_index\":\"test_index2\", \"_type\":\"test_type2\", \"_id\":\"test_id2\" } }\n",
-                "{ \"f1\":\"v2\", \"f2\":47 }\n"
-        };
-        parser = YamlXContent.yamlXContent.createParser(
-                "bulk:\n" +
-                "    refresh: true\n" +
-                "    body: |\n" +
-                "        " + bodies[0] +
-                "        " + bodies[1] +
-                "        " + bodies[2] +
-                "        " + bodies[3]
-        );
+        String bodies[] = new String[] { "{ \"index\": { \"_index\":\"test_index\", \"_type\":\"test_type\", \"_id\":\"test_id\" } }\n", "{ \"f1\":\"v1\", \"f2\":42 }\n", "{ \"index\": { \"_index\":\"test_index2\", \"_type\":\"test_type2\", \"_id\":\"test_id2\" } }\n", "{ \"f1\":\"v2\", \"f2\":47 }\n" };
+        parser = YamlXContent.yamlXContent.createParser("bulk:\n" + "    refresh: true\n" + "    body: |\n" + "        " + bodies[0] + "        " + bodies[1] + "        " + bodies[2] + "        " + bodies[3]);
 
         DoSectionParser doSectionParser = new DoSectionParser();
         DoSection doSection = doSectionParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -133,18 +107,8 @@ public class DoSectionParserTests extends AbstractParserTests {
 
     @Test
     public void testParseDoSectionWithJsonMultipleBodiesRepeatedProperty() throws Exception {
-        String[] bodies = new String[] {
-                "{ \"index\": { \"_index\":\"test_index\", \"_type\":\"test_type\", \"_id\":\"test_id\" } }",
-                "{ \"f1\":\"v1\", \"f2\":42 }",
-        };
-        parser = YamlXContent.yamlXContent.createParser(
-                "bulk:\n" +
-                "    refresh: true\n" +
-                "    body: \n" +
-                "        " + bodies[0] + "\n" +
-                "    body: \n" +
-                "        " + bodies[1]
-        );
+        String[] bodies = new String[] { "{ \"index\": { \"_index\":\"test_index\", \"_type\":\"test_type\", \"_id\":\"test_id\" } }", "{ \"f1\":\"v1\", \"f2\":42 }", };
+        parser = YamlXContent.yamlXContent.createParser("bulk:\n" + "    refresh: true\n" + "    body: \n" + "        " + bodies[0] + "\n" + "    body: \n" + "        " + bodies[1]);
 
         DoSectionParser doSectionParser = new DoSectionParser();
         DoSection doSection = doSectionParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -163,12 +127,7 @@ public class DoSectionParserTests extends AbstractParserTests {
 
     @Test
     public void testParseDoSectionWithYamlBody() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "search:\n" +
-                "    body:\n" +
-                "        _source: [ include.field1, include.field2 ]\n" +
-                "        query: { match_all: {} }"
-        );
+        parser = YamlXContent.yamlXContent.createParser("search:\n" + "    body:\n" + "        _source: [ include.field1, include.field2 ]\n" + "        query: { match_all: {} }");
         String body = "{ \"_source\": [ \"include.field1\", \"include.field2\" ], \"query\": { \"match_all\": {} }}";
 
         DoSectionParser doSectionParser = new DoSectionParser();
@@ -185,23 +144,7 @@ public class DoSectionParserTests extends AbstractParserTests {
 
     @Test
     public void testParseDoSectionWithYamlMultipleBodies() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "bulk:\n" +
-                "    refresh: true\n" +
-                "    body:\n" +
-                "        - index:\n" +
-                "            _index: test_index\n" +
-                "            _type:  test_type\n" +
-                "            _id:    test_id\n" +
-                "        - f1: v1\n" +
-                "          f2: 42\n" +
-                "        - index:\n" +
-                "            _index: test_index2\n" +
-                "            _type:  test_type2\n" +
-                "            _id:    test_id2\n" +
-                "        - f1: v2\n" +
-                "          f2: 47"
-        );
+        parser = YamlXContent.yamlXContent.createParser("bulk:\n" + "    refresh: true\n" + "    body:\n" + "        - index:\n" + "            _index: test_index\n" + "            _type:  test_type\n" + "            _id:    test_id\n" + "        - f1: v1\n" + "          f2: 42\n" + "        - index:\n" + "            _index: test_index2\n" + "            _type:  test_type2\n" + "            _id:    test_id2\n" + "        - f1: v2\n" + "          f2: 47");
         String[] bodies = new String[4];
         bodies[0] = "{\"index\": {\"_index\": \"test_index\", \"_type\":  \"test_type\", \"_id\": \"test_id\"}}";
         bodies[1] = "{ \"f1\":\"v1\", \"f2\": 42 }";
@@ -226,18 +169,7 @@ public class DoSectionParserTests extends AbstractParserTests {
 
     @Test
     public void testParseDoSectionWithYamlMultipleBodiesRepeatedProperty() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "bulk:\n" +
-                "    refresh: true\n" +
-                "    body:\n" +
-                "        index:\n" +
-                "            _index: test_index\n" +
-                "            _type:  test_type\n" +
-                "            _id:    test_id\n" +
-                "    body:\n" +
-                "        f1: v1\n" +
-                "        f2: 42\n"
-        );
+        parser = YamlXContent.yamlXContent.createParser("bulk:\n" + "    refresh: true\n" + "    body:\n" + "        index:\n" + "            _index: test_index\n" + "            _type:  test_type\n" + "            _id:    test_id\n" + "    body:\n" + "        f1: v1\n" + "        f2: 42\n");
         String[] bodies = new String[2];
         bodies[0] = "{\"index\": {\"_index\": \"test_index\", \"_type\":  \"test_type\", \"_id\": \"test_id\"}}";
         bodies[1] = "{ \"f1\":\"v1\", \"f2\": 42 }";
@@ -260,17 +192,8 @@ public class DoSectionParserTests extends AbstractParserTests {
 
     @Test
     public void testParseDoSectionWithYamlBodyMultiGet() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "mget:\n" +
-                "    body:\n" +
-                "        docs:\n" +
-                "            - { _index: test_2, _type: test, _id: 1}\n" +
-                "            - { _index: test_1, _type: none, _id: 1}"
-        );
-        String body = "{ \"docs\": [ " +
-                "{\"_index\": \"test_2\", \"_type\":\"test\", \"_id\":1}, " +
-                "{\"_index\": \"test_1\", \"_type\":\"none\", \"_id\":1} " +
-                "]}";
+        parser = YamlXContent.yamlXContent.createParser("mget:\n" + "    body:\n" + "        docs:\n" + "            - { _index: test_2, _type: test, _id: 1}\n" + "            - { _index: test_1, _type: none, _id: 1}");
+        String body = "{ \"docs\": [ " + "{\"_index\": \"test_2\", \"_type\":\"test\", \"_id\":1}, " + "{\"_index\": \"test_1\", \"_type\":\"none\", \"_id\":1} " + "]}";
 
         DoSectionParser doSectionParser = new DoSectionParser();
         DoSection doSection = doSectionParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -286,13 +209,7 @@ public class DoSectionParserTests extends AbstractParserTests {
 
     @Test
     public void testParseDoSectionWithBodyStringified() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "index:\n" +
-                "    index:  test_1\n" +
-                "    type:   test\n" +
-                "    id:     1\n" +
-                "    body:   \"{ _source: true, query: { match_all: {} } }\""
-        );
+        parser = YamlXContent.yamlXContent.createParser("index:\n" + "    index:  test_1\n" + "    type:   test\n" + "    id:     1\n" + "    body:   \"{ _source: true, query: { match_all: {} } }\"");
 
         DoSectionParser doSectionParser = new DoSectionParser();
         DoSection doSection = doSectionParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -312,12 +229,7 @@ public class DoSectionParserTests extends AbstractParserTests {
 
     @Test
     public void testParseDoSectionWithBodiesStringifiedAndNot() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "index:\n" +
-                "    body:\n" +
-                "        - \"{ _source: true, query: { match_all: {} } }\"\n" +
-                "        - { size: 100, query: { match_all: {} } }"
-        );
+        parser = YamlXContent.yamlXContent.createParser("index:\n" + "    body:\n" + "        - \"{ _source: true, query: { match_all: {} } }\"\n" + "        - { size: 100, query: { match_all: {} } }");
 
         String body = "{ \"size\": 100, \"query\": { \"match_all\": {} } }";
 
@@ -336,12 +248,7 @@ public class DoSectionParserTests extends AbstractParserTests {
 
     @Test
     public void testParseDoSectionWithCatch() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "catch: missing\n" +
-                "indices.get_warmer:\n" +
-                "    index: test_index\n" +
-                "    name: test_warmer"
-        );
+        parser = YamlXContent.yamlXContent.createParser("catch: missing\n" + "indices.get_warmer:\n" + "    index: test_index\n" + "    name: test_warmer");
 
         DoSectionParser doSectionParser = new DoSectionParser();
         DoSection doSection = doSectionParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -353,11 +260,9 @@ public class DoSectionParserTests extends AbstractParserTests {
         assertThat(doSection.getApiCallSection().hasBody(), equalTo(false));
     }
 
-    @Test (expected = RestTestParseException.class)
+    @Test(expected = RestTestParseException.class)
     public void testParseDoSectionWithoutClientCallSection() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "catch: missing\n"
-        );
+        parser = YamlXContent.yamlXContent.createParser("catch: missing\n");
 
         DoSectionParser doSectionParser = new DoSectionParser();
         doSectionParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -365,12 +270,7 @@ public class DoSectionParserTests extends AbstractParserTests {
 
     @Test
     public void testParseDoSectionMultivaluedField() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "indices.get_field_mapping:\n" +
-                        "        index: test_index\n" +
-                        "        type: test_type\n" +
-                        "        field: [ text , text1 ]"
-        );
+        parser = YamlXContent.yamlXContent.createParser("indices.get_field_mapping:\n" + "        index: test_index\n" + "        type: test_type\n" + "        field: [ text , text1 ]");
 
         DoSectionParser doSectionParser = new DoSectionParser();
         DoSection doSection = doSectionParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -387,7 +287,7 @@ public class DoSectionParserTests extends AbstractParserTests {
     }
 
     private static void assertJsonEquals(Map<String, Object> actual, String expected) throws IOException {
-        Map<String,Object> expectedMap = JsonXContent.jsonXContent.createParser(expected).mapOrderedAndClose();
+        Map<String, Object> expectedMap = JsonXContent.jsonXContent.createParser(expected).mapOrderedAndClose();
         MatcherAssert.assertThat(actual, equalTo(expectedMap));
     }
 }

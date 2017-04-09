@@ -40,8 +40,7 @@ public class MoreLikeThisRequestTests extends ElasticsearchTestCase {
     @Test
     public void testSerialization() throws IOException {
 
-        MoreLikeThisRequest mltRequest = new MoreLikeThisRequest(randomAsciiOfLength(randomIntBetween(1, 20)))
-                .id(randomAsciiOfLength(randomIntBetween(1, 20))).type(randomAsciiOfLength(randomIntBetween(1, 20)));
+        MoreLikeThisRequest mltRequest = new MoreLikeThisRequest(randomAsciiOfLength(randomIntBetween(1, 20))).id(randomAsciiOfLength(randomIntBetween(1, 20))).type(randomAsciiOfLength(randomIntBetween(1, 20)));
 
         if (randomBoolean()) {
             mltRequest.boostTerms(randomFloat());
@@ -88,7 +87,7 @@ public class MoreLikeThisRequestTests extends ElasticsearchTestCase {
         if (randomBoolean()) {
             mltRequest.searchSource(SearchSourceBuilder.searchSource().query(QueryBuilders.termQuery("term", "value")));
         }
-        if(randomBoolean()) {
+        if (randomBoolean()) {
             mltRequest.include(randomBoolean());
         }
         if (randomBoolean()) {

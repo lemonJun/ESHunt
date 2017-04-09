@@ -52,13 +52,12 @@ public class SkipSectionParser implements RestTestFragmentParser<SkipSection> {
                     reason = parser.text();
                 } else if ("features".equals(currentFieldName)) {
                     features.add(parser.text());
-                }
-                else {
+                } else {
                     throw new RestTestParseException("field " + currentFieldName + " not supported within skip section");
                 }
             } else if (token == XContentParser.Token.START_ARRAY) {
                 if ("features".equals(currentFieldName)) {
-                    while(parser.nextToken() != XContentParser.Token.END_ARRAY) {
+                    while (parser.nextToken() != XContentParser.Token.END_ARRAY) {
                         features.add(parser.text());
                     }
                 }

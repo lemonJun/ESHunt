@@ -46,18 +46,12 @@ public class PluggableTransportModuleTests extends ElasticsearchIntegrationTest 
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("plugin.types", CountingSentRequestsPlugin.class.getName())
-                .build();
+        return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("plugin.types", CountingSentRequestsPlugin.class.getName()).build();
     }
 
     @Override
     protected Settings transportClientSettings() {
-        return settingsBuilder()
-                .put("plugin.types", CountingSentRequestsPlugin.class.getName())
-                .put(super.transportClientSettings())
-                .build();
+        return settingsBuilder().put("plugin.types", CountingSentRequestsPlugin.class.getName()).put(super.transportClientSettings()).build();
     }
 
     @Test

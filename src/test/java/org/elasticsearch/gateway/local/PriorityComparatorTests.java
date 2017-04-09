@@ -40,15 +40,14 @@ public class PriorityComparatorTests extends ElasticsearchTestCase {
             if (frequently()) {
                 indices[i] = new IndexMeta("idx_2015_04_" + String.format(Locale.ROOT, "%02d", i), randomIntBetween(1, 1000), randomIntBetween(1, 10000));
             } else { // sometimes just use defaults
-                indices[i] = new IndexMeta("idx_2015_04_" +  String.format(Locale.ROOT, "%02d", i));
+                indices[i] = new IndexMeta("idx_2015_04_" + String.format(Locale.ROOT, "%02d", i));
             }
             map.put(indices[i].name, indices[i]);
         }
         int numShards = randomIntBetween(10, 100);
         for (int i = 0; i < numShards; i++) {
             IndexMeta indexMeta = randomFrom(indices);
-            shards.add(new MutableShardRouting(new ImmutableShardRouting(indexMeta.name, randomIntBetween(1, 5), null, null, null,
-                    randomBoolean(), ShardRoutingState.UNASSIGNED, randomIntBetween(0, 100), new UnassignedInfo(randomFrom(UnassignedInfo.Reason.values()), "foobar"))));
+            shards.add(new MutableShardRouting(new ImmutableShardRouting(indexMeta.name, randomIntBetween(1, 5), null, null, null, randomBoolean(), ShardRoutingState.UNASSIGNED, randomIntBetween(0, 100), new UnassignedInfo(randomFrom(UnassignedInfo.Reason.values()), "foobar"))));
         }
         shards.sort(new PriorityComparator() {
             @Override
@@ -71,7 +70,7 @@ public class PriorityComparatorTests extends ElasticsearchTestCase {
                         assertTrue("creationDate mismatch, expected:" + currentMeta.creationDate + " after " + prevMeta.creationDate, prevMeta.creationDate > currentMeta.creationDate);
                     }
                 } else {
-                    assertTrue("priority mismatch, expected:" +  currentMeta.priority + " after " + prevMeta.priority, prevMeta.priority > currentMeta.priority);
+                    assertTrue("priority mismatch, expected:" + currentMeta.priority + " after " + prevMeta.priority, prevMeta.priority > currentMeta.priority);
                 }
             }
             previous = routing;
@@ -95,8 +94,7 @@ public class PriorityComparatorTests extends ElasticsearchTestCase {
             this.name = name;
             this.priority = priority;
             this.creationDate = creationDate;
-            this.settings = ImmutableSettings.builder().put(IndexMetaData.SETTING_CREATION_DATE, creationDate)
-                    .put(IndexMetaData.SETTING_PRIORITY, priority).build();
+            this.settings = ImmutableSettings.builder().put(IndexMetaData.SETTING_CREATION_DATE, creationDate).put(IndexMetaData.SETTING_PRIORITY, priority).build();
         }
     }
 }

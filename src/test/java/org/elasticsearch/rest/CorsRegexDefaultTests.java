@@ -34,9 +34,7 @@ public class CorsRegexDefaultTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-            .put(InternalNode.HTTP_ENABLED, true)
-            .put(super.nodeSettings(nodeOrdinal)).build();
+        return ImmutableSettings.builder().put(InternalNode.HTTP_ENABLED, true).put(super.nodeSettings(nodeOrdinal)).build();
     }
 
     @Test

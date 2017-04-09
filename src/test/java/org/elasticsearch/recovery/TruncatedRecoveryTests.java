@@ -55,10 +55,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 public class TruncatedRecoveryTests extends ElasticsearchIntegrationTest {
 
     protected Settings nodeSettings(int nodeOrdinal) {
-        ImmutableSettings.Builder builder = ImmutableSettings.builder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, MockTransportService.class.getName())
-                .put(RecoverySettings.INDICES_RECOVERY_FILE_CHUNK_SIZE, new ByteSizeValue(randomIntBetween(50, 300), ByteSizeUnit.BYTES));
+        ImmutableSettings.Builder builder = ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal)).put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, MockTransportService.class.getName()).put(RecoverySettings.INDICES_RECOVERY_FILE_CHUNK_SIZE, new ByteSizeValue(randomIntBetween(50, 300), ByteSizeUnit.BYTES));
         return builder.build();
     }
 
@@ -87,10 +84,7 @@ public class TruncatedRecoveryTests extends ElasticsearchIntegrationTest {
 
         // create the index and prevent allocation on any other nodes than the lucky one
         // we have no replicas so far and make sure that we allocate the primary on the lucky node
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", "field1", "type=string", "the_id", "type=string")
-                .setSettings(settingsBuilder().put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0).put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, numberOfShards())
-                        .put("index.routing.allocation.include._name", primariesNode.getNode().name()))); // only allocate on the lucky node
+        assertAcked(prepareCreate("test").addMapping("type1", "field1", "type=string", "the_id", "type=string").setSettings(settingsBuilder().put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0).put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, numberOfShards()).put("index.routing.allocation.include._name", primariesNode.getNode().name()))); // only allocate on the lucky node
 
         // index some docs and check if they are coming back
         int numDocs = randomIntBetween(100, 200);
@@ -131,9 +125,7 @@ public class TruncatedRecoveryTests extends ElasticsearchIntegrationTest {
         }
 
         logger.info("--> bumping replicas to 1"); //
-        client().admin().indices().prepareUpdateSettings("test").setSettings(settingsBuilder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                .put("index.routing.allocation.include._name",  // now allow allocation on all nodes
+        client().admin().indices().prepareUpdateSettings("test").setSettings(settingsBuilder().put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1).put("index.routing.allocation.include._name", // now allow allocation on all nodes
                         primariesNode.getNode().name() + "," + unluckyNode.getNode().name())).get();
 
         latch.await();

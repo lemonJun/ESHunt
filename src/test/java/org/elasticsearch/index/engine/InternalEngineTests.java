@@ -136,8 +136,7 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
                     XIOUtils.rm(Paths.get(TRANSLOG_PRIMARY_LOCATION));
                     XIOUtils.rm(Paths.get(TRANSLOG_REPLICA_LOCATION));
                 } catch (IOException e) {
-                    fail("failed to delete translogs before tests."
-                            + ExceptionsHelper.detailedMessage(e) + "\n" + ExceptionsHelper.stackTrace(e));
+                    fail("failed to delete translogs before tests." + ExceptionsHelper.detailedMessage(e) + "\n" + ExceptionsHelper.stackTrace(e));
                 }
             }
         }, 30, TimeUnit.SECONDS);
@@ -151,14 +150,8 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
         } else {
             codecName = "default";
         }
-        defaultSettings = ImmutableSettings.builder()
-                .put(EngineConfig.INDEX_COMPOUND_ON_FLUSH, randomBoolean())
-                .put(EngineConfig.INDEX_CHECKSUM_ON_MERGE, randomBoolean())
-                .put(EngineConfig.INDEX_GC_DELETES_SETTING, "1h") // make sure this doesn't kick in on us
-                .put(EngineConfig.INDEX_FAIL_ON_CORRUPTION_SETTING, randomBoolean())
-                .put(EngineConfig.INDEX_CODEC_SETTING, codecName)
-                .put(EngineConfig.INDEX_CONCURRENCY_SETTING, indexConcurrency)
-                .build(); // TODO randomize more settings
+        defaultSettings = ImmutableSettings.builder().put(EngineConfig.INDEX_COMPOUND_ON_FLUSH, randomBoolean()).put(EngineConfig.INDEX_CHECKSUM_ON_MERGE, randomBoolean()).put(EngineConfig.INDEX_GC_DELETES_SETTING, "1h") // make sure this doesn't kick in on us
+                        .put(EngineConfig.INDEX_FAIL_ON_CORRUPTION_SETTING, randomBoolean()).put(EngineConfig.INDEX_CODEC_SETTING, codecName).put(EngineConfig.INDEX_CONCURRENCY_SETTING, indexConcurrency).build(); // TODO randomize more settings
         threadPool = new ThreadPool(getClass().getName());
         store = createStore();
         storeReplica = createStore();
@@ -188,9 +181,7 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
     @After
     public void tearDown() throws Exception {
         super.tearDown();
-        XIOUtils.close(
-                replicaEngine, storeReplica, replicaTranslog,
-                engine, store, translog);
+        XIOUtils.close(replicaEngine, storeReplica, replicaTranslog, engine, store, translog);
 
         terminate(threadPool);
     }
@@ -204,7 +195,6 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
     private Document testDocument() {
         return new Document();
     }
-
 
     private ParsedDocument testParsedDocument(String uid, String id, String type, String routing, long timestamp, long ttl, Document document, Analyzer analyzer, BytesReference source, boolean mappingsModified) {
         Field uidField = new Field("_uid", uid, UidFieldMapper.Defaults.FIELD_TYPE);
@@ -228,7 +218,7 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
 
             @Override
             public Directory[] build() throws IOException {
-                return new Directory[]{directory};
+                return new Directory[] { directory };
             }
 
             @Override
@@ -274,22 +264,19 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
 
     public EngineConfig config(IndexSettingsService indexSettingsService, Store store, Translog translog, MergeSchedulerProvider mergeSchedulerProvider) {
         IndexWriterConfig iwc = newIndexWriterConfig(Lucene.STANDARD_ANALYZER);
-        EngineConfig config = new EngineConfig(shardId, false/*per default optimization for auto generated ids is disabled*/, threadPool, new ShardIndexingService(shardId, EMPTY_SETTINGS, new ShardSlowLogIndexingService(shardId, EMPTY_SETTINGS, indexSettingsService)), indexSettingsService
-                , null, store, createSnapshotDeletionPolicy(), translog, createMergePolicy(), mergeSchedulerProvider,
-                iwc.getAnalyzer(), iwc.getSimilarity(), new CodecService(shardId.index()), new Engine.FailedEngineListener() {
+        EngineConfig config = new EngineConfig(shardId, false/*per default optimization for auto generated ids is disabled*/, threadPool, new ShardIndexingService(shardId, EMPTY_SETTINGS, new ShardSlowLogIndexingService(shardId, EMPTY_SETTINGS, indexSettingsService)), indexSettingsService, null, store, createSnapshotDeletionPolicy(), translog, createMergePolicy(), mergeSchedulerProvider, iwc.getAnalyzer(), iwc.getSimilarity(), new CodecService(shardId.index()), new Engine.FailedEngineListener() {
             @Override
             public void onFailedEngine(ShardId shardId, String reason, @Nullable Throwable t) {
                 // we don't need to notify anybody in this test
             }
         });
 
-
         return config;
     }
 
-    protected static final BytesReference B_1 = new BytesArray(new byte[]{1});
-    protected static final BytesReference B_2 = new BytesArray(new byte[]{2});
-    protected static final BytesReference B_3 = new BytesArray(new byte[]{3});
+    protected static final BytesReference B_1 = new BytesArray(new byte[] { 1 });
+    protected static final BytesReference B_2 = new BytesArray(new byte[] { 2 });
+    protected static final BytesReference B_3 = new BytesArray(new byte[] { 3 });
 
     @Test
     public void testSegments() throws Exception {
@@ -343,13 +330,11 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
         assertThat(segments.get(0).getDeletedDocs(), equalTo(0));
         assertThat(segments.get(0).isCompound(), equalTo(defaultCompound));
 
-
         assertThat(segments.get(1).isCommitted(), equalTo(false));
         assertThat(segments.get(1).isSearch(), equalTo(true));
         assertThat(segments.get(1).getNumDocs(), equalTo(1));
         assertThat(segments.get(1).getDeletedDocs(), equalTo(0));
         assertThat(segments.get(1).isCompound(), equalTo(false));
-
 
         engine.delete(new Engine.Delete("test", "1", newUid("1")));
         engine.refresh("test");
@@ -398,14 +383,13 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
         assertThat(segments.get(2).isCompound(), equalTo(true));
     }
 
-
     @Test
     public void testSegmentsWithMergeFlag() throws Exception {
         ConcurrentMergeSchedulerProvider mergeSchedulerProvider = new ConcurrentMergeSchedulerProvider(shardId, EMPTY_SETTINGS, threadPool, new IndexSettingsService(shardId.index(), EMPTY_SETTINGS));
         IndexSettingsService indexSettingsService = new IndexSettingsService(shardId.index(), ImmutableSettings.builder().put(defaultSettings).put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).build());
         try (Store store = createStore();
-             Translog translog = createTranslog();
-             Engine engine = createEngine(indexSettingsService, store, translog, mergeSchedulerProvider)) {
+                        Translog translog = createTranslog();
+                        Engine engine = createEngine(indexSettingsService, store, translog, mergeSchedulerProvider)) {
 
             ParsedDocument doc = testParsedDocument("1", "1", "test", null, -1, -1, testDocument(), Lucene.STANDARD_ANALYZER, B_1, false);
             Engine.Index index = new Engine.Index(null, newUid("1"), doc);
@@ -677,14 +661,11 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
         byte[] wrongBytes = Base64.decode(commitID.toString());
         wrongBytes[0] = (byte) ~wrongBytes[0];
         Engine.CommitId wrongId = new Engine.CommitId(new BytesRef(wrongBytes));
-        assertEquals("should fail to sync flush with wrong id (but no docs)", engine.syncFlush(syncId + "1", wrongId),
-                Engine.SyncedFlushResult.COMMIT_MISMATCH);
+        assertEquals("should fail to sync flush with wrong id (but no docs)", engine.syncFlush(syncId + "1", wrongId), Engine.SyncedFlushResult.COMMIT_MISMATCH);
         engine.create(new Engine.Create(null, newUid("2"), doc));
-        assertEquals("should fail to sync flush with right id but pending doc", engine.syncFlush(syncId + "2", commitID),
-                Engine.SyncedFlushResult.PENDING_OPERATIONS);
+        assertEquals("should fail to sync flush with right id but pending doc", engine.syncFlush(syncId + "2", commitID), Engine.SyncedFlushResult.PENDING_OPERATIONS);
         commitID = engine.flush();
-        assertEquals("should succeed to flush commit with right id and no pending doc", engine.syncFlush(syncId, commitID),
-                Engine.SyncedFlushResult.SUCCESS);
+        assertEquals("should succeed to flush commit with right id and no pending doc", engine.syncFlush(syncId, commitID), Engine.SyncedFlushResult.SUCCESS);
         assertEquals(store.readLastCommittedSegmentsInfo().getUserData().get(Engine.SYNC_COMMIT_ID), syncId);
         assertEquals(engine.getLastCommittedSegmentInfos().getUserData().get(Engine.SYNC_COMMIT_ID), syncId);
     }
@@ -694,8 +675,7 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
         ParsedDocument doc = testParsedDocument("1", "1", "test", null, -1, -1, testDocumentWithTextField(), Lucene.STANDARD_ANALYZER, B_1, false);
         engine.create(new Engine.Create(null, newUid("1"), doc));
         final Engine.CommitId commitID = engine.flush();
-        assertEquals("should succeed to flush commit with right id and no pending doc", engine.syncFlush(syncId, commitID),
-                Engine.SyncedFlushResult.SUCCESS);
+        assertEquals("should succeed to flush commit with right id and no pending doc", engine.syncFlush(syncId, commitID), Engine.SyncedFlushResult.SUCCESS);
         assertEquals(store.readLastCommittedSegmentsInfo().getUserData().get(Engine.SYNC_COMMIT_ID), syncId);
         assertEquals(engine.getLastCommittedSegmentInfos().getUserData().get(Engine.SYNC_COMMIT_ID), syncId);
         EngineConfig config = engine.config();
@@ -761,7 +741,6 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
             assertThat(failEngine, is(true));
         }
     }
-
 
     @Test
     public void testSimpleRecover() throws Exception {
@@ -1113,7 +1092,8 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
                                     return;
                                 }
                             }
-                        } catch (AlreadyClosedException | EngineClosedException ex) {
+                        } catch (AlreadyClosedException
+                                        | EngineClosedException ex) {
                             // fine
                         }
                     }
@@ -1302,8 +1282,7 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
 
         // second version on replica should fail as well
         try {
-            index = new Engine.Index(null, newUid("1"), doc, 2l
-                    , VersionType.INTERNAL.versionTypeForReplicationAndRecovery(), REPLICA, 0);
+            index = new Engine.Index(null, newUid("1"), doc, 2l, VersionType.INTERNAL.versionTypeForReplicationAndRecovery(), REPLICA, 0);
             replicaEngine.index(index);
             assertThat(index.version(), equalTo(2l));
         } catch (VersionConflictEngineException e) {
@@ -1319,8 +1298,7 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
         assertThat(index.version(), equalTo(1l));
 
         // apply the first index to the replica, should work fine
-        index = new Engine.Index(null, newUid("1"), doc, 1l
-                , VersionType.INTERNAL.versionTypeForReplicationAndRecovery(), REPLICA, 0);
+        index = new Engine.Index(null, newUid("1"), doc, 1l, VersionType.INTERNAL.versionTypeForReplicationAndRecovery(), REPLICA, 0);
         replicaEngine.index(index);
         assertThat(index.version(), equalTo(1l));
 
@@ -1335,15 +1313,13 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
         assertThat(delete.version(), equalTo(3l));
 
         // apply the delete on the replica (skipping the second index)
-        delete = new Engine.Delete("test", "1", newUid("1"), 3l
-                , VersionType.INTERNAL.versionTypeForReplicationAndRecovery(), REPLICA, 0, false);
+        delete = new Engine.Delete("test", "1", newUid("1"), 3l, VersionType.INTERNAL.versionTypeForReplicationAndRecovery(), REPLICA, 0, false);
         replicaEngine.delete(delete);
         assertThat(delete.version(), equalTo(3l));
 
         // second time delete with same version should fail
         try {
-            delete = new Engine.Delete("test", "1", newUid("1"), 3l
-                    , VersionType.INTERNAL.versionTypeForReplicationAndRecovery(), REPLICA, 0, false);
+            delete = new Engine.Delete("test", "1", newUid("1"), 3l, VersionType.INTERNAL.versionTypeForReplicationAndRecovery(), REPLICA, 0, false);
             replicaEngine.delete(delete);
             fail("excepted VersionConflictEngineException to be thrown");
         } catch (VersionConflictEngineException e) {
@@ -1359,7 +1335,6 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
             // all is well
         }
     }
-
 
     @Test
     public void testBasicCreatedFlag() {
@@ -1403,8 +1378,7 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
         @Override
         protected void append(LoggingEvent event) {
             if (event.getLevel() == Level.TRACE && event.getMessage().toString().contains("[index][1] ")) {
-                if (event.getLoggerName().endsWith("lucene.iw") &&
-                        event.getMessage().toString().contains("IW: apply all deletes during flush")) {
+                if (event.getLoggerName().endsWith("lucene.iw") && event.getMessage().toString().contains("IW: apply all deletes during flush")) {
                     sawIndexWriterMessage = true;
                 }
                 if (event.getLoggerName().endsWith("lucene.iw.ifd")) {
@@ -1615,7 +1589,6 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
         assertEquals(engine.config().getIndexConcurrency(), indexConcurrency);
         assertEquals(currentIndexWriterConfig.getMaxThreadStates(), indexConcurrency);
 
-
         IndexDynamicSettingsModule settings = new IndexDynamicSettingsModule();
 
         assertTrue(settings.containsSetting(EngineConfig.INDEX_FAIL_ON_CORRUPTION_SETTING));
@@ -1712,12 +1685,11 @@ public class InternalEngineTests extends ElasticsearchLuceneTestCase {
     @Test
     public void testDeletesAloneCanTriggerRefresh() throws Exception {
         // Tiny indexing buffer:
-        Settings indexSettings = ImmutableSettings.builder().put(defaultSettings)
-                .put(EngineConfig.INDEX_BUFFER_SIZE_SETTING, "1kb").build();
+        Settings indexSettings = ImmutableSettings.builder().put(defaultSettings).put(EngineConfig.INDEX_BUFFER_SIZE_SETTING, "1kb").build();
         IndexSettingsService indexSettingsService = new IndexSettingsService(shardId.index(), indexSettings);
         try (Store store = createStore();
-             Translog translog = createTranslog();
-             final Engine engine = new InternalEngine(config(indexSettingsService, store, translog, createMergeScheduler()))) {
+                        Translog translog = createTranslog();
+                        final Engine engine = new InternalEngine(config(indexSettingsService, store, translog, createMergeScheduler()))) {
             for (int i = 0; i < 100; i++) {
                 String id = Integer.toString(i);
                 ParsedDocument doc = testParsedDocument(id, id, "test", null, -1, -1, testDocument(), Lucene.STANDARD_ANALYZER, B_1, false);

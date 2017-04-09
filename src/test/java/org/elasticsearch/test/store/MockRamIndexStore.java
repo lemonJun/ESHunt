@@ -29,11 +29,10 @@ import org.elasticsearch.index.store.DirectoryService;
 import org.elasticsearch.index.store.support.AbstractIndexStore;
 import org.elasticsearch.indices.store.IndicesStore;
 
-public class MockRamIndexStore extends AbstractIndexStore{
+public class MockRamIndexStore extends AbstractIndexStore {
 
     @Inject
-    public MockRamIndexStore(Index index, @IndexSettings Settings indexSettings, IndexService indexService,
-                             IndicesStore indicesStore, NodeEnvironment nodeEnv) {
+    public MockRamIndexStore(Index index, @IndexSettings Settings indexSettings, IndexService indexService, IndicesStore indicesStore, NodeEnvironment nodeEnv) {
         super(index, indexSettings, indexService, indicesStore, nodeEnv);
     }
 

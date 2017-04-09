@@ -49,9 +49,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void simpleGetTests() {
-        assertAcked(prepareCreate("test")
-                .setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1))
-                .addAlias(new Alias("alias")));
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)).addAlias(new Alias("alias")));
         ensureGreen();
 
         GetResponse response = client().prepareGet(indexOrAlias(), "type1", "1").get();
@@ -174,8 +172,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void simpleMultiGetTests() throws Exception {
-        assertAcked(prepareCreate("test").addAlias(new Alias("alias"))
-                .setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
+        assertAcked(prepareCreate("test").addAlias(new Alias("alias")).setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
         ensureGreen();
 
         MultiGetResponse response = client().prepareMultiGet().add(indexOrAlias(), "type1", "1").get();
@@ -186,12 +183,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
             client().prepareIndex("test", "type1", Integer.toString(i)).setSource("field", "value" + i).get();
         }
 
-        response = client().prepareMultiGet()
-                .add(indexOrAlias(), "type1", "1")
-                .add(indexOrAlias(), "type1", "15")
-                .add(indexOrAlias(), "type1", "3")
-                .add(indexOrAlias(), "type1", "9")
-                .add(indexOrAlias(), "type1", "11").get();
+        response = client().prepareMultiGet().add(indexOrAlias(), "type1", "1").add(indexOrAlias(), "type1", "15").add(indexOrAlias(), "type1", "3").add(indexOrAlias(), "type1", "9").add(indexOrAlias(), "type1", "11").get();
         assertThat(response.getResponses().length, equalTo(5));
         assertThat(response.getResponses()[0].getId(), equalTo("1"));
         assertThat(response.getResponses()[0].getIndex(), equalTo("test"));
@@ -215,10 +207,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
         assertThat(response.getResponses()[4].getResponse().isExists(), equalTo(false));
 
         // multi get with specific field
-        response = client().prepareMultiGet()
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").fields("field"))
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "3").fields("field"))
-                .get();
+        response = client().prepareMultiGet().add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").fields("field")).add(new MultiGetRequest.Item(indexOrAlias(), "type1", "3").fields("field")).get();
 
         assertThat(response.getResponses().length, equalTo(2));
         assertThat(response.getResponses()[0].getResponse().getSourceAsBytes(), nullValue());
@@ -227,8 +216,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void realtimeGetWithCompress() throws Exception {
-        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1))
-                .addMapping("type", jsonBuilder().startObject().startObject("type").startObject("_source").field("compress", true).endObject().endObject().endObject()));
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)).addMapping("type", jsonBuilder().startObject().startObject("type").startObject("_source").field("compress", true).endObject().endObject().endObject()));
         ensureGreen();
 
         StringBuilder sb = new StringBuilder();
@@ -246,40 +234,12 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void getFieldsWithDifferentTypes() throws Exception {
-        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1))
-                .addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("_source").field("enabled", true).endObject().endObject().endObject())
-                .addMapping("type2", jsonBuilder().startObject().startObject("type2")
-                        .startObject("_source").field("enabled", false).endObject()
-                        .startObject("properties")
-                        .startObject("str").field("type", "string").field("store", "yes").endObject()
-                        .startObject("strs").field("type", "string").field("store", "yes").endObject()
-                        .startObject("int").field("type", "integer").field("store", "yes").endObject()
-                        .startObject("ints").field("type", "integer").field("store", "yes").endObject()
-                        .startObject("date").field("type", "date").field("store", "yes").endObject()
-                        .startObject("binary").field("type", "binary").field("store", "yes").endObject()
-                        .endObject()
-                        .endObject().endObject()));
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)).addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("_source").field("enabled", true).endObject().endObject().endObject()).addMapping("type2", jsonBuilder().startObject().startObject("type2").startObject("_source").field("enabled", false).endObject().startObject("properties").startObject("str").field("type", "string").field("store", "yes").endObject().startObject("strs").field("type", "string").field("store", "yes").endObject().startObject("int").field("type", "integer").field("store", "yes").endObject().startObject("ints").field("type", "integer").field("store", "yes").endObject().startObject("date").field("type", "date").field("store", "yes").endObject().startObject("binary").field("type", "binary").field("store", "yes").endObject().endObject().endObject().endObject()));
         ensureGreen();
 
-        client().prepareIndex("test", "type1", "1").setSource(
-                jsonBuilder().startObject()
-                        .field("str", "test")
-                        .field("strs", new String[]{"A", "B", "C"})
-                        .field("int", 42)
-                        .field("ints", new int[]{1, 2, 3, 4})
-                        .field("date", "2012-11-13T15:26:14.000Z")
-                        .field("binary", Base64.encodeBytes(new byte[]{1, 2, 3}))
-                        .endObject()).get();
+        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject().field("str", "test").field("strs", new String[] { "A", "B", "C" }).field("int", 42).field("ints", new int[] { 1, 2, 3, 4 }).field("date", "2012-11-13T15:26:14.000Z").field("binary", Base64.encodeBytes(new byte[] { 1, 2, 3 })).endObject()).get();
 
-        client().prepareIndex("test", "type2", "1").setSource(
-                jsonBuilder().startObject()
-                        .field("str", "test")
-                        .field("strs", new String[]{"A", "B", "C"})
-                        .field("int", 42)
-                        .field("ints", new int[]{1, 2, 3, 4})
-                        .field("date", "2012-11-13T15:26:14.000Z")
-                        .field("binary", Base64.encodeBytes(new byte[]{1, 2, 3}))
-                        .endObject()).get();
+        client().prepareIndex("test", "type2", "1").setSource(jsonBuilder().startObject().field("str", "test").field("strs", new String[] { "A", "B", "C" }).field("int", 42).field("ints", new int[] { 1, 2, 3, 4 }).field("date", "2012-11-13T15:26:14.000Z").field("binary", Base64.encodeBytes(new byte[] { 1, 2, 3 })).endObject()).get();
 
         // realtime get with stored source
         logger.info("--> realtime get (from source)");
@@ -300,7 +260,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
         assertThat((Integer) getResponse.getField("int").getValue(), equalTo(42));
         assertThat(getResponse.getField("ints").getValues(), contains((Object) 1, 2, 3, 4));
         assertThat((String) getResponse.getField("date").getValue(), equalTo("2012-11-13T15:26:14.000Z"));
-        assertThat((BytesReference) getResponse.getField("binary").getValue(), equalTo((BytesReference) new BytesArray(new byte[]{1, 2, 3})));
+        assertThat((BytesReference) getResponse.getField("binary").getValue(), equalTo((BytesReference) new BytesArray(new byte[] { 1, 2, 3 })));
 
         logger.info("--> flush the index, so we load it from it");
         flush();
@@ -323,26 +283,14 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
         assertThat((Integer) getResponse.getField("int").getValue(), equalTo(42));
         assertThat(getResponse.getField("ints").getValues(), contains((Object) 1, 2, 3, 4));
         assertThat((String) getResponse.getField("date").getValue(), equalTo("2012-11-13T15:26:14.000Z"));
-        assertThat((BytesReference) getResponse.getField("binary").getValue(), equalTo((BytesReference) new BytesArray(new byte[]{1, 2, 3})));
+        assertThat((BytesReference) getResponse.getField("binary").getValue(), equalTo((BytesReference) new BytesArray(new byte[] { 1, 2, 3 })));
     }
 
     @Test
     public void testGetDocWithMultivaluedFields() throws Exception {
-        String mapping1 = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties")
-                .startObject("field").field("type", "string").field("store", "yes").endObject()
-                .endObject()
-                .endObject().endObject().string();
-        String mapping2 = XContentFactory.jsonBuilder().startObject().startObject("type2")
-                .startObject("properties")
-                .startObject("field").field("type", "string").field("store", "yes").endObject()
-                .endObject()
-                .startObject("_source").field("enabled", false).endObject()
-                .endObject().endObject().string();
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", mapping1)
-                .addMapping("type2", mapping2)
-                .setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
+        String mapping1 = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field").field("type", "string").field("store", "yes").endObject().endObject().endObject().endObject().string();
+        String mapping2 = XContentFactory.jsonBuilder().startObject().startObject("type2").startObject("properties").startObject("field").field("type", "string").field("store", "yes").endObject().endObject().startObject("_source").field("enabled", false).endObject().endObject().endObject().string();
+        assertAcked(prepareCreate("test").addMapping("type1", mapping1).addMapping("type2", mapping2).setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
         ensureGreen();
 
         GetResponse response = client().prepareGet("test", "type1", "1").get();
@@ -350,11 +298,9 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
         response = client().prepareGet("test", "type2", "1").get();
         assertThat(response.isExists(), equalTo(false));
 
-        client().prepareIndex("test", "type1", "1")
-                .setSource(jsonBuilder().startObject().field("field", "1", "2").endObject()).get();
+        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject().field("field", "1", "2").endObject()).get();
 
-        client().prepareIndex("test", "type2", "1")
-                .setSource(jsonBuilder().startObject().field("field", "1", "2").endObject()).get();
+        client().prepareIndex("test", "type2", "1").setSource(jsonBuilder().startObject().field("field", "1", "2").endObject()).get();
 
         response = client().prepareGet("test", "type1", "1").setFields("field").get();
         assertThat(response.isExists(), equalTo(true));
@@ -364,7 +310,6 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
         assertThat(response.getFields().get("field").getValues().size(), equalTo(2));
         assertThat(response.getFields().get("field").getValues().get(0).toString(), equalTo("1"));
         assertThat(response.getFields().get("field").getValues().get(1).toString(), equalTo("2"));
-
 
         response = client().prepareGet("test", "type2", "1").setFields("field").get();
         assertThat(response.isExists(), equalTo(true));
@@ -399,23 +344,11 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
         String index = "test";
         String type = "type1";
 
-        String mapping = jsonBuilder()
-                .startObject()
-                .startObject(type)
-                .startObject("_source")
-                .array("excludes", "excluded")
-                .endObject()
-                .endObject()
-                .endObject()
-                .string();
+        String mapping = jsonBuilder().startObject().startObject(type).startObject("_source").array("excludes", "excluded").endObject().endObject().endObject().string();
 
-        assertAcked(prepareCreate(index)
-                .addMapping(type, mapping)
-                .setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
+        assertAcked(prepareCreate(index).addMapping(type, mapping).setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
 
-        client().prepareIndex(index, type, "1")
-                .setSource(jsonBuilder().startObject().field("field", "1", "2").field("excluded", "should not be seen").endObject())
-                .get();
+        client().prepareIndex(index, type, "1").setSource(jsonBuilder().startObject().field("field", "1", "2").field("excluded", "should not be seen").endObject()).get();
 
         GetResponse responseBeforeFlush = client().prepareGet(index, type, "1").get();
         client().admin().indices().prepareFlush(index).get();
@@ -433,23 +366,11 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
         String index = "test";
         String type = "type1";
 
-        String mapping = jsonBuilder()
-                .startObject()
-                .startObject(type)
-                .startObject("_source")
-                .array("includes", "included")
-                .endObject()
-                .endObject()
-                .endObject()
-                .string();
+        String mapping = jsonBuilder().startObject().startObject(type).startObject("_source").array("includes", "included").endObject().endObject().endObject().string();
 
-        assertAcked(prepareCreate(index)
-                .addMapping(type, mapping)
-                .setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
+        assertAcked(prepareCreate(index).addMapping(type, mapping).setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
 
-        client().prepareIndex(index, type, "1")
-                .setSource(jsonBuilder().startObject().field("field", "1", "2").field("included", "should be seen").endObject())
-                .get();
+        client().prepareIndex(index, type, "1").setSource(jsonBuilder().startObject().field("field", "1", "2").field("included", "should be seen").endObject()).get();
 
         GetResponse responseBeforeFlush = client().prepareGet(index, type, "1").get();
         flush();
@@ -468,28 +389,11 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
         String index = "test";
         String type = "type1";
 
-        String mapping = jsonBuilder()
-                .startObject()
-                .startObject(type)
-                .startObject("_source")
-                .array("includes", "included")
-                .array("exlcudes", "excluded")
-                .endObject()
-                .endObject()
-                .endObject()
-                .string();
+        String mapping = jsonBuilder().startObject().startObject(type).startObject("_source").array("includes", "included").array("exlcudes", "excluded").endObject().endObject().endObject().string();
 
-        assertAcked(prepareCreate(index)
-                .addMapping(type, mapping)
-                .setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
+        assertAcked(prepareCreate(index).addMapping(type, mapping).setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
 
-        client().prepareIndex(index, type, "1")
-                .setSource(jsonBuilder().startObject()
-                        .field("field", "1", "2")
-                        .startObject("included").field("field", "should be seen").field("field2", "extra field to remove").endObject()
-                        .startObject("excluded").field("field", "should not be seen").field("field2", "should not be seen").endObject()
-                        .endObject())
-                .get();
+        client().prepareIndex(index, type, "1").setSource(jsonBuilder().startObject().field("field", "1", "2").startObject("included").field("field", "should be seen").field("field2", "extra field to remove").endObject().startObject("excluded").field("field", "should not be seen").field("field2", "should not be seen").endObject().endObject()).get();
 
         GetResponse responseBeforeFlush = client().prepareGet(index, type, "1").setFields("_source", "included.field", "excluded.field").get();
         assertThat(responseBeforeFlush.isExists(), is(true));
@@ -498,8 +402,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
         assertThat(responseBeforeFlush.getSourceAsMap(), hasKey("included"));
 
         // now tests that extra source filtering works as expected
-        GetResponse responseBeforeFlushWithExtraFilters = client().prepareGet(index, type, "1").setFields("included.field", "excluded.field")
-                .setFetchSource(new String[]{"field", "*.field"}, new String[]{"*.field2"}).get();
+        GetResponse responseBeforeFlushWithExtraFilters = client().prepareGet(index, type, "1").setFields("included.field", "excluded.field").setFetchSource(new String[] { "field", "*.field" }, new String[] { "*.field2" }).get();
         assertThat(responseBeforeFlushWithExtraFilters.isExists(), is(true));
         assertThat(responseBeforeFlushWithExtraFilters.getSourceAsMap(), not(hasKey("excluded")));
         assertThat(responseBeforeFlushWithExtraFilters.getSourceAsMap(), not(hasKey("field")));
@@ -509,8 +412,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
         flush();
         GetResponse responseAfterFlush = client().prepareGet(index, type, "1").setFields("_source", "included.field", "excluded.field").get();
-        GetResponse responseAfterFlushWithExtraFilters = client().prepareGet(index, type, "1").setFields("included.field", "excluded.field")
-                .setFetchSource("*.field", "*.field2").get();
+        GetResponse responseAfterFlushWithExtraFilters = client().prepareGet(index, type, "1").setFields("included.field", "excluded.field").setFetchSource("*.field", "*.field2").get();
 
         assertThat(responseAfterFlush.isExists(), is(true));
         assertThat(responseBeforeFlush.getSourceAsString(), is(responseAfterFlush.getSourceAsString()));
@@ -521,8 +423,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testGetWithVersion() {
-        assertAcked(prepareCreate("test").addAlias(new Alias("alias"))
-                .setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
+        assertAcked(prepareCreate("test").addAlias(new Alias("alias")).setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
         ensureGreen();
 
         GetResponse response = client().prepareGet("test", "type1", "1").get();
@@ -625,8 +526,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testMultiGetWithVersion() throws Exception {
-        assertAcked(prepareCreate("test").addAlias(new Alias("alias"))
-                .setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
+        assertAcked(prepareCreate("test").addAlias(new Alias("alias")).setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
         ensureGreen();
 
         MultiGetResponse response = client().prepareMultiGet().add(indexOrAlias(), "type1", "1").get();
@@ -638,11 +538,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
         }
 
         // Version from translog
-        response = client().prepareMultiGet()
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").version(0))
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").version(1))
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").version(2))
-                .get();
+        response = client().prepareMultiGet().add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").version(0)).add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").version(1)).add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").version(2)).get();
         assertThat(response.getResponses().length, equalTo(3));
         // [0] version doesn't matter, which is the default
         assertThat(response.getResponses()[0].getFailure(), nullValue());
@@ -661,12 +557,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
         //Version from Lucene index
         refresh();
-        response = client().prepareMultiGet()
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").version(0))
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").version(1))
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").version(2))
-                .setRealtime(false)
-                .get();
+        response = client().prepareMultiGet().add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").version(0)).add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").version(1)).add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").version(2)).setRealtime(false).get();
         assertThat(response.getResponses().length, equalTo(3));
         // [0] version doesn't matter, which is the default
         assertThat(response.getResponses()[0].getFailure(), nullValue());
@@ -681,17 +572,12 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
         assertThat(response.getResponses()[2].getFailure().getId(), equalTo("1"));
         assertThat(response.getResponses()[2].getFailure().getMessage(), startsWith("VersionConflictEngineException"));
 
-
         for (int i = 0; i < 3; i++) {
             client().prepareIndex("test", "type1", Integer.toString(i)).setSource("field", "value" + i).get();
         }
 
         // Version from translog
-        response = client().prepareMultiGet()
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2").version(0))
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2").version(1))
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2").version(2))
-                .get();
+        response = client().prepareMultiGet().add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2").version(0)).add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2").version(1)).add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2").version(2)).get();
         assertThat(response.getResponses().length, equalTo(3));
         // [0] version doesn't matter, which is the default
         assertThat(response.getResponses()[0].getFailure(), nullValue());
@@ -709,15 +595,9 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
         assertThat(response.getResponses()[2].getResponse().isExists(), equalTo(true));
         assertThat(response.getResponses()[2].getResponse().getSourceAsMap().get("field").toString(), equalTo("value2"));
 
-
         //Version from Lucene index
         refresh();
-        response = client().prepareMultiGet()
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2").version(0))
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2").version(1))
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2").version(2))
-                .setRealtime(false)
-                .get();
+        response = client().prepareMultiGet().add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2").version(0)).add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2").version(1)).add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2").version(2)).setRealtime(false).get();
         assertThat(response.getResponses().length, equalTo(3));
         // [0] version doesn't matter, which is the default
         assertThat(response.getResponses()[0].getFailure(), nullValue());
@@ -738,18 +618,11 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testGetFields_metaData() throws Exception {
-        assertAcked(prepareCreate("test").addAlias(new Alias("alias"))
-                .setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
+        assertAcked(prepareCreate("test").addAlias(new Alias("alias")).setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
 
-        client().prepareIndex("test", "my-type1", "1")
-                .setRouting("1")
-                .setSource(jsonBuilder().startObject().field("field1", "value").endObject())
-                .get();
+        client().prepareIndex("test", "my-type1", "1").setRouting("1").setSource(jsonBuilder().startObject().field("field1", "value").endObject()).get();
 
-        GetResponse getResponse = client().prepareGet(indexOrAlias(), "my-type1", "1")
-                .setRouting("1")
-                .setFields("field1", "_routing")
-                .get();
+        GetResponse getResponse = client().prepareGet(indexOrAlias(), "my-type1", "1").setRouting("1").setFields("field1", "_routing").get();
         assertThat(getResponse.isExists(), equalTo(true));
         assertThat(getResponse.getField("field1").isMetadataField(), equalTo(false));
         assertThat(getResponse.getField("field1").getValue().toString(), equalTo("value"));
@@ -758,10 +631,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
         flush();
 
-        client().prepareGet(indexOrAlias(), "my-type1", "1")
-                .setFields("field1", "_routing")
-                .setRouting("1")
-                .get();
+        client().prepareGet(indexOrAlias(), "my-type1", "1").setFields("field1", "_routing").setRouting("1").get();
         assertThat(getResponse.isExists(), equalTo(true));
         assertThat(getResponse.getField("field1").isMetadataField(), equalTo(false));
         assertThat(getResponse.getField("field1").getValue().toString(), equalTo("value"));
@@ -771,17 +641,9 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testGetFields_nonLeafField() throws Exception {
-        assertAcked(prepareCreate("test").addAlias(new Alias("alias"))
-                .addMapping("my-type1", jsonBuilder().startObject().startObject("my-type1").startObject("properties")
-                        .startObject("field1").startObject("properties")
-                        .startObject("field2").field("type", "string").endObject()
-                        .endObject().endObject()
-                        .endObject().endObject().endObject())
-                .setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
+        assertAcked(prepareCreate("test").addAlias(new Alias("alias")).addMapping("my-type1", jsonBuilder().startObject().startObject("my-type1").startObject("properties").startObject("field1").startObject("properties").startObject("field2").field("type", "string").endObject().endObject().endObject().endObject().endObject().endObject()).setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
 
-        client().prepareIndex("test", "my-type1", "1")
-                .setSource(jsonBuilder().startObject().startObject("field1").field("field2", "value1").endObject().endObject())
-                .get();
+        client().prepareIndex("test", "my-type1", "1").setSource(jsonBuilder().startObject().startObject("field1").field("field2", "value1").endObject().endObject()).get();
 
         try {
             client().prepareGet(indexOrAlias(), "my-type1", "1").setFields("field1").get();
@@ -803,40 +665,9 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
     @Test
     @TestLogging("index.shard.service:TRACE,cluster.service:TRACE,action.admin.indices.flush:TRACE")
     public void testGetFields_complexField() throws Exception {
-        assertAcked(prepareCreate("my-index")
-                .setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1))
-                .addMapping("my-type2", jsonBuilder().startObject().startObject("my-type2").startObject("properties")
-                        .startObject("field1").field("type", "object")
-                        .startObject("field2").field("type", "object")
-                                .startObject("field3").field("type", "object")
-                                    .startObject("field4").field("type", "string").field("store", "yes")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                        .endObject().endObject().endObject()));
+        assertAcked(prepareCreate("my-index").setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)).addMapping("my-type2", jsonBuilder().startObject().startObject("my-type2").startObject("properties").startObject("field1").field("type", "object").startObject("field2").field("type", "object").startObject("field3").field("type", "object").startObject("field4").field("type", "string").field("store", "yes").endObject().endObject().endObject().endObject().endObject().endObject()));
 
-        BytesReference source = jsonBuilder().startObject()
-                    .startArray("field1")
-                        .startObject()
-                            .startObject("field2")
-                                .startArray("field3")
-                                    .startObject()
-                                        .field("field4", "value1")
-                                    .endObject()
-                                .endArray()
-                            .endObject()
-                        .endObject()
-                        .startObject()
-                            .startObject("field2")
-                                .startArray("field3")
-                                    .startObject()
-                                        .field("field4", "value2")
-                                    .endObject()
-                                .endArray()
-                            .endObject()
-                        .endObject()
-                    .endArray()
-                .endObject().bytes();
+        BytesReference source = jsonBuilder().startObject().startArray("field1").startObject().startObject("field2").startArray("field3").startObject().field("field4", "value1").endObject().endArray().endObject().endObject().startObject().startObject("field2").startArray("field3").startObject().field("field4", "value2").endObject().endArray().endObject().endObject().endArray().endObject().bytes();
 
         logger.info("indexing documents");
 
@@ -868,9 +699,8 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
         logger.info("flushing");
         FlushResponse flushResponse = client().admin().indices().prepareFlush("my-index").setForce(true).get();
         if (flushResponse.getSuccessfulShards() == 0) {
-            StringBuilder sb = new StringBuilder("failed to flush at least one shard. total shards [")
-                    .append(flushResponse.getTotalShards()).append("], failed shards: [").append(flushResponse.getFailedShards()).append("]");
-            for (ShardOperationFailedException failure: flushResponse.getShardFailures()) {
+            StringBuilder sb = new StringBuilder("failed to flush at least one shard. total shards [").append(flushResponse.getTotalShards()).append("], failed shards: [").append(flushResponse.getFailedShards()).append("]");
+            for (ShardOperationFailedException failure : flushResponse.getShardFailures()) {
                 sb.append("\nShard failure: ").append(failure);
             }
             fail(sb.toString());
@@ -895,21 +725,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testGet_allField() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addAlias(new Alias("alias"))
-                .addMapping("my-type1", jsonBuilder()
-                        .startObject()
-                        .startObject("my-type1")
-                        .startObject("_all")
-                        .field("store", true)
-                        .endObject()
-                        .startObject("properties")
-                        .startObject("some_field")
-                        .field("type", "string")
-                        .endObject()
-                        .endObject()
-                        .endObject()
-                        .endObject()));
+        assertAcked(prepareCreate("test").addAlias(new Alias("alias")).addMapping("my-type1", jsonBuilder().startObject().startObject("my-type1").startObject("_all").field("store", true).endObject().startObject("properties").startObject("some_field").field("type", "string").endObject().endObject().endObject().endObject()));
         index("test", "my-type1", "1", "some_field", "some text");
         refresh();
 
@@ -920,38 +736,13 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testUngeneratedFieldsThatAreNeverStored() throws IOException {
-        String createIndexSource = "{\n" +
-                "  \"settings\": {\n" +
-                "    \"index.translog.disable_flush\": true,\n" +
-                "    \"refresh_interval\": \"-1\"\n" +
-                "  },\n" +
-                "  \"mappings\": {\n" +
-                "    \"doc\": {\n" +
-                "      \"_source\": {\n" +
-                "        \"enabled\": \"" + randomBoolean() + "\"\n" +
-                "      },\n" +
-                "      \"properties\": {\n" +
-                "        \"suggest\": {\n" +
-                "          \"type\": \"completion\"\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        String createIndexSource = "{\n" + "  \"settings\": {\n" + "    \"index.translog.disable_flush\": true,\n" + "    \"refresh_interval\": \"-1\"\n" + "  },\n" + "  \"mappings\": {\n" + "    \"doc\": {\n" + "      \"_source\": {\n" + "        \"enabled\": \"" + randomBoolean() + "\"\n" + "      },\n" + "      \"properties\": {\n" + "        \"suggest\": {\n" + "          \"type\": \"completion\"\n" + "        }\n" + "      }\n" + "    }\n" + "  }\n" + "}";
         assertAcked(prepareCreate("test").addAlias(new Alias("alias")).setSource(createIndexSource));
         ensureGreen();
-        String doc = "{\n" +
-                "  \"suggest\": {\n" +
-                "    \"input\": [\n" +
-                "      \"Nevermind\",\n" +
-                "      \"Nirvana\"\n" +
-                "    ],\n" +
-                "    \"output\": \"Nirvana - Nevermind\"\n" +
-                "  }\n" +
-                "}";
+        String doc = "{\n" + "  \"suggest\": {\n" + "    \"input\": [\n" + "      \"Nevermind\",\n" + "      \"Nirvana\"\n" + "    ],\n" + "    \"output\": \"Nirvana - Nevermind\"\n" + "  }\n" + "}";
 
         index("test", "doc", "1", doc);
-        String[] fieldsList = {"suggest"};
+        String[] fieldsList = { "suggest" };
         // before refresh - document is only in translog
         assertGetFieldsAlwaysNull(indexOrAlias(), "doc", "1", fieldsList);
         refresh();
@@ -965,37 +756,14 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
     @Test
     public void testUngeneratedFieldsThatAreAlwaysStored() throws IOException {
         String storedString = randomBoolean() ? "yes" : "no";
-        String createIndexSource = "{\n" +
-                "  \"settings\": {\n" +
-                "    \"index.translog.disable_flush\": true,\n" +
-                "    \"refresh_interval\": \"-1\"\n" +
-                "  },\n" +
-                "  \"mappings\": {\n" +
-                "    \"parentdoc\": {},\n" +
-                "    \"doc\": {\n" +
-                "      \"_source\": {\n" +
-                "        \"enabled\": " + randomBoolean() + "\n" +
-                "      },\n" +
-                "      \"_parent\": {\n" +
-                "        \"type\": \"parentdoc\",\n" +
-                "        \"store\": \"" + storedString + "\"\n" +
-                "      },\n" +
-                "      \"_ttl\": {\n" +
-                "        \"enabled\": true,\n" +
-                "        \"store\": \"" + storedString + "\"\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        String createIndexSource = "{\n" + "  \"settings\": {\n" + "    \"index.translog.disable_flush\": true,\n" + "    \"refresh_interval\": \"-1\"\n" + "  },\n" + "  \"mappings\": {\n" + "    \"parentdoc\": {},\n" + "    \"doc\": {\n" + "      \"_source\": {\n" + "        \"enabled\": " + randomBoolean() + "\n" + "      },\n" + "      \"_parent\": {\n" + "        \"type\": \"parentdoc\",\n" + "        \"store\": \"" + storedString + "\"\n" + "      },\n" + "      \"_ttl\": {\n" + "        \"enabled\": true,\n" + "        \"store\": \"" + storedString + "\"\n" + "      }\n" + "    }\n" + "  }\n" + "}";
         assertAcked(prepareCreate("test").addAlias(new Alias("alias")).setSource(createIndexSource));
         ensureGreen();
-        String doc = "{\n" +
-                "  \"_ttl\": \"1h\"\n" +
-                "}";
+        String doc = "{\n" + "  \"_ttl\": \"1h\"\n" + "}";
 
         client().prepareIndex("test", "doc").setId("1").setSource(doc).setParent("1").get();
 
-        String[] fieldsList = {"_ttl", "_parent"};
+        String[] fieldsList = { "_ttl", "_parent" };
         // before refresh - document is only in translog
         assertGetFieldsAlwaysWorks(indexOrAlias(), "doc", "1", fieldsList, "1");
         refresh();
@@ -1009,7 +777,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
     @Test
     public void testUngeneratedFieldsPartOfSourceUnstoredSourceDisabled() throws IOException {
         indexSingleDocumentWithUngeneratedFieldsThatArePartOf_source(false, false);
-        String[] fieldsList = {"my_boost"};
+        String[] fieldsList = { "my_boost" };
         // before refresh - document is only in translog
         assertGetFieldsAlwaysNull(indexOrAlias(), "doc", "1", fieldsList);
         refresh();
@@ -1028,7 +796,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
             sourceEnabled = randomBoolean();
         }
         indexSingleDocumentWithUngeneratedFieldsThatArePartOf_source(stored, sourceEnabled);
-        String[] fieldsList = {"my_boost"};
+        String[] fieldsList = { "my_boost" };
         // before refresh - document is only in translog
         assertGetFieldsAlwaysWorks(indexOrAlias(), "doc", "1", fieldsList);
         refresh();
@@ -1041,39 +809,18 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
     void indexSingleDocumentWithUngeneratedFieldsThatArePartOf_source(boolean stored, boolean sourceEnabled) {
         String storedString = stored ? "yes" : "no";
-        String createIndexSource = "{\n" +
-                "  \"settings\": {\n" +
-                "    \"index.translog.disable_flush\": true,\n" +
-                "    \"refresh_interval\": \"-1\"\n" +
-                "  },\n" +
-                "  \"mappings\": {\n" +
-                "    \"doc\": {\n" +
-                "      \"_source\": {\n" +
-                "        \"enabled\": " + sourceEnabled + "\n" +
-                "      },\n" +
-                "      \"_boost\": {\n" +
-                "        \"name\": \"my_boost\",\n" +
-                "        \"null_value\": 1,\n" +
-                "        \"store\": \"" + storedString + "\"\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        String createIndexSource = "{\n" + "  \"settings\": {\n" + "    \"index.translog.disable_flush\": true,\n" + "    \"refresh_interval\": \"-1\"\n" + "  },\n" + "  \"mappings\": {\n" + "    \"doc\": {\n" + "      \"_source\": {\n" + "        \"enabled\": " + sourceEnabled + "\n" + "      },\n" + "      \"_boost\": {\n" + "        \"name\": \"my_boost\",\n" + "        \"null_value\": 1,\n" + "        \"store\": \"" + storedString + "\"\n" + "      }\n" + "    }\n" + "  }\n" + "}";
         assertAcked(prepareCreate("test").addAlias(new Alias("alias")).setSource(createIndexSource));
         ensureGreen();
-        String doc = "{\n" +
-                "  \"my_boost\": 5.0,\n" +
-                "  \"_ttl\": \"1h\"\n" +
-                "}\n";
+        String doc = "{\n" + "  \"my_boost\": 5.0,\n" + "  \"_ttl\": \"1h\"\n" + "}\n";
 
         client().prepareIndex("test", "doc").setId("1").setSource(doc).setRouting("1").get();
     }
 
-
     @Test
     public void testUngeneratedFieldsNotPartOfSourceUnstored() throws IOException {
         indexSingleDocumentWithUngeneratedFieldsThatAreNeverPartOf_source(false, randomBoolean());
-        String[] fieldsList = {"_timestamp", "_size", "_routing"};
+        String[] fieldsList = { "_timestamp", "_size", "_routing" };
         // before refresh - document is only in translog
         assertGetFieldsAlwaysNull(indexOrAlias(), "doc", "1", fieldsList, "1");
         refresh();
@@ -1087,7 +834,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
     @Test
     public void testUngeneratedFieldsNotPartOfSourceStored() throws IOException {
         indexSingleDocumentWithUngeneratedFieldsThatAreNeverPartOf_source(true, randomBoolean());
-        String[] fieldsList = {"_timestamp", "_size", "_routing"};
+        String[] fieldsList = { "_timestamp", "_size", "_routing" };
         // before refresh - document is only in translog
         assertGetFieldsAlwaysWorks(indexOrAlias(), "doc", "1", fieldsList, "1");
         refresh();
@@ -1100,42 +847,18 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
     void indexSingleDocumentWithUngeneratedFieldsThatAreNeverPartOf_source(boolean stored, boolean sourceEnabled) {
         String storedString = stored ? "yes" : "no";
-        String createIndexSource = "{\n" +
-                "  \"settings\": {\n" +
-                "    \"index.translog.disable_flush\": true,\n" +
-                "    \"refresh_interval\": \"-1\"\n" +
-                "  },\n" +
-                "  \"mappings\": {\n" +
-                "    \"parentdoc\": {},\n" +
-                "    \"doc\": {\n" +
-                "      \"_timestamp\": {\n" +
-                "        \"store\": \"" + storedString + "\",\n" +
-                "        \"enabled\": true\n" +
-                "      },\n" +
-                "      \"_routing\": {\n" +
-                "        \"store\": \"" + storedString + "\"\n" +
-                "      },\n" +
-                "      \"_size\": {\n" +
-                "        \"store\": \"" + storedString + "\",\n" +
-                "        \"enabled\": true\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        String createIndexSource = "{\n" + "  \"settings\": {\n" + "    \"index.translog.disable_flush\": true,\n" + "    \"refresh_interval\": \"-1\"\n" + "  },\n" + "  \"mappings\": {\n" + "    \"parentdoc\": {},\n" + "    \"doc\": {\n" + "      \"_timestamp\": {\n" + "        \"store\": \"" + storedString + "\",\n" + "        \"enabled\": true\n" + "      },\n" + "      \"_routing\": {\n" + "        \"store\": \"" + storedString + "\"\n" + "      },\n" + "      \"_size\": {\n" + "        \"store\": \"" + storedString + "\",\n" + "        \"enabled\": true\n" + "      }\n" + "    }\n" + "  }\n" + "}";
 
         assertAcked(prepareCreate("test").addAlias(new Alias("alias")).setSource(createIndexSource));
         ensureGreen();
-        String doc = "{\n" +
-                "  \"text\": \"some text.\"\n" +
-                "}\n";
+        String doc = "{\n" + "  \"text\": \"some text.\"\n" + "}\n";
         client().prepareIndex("test", "doc").setId("1").setSource(doc).setRouting("1").get();
     }
-
 
     @Test
     public void testGeneratedStringFieldsUnstored() throws IOException {
         indexSingleDocumentWithStringFieldsGeneratedFromText(false, randomBoolean());
-        String[] fieldsList = {"_all", "_field_names"};
+        String[] fieldsList = { "_all", "_field_names" };
         // before refresh - document is only in translog
         assertGetFieldsAlwaysNull(indexOrAlias(), "doc", "1", fieldsList);
         refresh();
@@ -1149,7 +872,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
     @Test
     public void testGeneratedStringFieldsStored() throws IOException {
         indexSingleDocumentWithStringFieldsGeneratedFromText(true, randomBoolean());
-        String[] fieldsList = {"_all", "_field_names"};
+        String[] fieldsList = { "_all", "_field_names" };
         // before refresh - document is only in translog
         assertGetFieldsNull(indexOrAlias(), "doc", "1", fieldsList);
         assertGetFieldsException(indexOrAlias(), "doc", "1", fieldsList);
@@ -1164,34 +887,18 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
     void indexSingleDocumentWithStringFieldsGeneratedFromText(boolean stored, boolean sourceEnabled) {
 
         String storedString = stored ? "yes" : "no";
-        String createIndexSource = "{\n" +
-                "  \"settings\": {\n" +
-                "    \"index.translog.disable_flush\": true,\n" +
-                "    \"refresh_interval\": \"-1\"\n" +
-                "  },\n" +
-                "  \"mappings\": {\n" +
-                "    \"doc\": {\n" +
-                "      \"_source\" : {\"enabled\" : " + sourceEnabled + "}," +
-                "      \"_all\" : {\"enabled\" : true, \"store\":\"" + storedString + "\" }," +
-                "      \"_field_names\" : {\"store\":\"" + storedString + "\" }" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        String createIndexSource = "{\n" + "  \"settings\": {\n" + "    \"index.translog.disable_flush\": true,\n" + "    \"refresh_interval\": \"-1\"\n" + "  },\n" + "  \"mappings\": {\n" + "    \"doc\": {\n" + "      \"_source\" : {\"enabled\" : " + sourceEnabled + "}," + "      \"_all\" : {\"enabled\" : true, \"store\":\"" + storedString + "\" }," + "      \"_field_names\" : {\"store\":\"" + storedString + "\" }" + "    }\n" + "  }\n" + "}";
 
         assertAcked(prepareCreate("test").addAlias(new Alias("alias")).setSource(createIndexSource));
         ensureGreen();
-        String doc = "{\n" +
-                "  \"text1\": \"some text.\"\n," +
-                "  \"text2\": \"more text.\"\n" +
-                "}\n";
+        String doc = "{\n" + "  \"text1\": \"some text.\"\n," + "  \"text2\": \"more text.\"\n" + "}\n";
         index("test", "doc", "1", doc);
     }
-
 
     @Test
     public void testGeneratedNumberFieldsUnstored() throws IOException {
         indexSingleDocumentWithNumericFieldsGeneratedFromText(false, randomBoolean());
-        String[] fieldsList = {"token_count", "text.token_count", "murmur", "text.murmur"};
+        String[] fieldsList = { "token_count", "text.token_count", "murmur", "text.murmur" };
         // before refresh - document is only in translog
         assertGetFieldsAlwaysNull(indexOrAlias(), "doc", "1", fieldsList);
         refresh();
@@ -1205,7 +912,7 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
     @Test
     public void testGeneratedNumberFieldsStored() throws IOException {
         indexSingleDocumentWithNumericFieldsGeneratedFromText(true, randomBoolean());
-        String[] fieldsList = {"token_count", "text.token_count", "murmur", "text.murmur"};
+        String[] fieldsList = { "token_count", "text.token_count", "murmur", "text.murmur" };
         // before refresh - document is only in translog
         assertGetFieldsNull(indexOrAlias(), "doc", "1", fieldsList);
         assertGetFieldsException(indexOrAlias(), "doc", "1", fieldsList);
@@ -1219,50 +926,11 @@ public class GetActionTests extends ElasticsearchIntegrationTest {
 
     void indexSingleDocumentWithNumericFieldsGeneratedFromText(boolean stored, boolean sourceEnabled) {
         String storedString = stored ? "yes" : "no";
-        String createIndexSource = "{\n" +
-                "  \"settings\": {\n" +
-                "    \"index.translog.disable_flush\": true,\n" +
-                "    \"refresh_interval\": \"-1\"\n" +
-                "  },\n" +
-                "  \"mappings\": {\n" +
-                "    \"doc\": {\n" +
-                "      \"_source\" : {\"enabled\" : " + sourceEnabled + "}," +
-                "      \"properties\": {\n" +
-                "        \"token_count\": {\n" +
-                "          \"type\": \"token_count\",\n" +
-                "          \"analyzer\": \"standard\",\n" +
-                "          \"store\": \"" + storedString + "\"" +
-                "        },\n" +
-                "        \"murmur\": {\n" +
-                "          \"type\": \"murmur3\",\n" +
-                "          \"store\": \"" + storedString + "\"" +
-                "        },\n" +
-                "        \"text\": {\n" +
-                "          \"type\": \"string\",\n" +
-                "          \"fields\": {\n" +
-                "            \"token_count\": {\n" +
-                "              \"type\": \"token_count\",\n" +
-                "              \"analyzer\": \"standard\",\n" +
-                "              \"store\": \"" + storedString + "\"" +
-                "            },\n" +
-                "            \"murmur\": {\n" +
-                "              \"type\": \"murmur3\",\n" +
-                "              \"store\": \"" + storedString + "\"" +
-                "            }\n" +
-                "          }\n" +
-                "        }" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        String createIndexSource = "{\n" + "  \"settings\": {\n" + "    \"index.translog.disable_flush\": true,\n" + "    \"refresh_interval\": \"-1\"\n" + "  },\n" + "  \"mappings\": {\n" + "    \"doc\": {\n" + "      \"_source\" : {\"enabled\" : " + sourceEnabled + "}," + "      \"properties\": {\n" + "        \"token_count\": {\n" + "          \"type\": \"token_count\",\n" + "          \"analyzer\": \"standard\",\n" + "          \"store\": \"" + storedString + "\"" + "        },\n" + "        \"murmur\": {\n" + "          \"type\": \"murmur3\",\n" + "          \"store\": \"" + storedString + "\"" + "        },\n" + "        \"text\": {\n" + "          \"type\": \"string\",\n" + "          \"fields\": {\n" + "            \"token_count\": {\n" + "              \"type\": \"token_count\",\n" + "              \"analyzer\": \"standard\",\n" + "              \"store\": \"" + storedString + "\"" + "            },\n" + "            \"murmur\": {\n" + "              \"type\": \"murmur3\",\n" + "              \"store\": \"" + storedString + "\"" + "            }\n" + "          }\n" + "        }" + "      }\n" + "    }\n" + "  }\n" + "}";
 
         assertAcked(prepareCreate("test").addAlias(new Alias("alias")).setSource(createIndexSource));
         ensureGreen();
-        String doc = "{\n" +
-                "  \"murmur\": \"Some value that can be hashed\",\n" +
-                "  \"token_count\": \"A text with five words.\",\n" +
-                "  \"text\": \"A text with five words.\"\n" +
-                "}\n";
+        String doc = "{\n" + "  \"murmur\": \"Some value that can be hashed\",\n" + "  \"token_count\": \"A text with five words.\",\n" + "  \"text\": \"A text with five words.\"\n" + "}\n";
         index("test", "doc", "1", doc);
     }
 

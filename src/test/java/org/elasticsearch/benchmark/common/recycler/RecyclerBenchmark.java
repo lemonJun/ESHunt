@@ -41,7 +41,7 @@ public class RecyclerBenchmark {
         final AtomicLong recycles = new AtomicLong(numRecycles);
         final CountDownLatch latch = new CountDownLatch(1);
         final Thread[] threads = new Thread[numThreads];
-        for (int i = 0; i < numThreads; ++i){
+        for (int i = 0; i < numThreads; ++i) {
             // Thread ids happen to be generated sequentially, so we also generate random threads so that distribution of IDs
             // is not perfect for the concurrent recycler
             for (int j = RANDOM.nextInt(5); j >= 0; --j) {
@@ -89,11 +89,7 @@ public class RecyclerBenchmark {
             }
         };
 
-        final ImmutableMap<String, Recycler<Object>> recyclers = ImmutableMap.<String, Recycler<Object>>builder()
-                .put("none", none(c))
-                .put("concurrent-queue", concurrentDeque(c, limit))
-                .put("locked", locked(deque(c, limit)))
-                .put("concurrent", concurrent(dequeFactory(c, limit), Runtime.getRuntime().availableProcessors())).build();
+        final ImmutableMap<String, Recycler<Object>> recyclers = ImmutableMap.<String, Recycler<Object>> builder().put("none", none(c)).put("concurrent-queue", concurrentDeque(c, limit)).put("locked", locked(deque(c, limit))).put("concurrent", concurrent(dequeFactory(c, limit), Runtime.getRuntime().availableProcessors())).build();
 
         // warmup
         final long start = System.nanoTime();

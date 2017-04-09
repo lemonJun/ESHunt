@@ -43,10 +43,7 @@ public class FixedBitSetFilterCacheTest extends ElasticsearchTestCase {
 
     @Test
     public void testInvalidateEntries() throws Exception {
-        IndexWriter writer = new IndexWriter(
-                new RAMDirectory(),
-                new IndexWriterConfig(Lucene.VERSION, new StandardAnalyzer(Lucene.VERSION)).setMergePolicy(new LogByteSizeMergePolicy())
-        );
+        IndexWriter writer = new IndexWriter(new RAMDirectory(), new IndexWriterConfig(Lucene.VERSION, new StandardAnalyzer(Lucene.VERSION)).setMergePolicy(new LogByteSizeMergePolicy()));
         Document document = new Document();
         document.add(new StringField("field", "value", Field.Store.NO));
         writer.addDocument(document);

@@ -44,7 +44,7 @@ import java.io.IOException;
 import static org.hamcrest.Matchers.equalTo;
 
 @Ignore
-@LuceneTestCase.SuppressCodecs(value = {"Lucene40", "Lucene3x"})
+@LuceneTestCase.SuppressCodecs(value = { "Lucene40", "Lucene3x" })
 public abstract class AbstractChildTests extends ElasticsearchSingleNodeLuceneTestCase {
 
     /**

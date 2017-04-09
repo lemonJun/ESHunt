@@ -50,24 +50,18 @@ public class BenchmarkNettyLargeMessages {
         final int NUMBER_OF_CLIENTS = 5;
         final byte[] payload = new byte[(int) payloadSize.bytes()];
 
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().build();
 
         NetworkService networkService = new NetworkService(settings);
         NodeSettingsService settingsService = new NodeSettingsService(settings);
         DynamicSettings dynamicSettings = new DynamicSettings();
 
-
         final ThreadPool threadPool = new ThreadPool("BenchmarkNettyLargeMessages");
-        final TransportService transportServiceServer = new TransportService(
-                new NettyTransport(settings, threadPool, networkService, BigArrays.NON_RECYCLING_INSTANCE, Version.CURRENT), threadPool
-        ).start();
-        final TransportService transportServiceClient = new TransportService(
-                new NettyTransport(settings, threadPool, networkService, BigArrays.NON_RECYCLING_INSTANCE, Version.CURRENT), threadPool
-        ).start();
+        final TransportService transportServiceServer = new TransportService(new NettyTransport(settings, threadPool, networkService, BigArrays.NON_RECYCLING_INSTANCE, Version.CURRENT), threadPool).start();
+        final TransportService transportServiceClient = new TransportService(new NettyTransport(settings, threadPool, networkService, BigArrays.NON_RECYCLING_INSTANCE, Version.CURRENT), threadPool).start();
 
         final DiscoveryNode bigNode = new DiscoveryNode("big", new InetSocketTransportAddress("localhost", 9300), Version.CURRENT);
-//        final DiscoveryNode smallNode = new DiscoveryNode("small", new InetSocketTransportAddress("localhost", 9300));
+        //        final DiscoveryNode smallNode = new DiscoveryNode("small", new InetSocketTransportAddress("localhost", 9300));
         final DiscoveryNode smallNode = bigNode;
 
         transportServiceClient.connectToNode(bigNode);

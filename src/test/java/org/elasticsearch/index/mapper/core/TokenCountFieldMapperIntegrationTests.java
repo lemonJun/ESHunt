@@ -57,8 +57,7 @@ public class TokenCountFieldMapperIntegrationTests extends ElasticsearchIntegrat
     private final boolean storeCountedFields;
     private final boolean loadCountedFields;
 
-    public TokenCountFieldMapperIntegrationTests(@Name("storeCountedFields") boolean storeCountedFields,
-            @Name("loadCountedFields") boolean loadCountedFields) {
+    public TokenCountFieldMapperIntegrationTests(@Name("storeCountedFields") boolean storeCountedFields, @Name("loadCountedFields") boolean loadCountedFields) {
         this.storeCountedFields = storeCountedFields;
         this.loadCountedFields = loadCountedFields;
     }
@@ -99,10 +98,8 @@ public class TokenCountFieldMapperIntegrationTests extends ElasticsearchIntegrat
     public void facetByTokenCount() throws ElasticsearchException, IOException {
         init();
 
-        String facetField = randomFrom(ImmutableList.of(
-                "foo.token_count", "foo.token_count_unstored", "foo.token_count_with_doc_values"));
-        SearchResponse result = searchByNumericRange(1, 10)
-                .addFacet(new TermsFacetBuilder("facet").field(facetField)).get();
+        String facetField = randomFrom(ImmutableList.of("foo.token_count", "foo.token_count_unstored", "foo.token_count_with_doc_values"));
+        SearchResponse result = searchByNumericRange(1, 10).addFacet(new TermsFacetBuilder("facet").field(facetField)).get();
         assertSearchReturns(result, "single", "bulk1", "bulk2", "multi", "multibulk1", "multibulk2");
         assertThat(result.getFacets().facets().size(), equalTo(1));
         TermsFacet facet = (TermsFacet) result.getFacets().facets().get(0);
@@ -110,48 +107,14 @@ public class TokenCountFieldMapperIntegrationTests extends ElasticsearchIntegrat
     }
 
     private void init() throws ElasticsearchException, IOException {
-        prepareCreate("test").addMapping("test", jsonBuilder().startObject()
-                .startObject("test")
-                    .startObject("properties")
-                        .startObject("foo")
-                            .field("type", "multi_field")
-                            .startObject("fields")
-                                .startObject("foo")
-                                    .field("type", "string")
-                                    .field("store", storeCountedFields)
-                                    .field("analyzer", "simple")
-                                .endObject()
-                                .startObject("token_count")
-                                    .field("type", "token_count")
-                                    .field("analyzer", "standard")
-                                    .field("store", true)
-                                .endObject()
-                                .startObject("token_count_unstored")
-                                    .field("type", "token_count")
-                                    .field("analyzer", "standard")
-                                .endObject()
-                                .startObject("token_count_with_doc_values")
-                                    .field("type", "token_count")
-                                    .field("analyzer", "standard")
-                                    .startObject("fielddata")
-                                        .field("format", LuceneTestCase.defaultCodecSupportsSortedSet() ? "doc_values" : null)
-                                    .endObject()
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                .endObject().endObject()).get();
+        prepareCreate("test").addMapping("test", jsonBuilder().startObject().startObject("test").startObject("properties").startObject("foo").field("type", "multi_field").startObject("fields").startObject("foo").field("type", "string").field("store", storeCountedFields).field("analyzer", "simple").endObject().startObject("token_count").field("type", "token_count").field("analyzer", "standard").field("store", true).endObject().startObject("token_count_unstored").field("type", "token_count").field("analyzer", "standard").endObject().startObject("token_count_with_doc_values").field("type", "token_count").field("analyzer", "standard").startObject("fielddata").field("format", LuceneTestCase.defaultCodecSupportsSortedSet() ? "doc_values" : null).endObject().endObject().endObject().endObject().endObject().endObject().endObject()).get();
         ensureGreen();
 
         assertTrue(prepareIndex("single", "I have four terms").get().isCreated());
-        BulkResponse bulk = client().prepareBulk()
-                .add(prepareIndex("bulk1", "bulk three terms"))
-                .add(prepareIndex("bulk2", "this has five bulk terms")).get();
+        BulkResponse bulk = client().prepareBulk().add(prepareIndex("bulk1", "bulk three terms")).add(prepareIndex("bulk2", "this has five bulk terms")).get();
         assertFalse(bulk.buildFailureMessage(), bulk.hasFailures());
         assertTrue(prepareIndex("multi", "two terms", "wow now I have seven lucky terms").get().isCreated());
-        bulk = client().prepareBulk()
-                .add(prepareIndex("multibulk1", "one", "oh wow now I have eight unlucky terms"))
-                .add(prepareIndex("multibulk2", "six is a bunch of terms", "ten!  ten terms is just crazy!  too many too count!")).get();
+        bulk = client().prepareBulk().add(prepareIndex("multibulk1", "one", "oh wow now I have eight unlucky terms")).add(prepareIndex("multibulk2", "six is a bunch of terms", "ten!  ten terms is just crazy!  too many too count!")).get();
         assertFalse(bulk.buildFailureMessage(), bulk.hasFailures());
 
         assertThat(refresh().getFailedShards(), equalTo(0));
@@ -166,9 +129,7 @@ public class TokenCountFieldMapperIntegrationTests extends ElasticsearchIntegrat
     }
 
     private SearchRequestBuilder searchByNumericRange(int low, int high) {
-        return prepareSearch().setQuery(QueryBuilders.rangeQuery(randomFrom(
-                ImmutableList.of("foo.token_count", "foo.token_count_unstored", "foo.token_count_with_doc_values")
-        )).gte(low).lte(high));
+        return prepareSearch().setQuery(QueryBuilders.rangeQuery(randomFrom(ImmutableList.of("foo.token_count", "foo.token_count_unstored", "foo.token_count_with_doc_values"))).gte(low).lte(high));
     }
 
     private SearchRequestBuilder prepareSearch() {

@@ -42,20 +42,20 @@ import static org.hamcrest.Matchers.*;
 public class PercentileRanksTests extends AbstractNumericTests {
 
     private static double[] randomPercents(long minValue, long maxValue) {
-        
+
         final int length = randomIntBetween(1, 20);
         final double[] percents = new double[length];
         for (int i = 0; i < percents.length; ++i) {
             switch (randomInt(20)) {
-            case 0:
-                percents[i] = minValue;
-                break;
-            case 1:
-                percents[i] = maxValue;
-                break;
-            default:
-                percents[i] = (randomDouble() * (maxValue - minValue)) + minValue;
-                break;
+                case 0:
+                    percents[i] = minValue;
+                    break;
+                case 1:
+                    percents[i] = maxValue;
+                    break;
+                default:
+                    percents[i] = (randomDouble() * (maxValue - minValue)) + minValue;
+                    break;
             }
         }
         Arrays.sort(percents);
@@ -95,12 +95,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testEmptyAggregation() throws Exception {
 
-        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0)
-                        .subAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                                .percentiles(10, 15)))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx").setQuery(matchAllQuery()).addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0).subAggregation(randomCompression(percentileRanks("percentile_ranks")).percentiles(10, 15))).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(2l));
         Histogram histo = searchResponse.getAggregations().get("histo");
@@ -117,12 +112,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
 
     @Test
     public void testUnmapped() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx_unmapped")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .field("value")
-                        .percentiles(0, 10, 15, 100))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx_unmapped").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).field("value").percentiles(0, 10, 15, 100)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(0l));
 
@@ -138,12 +128,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testSingleValuedField() throws Exception {
         final double[] pcts = randomPercents(minValue, maxValue);
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .field("value")
-                        .percentiles(pcts))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).field("value").percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -153,13 +138,8 @@ public class PercentileRanksTests extends AbstractNumericTests {
 
     @Test
     public void testSingleValuedFieldOutsideRange() throws Exception {
-        final double[] pcts = new double[] {minValue - 1, maxValue + 1};
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .field("value")
-                        .percentiles(pcts))
-                .execute().actionGet();
+        final double[] pcts = new double[] { minValue - 1, maxValue + 1 };
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).field("value").percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -170,12 +150,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testSingleValuedField_PartiallyUnmapped() throws Exception {
         final double[] pcts = randomPercents(minValue, maxValue);
-        SearchResponse searchResponse = client().prepareSearch("idx", "idx_unmapped")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .field("value")
-                        .percentiles(pcts))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx", "idx_unmapped").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).field("value").percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -186,12 +161,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testSingleValuedField_WithValueScript() throws Exception {
         final double[] pcts = randomPercents(minValue - 1, maxValue - 1);
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .field("value").script("_value - 1")
-                        .percentiles(pcts))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).field("value").script("_value - 1").percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -202,12 +172,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testSingleValuedField_WithValueScript_WithParams() throws Exception {
         final double[] pcts = randomPercents(minValue - 1, maxValue - 1);
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .field("value").script("_value - dec").param("dec", 1)
-                        .percentiles(pcts))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).field("value").script("_value - dec").param("dec", 1).percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -218,12 +183,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testMultiValuedField() throws Exception {
         final double[] pcts = randomPercents(minValues, maxValues);
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .field("values")
-                        .percentiles(pcts))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).field("values").percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -234,12 +194,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testMultiValuedField_WithValueScript() throws Exception {
         final double[] pcts = randomPercents(minValues - 1, maxValues - 1);
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .field("values").script("_value - 1")
-                        .percentiles(pcts))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).field("values").script("_value - 1").percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -250,12 +205,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testMultiValuedField_WithValueScript_Reverse() throws Exception {
         final double[] pcts = randomPercents(-maxValues, -minValues);
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .field("values").script("_value * -1")
-                        .percentiles(pcts))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).field("values").script("_value * -1").percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -266,12 +216,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testMultiValuedField_WithValueScript_WithParams() throws Exception {
         final double[] pcts = randomPercents(minValues - 1, maxValues - 1);
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .field("values").script("_value - dec").param("dec", 1)
-                        .percentiles(pcts))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).field("values").script("_value - dec").param("dec", 1).percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -282,12 +227,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testScript_SingleValued() throws Exception {
         final double[] pcts = randomPercents(minValue, maxValue);
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .script("doc['value'].value")
-                        .percentiles(pcts))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).script("doc['value'].value").percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -298,12 +238,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testScript_SingleValued_WithParams() throws Exception {
         final double[] pcts = randomPercents(minValue - 1, maxValue - 1);
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .script("doc['value'].value - dec").param("dec", 1)
-                        .percentiles(pcts))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).script("doc['value'].value - dec").param("dec", 1).percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -313,13 +248,8 @@ public class PercentileRanksTests extends AbstractNumericTests {
 
     @Test
     public void testScript_ExplicitSingleValued_WithParams() throws Exception {
-        final double[] pcts = randomPercents(minValue -1 , maxValue - 1);
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .script("doc['value'].value - dec").param("dec", 1)
-                        .percentiles(pcts))
-                .execute().actionGet();
+        final double[] pcts = randomPercents(minValue - 1, maxValue - 1);
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).script("doc['value'].value - dec").param("dec", 1).percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -330,12 +260,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testScript_MultiValued() throws Exception {
         final double[] pcts = randomPercents(minValues, maxValues);
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .script("doc['values'].values")
-                        .percentiles(pcts))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).script("doc['values'].values").percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -346,12 +271,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testScript_ExplicitMultiValued() throws Exception {
         final double[] pcts = randomPercents(minValues, maxValues);
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .script("doc['values'].values")
-                        .percentiles(pcts))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).script("doc['values'].values").percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -362,12 +282,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testScript_MultiValued_WithParams() throws Exception {
         final double[] pcts = randomPercents(minValues - 1, maxValues - 1);
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(randomCompression(percentileRanks("percentile_ranks"))
-                        .script("List values = doc['values'].values; double[] res = new double[values.size()]; for (int i = 0; i < res.length; i++) { res[i] = values.get(i) - dec; }; return res;").param("dec", 1)
-                        .percentiles(pcts))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(randomCompression(percentileRanks("percentile_ranks")).script("List values = doc['values'].values; double[] res = new double[values.size()]; for (int i = 0; i < res.length; i++) { res[i] = values.get(i) - dec; }; return res;").param("dec", 1).percentiles(pcts)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -378,13 +293,7 @@ public class PercentileRanksTests extends AbstractNumericTests {
     @Test
     public void testOrderBySubAggregation() {
         boolean asc = randomBoolean();
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(
-                        histogram("histo").field("value").interval(2l)
-                            .subAggregation(randomCompression(percentileRanks("percentile_ranks").percentiles(99)))
-                            .order(Order.aggregation("percentile_ranks", "99", asc)))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(histogram("histo").field("value").interval(2l).subAggregation(randomCompression(percentileRanks("percentile_ranks").percentiles(99))).order(Order.aggregation("percentile_ranks", "99", asc))).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 

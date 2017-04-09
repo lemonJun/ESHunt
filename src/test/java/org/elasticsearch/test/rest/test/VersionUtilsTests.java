@@ -82,7 +82,7 @@ public class VersionUtilsTests extends ElasticsearchTestCase {
         try {
             parseVersionNumber("1.0.Beta1");
             fail("parseVersionNumber should have thrown an error");
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("version is not a number"));
             assertThat(e.getCause(), instanceOf(NumberFormatException.class));
         }
@@ -112,7 +112,7 @@ public class VersionUtilsTests extends ElasticsearchTestCase {
         try {
             assertThat(skipCurrentVersion("0.90.2 - 0.90.999 - 1.0.0", "1.0.0"), equalTo(false));
             fail("skipCurrentVersion should have thrown an error");
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("too many skip versions found"));
         }
 

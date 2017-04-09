@@ -58,12 +58,8 @@ public class AllocationCommandsTests extends ElasticsearchAllocationTestCase {
         AllocationService allocation = createAllocationService(settingsBuilder().put("cluster.routing.allocation.concurrent_recoveries", 10).build());
 
         logger.info("creating an index with 1 shard, no replica");
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(0))
-                .build();
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(0)).build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
         logger.info("adding two nodes and performing rerouting");
@@ -99,27 +95,15 @@ public class AllocationCommandsTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void allocateCommand() {
-        AllocationService allocation = createAllocationService(settingsBuilder()
-                .put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_NEW_ALLOCATION, true)
-                .put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_ALLOCATION, true)
-                .build());
+        AllocationService allocation = createAllocationService(settingsBuilder().put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_NEW_ALLOCATION, true).put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_ALLOCATION, true).build());
 
         logger.info("--> building initial routing table");
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1))
-                .build();
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1)).build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
         logger.info("--> adding 3 nodes on same rack and do rerouting");
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(newNode("node1"))
-                .put(newNode("node2"))
-                .put(newNode("node3"))
-                .put(newNode("node4", ImmutableMap.of("data", Boolean.FALSE.toString())))
-        ).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2")).put(newNode("node3")).put(newNode("node4", ImmutableMap.of("data", Boolean.FALSE.toString())))).build();
         RoutingAllocation.Result rerouteResult = allocation.reroute(clusterState);
         clusterState = ClusterState.builder(clusterState).routingTable(rerouteResult.routingTable()).build();
         assertThat(clusterState.routingNodes().shardsWithState(INITIALIZING).size(), equalTo(0));
@@ -169,7 +153,6 @@ public class AllocationCommandsTests extends ElasticsearchAllocationTestCase {
         assertThat(clusterState.routingNodes().node("node2").size(), equalTo(1));
         assertThat(clusterState.routingNodes().node("node2").shardsWithState(INITIALIZING).size(), equalTo(1));
 
-
         logger.info("--> start the replica shard");
         rerouteResult = allocation.applyStartedShards(clusterState, clusterState.routingNodes().shardsWithState(INITIALIZING));
         clusterState = ClusterState.builder(clusterState).routingTable(rerouteResult.routingTable()).build();
@@ -188,26 +171,15 @@ public class AllocationCommandsTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void cancelCommand() {
-        AllocationService allocation = createAllocationService(settingsBuilder()
-                .put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_NEW_ALLOCATION, true)
-                .put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_ALLOCATION, true)
-                .build());
+        AllocationService allocation = createAllocationService(settingsBuilder().put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_NEW_ALLOCATION, true).put(DisableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_DISABLE_ALLOCATION, true).build());
 
         logger.info("--> building initial routing table");
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1))
-                .build();
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1)).build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
         logger.info("--> adding 3 nodes");
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(newNode("node1"))
-                .put(newNode("node2"))
-                .put(newNode("node3"))
-        ).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2")).put(newNode("node3"))).build();
         RoutingAllocation.Result rerouteResult = allocation.reroute(clusterState);
         clusterState = ClusterState.builder(clusterState).routingTable(rerouteResult.routingTable()).build();
         assertThat(clusterState.routingNodes().shardsWithState(INITIALIZING).size(), equalTo(0));
@@ -326,7 +298,6 @@ public class AllocationCommandsTests extends ElasticsearchAllocationTestCase {
         assertThat(clusterState.routingNodes().node("node2").size(), equalTo(1));
         assertThat(clusterState.routingNodes().node("node2").shardsWithState(STARTED).size(), equalTo(1));
 
-
         logger.info("--> cancel the primary allocation (with allow_primary set to true)");
         rerouteResult = allocation.reroute(clusterState, new AllocationCommands(new CancelAllocationCommand(new ShardId("test", 0), "node1", true)));
         clusterState = ClusterState.builder(clusterState).routingTable(rerouteResult.routingTable()).build();
@@ -338,11 +309,7 @@ public class AllocationCommandsTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void serialization() throws Exception {
-        AllocationCommands commands = new AllocationCommands(
-                new AllocateAllocationCommand(new ShardId("test", 1), "node1", true),
-                new MoveAllocationCommand(new ShardId("test", 3), "node2", "node3"),
-                new CancelAllocationCommand(new ShardId("test", 4), "node5", true)
-        );
+        AllocationCommands commands = new AllocationCommands(new AllocateAllocationCommand(new ShardId("test", 1), "node1", true), new MoveAllocationCommand(new ShardId("test", 3), "node2", "node3"), new CancelAllocationCommand(new ShardId("test", 4), "node5", true));
         BytesStreamOutput bytes = new BytesStreamOutput();
         AllocationCommands.writeTo(commands, bytes);
         AllocationCommands sCommands = AllocationCommands.readFrom(new BytesStreamInput(bytes.bytes()));
@@ -363,13 +330,7 @@ public class AllocationCommandsTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void xContent() throws Exception {
-        String commands = "{\n" +
-                "    \"commands\" : [\n" +
-                "        {\"allocate\" : {\"index\" : \"test\", \"shard\" : 1, \"node\" : \"node1\", \"allow_primary\" : true}}\n" +
-                "       ,{\"move\" : {\"index\" : \"test\", \"shard\" : 3, \"from_node\" : \"node2\", \"to_node\" : \"node3\"}} \n" +
-                "       ,{\"cancel\" : {\"index\" : \"test\", \"shard\" : 4, \"node\" : \"node5\", \"allow_primary\" : true}} \n" +
-                "    ]\n" +
-                "}\n";
+        String commands = "{\n" + "    \"commands\" : [\n" + "        {\"allocate\" : {\"index\" : \"test\", \"shard\" : 1, \"node\" : \"node1\", \"allow_primary\" : true}}\n" + "       ,{\"move\" : {\"index\" : \"test\", \"shard\" : 3, \"from_node\" : \"node2\", \"to_node\" : \"node3\"}} \n" + "       ,{\"cancel\" : {\"index\" : \"test\", \"shard\" : 4, \"node\" : \"node5\", \"allow_primary\" : true}} \n" + "    ]\n" + "}\n";
         XContentParser parser = XContentFactory.xContent(XContentType.JSON).createParser(commands);
         // move two tokens, parser expected to be "on" `commands` field
         parser.nextToken();

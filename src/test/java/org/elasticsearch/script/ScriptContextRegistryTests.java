@@ -36,7 +36,7 @@ public class ScriptContextRegistryTests extends ElasticsearchTestCase {
                 //try to register a prohibited script context
                 new ScriptContextRegistry(Lists.newArrayList(new ScriptContext.Plugin("test", rejectedContext)));
                 fail("ScriptContextRegistry initialization should have failed");
-            } catch(ElasticsearchIllegalArgumentException e) {
+            } catch (ElasticsearchIllegalArgumentException e) {
                 assertThat(e.getMessage(), Matchers.containsString("[" + rejectedContext + "] is a reserved name, it cannot be registered as a custom script context"));
             }
         }
@@ -49,7 +49,7 @@ public class ScriptContextRegistryTests extends ElasticsearchTestCase {
                 //try to register a prohibited script context
                 new ScriptContextRegistry(Lists.newArrayList(new ScriptContext.Plugin(rejectedContext, "test")));
                 fail("ScriptContextRegistry initialization should have failed");
-            } catch(ElasticsearchIllegalArgumentException e) {
+            } catch (ElasticsearchIllegalArgumentException e) {
                 assertThat(e.getMessage(), Matchers.containsString("[" + rejectedContext + "] is a reserved name, it cannot be registered as a custom script context"));
             }
         }
@@ -71,7 +71,7 @@ public class ScriptContextRegistryTests extends ElasticsearchTestCase {
             //try to register a prohibited script context
             new ScriptContextRegistry(Lists.newArrayList(new ScriptContext.Plugin("testplugin", "test"), new ScriptContext.Plugin("testplugin", "test")));
             fail("ScriptContextRegistry initialization should have failed");
-        } catch(ElasticsearchIllegalArgumentException e) {
+        } catch (ElasticsearchIllegalArgumentException e) {
             assertThat(e.getMessage(), Matchers.containsString("script context [testplugin_test] cannot be registered twice"));
         }
     }

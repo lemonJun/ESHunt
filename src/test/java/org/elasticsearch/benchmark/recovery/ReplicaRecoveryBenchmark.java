@@ -51,7 +51,6 @@ public class ReplicaRecoveryBenchmark {
     private static final String INDEX_NAME = "index";
     private static final String TYPE_NAME = "type";
 
-
     static int DOC_COUNT = (int) SizeValue.parseSizeValue("40k").singles();
     static int CONCURRENT_INDEXERS = 2;
 
@@ -59,18 +58,10 @@ public class ReplicaRecoveryBenchmark {
         System.setProperty("es.logger.prefix", "");
         Bootstrap.initializeNatives(true, false);
 
-        Settings settings = settingsBuilder()
-                .put("gateway.type", "local")
-                .put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_DISK_THRESHOLD_ENABLED, "false")
-                .put(SETTING_NUMBER_OF_SHARDS, 1)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .put(TransportModule.TRANSPORT_TYPE_KEY, "local")
-                .build();
+        Settings settings = settingsBuilder().put("gateway.type", "local").put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_DISK_THRESHOLD_ENABLED, "false").put(SETTING_NUMBER_OF_SHARDS, 1).put(SETTING_NUMBER_OF_REPLICAS, 0).put(TransportModule.TRANSPORT_TYPE_KEY, "local").build();
 
         String clusterName = ReplicaRecoveryBenchmark.class.getSimpleName();
-        Node node1 = nodeBuilder().clusterName(clusterName)
-                .settings(settingsBuilder().put(settings))
-                .node();
+        Node node1 = nodeBuilder().clusterName(clusterName).settings(settingsBuilder().put(settings)).node();
 
         final ESLogger logger = ESLoggerFactory.getLogger("benchmark");
 
@@ -96,12 +87,9 @@ public class ReplicaRecoveryBenchmark {
             logger.info("--> indexed {} of {}", indexer.totalIndexedDocs(), DOC_COUNT);
         }
 
-
         logger.info("--> starting another node and allocating a shard on it");
 
-        Node node2 = nodeBuilder().clusterName(clusterName)
-                .settings(settingsBuilder().put(settings))
-                .node();
+        Node node2 = nodeBuilder().clusterName(clusterName).settings(settingsBuilder().put(settings)).node();
 
         client1.admin().indices().prepareUpdateSettings(INDEX_NAME).setSettings(IndexMetaData.SETTING_NUMBER_OF_REPLICAS + ": 1").get();
 
@@ -139,9 +127,7 @@ public class ReplicaRecoveryBenchmark {
                         translogOps = lastTranslogOps = 0;
                     }
                     float seconds = (currentTime - lastTime) / 1000.0F;
-                    logger.info("--> indexed [{}];[{}] doc/s, recovered [{}] MB/s , translog ops [{}]/s ",
-                            currentDocs, (currentDocs - lastDocs) / seconds,
-                            (bytes - lastBytes) / 1024.0F / 1024F / seconds, (translogOps - lastTranslogOps) / seconds);
+                    logger.info("--> indexed [{}];[{}] doc/s, recovered [{}] MB/s , translog ops [{}]/s ", currentDocs, (currentDocs - lastDocs) / seconds, (bytes - lastBytes) / 1024.0F / 1024F / seconds, (translogOps - lastTranslogOps) / seconds);
                     lastBytes = bytes;
                     lastTranslogOps = translogOps;
                     lastTime = currentTime;
@@ -188,9 +174,7 @@ public class ReplicaRecoveryBenchmark {
 
         backgroundLogger.join();
 
-        logger.info("average doc/s [{}], average relocation time [{}], taking [{}], [{}], [{}]", (endDocIndexed - startDocIndexed) * 1000.0 / totalTime, new TimeValue(totalRecoveryTime / 3),
-                TimeValue.timeValueMillis(recoveryTimes[0]), TimeValue.timeValueMillis(recoveryTimes[1]), TimeValue.timeValueMillis(recoveryTimes[2])
-        );
+        logger.info("average doc/s [{}], average relocation time [{}], taking [{}], [{}], [{}]", (endDocIndexed - startDocIndexed) * 1000.0 / totalTime, new TimeValue(totalRecoveryTime / 3), TimeValue.timeValueMillis(recoveryTimes[0]), TimeValue.timeValueMillis(recoveryTimes[1]), TimeValue.timeValueMillis(recoveryTimes[2]));
 
         client1.close();
         node1.close();

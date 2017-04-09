@@ -94,7 +94,7 @@ public class IndicesStoreTests extends ElasticsearchTestCase {
 
         for (int i = 0; i < numShards; i++) {
             int unStartedShard = randomInt(numReplicas);
-            for (int j=0; j <= numReplicas; j++) {
+            for (int j = 0; j <= numReplicas; j++) {
                 ShardRoutingState state;
                 if (j == unStartedShard) {
                     state = randomFrom(NOT_STARTED_STATES);
@@ -186,11 +186,8 @@ public class IndicesStoreTests extends ElasticsearchTestCase {
         clusterState.metaData(MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(numShards).numberOfReplicas(numReplicas)));
         final Version nodeVersion = randomBoolean() ? Version.CURRENT : randomVersion();
 
-        clusterState.nodes(DiscoveryNodes.builder().localNodeId(localNode.id())
-                .put(localNode)
-                .put(new DiscoveryNode("xyz", new LocalTransportAddress("xyz"), Version.CURRENT))
-                .put(new DiscoveryNode("def", new LocalTransportAddress("def"), nodeVersion) // <-- only set relocating, since we're testing that in this test
-                ));
+        clusterState.nodes(DiscoveryNodes.builder().localNodeId(localNode.id()).put(localNode).put(new DiscoveryNode("xyz", new LocalTransportAddress("xyz"), Version.CURRENT)).put(new DiscoveryNode("def", new LocalTransportAddress("def"), nodeVersion) // <-- only set relocating, since we're testing that in this test
+        ));
         IndexShardRoutingTable.Builder routingTable = new IndexShardRoutingTable.Builder(new ShardId("test", 1), false);
         for (int i = 0; i < numShards; i++) {
             routingTable.addShard(new ImmutableShardRouting("test", i, "xyz", "def", true, ShardRoutingState.STARTED, 0));

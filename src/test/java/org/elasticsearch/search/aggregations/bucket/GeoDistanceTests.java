@@ -63,26 +63,20 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
     }
 
     public void setupSuiteScopeCluster() throws Exception {
-        prepareCreate("idx")
-                .addMapping("type", "location", "type=geo_point", "city", "type=string,index=not_analyzed")
-                .execute().actionGet();
+        prepareCreate("idx").addMapping("type", "location", "type=geo_point", "city", "type=string,index=not_analyzed").execute().actionGet();
 
-        prepareCreate("idx-multi")
-                .addMapping("type", "location", "type=geo_point", "city", "type=string,index=not_analyzed")
-                .execute().actionGet();
+        prepareCreate("idx-multi").addMapping("type", "location", "type=geo_point", "city", "type=string,index=not_analyzed").execute().actionGet();
 
         createIndex("idx_unmapped");
 
         List<IndexRequestBuilder> cities = new ArrayList<>();
         cities.addAll(Arrays.asList(
-                // below 500km
-                indexCity("idx", "utrecht", "52.0945, 5.116"),
-                indexCity("idx", "haarlem", "52.3890, 4.637"),
-                // above 500km, below 1000km
-                indexCity("idx", "berlin", "52.540, 13.409"),
-                indexCity("idx", "prague", "50.097679, 14.441314"),
-                // above 1000km
-                indexCity("idx", "tel-aviv", "32.0741, 34.777")));
+                        // below 500km
+                        indexCity("idx", "utrecht", "52.0945, 5.116"), indexCity("idx", "haarlem", "52.3890, 4.637"),
+                        // above 500km, below 1000km
+                        indexCity("idx", "berlin", "52.540, 13.409"), indexCity("idx", "prague", "50.097679, 14.441314"),
+                        // above 1000km
+                        indexCity("idx", "tel-aviv", "32.0741, 34.777")));
 
         // random cities with no location
         for (String cityName : Arrays.asList("london", "singapour", "tokyo", "milan")) {
@@ -93,10 +87,9 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         indexRandom(true, cities);
 
         cities.clear();
-        cities.addAll(Arrays.asList(
-                indexCity("idx-multi", "city1", "52.3890, 4.637", "50.097679,14.441314"), // first point is within the ~17.5km, the second is ~710km
-                indexCity("idx-multi", "city2", "52.540, 13.409", "52.0945, 5.116"), // first point is ~576km, the second is within the ~35km
-                indexCity("idx-multi", "city3", "32.0741, 34.777"))); // above 1000km
+        cities.addAll(Arrays.asList(indexCity("idx-multi", "city1", "52.3890, 4.637", "50.097679,14.441314"), // first point is within the ~17.5km, the second is ~710km
+                        indexCity("idx-multi", "city2", "52.540, 13.409", "52.0945, 5.116"), // first point is ~576km, the second is within the ~35km
+                        indexCity("idx-multi", "city3", "32.0741, 34.777"))); // above 1000km
 
         // random cities with no location
         for (String cityName : Arrays.asList("london", "singapour", "tokyo", "milan")) {
@@ -108,11 +101,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         prepareCreate("empty_bucket_idx").addMapping("type", "value", "type=integer", "location", "type=geo_point").execute().actionGet();
         List<IndexRequestBuilder> builders = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
-            builders.add(client().prepareIndex("empty_bucket_idx", "type", "" + i).setSource(jsonBuilder()
-                    .startObject()
-                    .field("value", i * 2)
-                    .field("location", "52.0945, 5.116")
-                    .endObject()));
+            builders.add(client().prepareIndex("empty_bucket_idx", "type", "" + i).setSource(jsonBuilder().startObject().field("value", i * 2).field("location", "52.0945, 5.116").endObject()));
         }
         indexRandom(true, builders.toArray(new IndexRequestBuilder[builders.size()]));
         ensureSearchable();
@@ -120,18 +109,10 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void simple() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(geoDistance("amsterdam_rings")
-                        .field("location")
-                        .unit(DistanceUnit.KILOMETERS)
-                        .point("52.3760, 4.894") // coords of amsterdam
-                        .addUnboundedTo(500)
-                        .addRange(500, 1000)
-                        .addUnboundedFrom(1000))
-                        .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(geoDistance("amsterdam_rings").field("location").unit(DistanceUnit.KILOMETERS).point("52.3760, 4.894") // coords of amsterdam
+                        .addUnboundedTo(500).addRange(500, 1000).addUnboundedFrom(1000)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         GeoDistance geoDist = response.getAggregations().get("amsterdam_rings");
         assertThat(geoDist, notNullValue());
@@ -168,18 +149,10 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void simple_WithCustomKeys() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(geoDistance("amsterdam_rings")
-                        .field("location")
-                        .unit(DistanceUnit.KILOMETERS)
-                        .point("52.3760, 4.894") // coords of amsterdam
-                        .addUnboundedTo("ring1", 500)
-                        .addRange("ring2", 500, 1000)
-                        .addUnboundedFrom("ring3", 1000))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(geoDistance("amsterdam_rings").field("location").unit(DistanceUnit.KILOMETERS).point("52.3760, 4.894") // coords of amsterdam
+                        .addUnboundedTo("ring1", 500).addRange("ring2", 500, 1000).addUnboundedFrom("ring3", 1000)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         GeoDistance geoDist = response.getAggregations().get("amsterdam_rings");
         assertThat(geoDist, notNullValue());
@@ -218,18 +191,10 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
     public void unmapped() throws Exception {
         client().admin().cluster().prepareHealth("idx_unmapped").setWaitForYellowStatus().execute().actionGet();
 
-        SearchResponse response = client().prepareSearch("idx_unmapped")
-                .addAggregation(geoDistance("amsterdam_rings")
-                        .field("location")
-                        .unit(DistanceUnit.KILOMETERS)
-                        .point("52.3760, 4.894") // coords of amsterdam
-                        .addUnboundedTo(500)
-                        .addRange(500, 1000)
-                        .addUnboundedFrom(1000))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx_unmapped").addAggregation(geoDistance("amsterdam_rings").field("location").unit(DistanceUnit.KILOMETERS).point("52.3760, 4.894") // coords of amsterdam
+                        .addUnboundedTo(500).addRange(500, 1000).addUnboundedFrom(1000)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         GeoDistance geoDist = response.getAggregations().get("amsterdam_rings");
         assertThat(geoDist, notNullValue());
@@ -266,18 +231,10 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void partiallyUnmapped() throws Exception {
-        SearchResponse response = client().prepareSearch("idx", "idx_unmapped")
-                .addAggregation(geoDistance("amsterdam_rings")
-                        .field("location")
-                        .unit(DistanceUnit.KILOMETERS)
-                        .point("52.3760, 4.894") // coords of amsterdam
-                        .addUnboundedTo(500)
-                        .addRange(500, 1000)
-                        .addUnboundedFrom(1000))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx", "idx_unmapped").addAggregation(geoDistance("amsterdam_rings").field("location").unit(DistanceUnit.KILOMETERS).point("52.3760, 4.894") // coords of amsterdam
+                        .addUnboundedTo(500).addRange(500, 1000).addUnboundedFrom(1000)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         GeoDistance geoDist = response.getAggregations().get("amsterdam_rings");
         assertThat(geoDist, notNullValue());
@@ -312,23 +269,12 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(bucket.getDocCount(), equalTo(1l));
     }
 
-
     @Test
     public void withSubAggregation() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(geoDistance("amsterdam_rings")
-                        .field("location")
-                        .unit(DistanceUnit.KILOMETERS)
-                        .point("52.3760, 4.894") // coords of amsterdam
-                        .addUnboundedTo(500)
-                        .addRange(500, 1000)
-                        .addUnboundedFrom(1000)
-                        .subAggregation(terms("cities").field("city")
-                                .collectMode(randomFrom(SubAggCollectionMode.values()))))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(geoDistance("amsterdam_rings").field("location").unit(DistanceUnit.KILOMETERS).point("52.3760, 4.894") // coords of amsterdam
+                        .addUnboundedTo(500).addRange(500, 1000).addUnboundedFrom(1000).subAggregation(terms("cities").field("city").collectMode(randomFrom(SubAggCollectionMode.values())))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         GeoDistance geoDist = response.getAggregations().get("amsterdam_rings");
         assertThat(geoDist, notNullValue());
@@ -389,11 +335,7 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void emptyAggregation() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0)
-                        .subAggregation(geoDistance("geo_dist").field("location").point("52.3760, 4.894").addRange("0-100", 0.0, 100.0)))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx").setQuery(matchAllQuery()).addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0).subAggregation(geoDistance("geo_dist").field("location").point("52.3760, 4.894").addRange("0-100", 0.0, 100.0))).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(2l));
         Histogram histo = searchResponse.getAggregations().get("histo");
@@ -417,16 +359,8 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValues() throws Exception {
-        SearchResponse response = client().prepareSearch("idx-multi")
-                .addAggregation(geoDistance("amsterdam_rings")
-                        .field("location")
-                        .unit(DistanceUnit.KILOMETERS)
-                        .distanceType(org.elasticsearch.common.geo.GeoDistance.ARC)
-                        .point("52.3760, 4.894") // coords of amsterdam
-                        .addUnboundedTo(500)
-                        .addRange(500, 1000)
-                        .addUnboundedFrom(1000))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx-multi").addAggregation(geoDistance("amsterdam_rings").field("location").unit(DistanceUnit.KILOMETERS).distanceType(org.elasticsearch.common.geo.GeoDistance.ARC).point("52.3760, 4.894") // coords of amsterdam
+                        .addUnboundedTo(500).addRange(500, 1000).addUnboundedFrom(1000)).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -462,7 +396,5 @@ public class GeoDistanceTests extends ElasticsearchIntegrationTest {
         assertThat(bucket.getToAsString(), nullValue());
         assertThat(bucket.getDocCount(), equalTo(1l));
     }
-
-
 
 }

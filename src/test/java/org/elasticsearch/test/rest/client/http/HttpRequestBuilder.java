@@ -190,7 +190,7 @@ public class HttpRequestBuilder {
                 uriBuilder.append("?").append(Joiner.on('&').withKeyValueSeparator("=").join(params));
             }
             return URI.create(uriBuilder.toString());
-        } catch(URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw new IllegalArgumentException("unable to build uri", e);
         }
     }
@@ -210,8 +210,7 @@ public class HttpRequestBuilder {
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder(method).append(" '")
-                .append(host).append(":").append(port).append(path).append("'");
+        StringBuilder stringBuilder = new StringBuilder(method).append(" '").append(host).append(":").append(port).append(path).append("'");
         if (!params.isEmpty()) {
             stringBuilder.append(", params=").append(params);
         }

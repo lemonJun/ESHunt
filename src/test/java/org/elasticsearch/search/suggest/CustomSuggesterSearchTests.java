@@ -39,7 +39,7 @@ import static org.hamcrest.Matchers.is;
 /**
  *
  */
-@ClusterScope(scope= Scope.SUITE, numDataNodes =1)
+@ClusterScope(scope = Scope.SUITE, numDataNodes = 1)
 public class CustomSuggesterSearchTests extends ElasticsearchIntegrationTest {
 
     @Override
@@ -50,34 +50,20 @@ public class CustomSuggesterSearchTests extends ElasticsearchIntegrationTest {
     @Test
     public void testThatCustomSuggestersCanBeRegisteredAndWork() throws Exception {
         createIndex("test");
-        client().prepareIndex("test", "test", "1").setSource(jsonBuilder()
-                .startObject()
-                .field("name", "arbitrary content")
-                .endObject())
-                .setRefresh(true).execute().actionGet();
+        client().prepareIndex("test", "test", "1").setSource(jsonBuilder().startObject().field("name", "arbitrary content").endObject()).setRefresh(true).execute().actionGet();
         ensureYellow();
-        
+
         String randomText = randomAsciiOfLength(10);
         String randomField = randomAsciiOfLength(10);
         String randomSuffix = randomAsciiOfLength(10);
         SearchRequestBuilder searchRequestBuilder = client().prepareSearch("test").setTypes("test").setFrom(0).setSize(1);
-        XContentBuilder query = jsonBuilder().startObject()
-                .startObject("suggest")
-                .startObject("someName")
-                .field("text", randomText)
-                .startObject("custom")
-                .field("field", randomField)
-                .field("suffix", randomSuffix)
-                .endObject()
-                .endObject()
-                .endObject()
-                .endObject();
+        XContentBuilder query = jsonBuilder().startObject().startObject("suggest").startObject("someName").field("text", randomText).startObject("custom").field("field", randomField).field("suffix", randomSuffix).endObject().endObject().endObject().endObject();
         searchRequestBuilder.setExtraSource(query.bytes());
 
         SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
 
         // TODO: infer type once JI-9019884 is fixed
-        List<Suggest.Suggestion.Entry<? extends Suggest.Suggestion.Entry.Option>> suggestions = Lists.<Suggest.Suggestion.Entry<? extends Suggest.Suggestion.Entry.Option>>newArrayList(searchResponse.getSuggest().getSuggestion("someName").iterator());
+        List<Suggest.Suggestion.Entry<? extends Suggest.Suggestion.Entry.Option>> suggestions = Lists.<Suggest.Suggestion.Entry<? extends Suggest.Suggestion.Entry.Option>> newArrayList(searchResponse.getSuggest().getSuggestion("someName").iterator());
         assertThat(suggestions, hasSize(2));
         assertThat(suggestions.get(0).getText().string(), is(String.format(Locale.ROOT, "%s-%s-%s-12", randomText, randomField, randomSuffix)));
         assertThat(suggestions.get(1).getText().string(), is(String.format(Locale.ROOT, "%s-%s-%s-123", randomText, randomField, randomSuffix)));

@@ -78,10 +78,7 @@ public class HttpPipeliningHandlerTest extends ElasticsearchTestCase {
         clientBootstrap.setPipelineFactory(new ChannelPipelineFactory() {
             @Override
             public ChannelPipeline getPipeline() throws Exception {
-                return Channels.pipeline(
-                        new HttpClientCodec(),
-                        new ClientHandler()
-                );
+                return Channels.pipeline(new HttpClientCodec(), new ClientHandler());
             }
         });
 
@@ -90,12 +87,7 @@ public class HttpPipeliningHandlerTest extends ElasticsearchTestCase {
         serverBootstrap.setPipelineFactory(new ChannelPipelineFactory() {
             @Override
             public ChannelPipeline getPipeline() throws Exception {
-                return Channels.pipeline(
-                        new HttpRequestDecoder(),
-                        new HttpResponseEncoder(),
-                        new HttpPipeliningHandler(10000),
-                        new ServerHandler()
-                );
+                return Channels.pipeline(new HttpRequestDecoder(), new HttpResponseEncoder(), new HttpPipeliningHandler(10000), new ServerHandler());
             }
         });
 
@@ -124,12 +116,10 @@ public class HttpPipeliningHandlerTest extends ElasticsearchTestCase {
         assertTrue(connectionFuture.await(CONNECTION_TIMEOUT));
         final Channel clientChannel = connectionFuture.getChannel();
 
-        final HttpRequest request1 = new DefaultHttpRequest(
-                HTTP_1_1, HttpMethod.GET, PATH1);
+        final HttpRequest request1 = new DefaultHttpRequest(HTTP_1_1, HttpMethod.GET, PATH1);
         request1.headers().add(HOST, HOST_ADDR.toString());
 
-        final HttpRequest request2 = new DefaultHttpRequest(
-                HTTP_1_1, HttpMethod.GET, PATH2);
+        final HttpRequest request2 = new DefaultHttpRequest(HTTP_1_1, HttpMethod.GET, PATH2);
         request2.headers().add(HOST, HOST_ADDR.toString());
 
         clientChannel.write(request1);
@@ -185,8 +175,7 @@ public class HttpPipeliningHandlerTest extends ElasticsearchTestCase {
             private final OrderedUpstreamMessageEvent oue;
             private final int subSequence;
 
-            public ChunkWriter(final ChannelHandlerContext ctx, final MessageEvent e, final String uri,
-                               final OrderedUpstreamMessageEvent oue, final int subSequence) {
+            public ChunkWriter(final ChannelHandlerContext ctx, final MessageEvent e, final String uri, final OrderedUpstreamMessageEvent oue, final int subSequence) {
                 this.ctx = ctx;
                 this.e = e;
                 this.uri = uri;

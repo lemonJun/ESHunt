@@ -55,7 +55,7 @@ public class PercentilesAggregationSearchBenchmark {
     private static final int NUM_DOCS = (int) SizeValue.parseSizeValue("1m").singles();
     private static final int BATCH = 100;
     private static final String CLUSTER_NAME = PercentilesAggregationSearchBenchmark.class.getSimpleName();
-    private static final double[] PERCENTILES = new double[] { 0, 0.01, 0.1, 1, 10, 25, 50, 75, 90, 99, 99.9, 99.99, 100};
+    private static final double[] PERCENTILES = new double[] { 0, 0.01, 0.1, 1, 10, 25, 50, 75, 90, 99, 99.9, 99.99, 100 };
     private static final int QUERY_WARMUP = 10;
     private static final int QUERY_COUNT = 20;
 
@@ -84,6 +84,7 @@ public class PercentilesAggregationSearchBenchmark {
         String indexName() {
             return name().toLowerCase(Locale.ROOT);
         }
+
         abstract int next();
     }
 
@@ -99,28 +100,21 @@ public class PercentilesAggregationSearchBenchmark {
     }
 
     public static void main(String[] args) throws Exception {
-        Settings settings = settingsBuilder()
-                .put("index.refresh_interval", "-1")
-                .put(SETTING_NUMBER_OF_SHARDS, 100) // to also test performance and accuracy of the reduce phase
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put("index.refresh_interval", "-1").put(SETTING_NUMBER_OF_SHARDS, 100) // to also test performance and accuracy of the reduce phase
+                        .put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
         Node[] nodes = new Node[1];
         for (int i = 0; i < nodes.length; i++) {
-            nodes[i] = nodeBuilder().clusterName(CLUSTER_NAME)
-                    .settings(settingsBuilder().put(settings).put("name", "node" + i))
-                    .node();
+            nodes[i] = nodeBuilder().clusterName(CLUSTER_NAME).settings(settingsBuilder().put(settings).put("name", "node" + i)).node();
         }
 
-        Node clientNode = nodeBuilder()
-                .clusterName(CLUSTER_NAME)
-                .settings(settingsBuilder().put(settings).put("name", "client")).client(true).node();
+        Node clientNode = nodeBuilder().clusterName(CLUSTER_NAME).settings(settingsBuilder().put(settings).put("name", "client")).client(true).node();
 
         Client client = clientNode.client();
 
         for (Distribution d : Distribution.values()) {
             try {
-//                client.admin().indices().prepareDelete(d.indexName()).execute().actionGet();
+                //                client.admin().indices().prepareDelete(d.indexName()).execute().actionGet();
                 client.admin().indices().create(createIndexRequest(d.indexName()).settings(settings)).actionGet();
             } catch (Exception e) {
                 System.out.println("Index " + d.indexName() + " already exists, skipping index creation");
@@ -133,7 +127,7 @@ public class PercentilesAggregationSearchBenchmark {
             }
             System.out.println("Indexing " + NUM_DOCS + " documents into " + d.indexName());
             StopWatch stopWatch = new StopWatch().start();
-            for (int i = 0; i < NUM_DOCS; ) {
+            for (int i = 0; i < NUM_DOCS;) {
                 BulkRequestBuilder request = client.prepareBulk();
                 for (int j = 0; j < BATCH && i < NUM_DOCS; ++j) {
                     request.add(client.prepareIndex(d.indexName(), "values", Integer.toString(i)).setSource("v", values[i]));
@@ -190,7 +184,7 @@ public class PercentilesAggregationSearchBenchmark {
             System.out.println("Sum of error squares: " + sumOfErrorSquares);
             System.out.println();
         }
-        
+
         System.out.println("## Performance");
         for (int i = 0; i < 3; ++i) {
             for (Distribution d : Distribution.values()) {

@@ -51,11 +51,8 @@ import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilde
  */
 final class ExternalNode implements Closeable {
 
-    public static final Settings REQUIRED_SETTINGS = settingsBuilder()
-            .put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true)
-            .put(DiscoveryModule.DISCOVERY_TYPE_KEY, "zen")
-            .put("node.mode", "network") // we need network mode for this
-            .put("gateway.type", "local").build(); // we require local gateway to mimic upgrades of nodes
+    public static final Settings REQUIRED_SETTINGS = settingsBuilder().put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true).put(DiscoveryModule.DISCOVERY_TYPE_KEY, "zen").put("node.mode", "network") // we need network mode for this
+                    .put("gateway.type", "local").build(); // we require local gateway to mimic upgrades of nodes
 
     private final File path;
     private final Random random;
@@ -67,7 +64,6 @@ final class ExternalNode implements Closeable {
 
     private final ESLogger logger = Loggers.getLogger(getClass());
     private Settings externalNodeSettings;
-
 
     ExternalNode(File path, long seed, SettingsSource settingsSource) {
         this(path, null, seed, settingsSource);
@@ -195,10 +191,7 @@ final class ExternalNode implements Closeable {
             TransportAddress addr = nodeInfo.getTransport().getAddress().publishAddress();
             // verify that the end node setting will have network enabled.
 
-            Settings clientSettings = settingsBuilder().put(externalNodeSettings)
-                    .put("client.transport.nodes_sampler_interval", "1s")
-                    .put("name", "transport_client_" + nodeInfo.getNode().name())
-                    .put(ClusterName.SETTING, clusterName).put("client.transport.sniff", false).build();
+            Settings clientSettings = settingsBuilder().put(externalNodeSettings).put("client.transport.nodes_sampler_interval", "1s").put("name", "transport_client_" + nodeInfo.getNode().name()).put(ClusterName.SETTING, clusterName).put("client.transport.sniff", false).build();
             TransportClient client = new TransportClient(clientSettings);
             client.addTransportAddress(addr);
             this.client = client;
@@ -239,7 +232,6 @@ final class ExternalNode implements Closeable {
             }
         }
     }
-
 
     synchronized boolean running() {
         return process != null;

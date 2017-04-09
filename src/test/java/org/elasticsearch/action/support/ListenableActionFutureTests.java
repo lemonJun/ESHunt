@@ -72,5 +72,4 @@ public class ListenableActionFutureTests extends ElasticsearchTestCase {
         }
     }
 
-
 }

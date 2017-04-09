@@ -41,10 +41,7 @@ public class SimpleDynamicTemplatesTests extends ElasticsearchSingleNodeTest {
     @Test
     public void testMatchTypeOnly() throws Exception {
         XContentBuilder builder = JsonXContent.contentBuilder();
-        builder.startObject().startObject("person").startArray("dynamic_templates").startObject().startObject("test")
-                .field("match_mapping_type", "string")
-                .startObject("mapping").field("index", "no").endObject()
-                .endObject().endObject().endArray().endObject().endObject();
+        builder.startObject().startObject("person").startArray("dynamic_templates").startObject().startObject("test").field("match_mapping_type", "string").startObject("mapping").field("index", "no").endObject().endObject().endObject().endArray().endObject().endObject();
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(builder.string());
         builder = JsonXContent.contentBuilder();
         builder.startObject().field("_id", "1").field("s", "hello").field("l", 1).endObject();
@@ -58,9 +55,7 @@ public class SimpleDynamicTemplatesTests extends ElasticsearchSingleNodeTest {
         assertThat(mappers.smartName("l"), Matchers.notNullValue());
         assertThat(mappers.smartName("l").mapper().fieldType().indexed(), equalTo(true));
 
-
     }
-
 
     @Test
     public void testSimple() throws Exception {

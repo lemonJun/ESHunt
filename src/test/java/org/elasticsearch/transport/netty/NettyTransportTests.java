@@ -63,9 +63,7 @@ public class NettyTransportTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return settingsBuilder().put(super.nodeSettings(nodeOrdinal))
-                .put("node.mode", "network")
-                .put(TransportModule.TRANSPORT_TYPE_KEY, ExceptionThrowingNettyTransport.class.getName()).build();
+        return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("node.mode", "network").put(TransportModule.TRANSPORT_TYPE_KEY, ExceptionThrowingNettyTransport.class.getName()).build();
     }
 
     @Test
@@ -155,7 +153,7 @@ public class NettyTransportTests extends ElasticsearchIntegrationTest {
                             this.action = action;
                         }
 
-                        @SuppressWarnings({"unchecked"})
+                        @SuppressWarnings({ "unchecked" })
                         @Override
                         protected void doRun() throws Exception {
                             handler.messageReceived(request, transportChannel);
@@ -176,7 +174,8 @@ public class NettyTransportTests extends ElasticsearchIntegrationTest {
                                     logger.warn("Failed to send error message back to client for action [" + action + "]", e1);
                                     logger.warn("Actual Exception", e);
                                 }
-                            }                        }
+                            }
+                        }
                     }
                 });
                 return pipeline;

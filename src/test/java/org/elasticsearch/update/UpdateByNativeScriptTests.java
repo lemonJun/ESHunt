@@ -36,15 +36,12 @@ import static org.hamcrest.Matchers.is;
 /**
  *
  */
-@ClusterScope(scope= Scope.SUITE, numDataNodes =1)
+@ClusterScope(scope = Scope.SUITE, numDataNodes = 1)
 public class UpdateByNativeScriptTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("script.native.custom.type", CustomNativeScriptFactory.class.getName())
-                .build();
+        return ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("script.native.custom.type", CustomNativeScriptFactory.class.getName()).build();
     }
 
     @Test
@@ -56,9 +53,7 @@ public class UpdateByNativeScriptTests extends ElasticsearchIntegrationTest {
 
         Map<String, Object> params = Maps.newHashMap();
         params.put("foo", "SETVALUE");
-        client().prepareUpdate("test", "type", "1")
-                .setScript("custom", ScriptService.ScriptType.INLINE)
-                .setScriptLang(NativeScriptEngineService.NAME).setScriptParams(params).get();
+        client().prepareUpdate("test", "type", "1").setScript("custom", ScriptService.ScriptType.INLINE).setScriptLang(NativeScriptEngineService.NAME).setScriptParams(params).get();
 
         Map<String, Object> data = client().prepareGet("test", "type", "1").get().getSource();
         assertThat(data, hasKey("foo"));

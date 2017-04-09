@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 
-
 public class CountDownTest extends ElasticsearchTestCase {
 
     @Test
@@ -48,7 +47,7 @@ public class CountDownTest extends ElasticsearchTestCase {
                         throw new RuntimeException();
                     }
                     while (true) {
-                        if(frequently()) {
+                        if (frequently()) {
                             if (countDown.isCountedDown()) {
                                 break;
                             }
@@ -79,12 +78,12 @@ public class CountDownTest extends ElasticsearchTestCase {
         assertThat(countDown.isCountedDown(), equalTo(true));
         assertThat(count.get(), Matchers.equalTo(1));
     }
-    
+
     @Test
     public void testSingleThreaded() {
         int atLeast = scaledRandomIntBetween(10, 1000);
         final CountDown countDown = new CountDown(atLeast);
-        while(!countDown.isCountedDown()) {
+        while (!countDown.isCountedDown()) {
             atLeast--;
             if (countDown.countDown()) {
                 assertThat(atLeast, equalTo(0));

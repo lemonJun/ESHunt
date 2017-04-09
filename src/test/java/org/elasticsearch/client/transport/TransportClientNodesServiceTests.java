@@ -55,7 +55,7 @@ public class TransportClientNodesServiceTests extends ElasticsearchTestCase {
             transport = new FailAndRetryMockTransport<TestResponse>(getRandom()) {
                 @Override
                 protected TestResponse newResponse() {
-                    return  new TestResponse();
+                    return new TestResponse();
                 }
             };
             transportService = new TransportService(ImmutableSettings.EMPTY, transport, threadPool);
@@ -85,8 +85,8 @@ public class TransportClientNodesServiceTests extends ElasticsearchTestCase {
     public void testListenerFailures() throws InterruptedException {
 
         int iters = iterations(10, 100);
-        for (int i = 0; i <iters; i++) {
-            try(final TestIteration iteration = new TestIteration()) {
+        for (int i = 0; i < iters; i++) {
+            try (final TestIteration iteration = new TestIteration()) {
                 final CountDownLatch latch = new CountDownLatch(1);
                 final AtomicInteger finalFailures = new AtomicInteger();
                 final AtomicReference<Throwable> finalFailure = new AtomicReference<>();

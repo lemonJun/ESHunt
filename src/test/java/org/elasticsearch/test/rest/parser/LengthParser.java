@@ -30,15 +30,15 @@ public class LengthParser implements RestTestFragmentParser<LengthAssertion> {
 
     @Override
     public LengthAssertion parse(RestTestSuiteParseContext parseContext) throws IOException, RestTestParseException {
-        Tuple<String,Object> stringObjectTuple = parseContext.parseTuple();
+        Tuple<String, Object> stringObjectTuple = parseContext.parseTuple();
         assert stringObjectTuple.v2() != null;
         int value;
-        if (stringObjectTuple.v2() instanceof  Number) {
+        if (stringObjectTuple.v2() instanceof Number) {
             value = ((Number) stringObjectTuple.v2()).intValue();
         } else {
             try {
                 value = Integer.valueOf(stringObjectTuple.v2().toString());
-            } catch(NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw new RestTestParseException("length is not a valid number", e);
             }
 

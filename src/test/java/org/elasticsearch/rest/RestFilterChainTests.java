@@ -69,7 +69,7 @@ public class RestFilterChainTests extends ElasticsearchTestCase {
         for (RestFilter filter : restFiltersByOrder) {
             TestFilter testFilter = (TestFilter) filter;
             expectedRestFilters.add(testFilter);
-            if (!(testFilter.callback == Operation.CONTINUE_PROCESSING) ) {
+            if (!(testFilter.callback == Operation.CONTINUE_PROCESSING)) {
                 break;
             }
         }
@@ -86,10 +86,9 @@ public class RestFilterChainTests extends ElasticsearchTestCase {
         restController.dispatchRequest(fakeRestRequest, fakeRestChannel);
         assertThat(fakeRestChannel.await(), equalTo(true));
 
-
         List<TestFilter> testFiltersByLastExecution = Lists.newArrayList();
         for (RestFilter restFilter : filters) {
-            testFiltersByLastExecution.add((TestFilter)restFilter);
+            testFiltersByLastExecution.add((TestFilter) restFilter);
         }
         Collections.sort(testFiltersByLastExecution, new Comparator<TestFilter>() {
             @Override
@@ -102,7 +101,7 @@ public class RestFilterChainTests extends ElasticsearchTestCase {
         for (RestFilter filter : testFiltersByLastExecution) {
             TestFilter testFilter = (TestFilter) filter;
             finalTestFilters.add(testFilter);
-            if (!(testFilter.callback == Operation.CONTINUE_PROCESSING) ) {
+            if (!(testFilter.callback == Operation.CONTINUE_PROCESSING)) {
                 break;
             }
         }

@@ -104,8 +104,7 @@ public class MemoryCircuitBreakerTests extends ElasticsearchTestCase {
             }
         };
         final BreakerSettings settings = new BreakerSettings(CircuitBreaker.Name.REQUEST, (BYTES_PER_THREAD * NUM_THREADS) - 1, 1.0);
-        final ChildMemoryCircuitBreaker breaker = new ChildMemoryCircuitBreaker(settings, logger,
-                (HierarchyCircuitBreakerService)service, CircuitBreaker.Name.REQUEST);
+        final ChildMemoryCircuitBreaker breaker = new ChildMemoryCircuitBreaker(settings, logger, (HierarchyCircuitBreakerService) service, CircuitBreaker.Name.REQUEST);
         breakerRef.set(breaker);
 
         for (int i = 0; i < NUM_THREADS; i++) {
@@ -170,8 +169,7 @@ public class MemoryCircuitBreakerTests extends ElasticsearchTestCase {
             }
         };
         final BreakerSettings settings = new BreakerSettings(CircuitBreaker.Name.REQUEST, childLimit, 1.0);
-        final ChildMemoryCircuitBreaker breaker = new ChildMemoryCircuitBreaker(settings, logger,
-                (HierarchyCircuitBreakerService)service, CircuitBreaker.Name.REQUEST);
+        final ChildMemoryCircuitBreaker breaker = new ChildMemoryCircuitBreaker(settings, logger, (HierarchyCircuitBreakerService) service, CircuitBreaker.Name.REQUEST);
         breakerRef.set(breaker);
 
         for (int i = 0; i < NUM_THREADS; i++) {
@@ -191,8 +189,7 @@ public class MemoryCircuitBreakerTests extends ElasticsearchTestCase {
             });
         }
 
-        logger.info("--> NUM_THREADS: [{}], BYTES_PER_THREAD: [{}], TOTAL_BYTES: [{}], PARENT_LIMIT: [{}], CHILD_LIMIT: [{}]",
-                NUM_THREADS, BYTES_PER_THREAD, (BYTES_PER_THREAD * NUM_THREADS), parentLimit, childLimit);
+        logger.info("--> NUM_THREADS: [{}], BYTES_PER_THREAD: [{}], TOTAL_BYTES: [{}], PARENT_LIMIT: [{}], CHILD_LIMIT: [{}]", NUM_THREADS, BYTES_PER_THREAD, (BYTES_PER_THREAD * NUM_THREADS), parentLimit, childLimit);
 
         logger.info("--> starting threads...");
         for (Thread t : threads) {
@@ -206,8 +203,7 @@ public class MemoryCircuitBreakerTests extends ElasticsearchTestCase {
         logger.info("--> child breaker: used: {}, limit: {}", breaker.getUsed(), breaker.getLimit());
         logger.info("--> parent tripped: {}, total trip count: {} (expecting 1-2 for each)", parentTripped.get(), tripped.get());
         assertThat("no other exceptions were thrown", lastException.get(), equalTo(null));
-        assertThat("breaker should be reset back to the parent limit after parent breaker trips",
-                breaker.getUsed(), greaterThanOrEqualTo((long)parentLimit - NUM_THREADS));
+        assertThat("breaker should be reset back to the parent limit after parent breaker trips", breaker.getUsed(), greaterThanOrEqualTo((long) parentLimit - NUM_THREADS));
         assertThat("parent breaker was tripped at least once", parentTripped.get(), greaterThanOrEqualTo(1));
         assertThat("total breaker was tripped at least once", tripped.get(), greaterThanOrEqualTo(1));
     }

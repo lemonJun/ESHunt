@@ -43,18 +43,11 @@ public class FailedNodeRoutingTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void simpleFailedNodeTest() {
-        AllocationService strategy = createAllocationService(settingsBuilder().put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE,
-                ClusterRebalanceAllocationDecider.ClusterRebalanceType.ALWAYS.toString()).build());
+        AllocationService strategy = createAllocationService(settingsBuilder().put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, ClusterRebalanceAllocationDecider.ClusterRebalanceType.ALWAYS.toString()).build());
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test1").numberOfShards(1).numberOfReplicas(1))
-                .put(IndexMetaData.builder("test2").numberOfShards(1).numberOfReplicas(1))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test1").numberOfShards(1).numberOfReplicas(1)).put(IndexMetaData.builder("test2").numberOfShards(1).numberOfReplicas(1)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test1"))
-                .addAsNew(metaData.index("test2"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test1")).addAsNew(metaData.index("test2")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
@@ -83,14 +76,9 @@ public class FailedNodeRoutingTests extends ElasticsearchAllocationTestCase {
         assertThat(routingNodes.node("node3").numberOfShardsWithState(STARTED), equalTo(1));
         assertThat(routingNodes.node("node4").numberOfShardsWithState(STARTED), equalTo(1));
 
-
         logger.info("remove 2 nodes where primaries are allocated, reroute");
 
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder(clusterState.nodes())
-                .remove(routingTable.index("test1").shard(0).primaryShard().currentNodeId())
-                .remove(routingTable.index("test2").shard(0).primaryShard().currentNodeId())
-        )
-                .build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder(clusterState.nodes()).remove(routingTable.index("test1").shard(0).primaryShard().currentNodeId()).remove(routingTable.index("test2").shard(0).primaryShard().currentNodeId())).build();
         prevRoutingTable = routingTable;
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();

@@ -30,7 +30,7 @@ public class MatchParser implements RestTestFragmentParser<MatchAssertion> {
 
     @Override
     public MatchAssertion parse(RestTestSuiteParseContext parseContext) throws IOException, RestTestParseException {
-        Tuple<String,Object> stringObjectTuple = parseContext.parseTuple();
+        Tuple<String, Object> stringObjectTuple = parseContext.parseTuple();
         return new MatchAssertion(stringObjectTuple.v1(), stringObjectTuple.v2());
     }
 }

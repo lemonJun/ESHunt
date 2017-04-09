@@ -31,16 +31,10 @@ import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertExis
 
 public class SimpleExistsTests extends ElasticsearchIntegrationTest {
 
-
     @Test
     public void testExistsRandomPreference() throws Exception {
         createIndex("test");
-        indexRandom(true, client().prepareIndex("test", "type", "1").setSource("field", "value"),
-                client().prepareIndex("test", "type", "2").setSource("field", "value"),
-                client().prepareIndex("test", "type", "3").setSource("field", "value"),
-                client().prepareIndex("test", "type", "4").setSource("field", "value"),
-                client().prepareIndex("test", "type", "5").setSource("field", "value"),
-                client().prepareIndex("test", "type", "6").setSource("field", "value"));
+        indexRandom(true, client().prepareIndex("test", "type", "1").setSource("field", "value"), client().prepareIndex("test", "type", "2").setSource("field", "value"), client().prepareIndex("test", "type", "3").setSource("field", "value"), client().prepareIndex("test", "type", "4").setSource("field", "value"), client().prepareIndex("test", "type", "5").setSource("field", "value"), client().prepareIndex("test", "type", "6").setSource("field", "value"));
 
         int iters = scaledRandomIntBetween(10, 100);
         for (int i = 0; i < iters; i++) {
@@ -56,22 +50,15 @@ public class SimpleExistsTests extends ElasticsearchIntegrationTest {
         }
     }
 
-
     @Test
     public void simpleIpTests() throws Exception {
         createIndex("test");
 
-        client().admin().indices().preparePutMapping("test").setType("type1")
-                .setSource(XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("from").field("type", "ip").endObject()
-                        .startObject("to").field("type", "ip").endObject()
-                        .endObject().endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().preparePutMapping("test").setType("type1").setSource(XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("from").field("type", "ip").endObject().startObject("to").field("type", "ip").endObject().endObject().endObject().endObject()).execute().actionGet();
 
         client().prepareIndex("test", "type1", "1").setSource("from", "192.168.0.5", "to", "192.168.0.10").setRefresh(true).execute().actionGet();
 
-        ExistsResponse existsResponse = client().prepareExists()
-                .setQuery(boolQuery().must(rangeQuery("from").lt("192.168.0.7")).must(rangeQuery("to").gt("192.168.0.7"))).get();
+        ExistsResponse existsResponse = client().prepareExists().setQuery(boolQuery().must(rangeQuery("from").lt("192.168.0.7")).must(rangeQuery("to").gt("192.168.0.7"))).get();
 
         assertExists(existsResponse, true);
 

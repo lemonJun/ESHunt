@@ -34,9 +34,8 @@ public class IndicesSegmentsRequestTests extends ElasticsearchSingleNodeTest {
     @Before
     public void setupIndex() {
         Settings settings = ImmutableSettings.builder()
-            // don't allow any merges so that the num docs is the expected segments
-            .put("index.merge.policy.segments_per_tier", 1000000f)
-            .build();
+                        // don't allow any merges so that the num docs is the expected segments
+                        .put("index.merge.policy.segments_per_tier", 1000000f).build();
         createIndex("test", settings);
 
         int numDocs = scaledRandomIntBetween(100, 1000);
@@ -56,7 +55,7 @@ public class IndicesSegmentsRequestTests extends ElasticsearchSingleNodeTest {
     /**
      * with the default IndicesOptions inherited from BroadcastOperationRequest this will raise an exception
      */
-    @Test(expected=org.elasticsearch.indices.IndexClosedException.class)
+    @Test(expected = org.elasticsearch.indices.IndexClosedException.class)
     public void testRequestOnClosedIndex() {
         client().admin().indices().prepareClose("test").get();
         client().admin().indices().prepareSegments("test").get();

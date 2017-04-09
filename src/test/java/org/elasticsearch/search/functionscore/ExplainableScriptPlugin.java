@@ -24,7 +24,9 @@ import org.elasticsearch.script.ScriptModule;
 
 public class ExplainableScriptPlugin extends AbstractPlugin {
 
-    public ExplainableScriptPlugin() {}
+    public ExplainableScriptPlugin() {
+    }
+
     @Override
     public String name() {
         return "native-explainable-script";

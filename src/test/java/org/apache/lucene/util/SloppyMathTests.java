@@ -26,14 +26,14 @@ import org.junit.Test;
 
 import static org.hamcrest.number.IsCloseTo.closeTo;
 
-public class SloppyMathTests extends ElasticsearchTestCase {    
+public class SloppyMathTests extends ElasticsearchTestCase {
 
     @Test
     public void testAccuracy() {
-        for (double lat1 = -89; lat1 <= 89; lat1+=1) {
+        for (double lat1 = -89; lat1 <= 89; lat1 += 1) {
             final double lon1 = randomLongitude();
 
-            for (double i = -180; i <= 180; i+=1) {
+            for (double i = -180; i <= 180; i += 1) {
                 final double lon2 = i;
                 final double lat2 = randomLatitude();
 
@@ -53,8 +53,8 @@ public class SloppyMathTests extends ElasticsearchTestCase {
     private static double maxError(double distance) {
         return distance / 1000.0;
     }
-    
-    private void testSloppyMath(DistanceUnit unit, double...deltaDeg) {
+
+    private void testSloppyMath(DistanceUnit unit, double... deltaDeg) {
         final double lat1 = randomLatitude();
         final double lon1 = randomLongitude();
         logger.info("testing SloppyMath with {} at \"{}, {}\"", unit, lat1, lon1);
@@ -68,16 +68,16 @@ public class SloppyMathTests extends ElasticsearchTestCase {
 
                 final double accurate = GeoDistance.ARC.calculate(lat1, lon1, lat2, lon2, unit);
                 final double dist = GeoDistance.SLOPPY_ARC.calculate(lat1, lon1, lat2, lon2, unit);
-    
-                assertThat("distance between("+lat1+", "+lon1+") and ("+lat2+", "+lon2+"))", dist, closeTo(accurate, maxError(accurate)));
+
+                assertThat("distance between(" + lat1 + ", " + lon1 + ") and (" + lat2 + ", " + lon2 + "))", dist, closeTo(accurate, maxError(accurate)));
             }
         }
     }
-        
+
     private static void assertAccurate(double lat1, double lon1, double lat2, double lon2) {
         double accurate = GeoDistance.ARC.calculate(lat1, lon1, lat2, lon2, DistanceUnit.METERS);
         double sloppy = GeoDistance.SLOPPY_ARC.calculate(lat1, lon1, lat2, lon2, DistanceUnit.METERS);
-        assertThat("distance between("+lat1+", "+lon1+") and ("+lat2+", "+lon2+"))", sloppy, closeTo(accurate, maxError(accurate)));
+        assertThat("distance between(" + lat1 + ", " + lon1 + ") and (" + lat2 + ", " + lon2 + "))", sloppy, closeTo(accurate, maxError(accurate)));
     }
 
     private static final double randomLatitude() {

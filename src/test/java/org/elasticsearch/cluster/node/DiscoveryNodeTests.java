@@ -35,7 +35,6 @@ import java.util.Map;
 
 public class DiscoveryNodeTests extends ElasticsearchTestCase {
 
-
     @Test
     public void testJavaSerializablilty() throws IOException, ClassNotFoundException {
         final int iters = scaledRandomIntBetween(100, 300);

@@ -49,7 +49,6 @@ import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilde
 import static org.elasticsearch.test.ElasticsearchIntegrationTest.*;
 import static org.hamcrest.Matchers.*;
 
-
 /**
  *
  */
@@ -70,10 +69,7 @@ public class IndexLifecycleActionTests extends ElasticsearchIntegrationTest {
     @Nightly
     @Test
     public void testIndexLifecycleActionsWith11Shards1Backup() throws Exception {
-        Settings settings = settingsBuilder()
-                .put(SETTING_NUMBER_OF_SHARDS, 11)
-                .put(SETTING_NUMBER_OF_REPLICAS, 1)
-                .build();
+        Settings settings = settingsBuilder().put(SETTING_NUMBER_OF_SHARDS, 11).put(SETTING_NUMBER_OF_REPLICAS, 1).build();
 
         // start one server
         logger.info("Starting sever1");
@@ -120,7 +116,6 @@ public class IndexLifecycleActionTests extends ElasticsearchIntegrationTest {
         assertThat(clusterHealth.getActiveShards(), equalTo(22));
         assertThat(clusterHealth.getActivePrimaryShards(), equalTo(11));
 
-
         clusterState = client().admin().cluster().prepareState().get().getState();
         assertNodesPresent(clusterState.readOnlyRoutingNodes(), node1, node2);
         routingNodeEntry1 = clusterState.readOnlyRoutingNodes().node(node1);
@@ -139,9 +134,7 @@ public class IndexLifecycleActionTests extends ElasticsearchIntegrationTest {
         assertThat(clusterHealth.isTimedOut(), equalTo(false));
         assertThat(clusterHealth.getStatus(), equalTo(ClusterHealthStatus.GREEN));
 
-
         final String node3 = getLocalNodeId(server_3);
-
 
         // explicitly call reroute, so shards will get relocated to the new node (we delay it in ES in case other nodes join)
         client().admin().cluster().prepareReroute().execute().actionGet();
@@ -155,7 +148,6 @@ public class IndexLifecycleActionTests extends ElasticsearchIntegrationTest {
         assertThat(clusterHealth.getRelocatingShards(), equalTo(0));
         assertThat(clusterHealth.getActiveShards(), equalTo(22));
         assertThat(clusterHealth.getActivePrimaryShards(), equalTo(11));
-
 
         clusterState = client().admin().cluster().prepareState().get().getState();
         assertNodesPresent(clusterState.readOnlyRoutingNodes(), node1, node2, node3);
@@ -207,7 +199,6 @@ public class IndexLifecycleActionTests extends ElasticsearchIntegrationTest {
         assertThat(routingNodeEntry3.numberOfShardsWithState(RELOCATING), equalTo(0));
         assertThat(routingNodeEntry3.numberOfShardsWithState(STARTED), equalTo(11));
 
-
         logger.info("Deleting index [test]");
         // last, lets delete the index
         DeleteIndexResponse deleteIndexResponse = client().admin().indices().prepareDelete("test").execute().actionGet();
@@ -234,10 +225,7 @@ public class IndexLifecycleActionTests extends ElasticsearchIntegrationTest {
     @Test
     public void testIndexLifecycleActionsWith11Shards0Backup() throws Exception {
 
-        Settings settings = settingsBuilder()
-                .put(SETTING_NUMBER_OF_SHARDS, 11)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put(SETTING_NUMBER_OF_SHARDS, 11).put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
         // start one server
         logger.info("Starting server1");
@@ -287,7 +275,6 @@ public class IndexLifecycleActionTests extends ElasticsearchIntegrationTest {
         assertThat(clusterHealth.getActiveShards(), equalTo(11));
         assertThat(clusterHealth.getActivePrimaryShards(), equalTo(11));
 
-
         clusterState = client().admin().cluster().prepareState().get().getState();
         assertNodesPresent(clusterState.readOnlyRoutingNodes(), node1, node2);
         routingNodeEntry1 = clusterState.readOnlyRoutingNodes().node(node1);
@@ -319,7 +306,6 @@ public class IndexLifecycleActionTests extends ElasticsearchIntegrationTest {
         assertThat(clusterHealth.getRelocatingShards(), equalTo(0));
         assertThat(clusterHealth.getActiveShards(), equalTo(11));
         assertThat(clusterHealth.getActivePrimaryShards(), equalTo(11));
-
 
         clusterState = client().admin().cluster().prepareState().get().getState();
         assertNodesPresent(clusterState.readOnlyRoutingNodes(), node1, node2, node3);

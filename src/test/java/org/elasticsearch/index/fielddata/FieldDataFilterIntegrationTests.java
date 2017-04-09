@@ -46,23 +46,7 @@ public class FieldDataFilterIntegrationTests extends ElasticsearchIntegrationTes
     @Test
     public void testRegexpFilter() throws IOException {
         CreateIndexRequestBuilder builder = prepareCreate("test");
-        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                    .startObject("name")
-                        .field("type", "string")
-                        .startObject("fielddata")
-                            .startObject("filter")
-                                .startObject("regex")
-                                    .field("pattern", "^bac.*")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                    .startObject("not_filtered")
-                        .field("type", "string")
-                    .endObject()
-                .endObject()
-                .endObject().endObject();
+        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("name").field("type", "string").startObject("fielddata").startObject("filter").startObject("regex").field("pattern", "^bac.*").endObject().endObject().endObject().endObject().startObject("not_filtered").field("type", "string").endObject().endObject().endObject().endObject();
         assertAcked(builder.addMapping("type", mapping));
         ensureGreen();
         int numDocs = scaledRandomIntBetween(5, 50);
@@ -70,16 +54,12 @@ public class FieldDataFilterIntegrationTests extends ElasticsearchIntegrationTes
             client().prepareIndex("test", "type", "" + 0).setSource("name", "bacon bastards", "not_filtered", "bacon bastards").get();
         }
         refresh();
-        SearchResponse searchResponse = client().prepareSearch()
-                .setSearchType(SearchType.COUNT)
-                .setQuery(matchAllQuery())
-                .addFacet(termsFacet("name").field("name"))
-                .addFacet(termsFacet("not_filtered").field("not_filtered")).get();
+        SearchResponse searchResponse = client().prepareSearch().setSearchType(SearchType.COUNT).setQuery(matchAllQuery()).addFacet(termsFacet("name").field("name")).addFacet(termsFacet("not_filtered").field("not_filtered")).get();
         Facets facets = searchResponse.getFacets();
         TermsFacet nameFacet = facets.facet("name");
         assertThat(nameFacet.getEntries().size(), Matchers.equalTo(1));
         assertThat(nameFacet.getEntries().get(0).getTerm().string(), Matchers.equalTo("bacon"));
-        
+
         TermsFacet notFilteredFacet = facets.facet("not_filtered");
         assertThat(notFilteredFacet.getEntries().size(), Matchers.equalTo(2));
         assertThat(notFilteredFacet.getEntries().get(0).getTerm().string(), Matchers.isOneOf("bacon", "bastards"));

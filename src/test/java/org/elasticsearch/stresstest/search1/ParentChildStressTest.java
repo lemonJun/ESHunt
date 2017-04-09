@@ -37,7 +37,6 @@ import org.elasticsearch.transport.RemoteTransportException;
 import java.io.IOException;
 import java.util.*;
 
-
 public class ParentChildStressTest {
 
     private Node elasticNode;
@@ -52,16 +51,11 @@ public class ParentChildStressTest {
      */
     public ParentChildStressTest() {
         NodeBuilder nodeBuilder = NodeBuilder.nodeBuilder();
-        Settings settings = nodeBuilder.settings()
-                .build();
+        Settings settings = nodeBuilder.settings().build();
         this.elasticNode = nodeBuilder.settings(settings).client(true).node();
         this.client = this.elasticNode.client();
 
-        String mapping =
-                "{\"contentFiles\": {" +
-                        "\"_parent\": {" +
-                        "\"type\" : \"content\"" +
-                        "}}}";
+        String mapping = "{\"contentFiles\": {" + "\"_parent\": {" + "\"type\" : \"content\"" + "}}}";
 
         try {
             client.admin().indices().create(new CreateIndexRequest(INDEX_NAME).mapping(CHILD_TYPE_NAME, mapping)).actionGet();
@@ -163,13 +157,7 @@ public class ParentChildStressTest {
      * loops until it finds the doc.
      */
     public void searchDocByChild() throws InterruptedException {
-        String dslString =
-                "{\"query\":{" +
-                        "\"has_child\":{" +
-                        "\"query\":{" +
-                        "\"field\":{" +
-                        "\"description\":\"child test\"}}," +
-                        "\"type\":\"contentFiles\"}}}";
+        String dslString = "{\"query\":{" + "\"has_child\":{" + "\"query\":{" + "\"field\":{" + "\"description\":\"child test\"}}," + "\"type\":\"contentFiles\"}}}";
 
         int numTries = 0;
         List<String> items = new ArrayList<>();

@@ -73,37 +73,23 @@ public class SignificantTermsBackwardCompatibilityTests extends ElasticsearchBac
     }
 
     private void index01Docs(String type, String settings) throws ExecutionException, InterruptedException {
-        String mappings = "{\"doc\": {\"properties\":{\"" + TEXT_FIELD + "\": {\"type\":\"" + type
- + "\"},\"" + CLASS_FIELD
-                + "\": {\"type\":\"string\"}}}}";
+        String mappings = "{\"doc\": {\"properties\":{\"" + TEXT_FIELD + "\": {\"type\":\"" + type + "\"},\"" + CLASS_FIELD + "\": {\"type\":\"string\"}}}}";
         assertAcked(prepareCreate(INDEX_NAME).setSettings(settings).addMapping("doc", mappings));
-        String[] gb = {"0", "1"};
+        String[] gb = { "0", "1" };
         List<IndexRequestBuilder> indexRequestBuilderList = new ArrayList<>();
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "1")
-                .setSource(TEXT_FIELD, "1", CLASS_FIELD, "1"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "2")
-                .setSource(TEXT_FIELD, "1", CLASS_FIELD, "1"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "3")
-                .setSource(TEXT_FIELD, "0", CLASS_FIELD, "0"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "4")
-                .setSource(TEXT_FIELD, "0", CLASS_FIELD, "0"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "5")
-                .setSource(TEXT_FIELD, gb, CLASS_FIELD, "1"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "6")
-                .setSource(TEXT_FIELD, gb, CLASS_FIELD, "0"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "7")
-                .setSource(TEXT_FIELD, "0", CLASS_FIELD, "0"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "1").setSource(TEXT_FIELD, "1", CLASS_FIELD, "1"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "2").setSource(TEXT_FIELD, "1", CLASS_FIELD, "1"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "3").setSource(TEXT_FIELD, "0", CLASS_FIELD, "0"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "4").setSource(TEXT_FIELD, "0", CLASS_FIELD, "0"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "5").setSource(TEXT_FIELD, gb, CLASS_FIELD, "1"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "6").setSource(TEXT_FIELD, gb, CLASS_FIELD, "0"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "7").setSource(TEXT_FIELD, "0", CLASS_FIELD, "0"));
         indexRandom(true, indexRequestBuilderList);
     }
 
     private void checkSignificantTermsAggregationCorrect() {
 
-        SearchResponse response = client().prepareSearch(INDEX_NAME).setTypes(DOC_TYPE)
-                .addAggregation(new TermsBuilder("class").field(CLASS_FIELD).subAggregation(
-                        new SignificantTermsBuilder("sig_terms")
-                                .field(TEXT_FIELD)))
-                .execute()
-                .actionGet();
+        SearchResponse response = client().prepareSearch(INDEX_NAME).setTypes(DOC_TYPE).addAggregation(new TermsBuilder("class").field(CLASS_FIELD).subAggregation(new SignificantTermsBuilder("sig_terms").field(TEXT_FIELD))).execute().actionGet();
         assertSearchResponse(response);
         StringTerms classes = (StringTerms) response.getAggregations().get("class");
         assertThat(classes.getBuckets().size(), equalTo(2));

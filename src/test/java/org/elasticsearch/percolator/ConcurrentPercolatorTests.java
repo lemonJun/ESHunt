@@ -43,7 +43,6 @@ import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertAcke
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertNoFailures;
 import static org.hamcrest.Matchers.*;
 
-
 /**
  *
  */
@@ -57,28 +56,14 @@ public class ConcurrentPercolatorTests extends ElasticsearchIntegrationTest {
         assertAcked(prepareCreate("index").addMapping("type", "field1", "type=long", "field2", "type=string")); // random # shards better has a mapping!
         ensureGreen();
 
-        final BytesReference onlyField1 = XContentFactory.jsonBuilder().startObject().startObject("doc")
-                .field("field1", 1)
-                .endObject().endObject().bytes();
-        final BytesReference onlyField2 = XContentFactory.jsonBuilder().startObject().startObject("doc")
-                .field("field2", "value")
-                .endObject().endObject().bytes();
-        final BytesReference bothFields = XContentFactory.jsonBuilder().startObject().startObject("doc")
-                .field("field1", 1)
-                .field("field2", "value")
-                .endObject().endObject().bytes();
+        final BytesReference onlyField1 = XContentFactory.jsonBuilder().startObject().startObject("doc").field("field1", 1).endObject().endObject().bytes();
+        final BytesReference onlyField2 = XContentFactory.jsonBuilder().startObject().startObject("doc").field("field2", "value").endObject().endObject().bytes();
+        final BytesReference bothFields = XContentFactory.jsonBuilder().startObject().startObject("doc").field("field1", 1).field("field2", "value").endObject().endObject().bytes();
 
-        client().prepareIndex("index", "type", "1").setSource(XContentFactory.jsonBuilder().startObject()
-                .field("field1", 1)
-                .field("field2", "value")
-                .endObject()).execute().actionGet();
+        client().prepareIndex("index", "type", "1").setSource(XContentFactory.jsonBuilder().startObject().field("field1", 1).field("field2", "value").endObject()).execute().actionGet();
 
-        client().prepareIndex("index", PercolatorService.TYPE_NAME, "test1")
-                .setSource(XContentFactory.jsonBuilder().startObject().field("query", termQuery("field2", "value")).endObject())
-                .execute().actionGet();
-        client().prepareIndex("index", PercolatorService.TYPE_NAME, "test2")
-                .setSource(XContentFactory.jsonBuilder().startObject().field("query", termQuery("field1", 1)).endObject())
-                .execute().actionGet();
+        client().prepareIndex("index", PercolatorService.TYPE_NAME, "test1").setSource(XContentFactory.jsonBuilder().startObject().field("query", termQuery("field2", "value")).endObject()).execute().actionGet();
+        client().prepareIndex("index", PercolatorService.TYPE_NAME, "test2").setSource(XContentFactory.jsonBuilder().startObject().field("query", termQuery("field1", 1)).endObject()).execute().actionGet();
         refresh(); // make sure it's refreshed
 
         final CountDownLatch start = new CountDownLatch(1);
@@ -101,21 +86,15 @@ public class ConcurrentPercolatorTests extends ElasticsearchIntegrationTest {
                             }
                             PercolateResponse percolate;
                             if (count % 3 == 0) {
-                                percolate = client().preparePercolate().setIndices("index").setDocumentType("type")
-                                        .setSource(bothFields)
-                                        .execute().actionGet();
+                                percolate = client().preparePercolate().setIndices("index").setDocumentType("type").setSource(bothFields).execute().actionGet();
                                 assertThat(percolate.getMatches(), arrayWithSize(2));
                                 assertThat(convertFromTextArray(percolate.getMatches(), "index"), arrayContainingInAnyOrder("test1", "test2"));
                             } else if (count % 3 == 1) {
-                                percolate = client().preparePercolate().setIndices("index").setDocumentType("type")
-                                        .setSource(onlyField2)
-                                        .execute().actionGet();
+                                percolate = client().preparePercolate().setIndices("index").setDocumentType("type").setSource(onlyField2).execute().actionGet();
                                 assertThat(percolate.getMatches(), arrayWithSize(1));
                                 assertThat(convertFromTextArray(percolate.getMatches(), "index"), arrayContaining("test1"));
                             } else {
-                                percolate = client().preparePercolate().setIndices("index").setDocumentType("type")
-                                        .setSource(onlyField1)
-                                        .execute().actionGet();
+                                percolate = client().preparePercolate().setIndices("index").setDocumentType("type").setSource(onlyField1).execute().actionGet();
                                 assertThat(percolate.getMatches(), arrayWithSize(1));
                                 assertThat(convertFromTextArray(percolate.getMatches(), "index"), arrayContaining("test2"));
                             }
@@ -168,12 +147,9 @@ public class ConcurrentPercolatorTests extends ElasticsearchIntegrationTest {
                 @Override
                 public void run() {
                     try {
-                        XContentBuilder onlyField1 = XContentFactory.jsonBuilder().startObject()
-                                .field("query", termQuery("field1", "value")).endObject();
-                        XContentBuilder onlyField2 = XContentFactory.jsonBuilder().startObject()
-                                .field("query", termQuery("field2", "value")).endObject();
-                        XContentBuilder field1And2 = XContentFactory.jsonBuilder().startObject()
-                                .field("query", boolQuery().must(termQuery("field1", "value")).must(termQuery("field2", "value"))).endObject();
+                        XContentBuilder onlyField1 = XContentFactory.jsonBuilder().startObject().field("query", termQuery("field1", "value")).endObject();
+                        XContentBuilder onlyField2 = XContentFactory.jsonBuilder().startObject().field("query", termQuery("field2", "value")).endObject();
+                        XContentBuilder field1And2 = XContentFactory.jsonBuilder().startObject().field("query", boolQuery().must(termQuery("field1", "value")).must(termQuery("field2", "value"))).endObject();
 
                         start.await();
                         while (runningPercolateThreads.get() > 0) {
@@ -183,21 +159,15 @@ public class ConcurrentPercolatorTests extends ElasticsearchIntegrationTest {
                             IndexResponse response;
                             switch (x) {
                                 case 0:
-                                    response = client().prepareIndex("index", PercolatorService.TYPE_NAME, id)
-                                            .setSource(onlyField1)
-                                            .execute().actionGet();
+                                    response = client().prepareIndex("index", PercolatorService.TYPE_NAME, id).setSource(onlyField1).execute().actionGet();
                                     type1.incrementAndGet();
                                     break;
                                 case 1:
-                                    response = client().prepareIndex("index", PercolatorService.TYPE_NAME, id)
-                                            .setSource(onlyField2)
-                                            .execute().actionGet();
+                                    response = client().prepareIndex("index", PercolatorService.TYPE_NAME, id).setSource(onlyField2).execute().actionGet();
                                     type2.incrementAndGet();
                                     break;
                                 case 2:
-                                    response = client().prepareIndex("index", PercolatorService.TYPE_NAME, id)
-                                            .setSource(field1And2)
-                                            .execute().actionGet();
+                                    response = client().prepareIndex("index", PercolatorService.TYPE_NAME, id).setSource(field1And2).execute().actionGet();
                                     type3.incrementAndGet();
                                     break;
                                 default:
@@ -223,16 +193,9 @@ public class ConcurrentPercolatorTests extends ElasticsearchIntegrationTest {
                 @Override
                 public void run() {
                     try {
-                        XContentBuilder onlyField1Doc = XContentFactory.jsonBuilder().startObject().startObject("doc")
-                                .field("field1", "value")
-                                .endObject().endObject();
-                        XContentBuilder onlyField2Doc = XContentFactory.jsonBuilder().startObject().startObject("doc")
-                                .field("field2", "value")
-                                .endObject().endObject();
-                        XContentBuilder field1AndField2Doc = XContentFactory.jsonBuilder().startObject().startObject("doc")
-                                .field("field1", "value")
-                                .field("field2", "value")
-                                .endObject().endObject();
+                        XContentBuilder onlyField1Doc = XContentFactory.jsonBuilder().startObject().startObject("doc").field("field1", "value").endObject().endObject();
+                        XContentBuilder onlyField2Doc = XContentFactory.jsonBuilder().startObject().startObject("doc").field("field2", "value").endObject().endObject();
+                        XContentBuilder field1AndField2Doc = XContentFactory.jsonBuilder().startObject().startObject("doc").field("field1", "value").field("field2", "value").endObject().endObject();
                         start.await();
                         for (int counter = 0; counter < numPercolatorOperationsPerThread; counter++) {
                             int x = rand.nextInt(3);
@@ -241,24 +204,21 @@ public class ConcurrentPercolatorTests extends ElasticsearchIntegrationTest {
                             switch (x) {
                                 case 0:
                                     atLeastExpected = type1.get();
-                                    response = client().preparePercolate().setIndices("index").setDocumentType("type")
-                                            .setSource(onlyField1Doc).execute().actionGet();
+                                    response = client().preparePercolate().setIndices("index").setDocumentType("type").setSource(onlyField1Doc).execute().actionGet();
                                     assertNoFailures(response);
                                     assertThat(response.getSuccessfulShards(), equalTo(response.getTotalShards()));
                                     assertThat(response.getMatches().length, greaterThanOrEqualTo(atLeastExpected));
                                     break;
                                 case 1:
                                     atLeastExpected = type2.get();
-                                    response = client().preparePercolate().setIndices("index").setDocumentType("type")
-                                            .setSource(onlyField2Doc).execute().actionGet();
+                                    response = client().preparePercolate().setIndices("index").setDocumentType("type").setSource(onlyField2Doc).execute().actionGet();
                                     assertNoFailures(response);
                                     assertThat(response.getSuccessfulShards(), equalTo(response.getTotalShards()));
                                     assertThat(response.getMatches().length, greaterThanOrEqualTo(atLeastExpected));
                                     break;
                                 case 2:
                                     atLeastExpected = type3.get();
-                                    response = client().preparePercolate().setIndices("index").setDocumentType("type")
-                                            .setSource(field1AndField2Doc).execute().actionGet();
+                                    response = client().preparePercolate().setIndices("index").setDocumentType("type").setSource(field1AndField2Doc).execute().actionGet();
                                     assertNoFailures(response);
                                     assertThat(response.getSuccessfulShards(), equalTo(response.getTotalShards()));
                                     assertThat(response.getMatches().length, greaterThanOrEqualTo(atLeastExpected));
@@ -310,10 +270,8 @@ public class ConcurrentPercolatorTests extends ElasticsearchIntegrationTest {
                 @Override
                 public void run() {
                     try {
-                        XContentBuilder doc = XContentFactory.jsonBuilder().startObject()
-                                .field("query", termQuery("field1", "value")).endObject();
-                        outer:
-                        while (run.get()) {
+                        XContentBuilder doc = XContentFactory.jsonBuilder().startObject().field("query", termQuery("field1", "value")).endObject();
+                        outer: while (run.get()) {
                             semaphore.acquire();
                             try {
                                 if (!liveIds.isEmpty() && rand.nextInt(100) < 19) {
@@ -325,15 +283,12 @@ public class ConcurrentPercolatorTests extends ElasticsearchIntegrationTest {
                                         id = Integer.toString(randomInt(idGen.get()));
                                     } while (!liveIds.remove(id));
 
-                                    DeleteResponse response = client().prepareDelete("index", PercolatorService.TYPE_NAME, id)
-                                            .execute().actionGet();
+                                    DeleteResponse response = client().prepareDelete("index", PercolatorService.TYPE_NAME, id).execute().actionGet();
                                     assertThat(response.getId(), equalTo(id));
                                     assertThat("doc[" + id + "] should have been deleted, but isn't", response.isFound(), equalTo(true));
                                 } else {
                                     String id = Integer.toString(idGen.getAndIncrement());
-                                    IndexResponse response = client().prepareIndex("index", PercolatorService.TYPE_NAME, id)
-                                            .setSource(doc)
-                                            .execute().actionGet();
+                                    IndexResponse response = client().prepareIndex("index", PercolatorService.TYPE_NAME, id).setSource(doc).execute().actionGet();
                                     liveIds.add(id);
                                     assertThat(response.isCreated(), equalTo(true)); // We only add new docs
                                     assertThat(response.getId(), equalTo(id));
@@ -356,9 +311,7 @@ public class ConcurrentPercolatorTests extends ElasticsearchIntegrationTest {
             indexThreads[i].start();
         }
 
-        XContentBuilder percolateDoc = XContentFactory.jsonBuilder().startObject().startObject("doc")
-                .field("field1", "value")
-                .endObject().endObject();
+        XContentBuilder percolateDoc = XContentFactory.jsonBuilder().startObject().startObject("doc").field("field1", "value").endObject().endObject();
         for (int counter = 0; counter < numberPercolateOperation; counter++) {
             Thread.sleep(5);
             semaphore.acquire(numIndexThreads);
@@ -367,8 +320,7 @@ public class ConcurrentPercolatorTests extends ElasticsearchIntegrationTest {
                     break;
                 }
                 int atLeastExpected = liveIds.size();
-                PercolateResponse response = client().preparePercolate().setIndices("index").setDocumentType("type")
-                        .setSource(percolateDoc).execute().actionGet();
+                PercolateResponse response = client().preparePercolate().setIndices("index").setDocumentType("type").setSource(percolateDoc).execute().actionGet();
                 assertThat(response.getShardFailures(), emptyArray());
                 assertThat(response.getSuccessfulShards(), equalTo(response.getTotalShards()));
                 assertThat(response.getMatches().length, equalTo(atLeastExpected));

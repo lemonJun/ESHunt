@@ -55,7 +55,7 @@ public class CompletionTokenStreamTest extends ElasticsearchTokenStreamTestCase 
                 return suggester.toFiniteStrings(suggester.getTokenStreamToAutomaton(), stream);
             }
         }));
-        assertTokenStreamContents(suggestTokenStream, new String[] {"mykeyword"}, null, null, new String[] {"Surface keyword|friggin payload|10"}, new int[] { 1 }, null, null);
+        assertTokenStreamContents(suggestTokenStream, new String[] { "mykeyword" }, null, null, new String[] { "Surface keyword|friggin payload|10" }, new int[] { 1 }, null, null);
     }
 
     @Test
@@ -73,23 +73,23 @@ public class CompletionTokenStreamTest extends ElasticsearchTokenStreamTestCase 
                 return suggester.toFiniteStrings(suggester.getTokenStreamToAutomaton(), stream);
             }
         }));
-        assertTokenStreamContents(suggestTokenStream, new String[] {"mysynonym", "mykeyword"}, null, null, new String[] {"Surface keyword|friggin payload|10", "Surface keyword|friggin payload|10"}, new int[] { 2, 0 }, null, null);
+        assertTokenStreamContents(suggestTokenStream, new String[] { "mysynonym", "mykeyword" }, null, null, new String[] { "Surface keyword|friggin payload|10", "Surface keyword|friggin payload|10" }, new int[] { 2, 0 }, null, null);
     }
 
     @Test
     public void testValidNumberOfExpansions() throws IOException {
         Builder builder = new SynonymMap.Builder(true);
         for (int i = 0; i < 256; i++) {
-            builder.add(new CharsRef("" + (i+1)), new CharsRef("" + (1000 + (i+1))), true);
+            builder.add(new CharsRef("" + (i + 1)), new CharsRef("" + (1000 + (i + 1))), true);
         }
         StringBuilder valueBuilder = new StringBuilder();
-        for (int i = 0 ; i < 8 ; i++) {
-            valueBuilder.append(i+1);
+        for (int i = 0; i < 8; i++) {
+            valueBuilder.append(i + 1);
             valueBuilder.append(" ");
         }
         MockTokenizer tokenizer = new MockTokenizer(new StringReader(valueBuilder.toString()), MockTokenizer.WHITESPACE, true);
         SynonymFilter filter = new SynonymFilter(tokenizer, builder.build(), true);
-       
+
         TokenStream suggestTokenStream = new CompletionTokenStream(filter, new BytesRef("Surface keyword|friggin payload|10"), new CompletionTokenStream.ToFiniteStrings() {
             @Override
             public Set<IntsRef> toFiniteStrings(TokenStream stream) throws IOException {
@@ -97,13 +97,13 @@ public class CompletionTokenStreamTest extends ElasticsearchTokenStreamTestCase 
                 return finiteStrings;
             }
         });
-        
+
         suggestTokenStream.reset();
         ByteTermAttribute attr = suggestTokenStream.addAttribute(ByteTermAttribute.class);
         PositionIncrementAttribute posAttr = suggestTokenStream.addAttribute(PositionIncrementAttribute.class);
         int maxPos = 0;
         int count = 0;
-        while(suggestTokenStream.incrementToken()) {
+        while (suggestTokenStream.incrementToken()) {
             count++;
             assertNotNull(attr.getBytesRef());
             assertTrue(attr.getBytesRef().length > 0);
@@ -114,21 +114,21 @@ public class CompletionTokenStreamTest extends ElasticsearchTokenStreamTestCase 
         assertEquals(count, maxPos);
 
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testInValidNumberOfExpansions() throws IOException {
         Builder builder = new SynonymMap.Builder(true);
         for (int i = 0; i < 256; i++) {
-            builder.add(new CharsRef("" + (i+1)), new CharsRef("" + (1000 + (i+1))), true);
+            builder.add(new CharsRef("" + (i + 1)), new CharsRef("" + (1000 + (i + 1))), true);
         }
         StringBuilder valueBuilder = new StringBuilder();
-        for (int i = 0 ; i < 9 ; i++) { // 9 -> expands to 512
-            valueBuilder.append(i+1);
+        for (int i = 0; i < 9; i++) { // 9 -> expands to 512
+            valueBuilder.append(i + 1);
             valueBuilder.append(" ");
         }
         MockTokenizer tokenizer = new MockTokenizer(new StringReader(valueBuilder.toString()), MockTokenizer.WHITESPACE, true);
         SynonymFilter filter = new SynonymFilter(tokenizer, builder.build(), true);
-       
+
         TokenStream suggestTokenStream = new CompletionTokenStream(filter, new BytesRef("Surface keyword|friggin payload|10"), new CompletionTokenStream.ToFiniteStrings() {
             @Override
             public Set<IntsRef> toFiniteStrings(TokenStream stream) throws IOException {
@@ -136,7 +136,7 @@ public class CompletionTokenStreamTest extends ElasticsearchTokenStreamTestCase 
                 return finiteStrings;
             }
         });
-        
+
         suggestTokenStream.reset();
         suggestTokenStream.incrementToken();
         suggestTokenStream.close();
@@ -166,12 +166,12 @@ public class CompletionTokenStreamTest extends ElasticsearchTokenStreamTestCase 
         suggestTokenStream.close();
     }
 
-
     public final static class ByteTermAttrToCharTermAttrFilter extends TokenFilter {
         private ByteTermAttribute byteAttr = addAttribute(ByteTermAttribute.class);
         private PayloadAttribute payload = addAttribute(PayloadAttribute.class);
         private TypeAttribute type = addAttribute(TypeAttribute.class);
         private CharTermAttribute charTermAttribute = addAttribute(CharTermAttribute.class);
+
         protected ByteTermAttrToCharTermAttrFilter(TokenStream input) {
             super(input);
         }

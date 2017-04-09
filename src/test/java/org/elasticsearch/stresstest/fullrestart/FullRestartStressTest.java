@@ -173,8 +173,7 @@ public class FullRestartStressTest {
                 BulkRequestBuilder bulk = client.client().prepareBulk();
                 for (int k = 0; k < bulkSize; k++) {
                     StringBuilder sb = new StringBuilder();
-                    XContentBuilder json = XContentFactory.jsonBuilder().startObject()
-                            .field("field", "value" + ThreadLocalRandom.current().nextInt());
+                    XContentBuilder json = XContentFactory.jsonBuilder().startObject().field("field", "value" + ThreadLocalRandom.current().nextInt());
 
                     int fields = ThreadLocalRandom.current().nextInt() % numberOfFields;
                     for (int i = 0; i < fields; i++) {
@@ -216,24 +215,10 @@ public class FullRestartStressTest {
         System.setProperty("es.logger.prefix", "");
 
         int numberOfNodes = 2;
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("index.shard.check_on_startup", true)
-                .put("gateway.type", "local")
-                .put("gateway.recover_after_nodes", numberOfNodes)
-                .put("index.number_of_shards", 1)
-                .put("path.data", "data/data1,data/data2")
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("index.shard.check_on_startup", true).put("gateway.type", "local").put("gateway.recover_after_nodes", numberOfNodes).put("index.number_of_shards", 1).put("path.data", "data/data1,data/data2").build();
 
-        FullRestartStressTest test = new FullRestartStressTest()
-                .settings(settings)
-                .period(TimeValue.timeValueMinutes(20))
-                .clearNodeWork(false) // only applies to shared gateway
-                .numberOfNodes(numberOfNodes)
-                .numberOfIndices(1)
-                .textTokens(150)
-                .numberOfFields(10)
-                .bulkSize(1000)
-                .numberOfDocsPerRound(10000);
+        FullRestartStressTest test = new FullRestartStressTest().settings(settings).period(TimeValue.timeValueMinutes(20)).clearNodeWork(false) // only applies to shared gateway
+                        .numberOfNodes(numberOfNodes).numberOfIndices(1).textTokens(150).numberOfFields(10).bulkSize(1000).numberOfDocsPerRound(10000);
 
         test.run();
     }

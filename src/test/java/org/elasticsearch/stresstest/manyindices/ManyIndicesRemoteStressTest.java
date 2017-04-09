@@ -56,9 +56,7 @@ public class ManyIndicesRemoteStressTest {
 
         for (int i = 0; i < numberOfIndices; i++) {
             logger.info("START index [{}] ...", i);
-            client.admin().indices().prepareCreate("index_" + i)
-                    .setSettings(ImmutableSettings.settingsBuilder().put("index.number_of_shards", numberOfShards).put("index.number_of_replicas", numberOfReplicas))
-                    .execute().actionGet();
+            client.admin().indices().prepareCreate("index_" + i).setSettings(ImmutableSettings.settingsBuilder().put("index.number_of_shards", numberOfShards).put("index.number_of_replicas", numberOfReplicas)).execute().actionGet();
 
             for (int j = 0; j < numberOfDocs; j++) {
                 client.prepareIndex("index_" + i, "type").setSource("field1", "test", "field2", 2, "field3", new Date()).execute().actionGet();

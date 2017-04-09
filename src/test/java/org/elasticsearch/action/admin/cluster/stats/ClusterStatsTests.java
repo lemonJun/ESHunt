@@ -51,8 +51,7 @@ public class ClusterStatsTests extends ElasticsearchIntegrationTest {
     }
 
     private void waitForNodes(int numNodes) {
-        ClusterHealthResponse actionGet = client().admin().cluster()
-                .health(Requests.clusterHealthRequest().waitForEvents(Priority.LANGUID).waitForNodes(Integer.toString(numNodes))).actionGet();
+        ClusterHealthResponse actionGet = client().admin().cluster().health(Requests.clusterHealthRequest().waitForEvents(Priority.LANGUID).waitForNodes(Integer.toString(numNodes))).actionGet();
         assertThat(actionGet.isTimedOut(), is(false));
     }
 
@@ -77,7 +76,6 @@ public class ClusterStatsTests extends ElasticsearchIntegrationTest {
         assertCounts(response.getNodesStats().getCounts(), 4, 1, 1, 1, 1);
     }
 
-
     private void assertShardStats(ClusterStatsIndices.ShardStats stats, int indices, int total, int primaries, double replicationFactor) {
         assertThat(stats.getIndices(), Matchers.equalTo(indices));
         assertThat(stats.getTotal(), Matchers.equalTo(total));
@@ -89,7 +87,6 @@ public class ClusterStatsTests extends ElasticsearchIntegrationTest {
     public void testIndicesShardStats() {
         ClusterStatsResponse response = client().admin().cluster().prepareClusterStats().get();
         assertThat(response.getStatus(), Matchers.equalTo(ClusterHealthStatus.GREEN));
-
 
         prepareCreate("test1").setSettings("number_of_shards", 2, "number_of_replicas", 1).get();
         ensureYellow();

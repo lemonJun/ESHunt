@@ -50,7 +50,6 @@ public class Search1StressTest {
 
     private final ESLogger logger = Loggers.getLogger(getClass());
 
-
     private int numberOfNodes = 4;
 
     private int indexers = 0;
@@ -71,7 +70,6 @@ public class Search1StressTest {
 
     private AtomicLong indexCounter = new AtomicLong();
     private AtomicLong searchCounter = new AtomicLong();
-
 
     private Node client;
 
@@ -287,15 +285,11 @@ public class Search1StressTest {
     }
 
     private void indexDoc() throws Exception {
-        XContentBuilder json = XContentFactory.jsonBuilder().startObject()
-                .field("num", nextNumValue())
-                .field("field", nextFieldValue());
+        XContentBuilder json = XContentFactory.jsonBuilder().startObject().field("num", nextNumValue()).field("field", nextFieldValue());
 
         json.endObject();
 
-        client.client().prepareIndex(nextIndex(), nextType())
-                .setSource(json)
-                .execute().actionGet();
+        client.client().prepareIndex(nextIndex(), nextType()).setSource(json).execute().actionGet();
         indexCounter.incrementAndGet();
     }
 
@@ -345,7 +339,6 @@ public class Search1StressTest {
             deleteByQuery = new DeleteByQuery();
             deleteByQuery.start();
         }
-
 
         long testStart = System.currentTimeMillis();
 
@@ -402,25 +395,9 @@ public class Search1StressTest {
     }
 
     public static void main(String[] args) throws Exception {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("gateway.type", "none")
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("gateway.type", "none").build();
 
-        Search1StressTest test = new Search1StressTest()
-                .setPeriod(TimeValue.timeValueMinutes(10))
-                .setSettings(settings)
-                .setNumberOfNodes(2)
-                .setPreIndexDocs(SizeValue.parseSizeValue("100"))
-                .setIndexers(2)
-                .setIndexerThrottle(TimeValue.timeValueMillis(100))
-                .setSearchers(10)
-                .setSearcherThrottle(TimeValue.timeValueMillis(10))
-                .setDeleteByQueryThrottle(TimeValue.timeValueMillis(-1))
-                .setFlusherThrottle(TimeValue.timeValueMillis(1000))
-                .setNumberOfIndices(10)
-                .setNumberOfTypes(5)
-                .setNumberOfValues(50)
-                .setNumberOfHits(300);
+        Search1StressTest test = new Search1StressTest().setPeriod(TimeValue.timeValueMinutes(10)).setSettings(settings).setNumberOfNodes(2).setPreIndexDocs(SizeValue.parseSizeValue("100")).setIndexers(2).setIndexerThrottle(TimeValue.timeValueMillis(100)).setSearchers(10).setSearcherThrottle(TimeValue.timeValueMillis(10)).setDeleteByQueryThrottle(TimeValue.timeValueMillis(-1)).setFlusherThrottle(TimeValue.timeValueMillis(1000)).setNumberOfIndices(10).setNumberOfTypes(5).setNumberOfValues(50).setNumberOfHits(300);
 
         test.run();
     }

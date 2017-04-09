@@ -60,15 +60,11 @@ public abstract class ElasticsearchAllocationTestCase extends ElasticsearchTestC
     }
 
     public static AllocationService createAllocationService(Settings settings, GatewayAllocator allocator) {
-        return new AllocationService(settings,
-                randomAllocationDeciders(settings, new NodeSettingsService(ImmutableSettings.Builder.EMPTY_SETTINGS), getRandom()),
-                new ShardsAllocators(settings, allocator, new BalancedShardsAllocator(settings)), ClusterInfoService.EMPTY);
+        return new AllocationService(settings, randomAllocationDeciders(settings, new NodeSettingsService(ImmutableSettings.Builder.EMPTY_SETTINGS), getRandom()), new ShardsAllocators(settings, allocator, new BalancedShardsAllocator(settings)), ClusterInfoService.EMPTY);
     }
 
     public static AllocationService createAllocationService(Settings settings, Random random) {
-        return new AllocationService(settings,
-                randomAllocationDeciders(settings, new NodeSettingsService(ImmutableSettings.Builder.EMPTY_SETTINGS), random),
-                new ShardsAllocators(settings), ClusterInfoService.EMPTY);
+        return new AllocationService(settings, randomAllocationDeciders(settings, new NodeSettingsService(ImmutableSettings.Builder.EMPTY_SETTINGS), random), new ShardsAllocators(settings), ClusterInfoService.EMPTY);
     }
 
     public static AllocationDeciders randomAllocationDeciders(Settings settings, NodeSettingsService nodeSettingsService, Random random) {
@@ -82,10 +78,10 @@ public abstract class ElasticsearchAllocationTestCase extends ElasticsearchTestC
                     list.add(constructor.newInstance(settings, nodeSettingsService));
                 } catch (NoSuchMethodException e) {
                     try {
-                        Constructor<? extends AllocationDecider> constructor  = deciderClass.getConstructor(Settings.class);
+                        Constructor<? extends AllocationDecider> constructor = deciderClass.getConstructor(Settings.class);
                         list.add(constructor.newInstance(settings));
                     } catch (NoSuchMethodException e1) {
-                        Constructor<? extends AllocationDecider> constructor  = deciderClass.getConstructor(Settings.class, RecoverySettings.class);
+                        Constructor<? extends AllocationDecider> constructor = deciderClass.getConstructor(Settings.class, RecoverySettings.class);
                         list.add(constructor.newInstance(settings, recoverySettings));
                     }
                 }
@@ -114,7 +110,7 @@ public abstract class ElasticsearchAllocationTestCase extends ElasticsearchTestC
         return new DiscoveryNode("", nodeId, DummyTransportAddress.INSTANCE, attributes, Version.CURRENT);
     }
 
-    public static DiscoveryNode newNode(String nodeName,String nodeId, Map<String, String> attributes) {
+    public static DiscoveryNode newNode(String nodeName, String nodeId, Map<String, String> attributes) {
         return new DiscoveryNode(nodeName, nodeId, DummyTransportAddress.INSTANCE, attributes, Version.CURRENT);
     }
 

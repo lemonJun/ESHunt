@@ -38,7 +38,6 @@ import static org.elasticsearch.test.ElasticsearchIntegrationTest.Scope;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
-
 @ClusterScope(scope = Scope.TEST, numDataNodes = 1)
 public class NettyPipeliningEnabledIntegrationTest extends ElasticsearchIntegrationTest {
 
@@ -55,7 +54,7 @@ public class NettyPipeliningEnabledIntegrationTest extends ElasticsearchIntegrat
         InetSocketTransportAddress inetSocketTransportAddress = (InetSocketTransportAddress) httpServerTransport.boundAddress().boundAddress();
 
         try (NettyHttpClient nettyHttpClient = new NettyHttpClient()) {
-            Collection<HttpResponse> responses = nettyHttpClient.sendRequests(inetSocketTransportAddress.address(), requests.toArray(new String[]{}));
+            Collection<HttpResponse> responses = nettyHttpClient.sendRequests(inetSocketTransportAddress.address(), requests.toArray(new String[] {}));
             assertThat(responses, hasSize(5));
 
             Collection<String> opaqueIds = returnOpaqueIds(responses);

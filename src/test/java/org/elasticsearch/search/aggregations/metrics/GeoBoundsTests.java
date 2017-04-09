@@ -67,60 +67,47 @@ public class GeoBoundsTests extends ElasticsearchIntegrationTest {
     static int numDocs;
     static int numUniqueGeoPoints;
     static GeoPoint[] singleValues, multiValues;
-    static GeoPoint singleTopLeft, singleBottomRight, multiTopLeft, multiBottomRight, unmappedTopLeft, unmappedBottomRight;
+    static GeoPoint singleTopLeft, singleBottomRight, multiTopLeft,
+                    multiBottomRight, unmappedTopLeft, unmappedBottomRight;
 
     @Override
     public void setupSuiteScopeCluster() throws Exception {
-        assertAcked(prepareCreate("idx")
-                .addMapping("type", SINGLE_VALUED_FIELD_NAME, "type=geo_point", MULTI_VALUED_FIELD_NAME, "type=geo_point", NUMBER_FIELD_NAME, "type=long", "tag", "type=string,index=not_analyzed"));
+        assertAcked(prepareCreate("idx").addMapping("type", SINGLE_VALUED_FIELD_NAME, "type=geo_point", MULTI_VALUED_FIELD_NAME, "type=geo_point", NUMBER_FIELD_NAME, "type=long", "tag", "type=string,index=not_analyzed"));
         createIndex("idx_unmapped");
-        
+
         unmappedTopLeft = new GeoPoint(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         unmappedBottomRight = new GeoPoint(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
         singleTopLeft = new GeoPoint(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         singleBottomRight = new GeoPoint(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
         multiTopLeft = new GeoPoint(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         multiBottomRight = new GeoPoint(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
-        
+
         numDocs = randomIntBetween(6, 20);
         numUniqueGeoPoints = randomIntBetween(1, numDocs);
 
         singleValues = new GeoPoint[numUniqueGeoPoints];
-        for (int i = 0 ; i < singleValues.length; i++)
-        {
+        for (int i = 0; i < singleValues.length; i++) {
             singleValues[i] = randomGeoPoint();
             updateBoundsTopLeft(singleValues[i], singleTopLeft);
             updateBoundsBottomRight(singleValues[i], singleBottomRight);
         }
-        
+
         multiValues = new GeoPoint[numUniqueGeoPoints];
-        for (int i = 0 ; i < multiValues.length; i++)
-        {
+        for (int i = 0; i < multiValues.length; i++) {
             multiValues[i] = randomGeoPoint();
             updateBoundsTopLeft(multiValues[i], multiTopLeft);
             updateBoundsBottomRight(multiValues[i], multiBottomRight);
         }
-        
+
         List<IndexRequestBuilder> builders = new ArrayList<>();
 
-
         for (int i = 0; i < numDocs; i++) {
-            builders.add(client().prepareIndex("idx", "type").setSource(jsonBuilder()
-                    .startObject()
-                    .array(SINGLE_VALUED_FIELD_NAME, singleValues[i % numUniqueGeoPoints].lon(), singleValues[i % numUniqueGeoPoints].lat())
-                    .startArray(MULTI_VALUED_FIELD_NAME)
-                        .startArray().value(multiValues[i % numUniqueGeoPoints].lon()).value(multiValues[i % numUniqueGeoPoints].lat()).endArray()   
-                        .startArray().value(multiValues[(i+1) % numUniqueGeoPoints].lon()).value(multiValues[(i+1) % numUniqueGeoPoints].lat()).endArray()
-                     .endArray()
-                    .field(NUMBER_FIELD_NAME, i)
-                    .field("tag", "tag" + i)
-                    .endObject()));
+            builders.add(client().prepareIndex("idx", "type").setSource(jsonBuilder().startObject().array(SINGLE_VALUED_FIELD_NAME, singleValues[i % numUniqueGeoPoints].lon(), singleValues[i % numUniqueGeoPoints].lat()).startArray(MULTI_VALUED_FIELD_NAME).startArray().value(multiValues[i % numUniqueGeoPoints].lon()).value(multiValues[i % numUniqueGeoPoints].lat()).endArray().startArray().value(multiValues[(i + 1) % numUniqueGeoPoints].lon()).value(multiValues[(i + 1) % numUniqueGeoPoints].lat()).endArray().endArray().field(NUMBER_FIELD_NAME, i).field("tag", "tag" + i).endObject()));
         }
 
         assertAcked(prepareCreate("empty_idx").addMapping("type", SINGLE_VALUED_FIELD_NAME, "type=geo_point"));
-        
-        assertAcked(prepareCreate("idx_dateline")
-                .addMapping("type", SINGLE_VALUED_FIELD_NAME, "type=geo_point", MULTI_VALUED_FIELD_NAME, "type=geo_point", NUMBER_FIELD_NAME, "type=long", "tag", "type=string,index=not_analyzed"));
+
+        assertAcked(prepareCreate("idx_dateline").addMapping("type", SINGLE_VALUED_FIELD_NAME, "type=geo_point", MULTI_VALUED_FIELD_NAME, "type=geo_point", NUMBER_FIELD_NAME, "type=long", "tag", "type=string,index=not_analyzed"));
 
         GeoPoint[] geoValues = new GeoPoint[5];
         geoValues[0] = new GeoPoint(38, 178);
@@ -128,34 +115,17 @@ public class GeoBoundsTests extends ElasticsearchIntegrationTest {
         geoValues[2] = new GeoPoint(-24, 170);
         geoValues[3] = new GeoPoint(32, -175);
         geoValues[4] = new GeoPoint(-11, 178);
-        
-        for (int i = 0; i < 5; i++) {
-            builders.add(client().prepareIndex("idx_dateline", "type").setSource(jsonBuilder()
-                    .startObject()
-                    .array(SINGLE_VALUED_FIELD_NAME, geoValues[i].lon(), geoValues[i].lat())
-                    .field(NUMBER_FIELD_NAME, i)
-                    .field("tag", "tag" + i)
-                    .endObject()));
-        }
-        assertAcked(prepareCreate("high_card_idx").setSettings(ImmutableSettings.builder().put("number_of_shards", 2))
-                .addMapping("type", SINGLE_VALUED_FIELD_NAME, "type=geo_point", MULTI_VALUED_FIELD_NAME, "type=geo_point", NUMBER_FIELD_NAME, "type=long", "tag", "type=string,index=not_analyzed"));
 
+        for (int i = 0; i < 5; i++) {
+            builders.add(client().prepareIndex("idx_dateline", "type").setSource(jsonBuilder().startObject().array(SINGLE_VALUED_FIELD_NAME, geoValues[i].lon(), geoValues[i].lat()).field(NUMBER_FIELD_NAME, i).field("tag", "tag" + i).endObject()));
+        }
+        assertAcked(prepareCreate("high_card_idx").setSettings(ImmutableSettings.builder().put("number_of_shards", 2)).addMapping("type", SINGLE_VALUED_FIELD_NAME, "type=geo_point", MULTI_VALUED_FIELD_NAME, "type=geo_point", NUMBER_FIELD_NAME, "type=long", "tag", "type=string,index=not_analyzed"));
 
         for (int i = 0; i < 2000; i++) {
-            builders.add(client().prepareIndex("high_card_idx", "type").setSource(jsonBuilder()
-                    .startObject()
-                    .array(SINGLE_VALUED_FIELD_NAME, singleValues[i % numUniqueGeoPoints].lon(), singleValues[i % numUniqueGeoPoints].lat())
-                    .startArray(MULTI_VALUED_FIELD_NAME)
-                        .startArray().value(multiValues[i % numUniqueGeoPoints].lon()).value(multiValues[i % numUniqueGeoPoints].lat()).endArray()   
-                        .startArray().value(multiValues[(i+1) % numUniqueGeoPoints].lon()).value(multiValues[(i+1) % numUniqueGeoPoints].lat()).endArray()
-                     .endArray()
-                    .field(NUMBER_FIELD_NAME, i)
-                    .field("tag", "tag" + i)
-                    .endObject()));
+            builders.add(client().prepareIndex("high_card_idx", "type").setSource(jsonBuilder().startObject().array(SINGLE_VALUED_FIELD_NAME, singleValues[i % numUniqueGeoPoints].lon(), singleValues[i % numUniqueGeoPoints].lat()).startArray(MULTI_VALUED_FIELD_NAME).startArray().value(multiValues[i % numUniqueGeoPoints].lon()).value(multiValues[i % numUniqueGeoPoints].lat()).endArray().startArray().value(multiValues[(i + 1) % numUniqueGeoPoints].lon()).value(multiValues[(i + 1) % numUniqueGeoPoints].lat()).endArray().endArray().field(NUMBER_FIELD_NAME, i).field("tag", "tag" + i).endObject()));
         }
 
-        builders.add(client().prepareIndex("idx_zero", "type").setSource(
-                jsonBuilder().startObject().array(SINGLE_VALUED_FIELD_NAME, 0.0, 1.0).endObject()));
+        builders.add(client().prepareIndex("idx_zero", "type").setSource(jsonBuilder().startObject().array(SINGLE_VALUED_FIELD_NAME, 0.0, 1.0).endObject()));
         assertAcked(prepareCreate("idx_zero").addMapping("type", SINGLE_VALUED_FIELD_NAME, "type=geo_point"));
 
         indexRandom(true, builders);
@@ -176,7 +146,7 @@ public class GeoBoundsTests extends ElasticsearchIntegrationTest {
             assertThat("Hit " + i + " with id: " + searchHit.getId(), searchHit.getIndex(), equalTo("high_card_idx"));
             assertThat("Hit " + i + " with id: " + searchHit.getId(), searchHit.getType(), equalTo("type"));
             SearchHitField hitField = searchHit.field(NUMBER_FIELD_NAME);
-            
+
             assertThat("Hit " + i + " has wrong number of values", hitField.getValues().size(), equalTo(1));
             Integer value = hitField.getValue();
             assertThat("Hit " + i + " has wrong value", value, equalTo(i));
@@ -208,13 +178,9 @@ public class GeoBoundsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedField() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME)
-                        .wrapLongitude(false))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME).wrapLongitude(false)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         GeoBounds geoBounds = response.getAggregations().get("geoBounds");
         assertThat(geoBounds, notNullValue());
@@ -229,13 +195,9 @@ public class GeoBoundsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedField() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(geoBounds("geoBounds").field(MULTI_VALUED_FIELD_NAME)
-                        .wrapLongitude(false))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(geoBounds("geoBounds").field(MULTI_VALUED_FIELD_NAME).wrapLongitude(false)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         GeoBounds geoBounds = response.getAggregations().get("geoBounds");
         assertThat(geoBounds, notNullValue());
@@ -250,13 +212,9 @@ public class GeoBoundsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void unmapped() throws Exception {
-        SearchResponse response = client().prepareSearch("idx_unmapped")
-                .addAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME)
-                        .wrapLongitude(false))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx_unmapped").addAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME).wrapLongitude(false)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         GeoBounds geoBounds = response.getAggregations().get("geoBounds");
         assertThat(geoBounds, notNullValue());
@@ -269,13 +227,9 @@ public class GeoBoundsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void partiallyUnmapped() throws Exception {
-        SearchResponse response = client().prepareSearch("idx", "idx_unmapped")
-                .addAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME)
-                        .wrapLongitude(false))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx", "idx_unmapped").addAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME).wrapLongitude(false)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         GeoBounds geoBounds = response.getAggregations().get("geoBounds");
         assertThat(geoBounds, notNullValue());
@@ -290,11 +244,7 @@ public class GeoBoundsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void emptyAggregation() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("empty_idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME)
-                        .wrapLongitude(false))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("empty_idx").setQuery(matchAllQuery()).addAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME).wrapLongitude(false)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(0l));
         GeoBounds geoBounds = searchResponse.getAggregations().get("geoBounds");
@@ -307,11 +257,8 @@ public class GeoBoundsTests extends ElasticsearchIntegrationTest {
     }
 
     @Test
-    public void singleValuedFieldNearDateLine() throws Exception {        
-        SearchResponse response = client().prepareSearch("idx_dateline")
-                .addAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME)
-                        .wrapLongitude(false))
-                .execute().actionGet();
+    public void singleValuedFieldNearDateLine() throws Exception {
+        SearchResponse response = client().prepareSearch("idx_dateline").addAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME).wrapLongitude(false)).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -334,13 +281,11 @@ public class GeoBoundsTests extends ElasticsearchIntegrationTest {
 
         GeoPoint geoValuesTopLeft = new GeoPoint(38, 170);
         GeoPoint geoValuesBottomRight = new GeoPoint(-24, -175);
-        
-        SearchResponse response = client().prepareSearch("idx_dateline")
-                .addAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME).wrapLongitude(true))
-                .execute().actionGet();
+
+        SearchResponse response = client().prepareSearch("idx_dateline").addAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME).wrapLongitude(true)).execute().actionGet();
 
         assertSearchResponse(response);
-        
+
         GeoBounds geoBounds = response.getAggregations().get("geoBounds");
         assertThat(geoBounds, notNullValue());
         assertThat(geoBounds.getName(), equalTo("geoBounds"));
@@ -357,10 +302,7 @@ public class GeoBoundsTests extends ElasticsearchIntegrationTest {
      */
     @Test
     public void singleValuedFieldAsSubAggToHighCardTermsAgg() {
-        SearchResponse response = client().prepareSearch("high_card_idx")
-                .addAggregation(terms("terms").field(NUMBER_FIELD_NAME).subAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME)
-                        .wrapLongitude(false)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("high_card_idx").addAggregation(terms("terms").field(NUMBER_FIELD_NAME).subAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME).wrapLongitude(false))).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -385,8 +327,7 @@ public class GeoBoundsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedFieldWithZeroLon() throws Exception {
-        SearchResponse response = client().prepareSearch("idx_zero")
-                .addAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME).wrapLongitude(false)).execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx_zero").addAggregation(geoBounds("geoBounds").field(SINGLE_VALUED_FIELD_NAME).wrapLongitude(false)).execute().actionGet();
 
         assertSearchResponse(response);
 

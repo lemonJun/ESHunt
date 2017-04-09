@@ -33,10 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class GetStressTest {
 
     public static void main(String[] args) throws Exception {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("index.number_of_shards", 2)
-                .put("index.number_of_replicas", 1)
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("index.number_of_shards", 2).put("index.number_of_replicas", 1).build();
 
         final int NUMBER_OF_NODES = 2;
         final int NUMBER_OF_THREADS = 50;
@@ -47,10 +44,7 @@ public class GetStressTest {
             nodes[i] = NodeBuilder.nodeBuilder().settings(settings).node();
         }
 
-        final Node client = NodeBuilder.nodeBuilder()
-                .settings(settings)
-                .client(true)
-                .node();
+        final Node client = NodeBuilder.nodeBuilder().settings(settings).client(true).node();
 
         client.client().admin().indices().prepareCreate("test").execute().actionGet();
 
@@ -66,13 +60,11 @@ public class GetStressTest {
                     ThreadLocalRandom random = ThreadLocalRandom.current();
                     while (!done.get()) {
                         String id = String.valueOf(idGenerator.incrementAndGet());
-                        client.client().prepareIndex("test", "type1", id)
-                                .setSource("field", random.nextInt(100))
-                                .execute().actionGet();
+                        client.client().prepareIndex("test", "type1", id).setSource("field", random.nextInt(100)).execute().actionGet();
 
                         GetResponse getResponse = client.client().prepareGet("test", "type1", id)
-                                //.setFields(Strings.EMPTY_ARRAY)
-                                .execute().actionGet();
+                                        //.setFields(Strings.EMPTY_ARRAY)
+                                        .execute().actionGet();
                         if (!getResponse.isExists()) {
                             System.err.println("Failed to find " + id);
                         }

@@ -58,17 +58,14 @@ public class ExceptionsSerializationTests extends ElasticsearchTestCase {
         assertEquals(tpEx.getMessage(), serializeTpEx.getMessage());
         assertEquals(src, tpEx.node());
 
-        TestException testException = new TestException(Arrays.asList("foo"), EnumSet.allOf(IndexShardState.class), ImmutableMap.<String,String>builder().put("foo", "bar").build(), InetAddress.getByName("localhost"), new Number[] {new Integer(1)});
+        TestException testException = new TestException(Arrays.asList("foo"), EnumSet.allOf(IndexShardState.class), ImmutableMap.<String, String> builder().put("foo", "bar").build(), InetAddress.getByName("localhost"), new Number[] { new Integer(1) });
         assertEquals(serialize(testException).list.get(0), "foo");
         assertTrue(serialize(testException).set.containsAll(Arrays.asList(IndexShardState.values())));
         assertEquals(serialize(testException).map.get("foo"), "bar");
     }
 
     public void testPreventBogusFromSerializing() throws IOException, ClassNotFoundException {
-        Serializable[] serializables = new Serializable[] {
-                new AtomicBoolean(false),
-                TypeToken.of(String.class),
-        };
+        Serializable[] serializables = new Serializable[] { new AtomicBoolean(false), TypeToken.of(String.class), };
         for (Serializable s : serializables) {
             try {
                 serialize(s);

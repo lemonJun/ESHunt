@@ -39,7 +39,6 @@ public abstract class ElasticsearchSingleNodeLuceneTestCase extends Elasticsearc
         ElasticsearchSingleNodeTest.cleanup(resetNodeAfterTest());
     }
 
-
     @BeforeClass
     public static void setUpClass() throws Exception {
         ElasticsearchSingleNodeTest.setUpClass();

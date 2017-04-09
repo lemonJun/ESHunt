@@ -55,9 +55,7 @@ import java.util.Random;
 
 public class MockFSDirectoryService extends FsDirectoryService {
 
-    private static final EnumSet<IndexShardState> validCheckIndexStates = EnumSet.of(
-            IndexShardState.STARTED, IndexShardState.RELOCATED , IndexShardState.POST_RECOVERY
-    );
+    private static final EnumSet<IndexShardState> validCheckIndexStates = EnumSet.of(IndexShardState.STARTED, IndexShardState.RELOCATED, IndexShardState.POST_RECOVERY);
 
     private final MockDirectoryHelper helper;
     private FsDirectoryService delegateService;
@@ -79,8 +77,7 @@ public class MockFSDirectoryService extends FsDirectoryService {
                 boolean canRun = false;
 
                 @Override
-                public void beforeIndexShardClosed(ShardId sid, @Nullable IndexShard indexShard,
-                                                   @IndexSettings Settings indexSettings) {
+                public void beforeIndexShardClosed(ShardId sid, @Nullable IndexShard indexShard, @IndexSettings Settings indexSettings) {
                     if (indexShard != null && shardId.equals(sid)) {
                         logger.info("{} shard state before potentially flushing is {}", indexShard.shardId(), indexShard.state());
                         if (validCheckIndexStates.contains(indexShard.state()) && IndexMetaData.isOnSharedFilesystem(indexSettings) == false) {
@@ -98,8 +95,7 @@ public class MockFSDirectoryService extends FsDirectoryService {
                 }
 
                 @Override
-                public void afterIndexShardClosed(ShardId sid, @Nullable IndexShard indexShard,
-                                                  @IndexSettings Settings indexSettings) {
+                public void afterIndexShardClosed(ShardId sid, @Nullable IndexShard indexShard, @IndexSettings Settings indexSettings) {
                     if (shardId.equals(sid) && indexShard != null && canRun) {
                         assert indexShard.state() == IndexShardState.CLOSED : "Current state must be closed";
                         checkIndex(indexShard.store(), sid);
@@ -115,7 +111,7 @@ public class MockFSDirectoryService extends FsDirectoryService {
     public Directory[] build() throws IOException {
         return delegateService.build();
     }
-    
+
     @Override
     protected synchronized Directory newFSDirectory(File location, LockFactory lockFactory) throws IOException {
         throw new UnsupportedOperationException();
@@ -141,9 +137,7 @@ public class MockFSDirectoryService extends FsDirectoryService {
                 CheckIndex.Status status = checkIndex.checkIndex();
                 if (!status.clean) {
                     AbstractRandomizedTest.checkIndexFailed = true;
-                    logger.warn("check index [failure] index files={}\n{}",
-                                Arrays.toString(dir.listAll()),
-                                new String(os.bytes().toBytes(), Charsets.UTF_8));
+                    logger.warn("check index [failure] index files={}\n{}", Arrays.toString(dir.listAll()), new String(os.bytes().toBytes(), Charsets.UTF_8));
                     throw new IndexShardException(shardId, "index check failure");
                 } else {
                     if (logger.isDebugEnabled()) {

@@ -68,37 +68,16 @@ public class TemplateQueryParserTest extends ElasticsearchTestCase {
 
     @Before
     public void setup() throws IOException {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("path.conf", this.getResource("config").getPath())
-                .put("name", getClass().getName())
-                .put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT)
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("path.conf", this.getResource("config").getPath()).put("name", getClass().getName()).put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).build();
 
         Index index = new Index("test");
-        injector = new ModulesBuilder().add(
-                new EnvironmentModule(new Environment(settings)),
-                new SettingsModule(settings),
-                new CacheRecyclerModule(settings),
-                new CodecModule(settings),
-                new ThreadPoolModule(new ThreadPool(settings)),
-                new IndicesQueriesModule(),
-                new ScriptModule(settings),
-                new IndexSettingsModule(index, settings),
-                new IndexCacheModule(settings),
-                new AnalysisModule(settings),
-                new IndexEngineModule(settings),
-                new SimilarityModule(settings),
-                new IndexNameModule(index),
-                new IndexQueryParserModule(settings),
-                new FunctionScoreModule(),
-                new AbstractModule() {
-                    @Override
-                    protected void configure() {
-                        bind(ClusterService.class).toProvider(Providers.of((ClusterService) null));
-                        bind(CircuitBreakerService.class).to(NoneCircuitBreakerService.class);
-                    }
-                }
-        ).createInjector();
+        injector = new ModulesBuilder().add(new EnvironmentModule(new Environment(settings)), new SettingsModule(settings), new CacheRecyclerModule(settings), new CodecModule(settings), new ThreadPoolModule(new ThreadPool(settings)), new IndicesQueriesModule(), new ScriptModule(settings), new IndexSettingsModule(index, settings), new IndexCacheModule(settings), new AnalysisModule(settings), new IndexEngineModule(settings), new SimilarityModule(settings), new IndexNameModule(index), new IndexQueryParserModule(settings), new FunctionScoreModule(), new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ClusterService.class).toProvider(Providers.of((ClusterService) null));
+                bind(CircuitBreakerService.class).to(NoneCircuitBreakerService.class);
+            }
+        }).createInjector();
 
         IndexQueryParserService queryParserService = injector.getInstance(IndexQueryParserService.class);
         context = new QueryParseContext(index, queryParserService);
@@ -112,9 +91,7 @@ public class TemplateQueryParserTest extends ElasticsearchTestCase {
 
     @Test
     public void testParser() throws IOException {
-        String templateString = "{\"template\": {"
-                + "\"query\":{\"match_{{template}}\": {}},"
-                + "\"params\":{\"template\":\"all\"}}" + "}";
+        String templateString = "{\"template\": {" + "\"query\":{\"match_{{template}}\": {}}," + "\"params\":{\"template\":\"all\"}}" + "}";
 
         XContentParser templateSourceParser = XContentFactory.xContent(templateString).createParser(templateString);
         context.reset(templateSourceParser);

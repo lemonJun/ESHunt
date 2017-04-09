@@ -55,12 +55,9 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
     public void testOpenCloseUpdateSettings() throws Exception {
         createIndex("test");
         try {
-            client().admin().indices().prepareUpdateSettings("test")
-                    .setSettings(ImmutableSettings.settingsBuilder()
-                            .put("index.refresh_interval", -1) // this one can change
+            client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1) // this one can change
                             .put("index.cache.filter.type", "none") // this one can't
-                    )
-                    .execute().actionGet();
+            ).execute().actionGet();
             fail();
         } catch (ElasticsearchIllegalArgumentException e) {
             // all is well
@@ -75,11 +72,8 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
         assertThat(getSettingsResponse.getSetting("test", "index.refresh_interval"), nullValue());
         assertThat(getSettingsResponse.getSetting("test", "index.cache.filter.type"), nullValue());
 
-        client().admin().indices().prepareUpdateSettings("test")
-                .setSettings(ImmutableSettings.settingsBuilder()
-                        .put("index.refresh_interval", -1) // this one can change
-                )
-                .execute().actionGet();
+        client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1) // this one can change
+        ).execute().actionGet();
 
         indexMetaData = client().admin().cluster().prepareState().execute().actionGet().getState().metaData().index("test");
         assertThat(indexMetaData.settings().get("index.refresh_interval"), equalTo("-1"));
@@ -96,22 +90,15 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
         client().admin().indices().prepareClose("test").execute().actionGet();
 
         try {
-            client().admin().indices().prepareUpdateSettings("test")
-                    .setSettings(ImmutableSettings.settingsBuilder()
-                                    .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                    )
-                    .execute().actionGet();
+            client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.settingsBuilder().put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)).execute().actionGet();
             fail("can't change number of replicas on a closed index");
         } catch (ElasticsearchIllegalArgumentException ex) {
             assertEquals(ex.getMessage(), "Can't update [index.number_of_replicas] on closed indices [[test]] - can leave index in an unopenable state");
             // expected
         }
-        client().admin().indices().prepareUpdateSettings("test")
-                .setSettings(ImmutableSettings.settingsBuilder()
-                        .put("index.refresh_interval", "1s") // this one can change
+        client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", "1s") // this one can change
                         .put("index.cache.filter.type", "none") // this one can't
-                )
-                .execute().actionGet();
+        ).execute().actionGet();
 
         indexMetaData = client().admin().cluster().prepareState().execute().actionGet().getState().metaData().index("test");
         assertThat(indexMetaData.settings().get("index.refresh_interval"), equalTo("1s"));
@@ -129,10 +116,7 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
         client().prepareIndex("test", "type", "1").setSource("f", 1).get(); // set version to 1
         client().prepareDelete("test", "type", "1").get(); // sets version to 2
         client().prepareIndex("test", "type", "1").setSource("f", 2).setVersion(2).get(); // delete is still in cache this should work & set version to 3
-        client().admin().indices().prepareUpdateSettings("test")
-                .setSettings(ImmutableSettings.settingsBuilder()
-                        .put("index.gc_deletes", 0)
-                ).get();
+        client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.settingsBuilder().put("index.gc_deletes", 0)).get();
 
         client().prepareDelete("test", "type", "1").get(); // sets version to 4
         Thread.sleep(300); // wait for cache time to change TODO: this needs to be solved better. To be discussed.
@@ -146,27 +130,18 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
     public void testUpdateThrottleSettings() {
 
         // No throttling at first, only 1 non-replicated shard, force lots of merging:
-        assertAcked(prepareCreate("test")
-                    .setSettings(ImmutableSettings.builder()
-                                 .put(AbstractIndexStore.INDEX_STORE_THROTTLE_TYPE, "none")
-                                 .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, "1")
-                                 .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, "0")
-                                 .put(TieredMergePolicyProvider.INDEX_MERGE_POLICY_MAX_MERGE_AT_ONCE, "2")
-                                 .put(TieredMergePolicyProvider.INDEX_MERGE_POLICY_SEGMENTS_PER_TIER, "2")
-                                 .put(ConcurrentMergeSchedulerProvider.MAX_THREAD_COUNT, "1")
-                                 .put(ConcurrentMergeSchedulerProvider.MAX_MERGE_COUNT, "2")
-                                 .put(Store.INDEX_STORE_STATS_REFRESH_INTERVAL, 0) // get stats all the time - no caching
-                                 ));
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder().put(AbstractIndexStore.INDEX_STORE_THROTTLE_TYPE, "none").put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, "1").put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, "0").put(TieredMergePolicyProvider.INDEX_MERGE_POLICY_MAX_MERGE_AT_ONCE, "2").put(TieredMergePolicyProvider.INDEX_MERGE_POLICY_SEGMENTS_PER_TIER, "2").put(ConcurrentMergeSchedulerProvider.MAX_THREAD_COUNT, "1").put(ConcurrentMergeSchedulerProvider.MAX_MERGE_COUNT, "2").put(Store.INDEX_STORE_STATS_REFRESH_INTERVAL, 0) // get stats all the time - no caching
+        ));
         ensureGreen();
         long termUpto = 0;
-        for(int i=0;i<100;i++) {
+        for (int i = 0; i < 100; i++) {
             // Provoke slowish merging by making many unique terms:
             StringBuilder sb = new StringBuilder();
-            for(int j=0;j<100;j++) {
+            for (int j = 0; j < 100; j++) {
                 sb.append(' ');
                 sb.append(termUpto++);
             }
-            client().prepareIndex("test", "type", ""+termUpto).setSource("field" + (i%10), sb.toString()).get();
+            client().prepareIndex("test", "type", "" + termUpto).setSource("field" + (i % 10), sb.toString()).get();
             if (i % 2 == 0) {
                 refresh();
             }
@@ -174,21 +149,14 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
 
         // No merge IO throttling should have happened:
         NodesStatsResponse nodesStats = client().admin().cluster().prepareNodesStats().setIndices(true).get();
-        for(NodeStats stats : nodesStats.getNodes()) {
+        for (NodeStats stats : nodesStats.getNodes()) {
             assertThat(stats.getIndices().getStore().getThrottleTime().getMillis(), equalTo(0l));
         }
 
         logger.info("test: set low merge throttling");
 
         // Now updates settings to turn on merge throttling lowish rate
-        client()
-            .admin()
-            .indices()
-            .prepareUpdateSettings("test")
-            .setSettings(ImmutableSettings.builder()
-                         .put(AbstractIndexStore.INDEX_STORE_THROTTLE_TYPE, "merge")
-                         .put(AbstractIndexStore.INDEX_STORE_THROTTLE_MAX_BYTES_PER_SEC, "1mb"))
-            .get();
+        client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.builder().put(AbstractIndexStore.INDEX_STORE_THROTTLE_TYPE, "merge").put(AbstractIndexStore.INDEX_STORE_THROTTLE_MAX_BYTES_PER_SEC, "1mb")).get();
 
         // Make sure setting says it is in fact changed:
         GetSettingsResponse getSettingsResponse = client().admin().indices().prepareGetSettings("test").get();
@@ -198,18 +166,18 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
         boolean done = false;
         while (done == false) {
             // Provoke slowish merging by making many unique terms:
-            for(int i=0;i<5;i++) {
+            for (int i = 0; i < 5; i++) {
                 StringBuilder sb = new StringBuilder();
-                for(int j=0;j<100;j++) {
+                for (int j = 0; j < 100; j++) {
                     sb.append(' ');
                     sb.append(termUpto++);
                     sb.append(" some random text that keeps repeating over and over again hambone");
                 }
-                client().prepareIndex("test", "type", ""+termUpto).setSource("field" + (i%10), sb.toString()).get();
+                client().prepareIndex("test", "type", "" + termUpto).setSource("field" + (i % 10), sb.toString()).get();
             }
             refresh();
             nodesStats = client().admin().cluster().prepareNodesStats().setIndices(true).get();
-            for(NodeStats stats : nodesStats.getNodes()) {
+            for (NodeStats stats : nodesStats.getNodes()) {
                 long throttleMillis = stats.getIndices().getStore().getThrottleTime().getMillis();
                 if (throttleMillis > 0) {
                     done = true;
@@ -219,15 +187,9 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
         }
 
         logger.info("test: disable merge throttling");
-        
+
         // Now updates settings to disable merge throttling
-        client()
-            .admin()
-            .indices()
-            .prepareUpdateSettings("test")
-            .setSettings(ImmutableSettings.builder()
-                         .put(AbstractIndexStore.INDEX_STORE_THROTTLE_TYPE, "none"))
-            .get();
+        client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.builder().put(AbstractIndexStore.INDEX_STORE_THROTTLE_TYPE, "none")).get();
 
         // Optimize does a waitForMerges, which we must do to make sure all in-flight (throttled) merges finish:
         logger.info("test: optimize");
@@ -237,19 +199,19 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
         // Record current throttling so far
         long sumThrottleTime = 0;
         nodesStats = client().admin().cluster().prepareNodesStats().setIndices(true).get();
-        for(NodeStats stats : nodesStats.getNodes()) {
+        for (NodeStats stats : nodesStats.getNodes()) {
             sumThrottleTime += stats.getIndices().getStore().getThrottleTime().getMillis();
         }
 
         // Make sure no further throttling happens:
-        for(int i=0;i<100;i++) {
+        for (int i = 0; i < 100; i++) {
             // Provoke slowish merging by making many unique terms:
             StringBuilder sb = new StringBuilder();
-            for(int j=0;j<100;j++) {
+            for (int j = 0; j < 100; j++) {
                 sb.append(' ');
                 sb.append(termUpto++);
             }
-            client().prepareIndex("test", "type", ""+termUpto).setSource("field" + (i%10), sb.toString()).get();
+            client().prepareIndex("test", "type", "" + termUpto).setSource("field" + (i % 10), sb.toString()).get();
             if (i % 2 == 0) {
                 refresh();
             }
@@ -258,7 +220,7 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
 
         long newSumThrottleTime = 0;
         nodesStats = client().admin().cluster().prepareNodesStats().setIndices(true).get();
-        for(NodeStats stats : nodesStats.getNodes()) {
+        for (NodeStats stats : nodesStats.getNodes()) {
             newSumThrottleTime += stats.getIndices().getStore().getThrottleTime().getMillis();
         }
 
@@ -284,8 +246,7 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
         @Override
         protected void append(LoggingEvent event) {
             String message = event.getMessage().toString();
-            if (event.getLevel() == Level.TRACE &&
-                event.getLoggerName().endsWith("lucene.iw")) {
+            if (event.getLevel() == Level.TRACE && event.getLoggerName().endsWith("lucene.iw")) {
                 sawFlushDeletes |= message.contains("IW: apply all deletes during flush");
                 sawMergeThreadPaused |= message.contains("CMS: pause thread");
             }
@@ -318,28 +279,17 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
         try {
 
             // Tons of merge threads allowed, only 1 non-replicated shard, force lots of merging, throttle so they fall behind:
-            assertAcked(prepareCreate("test")
-                        .setSettings(ImmutableSettings.builder()
-                                     .put(AbstractIndexStore.INDEX_STORE_THROTTLE_TYPE, "merge")
-                                     .put(AbstractIndexStore.INDEX_STORE_THROTTLE_MAX_BYTES_PER_SEC, "1mb")
-                                     .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, "1")
-                                     .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, "0")
-                                     .put(TieredMergePolicyProvider.INDEX_MERGE_POLICY_MAX_MERGE_AT_ONCE, "2")
-                                     .put(TieredMergePolicyProvider.INDEX_MERGE_POLICY_SEGMENTS_PER_TIER, "2")
-                                     .put(MergeSchedulerModule.MERGE_SCHEDULER_TYPE_KEY, ConcurrentMergeSchedulerProvider.class)
-                                     .put(ConcurrentMergeSchedulerProvider.MAX_THREAD_COUNT, "10000")
-                                     .put(ConcurrentMergeSchedulerProvider.MAX_MERGE_COUNT, "10000")
-                                     ));
+            assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder().put(AbstractIndexStore.INDEX_STORE_THROTTLE_TYPE, "merge").put(AbstractIndexStore.INDEX_STORE_THROTTLE_MAX_BYTES_PER_SEC, "1mb").put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, "1").put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, "0").put(TieredMergePolicyProvider.INDEX_MERGE_POLICY_MAX_MERGE_AT_ONCE, "2").put(TieredMergePolicyProvider.INDEX_MERGE_POLICY_SEGMENTS_PER_TIER, "2").put(MergeSchedulerModule.MERGE_SCHEDULER_TYPE_KEY, ConcurrentMergeSchedulerProvider.class).put(ConcurrentMergeSchedulerProvider.MAX_THREAD_COUNT, "10000").put(ConcurrentMergeSchedulerProvider.MAX_MERGE_COUNT, "10000")));
             ensureGreen();
             long termUpto = 0;
-            for(int i=0;i<100;i++) {
+            for (int i = 0; i < 100; i++) {
                 // Provoke slowish merging by making many unique terms:
                 StringBuilder sb = new StringBuilder();
-                for(int j=0;j<100;j++) {
+                for (int j = 0; j < 100; j++) {
                     sb.append(' ');
                     sb.append(termUpto++);
                 }
-                client().prepareIndex("test", "type", ""+termUpto).setSource("field" + (i%10), sb.toString()).get();
+                client().prepareIndex("test", "type", "" + termUpto).setSource("field" + (i % 10), sb.toString()).get();
                 if (i % 2 == 0) {
                     refresh();
                 }
@@ -353,15 +303,7 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
             assertFalse(mockAppender.sawUpdateSetting);
 
             // Now make a live change to reduce allowed merge threads, and waaay over-throttle merging so they fall behind:
-            client()
-                .admin()
-                .indices()
-                .prepareUpdateSettings("test")
-                .setSettings(ImmutableSettings.builder()
-                             .put(ConcurrentMergeSchedulerProvider.MAX_THREAD_COUNT, "1")
-                             .put(AbstractIndexStore.INDEX_STORE_THROTTLE_MAX_BYTES_PER_SEC, "10kb")
-                             )
-                .get();
+            client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.builder().put(ConcurrentMergeSchedulerProvider.MAX_THREAD_COUNT, "1").put(AbstractIndexStore.INDEX_STORE_THROTTLE_MAX_BYTES_PER_SEC, "10kb")).get();
 
             try {
 
@@ -372,11 +314,11 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
                 while (true) {
                     // Provoke slowish merging by making many unique terms:
                     StringBuilder sb = new StringBuilder();
-                    for(int j=0;j<100;j++) {
+                    for (int j = 0; j < 100; j++) {
                         sb.append(' ');
                         sb.append(termUpto++);
                     }
-                    client().prepareIndex("test", "type", ""+termUpto).setSource("field" + (i%10), sb.toString()).get();
+                    client().prepareIndex("test", "type", "" + termUpto).setSource("field" + (i % 10), sb.toString()).get();
                     if (i % 2 == 0) {
                         refresh();
                     }
@@ -389,20 +331,11 @@ public class UpdateSettingsTests extends ElasticsearchIntegrationTest {
             } finally {
                 // Make merges fast again & finish merges before we try to close; else we sometimes get a "Delete Index failed - not acked"
                 // when ElasticsearchIntegrationTest.after tries to remove indices created by the test:
-                client()
-                    .admin()
-                    .indices()
-                    .prepareUpdateSettings("test")
-                    .setSettings(ImmutableSettings.builder()
-                                 .put(ConcurrentMergeSchedulerProvider.MAX_THREAD_COUNT, "3")
-                                 .put(AbstractIndexStore.INDEX_STORE_THROTTLE_MAX_BYTES_PER_SEC, "20mb")
-                                 )
-                    .get();
+                client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.builder().put(ConcurrentMergeSchedulerProvider.MAX_THREAD_COUNT, "3").put(AbstractIndexStore.INDEX_STORE_THROTTLE_MAX_BYTES_PER_SEC, "20mb")).get();
 
                 // Wait for merges to finish
                 client().admin().indices().prepareOptimize("test").get();
             }
-
 
         } finally {
             rootLogger.removeAppender(mockAppender);

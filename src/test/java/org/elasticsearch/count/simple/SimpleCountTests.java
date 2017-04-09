@@ -44,12 +44,7 @@ public class SimpleCountTests extends ElasticsearchIntegrationTest {
     @Test
     public void testCountRandomPreference() throws InterruptedException, ExecutionException {
         createIndex("test");
-        indexRandom(true, client().prepareIndex("test", "type", "1").setSource("field", "value"),
-                client().prepareIndex("test", "type", "2").setSource("field", "value"),
-                client().prepareIndex("test", "type", "3").setSource("field", "value"),
-                client().prepareIndex("test", "type", "4").setSource("field", "value"),
-                client().prepareIndex("test", "type", "5").setSource("field", "value"),
-                client().prepareIndex("test", "type", "6").setSource("field", "value"));
+        indexRandom(true, client().prepareIndex("test", "type", "1").setSource("field", "value"), client().prepareIndex("test", "type", "2").setSource("field", "value"), client().prepareIndex("test", "type", "3").setSource("field", "value"), client().prepareIndex("test", "type", "4").setSource("field", "value"), client().prepareIndex("test", "type", "5").setSource("field", "value"), client().prepareIndex("test", "type", "6").setSource("field", "value"));
 
         int iters = scaledRandomIntBetween(10, 100);
         for (int i = 0; i < iters; i++) {
@@ -69,18 +64,11 @@ public class SimpleCountTests extends ElasticsearchIntegrationTest {
     public void simpleIpTests() throws Exception {
         createIndex("test");
 
-        client().admin().indices().preparePutMapping("test").setType("type1")
-                .setSource(XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("from").field("type", "ip").endObject()
-                        .startObject("to").field("type", "ip").endObject()
-                        .endObject().endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().preparePutMapping("test").setType("type1").setSource(XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("from").field("type", "ip").endObject().startObject("to").field("type", "ip").endObject().endObject().endObject().endObject()).execute().actionGet();
 
         client().prepareIndex("test", "type1", "1").setSource("from", "192.168.0.5", "to", "192.168.0.10").setRefresh(true).execute().actionGet();
 
-        CountResponse countResponse = client().prepareCount()
-                .setQuery(boolQuery().must(rangeQuery("from").lt("192.168.0.7")).must(rangeQuery("to").gt("192.168.0.7")))
-                .execute().actionGet();
+        CountResponse countResponse = client().prepareCount().setQuery(boolQuery().must(rangeQuery("from").lt("192.168.0.7")).must(rangeQuery("to").gt("192.168.0.7"))).execute().actionGet();
 
         assertHitCount(countResponse, 1l);
     }
@@ -122,23 +110,21 @@ public class SimpleCountTests extends ElasticsearchIntegrationTest {
     @Test
     public void simpleCountEarlyTerminationTests() throws Exception {
         // set up one shard only to test early termination
-        prepareCreate("test").setSettings(
-                SETTING_NUMBER_OF_SHARDS, 1,
-                SETTING_NUMBER_OF_REPLICAS, 0).get();
+        prepareCreate("test").setSettings(SETTING_NUMBER_OF_SHARDS, 1, SETTING_NUMBER_OF_REPLICAS, 0).get();
         ensureGreen();
         int max = randomIntBetween(3, 29);
         List<IndexRequestBuilder> docbuilders = new ArrayList<>(max);
 
         for (int i = 1; i <= max; i++) {
             String id = String.valueOf(i);
-            docbuilders.add(client().prepareIndex("test", "type1", id).setSource("field", "2010-01-"+ id +"T02:00"));
+            docbuilders.add(client().prepareIndex("test", "type1", id).setSource("field", "2010-01-" + id + "T02:00"));
         }
 
         indexRandom(true, docbuilders);
         ensureGreen();
         refresh();
 
-        String upperBound = "2010-01-" + String.valueOf(max+1) + "||+2d";
+        String upperBound = "2010-01-" + String.valueOf(max + 1) + "||+2d";
         String lowerBound = "2009-12-01||+2d";
 
         // sanity check
@@ -161,19 +147,7 @@ public class SimpleCountTests extends ElasticsearchIntegrationTest {
     @Test
     public void localDependentDateTests() throws Exception {
         assumeFalse("Locals are buggy on JDK9EA", Constants.JRE_IS_MINIMUM_JAVA9);
-        assertAcked(prepareCreate("test")
-                        .addMapping("type1",
-                                jsonBuilder().startObject()
-                                        .startObject("type1")
-                                        .startObject("properties")
-                                        .startObject("date_field")
-                                        .field("type", "date")
-                                        .field("format", "E, d MMM yyyy HH:mm:ss Z")
-                                        .field("locale", "de")
-                                        .endObject()
-                                        .endObject()
-                                        .endObject()
-                                        .endObject()));
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("date_field").field("type", "date").field("format", "E, d MMM yyyy HH:mm:ss Z").field("locale", "de").endObject().endObject().endObject().endObject()));
         ensureGreen();
         for (int i = 0; i < 10; i++) {
             client().prepareIndex("test", "type1", "" + i).setSource("date_field", "Mi, 06 Dez 2000 02:55:00 -0800").execute().actionGet();
@@ -182,14 +156,10 @@ public class SimpleCountTests extends ElasticsearchIntegrationTest {
 
         refresh();
         for (int i = 0; i < 10; i++) {
-            CountResponse countResponse = client().prepareCount("test")
-                    .setQuery(QueryBuilders.rangeQuery("date_field").gte("Di, 05 Dez 2000 02:55:00 -0800").lte("Do, 07 Dez 2000 00:00:00 -0800"))
-                    .execute().actionGet();
+            CountResponse countResponse = client().prepareCount("test").setQuery(QueryBuilders.rangeQuery("date_field").gte("Di, 05 Dez 2000 02:55:00 -0800").lte("Do, 07 Dez 2000 00:00:00 -0800")).execute().actionGet();
             assertHitCount(countResponse, 10l);
 
-            countResponse = client().prepareCount("test")
-                    .setQuery(QueryBuilders.rangeQuery("date_field").gte("Di, 05 Dez 2000 02:55:00 -0800").lte("Fr, 08 Dez 2000 00:00:00 -0800"))
-                    .execute().actionGet();
+            countResponse = client().prepareCount("test").setQuery(QueryBuilders.rangeQuery("date_field").gte("Di, 05 Dez 2000 02:55:00 -0800").lte("Fr, 08 Dez 2000 00:00:00 -0800")).execute().actionGet();
             assertHitCount(countResponse, 20l);
         }
     }

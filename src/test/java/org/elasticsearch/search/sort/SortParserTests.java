@@ -17,9 +17,7 @@
  * under the License.
  */
 
-
 package org.elasticsearch.search.sort;
-
 
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.settings.ImmutableSettings;

@@ -43,11 +43,7 @@ public class TTLMappingTests extends ElasticsearchSingleNodeTest {
     public void testSimpleDisabled() throws Exception {
         String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").endObject().string();
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
-        BytesReference source = XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field", "value")
-                .endObject()
-                .bytes();
+        BytesReference source = XContentFactory.jsonBuilder().startObject().field("field", "value").endObject().bytes();
         ParsedDocument doc = docMapper.parse(SourceToParse.source(source).type("type").id("1").ttl(Long.MAX_VALUE));
 
         assertThat(doc.rootDoc().getField("_ttl"), equalTo(null));
@@ -55,15 +51,9 @@ public class TTLMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testEnabled() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_ttl").field("enabled", "yes").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_ttl").field("enabled", "yes").endObject().endObject().endObject().string();
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
-        BytesReference source = XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field", "value")
-                .endObject()
-                .bytes();
+        BytesReference source = XContentFactory.jsonBuilder().startObject().field("field", "value").endObject().bytes();
         ParsedDocument doc = docMapper.parse(SourceToParse.source(source).type("type").id("1").ttl(Long.MAX_VALUE));
 
         assertThat(doc.rootDoc().getField("_ttl").fieldType().stored(), equalTo(true));
@@ -80,14 +70,9 @@ public class TTLMappingTests extends ElasticsearchSingleNodeTest {
         assertThat(docMapper.TTLFieldMapper().fieldType().indexed(), equalTo(TTLFieldMapper.Defaults.TTL_FIELD_TYPE.indexed()));
     }
 
-
     @Test
     public void testSetValues() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_ttl")
-                .field("enabled", "yes").field("store", "no").field("index", "no")
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_ttl").field("enabled", "yes").field("store", "no").field("index", "no").endObject().endObject().endObject().string();
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
         assertThat(docMapper.TTLFieldMapper().enabled(), equalTo(true));
         assertThat(docMapper.TTLFieldMapper().fieldType().stored(), equalTo(false));
@@ -96,16 +81,9 @@ public class TTLMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testThatEnablingTTLFieldOnMergeWorks() throws Exception {
-        String mappingWithoutTtl = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").field("field").startObject().field("type", "string").endObject().endObject()
-                .endObject().endObject().string();
+        String mappingWithoutTtl = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").field("field").startObject().field("type", "string").endObject().endObject().endObject().endObject().string();
 
-        String mappingWithTtl = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_ttl")
-                .field("enabled", "yes").field("store", "no").field("index", "no")
-                .endObject()
-                .startObject("properties").field("field").startObject().field("type", "string").endObject().endObject()
-                .endObject().endObject().string();
+        String mappingWithTtl = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_ttl").field("enabled", "yes").field("store", "no").field("index", "no").endObject().startObject("properties").field("field").startObject().field("type", "string").endObject().endObject().endObject().endObject().string();
 
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
         DocumentMapper mapperWithoutTtl = parser.parse(mappingWithoutTtl);
@@ -120,19 +98,9 @@ public class TTLMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testThatChangingTTLKeepsMapperEnabled() throws Exception {
-        String mappingWithTtl = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_ttl")
-                .field("enabled", "yes")
-                .endObject()
-                .startObject("properties").field("field").startObject().field("type", "string").endObject().endObject()
-                .endObject().endObject().string();
+        String mappingWithTtl = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_ttl").field("enabled", "yes").endObject().startObject("properties").field("field").startObject().field("type", "string").endObject().endObject().endObject().endObject().string();
 
-        String updatedMapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_ttl")
-                .field("default", "1w")
-                .endObject()
-                .startObject("properties").field("field").startObject().field("type", "string").endObject().endObject()
-                .endObject().endObject().string();
+        String updatedMapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_ttl").field("default", "1w").endObject().startObject("properties").field("field").startObject().field("type", "string").endObject().endObject().endObject().endObject().string();
 
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
         DocumentMapper initialMapper = parser.parse(mappingWithTtl);
@@ -298,33 +266,22 @@ public class TTLMappingTests extends ElasticsearchSingleNodeTest {
     }
 
     private org.elasticsearch.common.xcontent.XContentBuilder getMappingWithTtlEnabled(String defaultValue) throws IOException {
-        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_ttl")
-                .field("enabled", true);
+        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_ttl").field("enabled", true);
         if (defaultValue != null) {
             mapping.field("default", defaultValue);
         }
-        return mapping.endObject()
-                .startObject("properties").field("field").startObject().field("type", "string").endObject().endObject()
-                .endObject().endObject();
+        return mapping.endObject().startObject("properties").field("field").startObject().field("type", "string").endObject().endObject().endObject().endObject();
     }
 
     private org.elasticsearch.common.xcontent.XContentBuilder getMappingWithTtlDisabled(String defaultValue) throws IOException {
-        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_ttl")
-                .field("enabled", false);
+        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_ttl").field("enabled", false);
         if (defaultValue != null) {
             mapping.field("default", defaultValue);
         }
-        return mapping.endObject()
-                .startObject("properties").field("field").startObject().field("type", "string").endObject().endObject()
-                .endObject().endObject();
+        return mapping.endObject().startObject("properties").field("field").startObject().field("type", "string").endObject().endObject().endObject().endObject();
     }
 
     private org.elasticsearch.common.xcontent.XContentBuilder getMappingWithOnlyTtlDefaultSet(String defaultValue) throws IOException {
-        return XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_ttl").field("default", defaultValue).endObject()
-                .startObject("properties").field("field").startObject().field("type", "string").endObject().endObject()
-                .endObject().endObject();
+        return XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_ttl").field("default", defaultValue).endObject().startObject("properties").field("field").startObject().field("type", "string").endObject().endObject().endObject().endObject();
     }
 }

@@ -197,7 +197,7 @@ public class RestApi {
             this.parts = extractParts(path);
         }
 
-        private static Map<String,String> extractParts(String input) {
+        private static Map<String, String> extractParts(String input) {
             Map<String, String> parts = Maps.newHashMap();
             Matcher matcher = PLACEHOLDERS_PATTERN.matcher(input);
             while (matcher.find()) {

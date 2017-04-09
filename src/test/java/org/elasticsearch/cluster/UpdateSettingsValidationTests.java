@@ -34,16 +34,12 @@ import static org.hamcrest.Matchers.equalTo;
 
 /**
  */
-@ClusterScope(scope= Scope.TEST, numDataNodes =0)
+@ClusterScope(scope = Scope.TEST, numDataNodes = 0)
 public class UpdateSettingsValidationTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testUpdateSettingsValidation() throws Exception {
-        List<String> nodes = internalCluster().startNodesAsync(
-                settingsBuilder().put("node.data", false).build(),
-                settingsBuilder().put("node.master", false).build(),
-                settingsBuilder().put("node.master", false).build()
-        ).get();
+        List<String> nodes = internalCluster().startNodesAsync(settingsBuilder().put("node.data", false).build(), settingsBuilder().put("node.master", false).build(), settingsBuilder().put("node.master", false).build()).get();
         String master = nodes.get(0);
         String node_1 = nodes.get(1);
         String node_2 = nodes.get(2);

@@ -47,24 +47,11 @@ public class UnmappedFieldsTermsFacetsTests extends ElasticsearchIntegrationTest
         ensureGreen();
 
         for (int i = 0; i < 10; i++) {
-            client().prepareIndex("idx", "type", "" + i).setSource(jsonBuilder().startObject()
-                    .field("mapped", "" + i)
-                    .endObject()).execute().actionGet();
+            client().prepareIndex("idx", "type", "" + i).setSource(jsonBuilder().startObject().field("mapped", "" + i).endObject()).execute().actionGet();
         }
 
         flushAndRefresh();
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addFacet(termsFacet("mapped").field("mapped").size(10))
-                .addFacet(termsFacet("unmapped_bool").field("unmapped_bool").size(10))
-                .addFacet(termsFacet("unmapped_str").field("unmapped_str").size(10))
-                .addFacet(termsFacet("unmapped_byte").field("unmapped_byte").size(10))
-                .addFacet(termsFacet("unmapped_short").field("unmapped_short").size(10))
-                .addFacet(termsFacet("unmapped_int").field("unmapped_int").size(10))
-                .addFacet(termsFacet("unmapped_long").field("unmapped_long").size(10))
-                .addFacet(termsFacet("unmapped_float").field("unmapped_float").size(10))
-                .addFacet(termsFacet("unmapped_double").field("unmapped_double").size(10))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addFacet(termsFacet("mapped").field("mapped").size(10)).addFacet(termsFacet("unmapped_bool").field("unmapped_bool").size(10)).addFacet(termsFacet("unmapped_str").field("unmapped_str").size(10)).addFacet(termsFacet("unmapped_byte").field("unmapped_byte").size(10)).addFacet(termsFacet("unmapped_short").field("unmapped_short").size(10)).addFacet(termsFacet("unmapped_int").field("unmapped_int").size(10)).addFacet(termsFacet("unmapped_long").field("unmapped_long").size(10)).addFacet(termsFacet("unmapped_float").field("unmapped_float").size(10)).addFacet(termsFacet("unmapped_double").field("unmapped_double").size(10)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -135,62 +122,29 @@ public class UnmappedFieldsTermsFacetsTests extends ElasticsearchIntegrationTest
 
     }
 
-
     /**
      * Tests the terms facet when faceting on partially unmapped field. An example for this scenario is when searching
      * across indices, where the field is mapped in some indices and unmapped in others.
      */
     @Test
     public void testPartiallyUnmappedField() throws ElasticsearchException, IOException {
-        assertAcked(prepareCreate("mapped_idx")
-                .addMapping("type", jsonBuilder().startObject().startObject("type").startObject("properties")
-                        .startObject("partially_mapped_byte").field("type", "byte").endObject()
-                        .startObject("partially_mapped_short").field("type", "short").endObject()
-                        .startObject("partially_mapped_int").field("type", "integer").endObject()
-                        .startObject("partially_mapped_long").field("type", "long").endObject()
-                        .startObject("partially_mapped_float").field("type", "float").endObject()
-                        .startObject("partially_mapped_double").field("type", "double").endObject()
-                        .endObject().endObject().endObject()));
+        assertAcked(prepareCreate("mapped_idx").addMapping("type", jsonBuilder().startObject().startObject("type").startObject("properties").startObject("partially_mapped_byte").field("type", "byte").endObject().startObject("partially_mapped_short").field("type", "short").endObject().startObject("partially_mapped_int").field("type", "integer").endObject().startObject("partially_mapped_long").field("type", "long").endObject().startObject("partially_mapped_float").field("type", "float").endObject().startObject("partially_mapped_double").field("type", "double").endObject().endObject().endObject().endObject()));
         ensureGreen();
 
         createIndex("unmapped_idx");
         ensureGreen();
 
         for (int i = 0; i < 10; i++) {
-            client().prepareIndex("mapped_idx", "type", "" + i).setSource(jsonBuilder().startObject()
-                    .field("mapped", "" + i)
-                    .field("partially_mapped_str", "" + i)
-                    .field("partially_mapped_bool", i % 2 == 0)
-                    .field("partially_mapped_byte", i)
-                    .field("partially_mapped_short", i)
-                    .field("partially_mapped_int", i)
-                    .field("partially_mapped_long", i)
-                    .field("partially_mapped_float", i)
-                    .field("partially_mapped_double", i)
-                    .endObject()).execute().actionGet();
+            client().prepareIndex("mapped_idx", "type", "" + i).setSource(jsonBuilder().startObject().field("mapped", "" + i).field("partially_mapped_str", "" + i).field("partially_mapped_bool", i % 2 == 0).field("partially_mapped_byte", i).field("partially_mapped_short", i).field("partially_mapped_int", i).field("partially_mapped_long", i).field("partially_mapped_float", i).field("partially_mapped_double", i).endObject()).execute().actionGet();
         }
 
         for (int i = 10; i < 20; i++) {
-            client().prepareIndex("unmapped_idx", "type", "" + i).setSource(jsonBuilder().startObject()
-                    .field("mapped", "" + i)
-                    .endObject()).execute().actionGet();
+            client().prepareIndex("unmapped_idx", "type", "" + i).setSource(jsonBuilder().startObject().field("mapped", "" + i).endObject()).execute().actionGet();
         }
-
 
         flushAndRefresh();
 
-        SearchResponse searchResponse = client().prepareSearch("mapped_idx", "unmapped_idx")
-                .setQuery(matchAllQuery())
-                .addFacet(termsFacet("mapped").field("mapped").size(10))
-                .addFacet(termsFacet("partially_mapped_str").field("partially_mapped_str").size(10))
-                .addFacet(termsFacet("partially_mapped_bool").field("partially_mapped_bool").size(10))
-                .addFacet(termsFacet("partially_mapped_byte").field("partially_mapped_byte").size(10))
-                .addFacet(termsFacet("partially_mapped_short").field("partially_mapped_short").size(10))
-                .addFacet(termsFacet("partially_mapped_int").field("partially_mapped_int").size(10))
-                .addFacet(termsFacet("partially_mapped_long").field("partially_mapped_long").size(10))
-                .addFacet(termsFacet("partially_mapped_float").field("partially_mapped_float").size(10))
-                .addFacet(termsFacet("partially_mapped_double").field("partially_mapped_double").size(10))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("mapped_idx", "unmapped_idx").setQuery(matchAllQuery()).addFacet(termsFacet("mapped").field("mapped").size(10)).addFacet(termsFacet("partially_mapped_str").field("partially_mapped_str").size(10)).addFacet(termsFacet("partially_mapped_bool").field("partially_mapped_bool").size(10)).addFacet(termsFacet("partially_mapped_byte").field("partially_mapped_byte").size(10)).addFacet(termsFacet("partially_mapped_short").field("partially_mapped_short").size(10)).addFacet(termsFacet("partially_mapped_int").field("partially_mapped_int").size(10)).addFacet(termsFacet("partially_mapped_long").field("partially_mapped_long").size(10)).addFacet(termsFacet("partially_mapped_float").field("partially_mapped_float").size(10)).addFacet(termsFacet("partially_mapped_double").field("partially_mapped_double").size(10)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(20l));
 
@@ -268,30 +222,15 @@ public class UnmappedFieldsTermsFacetsTests extends ElasticsearchIntegrationTest
 
     @Test
     public void testMappedYetMissingField() throws IOException {
-        assertAcked(prepareCreate("idx")
-                .addMapping("type", jsonBuilder().startObject()
-                        .field("type").startObject()
-                        .field("properties").startObject()
-                        .field("string").startObject().field("type", "string").endObject()
-                        .field("long").startObject().field("type", "long").endObject()
-                        .field("double").startObject().field("type", "double").endObject()
-                        .endObject()
-                        .endObject()));
+        assertAcked(prepareCreate("idx").addMapping("type", jsonBuilder().startObject().field("type").startObject().field("properties").startObject().field("string").startObject().field("type", "string").endObject().field("long").startObject().field("type", "long").endObject().field("double").startObject().field("type", "double").endObject().endObject().endObject()));
         ensureGreen();
 
         for (int i = 0; i < 10; i++) {
-            client().prepareIndex("idx", "type", "" + i).setSource(jsonBuilder().startObject()
-                    .field("foo", "bar")
-                    .endObject()).execute().actionGet();
+            client().prepareIndex("idx", "type", "" + i).setSource(jsonBuilder().startObject().field("foo", "bar").endObject()).execute().actionGet();
         }
         flushAndRefresh();
 
-        SearchResponse searchResponse = client().prepareSearch()
-                .setQuery(matchAllQuery())
-                .addFacet(termsFacet("string").field("string").size(10))
-                .addFacet(termsFacet("long").field("long").size(10))
-                .addFacet(termsFacet("double").field("double").size(10))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setQuery(matchAllQuery()).addFacet(termsFacet("string").field("string").size(10)).addFacet(termsFacet("long").field("long").size(10)).addFacet(termsFacet("double").field("double").size(10)).execute().actionGet();
 
         TermsFacet facet = searchResponse.getFacets().facet("string");
         assertThat(facet.getName(), equalTo("string"));
@@ -323,21 +262,11 @@ public class UnmappedFieldsTermsFacetsTests extends ElasticsearchIntegrationTest
         ensureGreen();
 
         for (int i = 0; i < 10; i++) {
-            client().prepareIndex("idx", "type", "" + i).setSource(jsonBuilder().startObject()
-                    .field("mapped_str", "" + i)
-                    .field("mapped_long", i)
-                    .field("mapped_double", i)
-                    .endObject()).execute().actionGet();
+            client().prepareIndex("idx", "type", "" + i).setSource(jsonBuilder().startObject().field("mapped_str", "" + i).field("mapped_long", i).field("mapped_double", i).endObject()).execute().actionGet();
         }
 
         flushAndRefresh();
-        SearchResponse searchResponse = client().prepareSearch()
-                .setQuery(matchAllQuery())
-                .addFacet(termsFacet("string").fields("mapped_str", "unmapped").size(10))
-                .addFacet(termsFacet("long").fields("mapped_long", "unmapped").size(10))
-                .addFacet(termsFacet("double").fields("mapped_double", "unmapped").size(10))
-                .addFacet(termsFacet("all_unmapped").fields("unmapped", "unmapped_1").size(10))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setQuery(matchAllQuery()).addFacet(termsFacet("string").fields("mapped_str", "unmapped").size(10)).addFacet(termsFacet("long").fields("mapped_long", "unmapped").size(10)).addFacet(termsFacet("double").fields("mapped_double", "unmapped").size(10)).addFacet(termsFacet("all_unmapped").fields("unmapped", "unmapped_1").size(10)).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 

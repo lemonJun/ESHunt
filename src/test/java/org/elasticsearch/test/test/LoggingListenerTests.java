@@ -150,10 +150,12 @@ public class LoggingListenerTests extends ElasticsearchTestCase {
 
         @SuppressWarnings("unused")
         @TestLogging("xyz:TRACE")
-        public void annotatedTestMethod() {}
+        public void annotatedTestMethod() {
+        }
 
         @SuppressWarnings("unused")
         @TestLogging("abc:TRACE,xyz:DEBUG")
-        public void annotatedTestMethod2() {}
+        public void annotatedTestMethod2() {
+        }
     }
 }

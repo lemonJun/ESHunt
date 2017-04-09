@@ -71,10 +71,7 @@ public class UnicastZenPingTests extends ElasticsearchTestCase {
 
         InetSocketTransportAddress addressB = (InetSocketTransportAddress) transportB.boundAddress().publishAddress();
 
-        Settings hostsSettings = ImmutableSettings.settingsBuilder().putArray("discovery.zen.ping.unicast.hosts",
-                addressA.address().getAddress().getHostAddress() + ":" + addressA.address().getPort(),
-                addressB.address().getAddress().getHostAddress() + ":" + addressB.address().getPort())
-                .build();
+        Settings hostsSettings = ImmutableSettings.settingsBuilder().putArray("discovery.zen.ping.unicast.hosts", addressA.address().getAddress().getHostAddress() + ":" + addressA.address().getPort(), addressB.address().getAddress().getHostAddress() + ":" + addressB.address().getPort()).build();
 
         UnicastZenPing zenPingA = new UnicastZenPing(hostsSettings, threadPool, transportServiceA, clusterName, Version.CURRENT, electMasterService, null);
         zenPingA.setPingContextProvider(new PingContextProvider() {

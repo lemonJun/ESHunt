@@ -109,9 +109,7 @@ public class DeleteByQueryTests extends ElasticsearchIntegrationTest {
     public void testFailure() throws Exception {
         assertAcked(prepareCreate("test").addAlias(new Alias("alias")));
 
-        DeleteByQueryResponse response = client().prepareDeleteByQuery(indexOrAlias())
-                .setQuery(QueryBuilders.hasChildQuery("type", QueryBuilders.matchAllQuery()))
-                .execute().actionGet();
+        DeleteByQueryResponse response = client().prepareDeleteByQuery(indexOrAlias()).setQuery(QueryBuilders.hasChildQuery("type", QueryBuilders.matchAllQuery())).execute().actionGet();
 
         NumShards twitter = getNumShards("test");
 
@@ -133,15 +131,12 @@ public class DeleteByQueryTests extends ElasticsearchIntegrationTest {
         assertAcked(prepareCreate("test").addAlias(new Alias("alias")));
         int numDocs = scaledRandomIntBetween(10, 100);
         for (int i = 0; i < numDocs; i++) {
-            client().prepareIndex("test", "test", Integer.toString(i))
-                    .setRouting(randomAsciiOfLengthBetween(1, 5))
-                    .setSource("foo", "bar").get();
+            client().prepareIndex("test", "test", Integer.toString(i)).setRouting(randomAsciiOfLengthBetween(1, 5)).setSource("foo", "bar").get();
         }
         refresh();
         assertHitCount(client().prepareCount("test").setQuery(QueryBuilders.matchQuery("_id", Integer.toString(between(0, numDocs - 1)))).get(), 1);
         assertHitCount(client().prepareCount("test").setQuery(QueryBuilders.matchAllQuery()).get(), numDocs);
-        DeleteByQueryResponse deleteByQueryResponse = client().prepareDeleteByQuery(indexOrAlias())
-                .setQuery(QueryBuilders.matchQuery("_id", Integer.toString(between(0, numDocs - 1)))).get();
+        DeleteByQueryResponse deleteByQueryResponse = client().prepareDeleteByQuery(indexOrAlias()).setQuery(QueryBuilders.matchQuery("_id", Integer.toString(between(0, numDocs - 1)))).get();
         assertThat(deleteByQueryResponse.getIndices().size(), equalTo(1));
         assertThat(deleteByQueryResponse.getIndex("test"), notNullValue());
 
@@ -175,7 +170,7 @@ public class DeleteByQueryTests extends ElasticsearchIntegrationTest {
 
         SearchResponse searchResponse = client().prepareSearch("test").get();
         assertNoFailures(searchResponse);
-        assertThat(searchResponse.getHits().totalHits(), equalTo((long)numDocs + 1));
+        assertThat(searchResponse.getHits().totalHits(), equalTo((long) numDocs + 1));
 
         DeleteByQueryResponse deleteByQueryResponse = client().prepareDeleteByQuery("test").setQuery(QueryBuilders.termQuery("field", "value")).get();
         assertThat(deleteByQueryResponse.getIndices().size(), equalTo(1));

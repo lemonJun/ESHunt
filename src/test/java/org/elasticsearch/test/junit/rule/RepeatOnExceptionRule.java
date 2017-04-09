@@ -65,7 +65,7 @@ public class RepeatOnExceptionRule implements TestRule {
                     } catch (Throwable t) {
                         if (t.getClass().equals(expectedException)) {
                             caughtThrowable = t;
-                            logger.info("Exception [{}] occurred, rerunning the test after [{}] failures", t, t.getClass().getSimpleName(), i+1);
+                            logger.info("Exception [{}] occurred, rerunning the test after [{}] failures", t, t.getClass().getSimpleName(), i + 1);
                         } else {
                             throw t;
                         }

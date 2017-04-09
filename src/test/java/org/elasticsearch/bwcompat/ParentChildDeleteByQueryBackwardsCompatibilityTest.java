@@ -52,42 +52,26 @@ public class ParentChildDeleteByQueryBackwardsCompatibilityTest extends Elastics
 
     @Override
     protected Settings externalNodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-                .put(super.externalNodeSettings(nodeOrdinal))
-                .put("index.translog.disable_flush", true)
-                .build();
+        return ImmutableSettings.builder().put(super.externalNodeSettings(nodeOrdinal)).put("index.translog.disable_flush", true).build();
     }
 
     @Test
     public void testHasChild() throws Exception {
-        assertAcked(prepareCreate("idx")
-                .setSettings(ImmutableSettings.builder()
-                                .put(indexSettings())
-                                .put("index.refresh_interval", "-1")
-                                .put("index.routing.allocation.exclude._name", backwardsCluster().newNodePattern())
-                )
-                .addMapping("parent")
-                .addMapping("child", "_parent", "type=parent"));
+        assertAcked(prepareCreate("idx").setSettings(ImmutableSettings.builder().put(indexSettings()).put("index.refresh_interval", "-1").put("index.routing.allocation.exclude._name", backwardsCluster().newNodePattern())).addMapping("parent").addMapping("child", "_parent", "type=parent"));
 
         List<IndexRequestBuilder> requests = new ArrayList<>();
         requests.add(client().prepareIndex("idx", "parent", "1").setSource("{}"));
         requests.add(client().prepareIndex("idx", "child", "1").setParent("1").setSource("{}"));
         indexRandom(true, requests);
 
-        SearchResponse response = client().prepareSearch("idx")
-                .setQuery(hasChildQuery("child", matchAllQuery()))
-                .get();
+        SearchResponse response = client().prepareSearch("idx").setQuery(hasChildQuery("child", matchAllQuery())).get();
         assertNoFailures(response);
         assertHitCount(response, 1);
 
-        client().prepareDeleteByQuery("idx")
-                .setQuery(hasChildQuery("child", matchAllQuery()))
-                .get();
+        client().prepareDeleteByQuery("idx").setQuery(hasChildQuery("child", matchAllQuery())).get();
         refresh();
 
-        response = client().prepareSearch("idx")
-                .setQuery(hasChildQuery("child", matchAllQuery()))
-                .get();
+        response = client().prepareSearch("idx").setQuery(hasChildQuery("child", matchAllQuery())).get();
         assertNoFailures(response);
         assertHitCount(response, 0);
 
@@ -98,9 +82,7 @@ public class ParentChildDeleteByQueryBackwardsCompatibilityTest extends Elastics
         backwardsCluster().allowOnAllNodes("idx");
         ensureGreen("idx");
 
-        response = client().prepareSearch("idx")
-                .setQuery(hasChildQuery("child", matchAllQuery()))
-                .get();
+        response = client().prepareSearch("idx").setQuery(hasChildQuery("child", matchAllQuery())).get();
         assertNoFailures(response);
         assertHitCount(response, 1); // The delete by query has failed on recovery so that parent doc is still there
 

@@ -130,7 +130,7 @@ public class RecoveriesCollectionTests extends ElasticsearchSingleNodeTest {
             RecoveriesCollection.StatusRef statusRef = collection.getStatus(recoveryId);
             toClose.add(statusRef);
             ShardId shardId = statusRef.status().shardId();
-            assertFalse("should not have cancelled recoveries", collection.cancelRecoveriesForShard(shardId, "test", Predicates.<RecoveryStatus>alwaysFalse()));
+            assertFalse("should not have cancelled recoveries", collection.cancelRecoveriesForShard(shardId, "test", Predicates.<RecoveryStatus> alwaysFalse()));
             final Predicate<RecoveryStatus> shouldCancel = new Predicate<RecoveryStatus>() {
                 @Override
                 public boolean apply(RecoveryStatus status) {
@@ -159,13 +159,9 @@ public class RecoveriesCollectionTests extends ElasticsearchSingleNodeTest {
     }
 
     protected void createIndex() {
-        createIndex("test",
-                ImmutableSettings.builder()
-                        .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1, IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)
-                        .build());
+        createIndex("test", ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1, IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0).build());
         ensureGreen();
     }
-
 
     long startRecovery(RecoveriesCollection collection) {
         return startRecovery(collection, listener, TimeValue.timeValueMinutes(60));

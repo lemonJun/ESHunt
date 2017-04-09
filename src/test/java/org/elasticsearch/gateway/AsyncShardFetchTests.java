@@ -75,7 +75,7 @@ public class AsyncShardFetchTests extends ElasticsearchTestCase {
         test.addSimulation(node1.getId(), response1);
 
         // first fetch, no data, still on going
-        AsyncShardFetch.FetchResult<Response> fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        AsyncShardFetch.FetchResult<Response> fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(false));
         assertThat(test.reroute.get(), equalTo(0));
 
@@ -85,13 +85,12 @@ public class AsyncShardFetchTests extends ElasticsearchTestCase {
         assertThat(test.reroute.get(), equalTo(1));
         test.close();
         try {
-            test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+            test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
             fail("fetch data should fail when closed");
         } catch (IllegalStateException e) {
             // all is well
         }
     }
-
 
     @Test
     public void testFullCircleSingleNodeSuccess() throws Exception {
@@ -99,7 +98,7 @@ public class AsyncShardFetchTests extends ElasticsearchTestCase {
         test.addSimulation(node1.getId(), response1);
 
         // first fetch, no data, still on going
-        AsyncShardFetch.FetchResult<Response> fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        AsyncShardFetch.FetchResult<Response> fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(false));
         assertThat(test.reroute.get(), equalTo(0));
 
@@ -107,7 +106,7 @@ public class AsyncShardFetchTests extends ElasticsearchTestCase {
         test.fireSimulationAndWait(node1.getId());
         // verify we get back the data node
         assertThat(test.reroute.get(), equalTo(1));
-        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(true));
         assertThat(fetchData.getData().size(), equalTo(1));
         assertThat(fetchData.getData().get(node1), sameInstance(response1));
@@ -120,7 +119,7 @@ public class AsyncShardFetchTests extends ElasticsearchTestCase {
         test.addSimulation(node1.getId(), failure1);
 
         // first fetch, no data, still on going
-        AsyncShardFetch.FetchResult<Response> fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        AsyncShardFetch.FetchResult<Response> fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(false));
         assertThat(test.reroute.get(), equalTo(0));
 
@@ -128,19 +127,19 @@ public class AsyncShardFetchTests extends ElasticsearchTestCase {
         test.fireSimulationAndWait(node1.getId());
         // failure, fetched data exists, but has no data
         assertThat(test.reroute.get(), equalTo(1));
-        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(true));
         assertThat(fetchData.getData().size(), equalTo(0));
 
         // on failure, we reset the failure on a successive call to fetchData, and try again afterwards
         test.addSimulation(node1.getId(), response1);
-        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(false));
 
         test.fireSimulationAndWait(node1.getId());
         // 2 reroutes, cause we have a failure that we clear
         assertThat(test.reroute.get(), equalTo(3));
-        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(true));
         assertThat(fetchData.getData().size(), equalTo(1));
         assertThat(fetchData.getData().get(node1), sameInstance(response1));
@@ -153,7 +152,7 @@ public class AsyncShardFetchTests extends ElasticsearchTestCase {
         test.addSimulation(node2.getId(), response2);
 
         // no fetched data, 2 requests still on going
-        AsyncShardFetch.FetchResult<Response> fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        AsyncShardFetch.FetchResult<Response> fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(false));
         assertThat(test.reroute.get(), equalTo(0));
 
@@ -161,14 +160,14 @@ public class AsyncShardFetchTests extends ElasticsearchTestCase {
         test.fireSimulationAndWait(node1.getId());
         // there is still another on going request, so no data
         assertThat(test.getNumberOfInFlightFetches(), equalTo(1));
-        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(false));
 
         // fire the second simulation, this should allow us to get the data
         test.fireSimulationAndWait(node2.getId());
         // no more ongoing requests, we should fetch the data
         assertThat(test.reroute.get(), equalTo(2));
-        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(true));
         assertThat(fetchData.getData().size(), equalTo(2));
         assertThat(fetchData.getData().get(node1), sameInstance(response1));
@@ -182,21 +181,21 @@ public class AsyncShardFetchTests extends ElasticsearchTestCase {
         test.addSimulation(node2.getId(), failure2);
 
         // no fetched data, 2 requests still on going
-        AsyncShardFetch.FetchResult<Response> fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        AsyncShardFetch.FetchResult<Response> fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(false));
         assertThat(test.reroute.get(), equalTo(0));
 
         // fire the first response, it should trigger a reroute
         test.fireSimulationAndWait(node1.getId());
         assertThat(test.reroute.get(), equalTo(1));
-        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(false));
 
         // fire the second simulation, this should allow us to get the data
         test.fireSimulationAndWait(node2.getId());
         assertThat(test.reroute.get(), equalTo(2));
         // since one of those failed, we should only have one entry
-        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(true));
         assertThat(fetchData.getData().size(), equalTo(1));
         assertThat(fetchData.getData().get(node1), sameInstance(response1));
@@ -208,7 +207,7 @@ public class AsyncShardFetchTests extends ElasticsearchTestCase {
         test.addSimulation(node1.getId(), response1);
 
         // no fetched data, 2 requests still on going
-        AsyncShardFetch.FetchResult<Response> fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        AsyncShardFetch.FetchResult<Response> fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(false));
         assertThat(test.reroute.get(), equalTo(0));
 
@@ -219,14 +218,14 @@ public class AsyncShardFetchTests extends ElasticsearchTestCase {
         nodes = DiscoveryNodes.builder(nodes).put(node2).build();
         test.addSimulation(node2.getId(), response2);
         // no fetch data, has a new node introduced
-        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(false));
 
         // fire the second simulation, this should allow us to get the data
         test.fireSimulationAndWait(node2.getId());
 
         // since one of those failed, we should only have one entry
-        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String>of());
+        fetchData = test.fetchData(nodes, MetaData.EMPTY_META_DATA, ImmutableSet.<String> of());
         assertThat(fetchData.hasData(), equalTo(true));
         assertThat(fetchData.getData().size(), equalTo(2));
         assertThat(fetchData.getData().get(node1), sameInstance(response1));
@@ -296,9 +295,9 @@ public class AsyncShardFetchTests extends ElasticsearchTestCase {
                             assert entry != null;
                             entry.executeLatch.await();
                             if (entry.failure != null) {
-                                processAsyncFetch(shardId, null, new FailedNodeException[]{new FailedNodeException(nodeId, "unexpected", entry.failure)});
+                                processAsyncFetch(shardId, null, new FailedNodeException[] { new FailedNodeException(nodeId, "unexpected", entry.failure) });
                             } else {
-                                processAsyncFetch(shardId, new Response[]{entry.response}, null);
+                                processAsyncFetch(shardId, new Response[] { entry.response }, null);
                             }
                         } catch (Throwable e) {
                             logger.error("unexpected failure", e);
@@ -312,7 +311,6 @@ public class AsyncShardFetchTests extends ElasticsearchTestCase {
             }
         }
     }
-
 
     static class Response extends NodeOperationResponse {
 

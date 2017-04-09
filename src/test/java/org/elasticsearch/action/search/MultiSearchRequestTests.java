@@ -74,7 +74,7 @@ public class MultiSearchRequestTests extends ElasticsearchTestCase {
         assertThat(request.requests().get(4).indices(), nullValue());
         assertThat(request.requests().get(4).types().length, equalTo(0));
     }
-    
+
     @Test
     public void simpleAdd3() throws Exception {
         byte[] data = Streams.copyToBytesFromClasspath("/org/elasticsearch/action/search/simple-msearch3.json");

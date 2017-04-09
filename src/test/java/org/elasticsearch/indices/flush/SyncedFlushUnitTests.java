@@ -47,7 +47,6 @@ import static org.hamcrest.Matchers.hasSize;
 
 public class SyncedFlushUnitTests extends ElasticsearchTestCase {
 
-
     private static class TestPlan {
         public ShardCounts totalCounts;
         public Map<String, ShardCounts> countsPerIndex = new HashMap<>();
@@ -120,8 +119,7 @@ public class SyncedFlushUnitTests extends ElasticsearchTestCase {
                 } else {
                     Map<ShardRouting, SyncedFlushResponse> shardResponses = new HashMap<>();
                     for (int copy = 0; copy < replicas + 1; copy++) {
-                        final ShardRouting shardRouting = new ImmutableShardRouting(index, shard, "node_" + shardId + "_" + copy, null,
-                                copy == 0, ShardRoutingState.STARTED, 0);
+                        final ShardRouting shardRouting = new ImmutableShardRouting(index, shard, "node_" + shardId + "_" + copy, null, copy == 0, ShardRoutingState.STARTED, 0);
                         if (randomInt(5) < 2) {
                             // shard copy failure
                             failed++;

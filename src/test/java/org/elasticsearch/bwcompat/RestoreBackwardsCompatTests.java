@@ -63,15 +63,11 @@ public class RestoreBackwardsCompatTests extends AbstractSnapshotTests {
         try {
             URI repoDirUri = getClass().getResource(".").toURI();
             URI repoJarPatternUri = new URI("jar:" + repoDirUri.toString() + "*.zip!/repo/");
-            return ImmutableSettings.settingsBuilder()
-                    .put(super.nodeSettings(nodeOrdinal))
-                    .putArray("repositories.url.allowed_urls", repoJarPatternUri.toString())
-                    .build();
+            return ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal)).putArray("repositories.url.allowed_urls", repoJarPatternUri.toString()).build();
         } catch (URISyntaxException ex) {
             throw new IllegalArgumentException(ex);
         }
     }
-
 
     @Test
     public void restoreOldSnapshots() throws Exception {
@@ -88,9 +84,12 @@ public class RestoreBackwardsCompatTests extends AbstractSnapshotTests {
         for (java.lang.reflect.Field field : Version.class.getDeclaredFields()) {
             if (Modifier.isStatic(field.getModifiers()) && field.getType() == Version.class) {
                 Version v = (Version) field.get(Version.class);
-                if (v.snapshot()) continue;
-                if (v.onOrBefore(Version.V_1_0_0_Beta1)) continue;
-                if (v.equals(Version.CURRENT)) continue;
+                if (v.snapshot())
+                    continue;
+                if (v.onOrBefore(Version.V_1_0_0_Beta1))
+                    continue;
+                if (v.equals(Version.CURRENT))
+                    continue;
 
                 expectedVersions.add(v.toString());
             }
@@ -129,9 +128,7 @@ public class RestoreBackwardsCompatTests extends AbstractSnapshotTests {
         URI repoFileUri = getClass().getResource(repoFile).toURI();
         URI repoJarUri = new URI("jar:" + repoFileUri.toString() + "!/repo/");
         logger.info("-->  creating repository [{}] for version [{}]", repo, version);
-        assertAcked(client().admin().cluster().preparePutRepository(repo)
-                .setType("url").setSettings(ImmutableSettings.settingsBuilder()
-                        .put("url", repoJarUri.toString())));
+        assertAcked(client().admin().cluster().preparePutRepository(repo).setType("url").setSettings(ImmutableSettings.settingsBuilder().put("url", repoJarUri.toString())));
     }
 
     private void testOldSnapshot(String version, String repo, String snapshot) throws IOException {
@@ -180,4 +177,3 @@ public class RestoreBackwardsCompatTests extends AbstractSnapshotTests {
 
     }
 }
-

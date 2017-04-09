@@ -36,15 +36,12 @@ public class CamelCaseFieldNameTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testCamelCaseFieldNameStaysAsIs() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").endObject().endObject().string();
 
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
         DocumentMapper documentMapper = parser.parse(mapping);
 
-        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("thisIsCamelCase", "value1")
-                .endObject().bytes());
+        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("thisIsCamelCase", "value1").endObject().bytes());
 
         assertThat(documentMapper.mappers().indexName("thisIsCamelCase").isEmpty(), equalTo(false));
         assertThat(documentMapper.mappers().indexName("this_is_camel_case"), nullValue());

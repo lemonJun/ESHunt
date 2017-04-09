@@ -49,7 +49,7 @@ public class SimpleLuceneTests extends ElasticsearchTestCase {
         IndexWriter indexWriter = new IndexWriter(dir, new IndexWriterConfig(Lucene.VERSION, Lucene.STANDARD_ANALYZER));
         for (int i = 0; i < 10; i++) {
             Document document = new Document();
-            document.add(new TextField("str", new String(new char[]{(char) (97 + i), (char) (97 + i)}), Field.Store.YES));
+            document.add(new TextField("str", new String(new char[] { (char) (97 + i), (char) (97 + i) }), Field.Store.YES));
             indexWriter.addDocument(document);
         }
         IndexReader reader = DirectoryReader.open(indexWriter, true);
@@ -57,7 +57,7 @@ public class SimpleLuceneTests extends ElasticsearchTestCase {
         TopFieldDocs docs = searcher.search(new MatchAllDocsQuery(), null, 10, new Sort(new SortField("str", SortField.Type.STRING)));
         for (int i = 0; i < 10; i++) {
             FieldDoc fieldDoc = (FieldDoc) docs.scoreDocs[i];
-            assertThat((BytesRef) fieldDoc.fields[0], equalTo(new BytesRef(new String(new char[]{(char) (97 + i), (char) (97 + i)}))));
+            assertThat((BytesRef) fieldDoc.fields[0], equalTo(new BytesRef(new String(new char[] { (char) (97 + i), (char) (97 + i) }))));
         }
     }
 
@@ -172,7 +172,7 @@ public class SimpleLuceneTests extends ElasticsearchTestCase {
         assertThat(100, equalTo(topDocs.totalHits));
         for (int i = 0; i < topDocs.scoreDocs.length; i++) {
             Document doc = searcher.doc(topDocs.scoreDocs[i].doc);
-//            System.out.println(doc.get("id") + ": " + searcher.explain(query, topDocs.scoreDocs[i].doc));
+            //            System.out.println(doc.get("id") + ": " + searcher.explain(query, topDocs.scoreDocs[i].doc));
             assertThat(doc.get("_id"), equalTo(Integer.toString(100 - i - 1)));
         }
 
@@ -244,7 +244,7 @@ public class SimpleLuceneTests extends ElasticsearchTestCase {
         terms = atomicReader.terms("int2");
         termsEnum = terms.iterator(termsEnum);
         termsEnum.next();
-        termDocs =  termsEnum.docs(atomicReader.getLiveDocs(), termDocs);
+        termDocs = termsEnum.docs(atomicReader.getLiveDocs(), termDocs);
         assertThat(termDocs.nextDoc(), equalTo(0));
         assertThat(termDocs.docID(), equalTo(0));
         assertThat(termDocs.freq(), equalTo(2));

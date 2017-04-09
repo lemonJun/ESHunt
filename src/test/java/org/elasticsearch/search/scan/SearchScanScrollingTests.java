@@ -69,13 +69,7 @@ public class SearchScanScrollingTests extends ElasticsearchIntegrationTest {
 
         refresh();
 
-        SearchResponse searchResponse = client().prepareSearch()
-                .setSearchType(SearchType.SCAN)
-                .setQuery(matchAllQuery())
-                .setSize(size)
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .setTrackScores(trackScores)
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setSearchType(SearchType.SCAN).setQuery(matchAllQuery()).setSize(size).setScroll(TimeValue.timeValueMinutes(2)).setTrackScores(trackScores).execute().actionGet();
         try {
             assertHitCount(searchResponse, numberOfDocs);
 

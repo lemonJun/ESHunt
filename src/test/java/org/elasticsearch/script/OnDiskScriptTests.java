@@ -43,17 +43,11 @@ public class OnDiskScriptTests extends ElasticsearchIntegrationTest {
     @Override
     public Settings nodeSettings(int nodeOrdinal) {
         //Set path so ScriptService will pick up the test scripts
-        return settingsBuilder().put(super.nodeSettings(nodeOrdinal))
-                .put("path.conf", this.getResource("config").getPath())
-                .put("script.engine.expression.file.aggs", "off")
-                .put("script.engine.mustache.file.aggs", "off")
-                .put("script.engine.mustache.file.search", "off")
-                .put("script.engine.mustache.file.mapping", "off")
-                .put("script.engine.mustache.file.update", "off").build();
+        return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("path.conf", this.getResource("config").getPath()).put("script.engine.expression.file.aggs", "off").put("script.engine.mustache.file.aggs", "off").put("script.engine.mustache.file.search", "off").put("script.engine.mustache.file.mapping", "off").put("script.engine.mustache.file.update", "off").build();
     }
 
     @Test
-    public void testFieldOnDiskScript()  throws ExecutionException, InterruptedException {
+    public void testFieldOnDiskScript() throws ExecutionException, InterruptedException {
         List<IndexRequestBuilder> builders = new ArrayList<>();
         builders.add(client().prepareIndex("test", "scriptTest", "1").setSource("{\"theField\":\"foo\"}"));
         builders.add(client().prepareIndex("test", "scriptTest", "2").setSource("{\"theField\":\"foo 2\"}"));
@@ -67,12 +61,12 @@ public class OnDiskScriptTests extends ElasticsearchIntegrationTest {
         assertHitCount(searchResponse, 5);
         assertTrue(searchResponse.getHits().hits().length == 1);
         SearchHit sh = searchResponse.getHits().getAt(0);
-        assertThat((Integer)sh.field("test1").getValue(), equalTo(2));
-        assertThat((Integer)sh.field("test2").getValue(), equalTo(6));
+        assertThat((Integer) sh.field("test1").getValue(), equalTo(2));
+        assertThat((Integer) sh.field("test2").getValue(), equalTo(6));
     }
 
     @Test
-    public void testFieldOnDiskBackwardCompatScript()  throws ExecutionException, InterruptedException {
+    public void testFieldOnDiskBackwardCompatScript() throws ExecutionException, InterruptedException {
         List<IndexRequestBuilder> builders = new ArrayList<>();
         builders.add(client().prepareIndex("test", "scriptTest", "1").setSource("{\"theField\":\"foo\"}"));
         builders.add(client().prepareIndex("test", "scriptTest", "2").setSource("{\"theField\":\"foo 2\"}"));
@@ -91,7 +85,7 @@ public class OnDiskScriptTests extends ElasticsearchIntegrationTest {
     }
 
     @Test
-    public void testOnDiskScriptsSameNameDifferentLang()  throws ExecutionException, InterruptedException {
+    public void testOnDiskScriptsSameNameDifferentLang() throws ExecutionException, InterruptedException {
         List<IndexRequestBuilder> builders = new ArrayList<>();
         builders.add(client().prepareIndex("test", "scriptTest", "1").setSource("{\"theField\":\"foo\"}"));
         builders.add(client().prepareIndex("test", "scriptTest", "2").setSource("{\"theField\":\"foo 2\"}"));
@@ -105,8 +99,8 @@ public class OnDiskScriptTests extends ElasticsearchIntegrationTest {
         assertHitCount(searchResponse, 5);
         assertThat(searchResponse.getHits().hits().length, equalTo(1));
         SearchHit sh = searchResponse.getHits().getAt(0);
-        assertThat((Integer)sh.field("test1").getValue(), equalTo(2));
-        assertThat((Double)sh.field("test2").getValue(), equalTo(10d));
+        assertThat((Integer) sh.field("test1").getValue(), equalTo(2));
+        assertThat((Double) sh.field("test2").getValue(), equalTo(10d));
     }
 
     @Test
@@ -125,7 +119,7 @@ public class OnDiskScriptTests extends ElasticsearchIntegrationTest {
         try {
             client().prepareSearch("test").setSource(source).get();
             fail("aggs script should have been rejected");
-        } catch(Exception e) {
+        } catch (Exception e) {
             assertThat(ExceptionsHelper.detailedMessage(e), containsString("scripts of type [file], operation [aggs] and lang [expression] are disabled"));
         }
 
@@ -134,7 +128,7 @@ public class OnDiskScriptTests extends ElasticsearchIntegrationTest {
         assertHitCount(searchResponse, 5);
         assertTrue(searchResponse.getHits().hits().length == 1);
         SearchHit sh = searchResponse.getHits().getAt(0);
-        assertThat((Double)sh.field("test1").getValue(), equalTo(10d));
+        assertThat((Double) sh.field("test1").getValue(), equalTo(10d));
     }
 
     @Test
@@ -146,7 +140,7 @@ public class OnDiskScriptTests extends ElasticsearchIntegrationTest {
         try {
             client().prepareSearch("test").setSource(source).get();
             fail("aggs script should have been rejected");
-        } catch(Exception e) {
+        } catch (Exception e) {
             assertThat(ExceptionsHelper.detailedMessage(e), containsString("scripts of type [file], operation [aggs] and lang [expression] are disabled"));
         }
     }
@@ -160,20 +154,20 @@ public class OnDiskScriptTests extends ElasticsearchIntegrationTest {
         try {
             client().prepareSearch("test").setSource(source).get();
             fail("aggs script should have been rejected");
-        } catch(Exception e) {
+        } catch (Exception e) {
             assertThat(ExceptionsHelper.detailedMessage(e), containsString("scripts of type [file], operation [aggs] and lang [mustache] are disabled"));
         }
         String query = "{ \"query\" : { \"match_all\": {}} , \"script_fields\" : { \"test1\" : { \"file\" : \"script1\", \"lang\":\"mustache\" }}, size:1}";
         try {
             client().prepareSearch().setSource(query).setIndices("test").setTypes("scriptTest").get();
             fail("search script should have been rejected");
-        } catch(Exception e) {
+        } catch (Exception e) {
             assertThat(ExceptionsHelper.detailedMessage(e), containsString("scripts of type [file], operation [search] and lang [mustache] are disabled"));
         }
         try {
             client().prepareUpdate("test", "scriptTest", "1").setScript("script1", ScriptService.ScriptType.FILE).setScriptLang(MustacheScriptEngineService.NAME).get();
             fail("update script should have been rejected");
-        } catch(Exception e) {
+        } catch (Exception e) {
             assertThat(e.getMessage(), containsString("failed to execute script"));
             assertThat(ExceptionsHelper.detailedMessage(e), containsString("scripts of type [file], operation [update] and lang [mustache] are disabled"));
         }

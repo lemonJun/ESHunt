@@ -75,14 +75,12 @@ public class IndicesCustomDataPathTests extends ElasticsearchIntegrationTest {
         // already existing
         XIOUtils.rm(endDir);
 
-        ImmutableSettings.Builder sb = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_DATA_PATH, startDir.toAbsolutePath().toString())
+        ImmutableSettings.Builder sb = ImmutableSettings.builder().put(IndexMetaData.SETTING_DATA_PATH, startDir.toAbsolutePath().toString())
                         // Don't allow a RAM store or a "none" gateway
-                .put("index.store.type", "default");
-        ImmutableSettings.Builder sb2 = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_DATA_PATH, endDir.toAbsolutePath().toString())
+                        .put("index.store.type", "default");
+        ImmutableSettings.Builder sb2 = ImmutableSettings.builder().put(IndexMetaData.SETTING_DATA_PATH, endDir.toAbsolutePath().toString())
                         // Don't allow a RAM store or a "none" gateway
-                .put("index.store.type", "default");
+                        .put("index.store.type", "default");
 
         logger.info("--> creating an index with data_path [{}]", startDir.toAbsolutePath().toString());
         client().admin().indices().prepareCreate(INDEX).setSettings(sb).get();
@@ -113,10 +111,7 @@ public class IndicesCustomDataPathTests extends ElasticsearchIntegrationTest {
         Files.move(startDir, endDir, StandardCopyOption.REPLACE_EXISTING);
 
         logger.info("--> updating settings...");
-        client().admin().indices().prepareUpdateSettings(INDEX)
-                .setSettings(sb2)
-                .setIndicesOptions(IndicesOptions.fromOptions(true, false, true, true))
-                .get();
+        client().admin().indices().prepareUpdateSettings(INDEX).setSettings(sb2).setIndicesOptions(IndicesOptions.fromOptions(true, false, true, true)).get();
 
         assert Files.exists(startDir) == false : "start dir shouldn't exist";
 

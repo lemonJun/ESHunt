@@ -63,10 +63,7 @@ public class InternalSettingsPreparerTests extends ElasticsearchTestCase {
         // Should use setting from the system property
         assertThat(tuple.v1().get("node.zone"), equalTo("foo"));
 
-        Settings settings = settingsBuilder()
-                .put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true)
-                .put("node.zone", "bar")
-                .build();
+        Settings settings = settingsBuilder().put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true).put("node.zone", "bar").build();
         tuple = InternalSettingsPreparer.prepareSettings(settings, true);
         // Should use setting from the system property
         assertThat(tuple.v1().get("node.zone"), equalTo("bar"));
@@ -75,9 +72,7 @@ public class InternalSettingsPreparerTests extends ElasticsearchTestCase {
     @Test
     public void testAlternateConfigFileSuffixes() {
         // test that we can read config files with .yaml, .json, and .properties suffixes
-        Tuple<Settings, Environment> tuple = InternalSettingsPreparer.prepareSettings(settingsBuilder()
-                .put("config.ignore_system_properties", true)
-                .build(), true);
+        Tuple<Settings, Environment> tuple = InternalSettingsPreparer.prepareSettings(settingsBuilder().put("config.ignore_system_properties", true).build(), true);
 
         assertThat(tuple.v1().get("yaml.config.exists"), equalTo("true"));
         assertThat(tuple.v1().get("json.config.exists"), equalTo("true"));
@@ -106,14 +101,7 @@ public class InternalSettingsPreparerTests extends ElasticsearchTestCase {
             }
         };
 
-        Settings.Builder builder = settingsBuilder()
-                .put("password.replace", InternalSettingsPreparer.SECRET_PROMPT_VALUE)
-                .put("dont.replace", "prompt:secret")
-                .put("dont.replace2", "_prompt:secret_")
-                .put("dont.replace3", "_prompt:text__")
-                .put("dont.replace4", "__prompt:text_")
-                .put("dont.replace5", "prompt:secret__")
-                .put("replace_me", InternalSettingsPreparer.TEXT_PROMPT_VALUE);
+        Settings.Builder builder = settingsBuilder().put("password.replace", InternalSettingsPreparer.SECRET_PROMPT_VALUE).put("dont.replace", "prompt:secret").put("dont.replace2", "_prompt:secret_").put("dont.replace3", "_prompt:text__").put("dont.replace4", "__prompt:text_").put("dont.replace5", "prompt:secret__").put("replace_me", InternalSettingsPreparer.TEXT_PROMPT_VALUE);
         Settings settings = builder.build();
         settings = InternalSettingsPreparer.replacePromptPlaceholders(settings, terminal);
 
@@ -132,8 +120,7 @@ public class InternalSettingsPreparerTests extends ElasticsearchTestCase {
 
     @Test
     public void testReplaceSecretPromptPlaceholderWithNullTerminal() {
-        Settings.Builder builder = settingsBuilder()
-                .put("replace_me1", InternalSettingsPreparer.SECRET_PROMPT_VALUE);
+        Settings.Builder builder = settingsBuilder().put("replace_me1", InternalSettingsPreparer.SECRET_PROMPT_VALUE);
         try {
             InternalSettingsPreparer.replacePromptPlaceholders(builder.build(), null);
             fail("an exception should have been thrown since no terminal was provided!");
@@ -144,8 +131,7 @@ public class InternalSettingsPreparerTests extends ElasticsearchTestCase {
 
     @Test
     public void testReplaceTextPromptPlaceholderWithNullTerminal() {
-        Settings.Builder builder = settingsBuilder()
-                .put("replace_me1", InternalSettingsPreparer.TEXT_PROMPT_VALUE);
+        Settings.Builder builder = settingsBuilder().put("replace_me1", InternalSettingsPreparer.TEXT_PROMPT_VALUE);
         try {
             InternalSettingsPreparer.replacePromptPlaceholders(builder.build(), null);
             fail("an exception should have been thrown since no terminal was provided!");
@@ -157,35 +143,23 @@ public class InternalSettingsPreparerTests extends ElasticsearchTestCase {
     @Test
     public void testNameSettingsPreference() {
         // Test system property overrides node.name
-        Settings settings = settingsBuilder()
-                .put("node.name", "node-name")
-                .put("path.home", newTempDir())
-                .build();
+        Settings settings = settingsBuilder().put("node.name", "node-name").put("path.home", newTempDir()).build();
         Tuple<Settings, Environment> tuple = InternalSettingsPreparer.prepareSettings(settings, true);
         assertThat(tuple.v1().get("name"), equalTo("sys-prop-name"));
 
         // test name in settings overrides sys prop and node.name
-        settings = settingsBuilder()
-                .put("name", "name-in-settings")
-                .put("node.name", "node-name")
-                .put("path.home", newTempDir())
-                .build();
+        settings = settingsBuilder().put("name", "name-in-settings").put("node.name", "node-name").put("path.home", newTempDir()).build();
         tuple = InternalSettingsPreparer.prepareSettings(settings, true);
         assertThat(tuple.v1().get("name"), equalTo("name-in-settings"));
 
         // test only node.name in settings
         System.clearProperty("name");
-        settings = settingsBuilder()
-                .put("node.name", "node-name")
-                .put("path.home", newTempDir())
-                .build();
+        settings = settingsBuilder().put("node.name", "node-name").put("path.home", newTempDir()).build();
         tuple = InternalSettingsPreparer.prepareSettings(settings, true);
         assertThat(tuple.v1().get("name"), equalTo("node-name"));
 
         // test no name at all results in name being set
-        settings = settingsBuilder()
-                .put("path.home", newTempDir())
-                .build();
+        settings = settingsBuilder().put("path.home", newTempDir()).build();
         tuple = InternalSettingsPreparer.prepareSettings(settings, true);
         assertThat(tuple.v1().get("name"), not("name-in-settings"));
         assertThat(tuple.v1().get("name"), not("sys-prop-name"));
@@ -211,10 +185,7 @@ public class InternalSettingsPreparerTests extends ElasticsearchTestCase {
         };
 
         System.clearProperty("name");
-        Settings settings = ImmutableSettings.builder()
-                .put("path.home", newTempDir())
-                .put("node.name", InternalSettingsPreparer.TEXT_PROMPT_VALUE)
-                .build();
+        Settings settings = ImmutableSettings.builder().put("path.home", newTempDir()).put("node.name", InternalSettingsPreparer.TEXT_PROMPT_VALUE).build();
         Tuple<Settings, Environment> tuple = InternalSettingsPreparer.prepareSettings(settings, false, terminal);
         settings = tuple.v1();
         assertThat(counter.intValue(), is(1));
@@ -225,11 +196,7 @@ public class InternalSettingsPreparerTests extends ElasticsearchTestCase {
     @Test
     public void testPreserveSettingsClassloader() {
         final ClassLoader classLoader = URLClassLoader.newInstance(new URL[0]);
-        Settings settings = settingsBuilder()
-                .put("foo", "bar")
-                .put("path.home", newTempDir())
-                .classLoader(classLoader)
-                .build();
+        Settings settings = settingsBuilder().put("foo", "bar").put("path.home", newTempDir()).classLoader(classLoader).build();
 
         Tuple<Settings, Environment> tuple = InternalSettingsPreparer.prepareSettings(settings, randomBoolean());
 

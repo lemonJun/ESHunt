@@ -48,14 +48,7 @@ public class StartRecoveryRequestTest extends ElasticsearchTestCase {
     @Test
     public void testSerialization() throws Exception {
         Version targetNodeVersion = randomVersion();
-        StartRecoveryRequest outRequest = new StartRecoveryRequest(
-                new ShardId("test", 0),
-                new DiscoveryNode("a", new LocalTransportAddress("1"), targetNodeVersion),
-                new DiscoveryNode("b", new LocalTransportAddress("1"), targetNodeVersion),
-                true,
-                Store.MetadataSnapshot.EMPTY,
-                RecoveryState.Type.RELOCATION,
-                1l
+        StartRecoveryRequest outRequest = new StartRecoveryRequest(new ShardId("test", 0), new DiscoveryNode("a", new LocalTransportAddress("1"), targetNodeVersion), new DiscoveryNode("b", new LocalTransportAddress("1"), targetNodeVersion), true, Store.MetadataSnapshot.EMPTY, RecoveryState.Type.RELOCATION, 1l
 
         );
         ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();

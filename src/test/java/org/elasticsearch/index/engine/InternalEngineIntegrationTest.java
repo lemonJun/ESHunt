@@ -41,14 +41,12 @@ public class InternalEngineIntegrationTest extends ElasticsearchIntegrationTest 
         client().prepareIndex("test", "foo").setSource("field", "foo").get();
         refresh();
         assertTotalCompoundSegments(1, 1, "test");
-        client().admin().indices().prepareUpdateSettings("test")
-                .setSettings(ImmutableSettings.builder().put(EngineConfig.INDEX_COMPOUND_ON_FLUSH, false)).get();
+        client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.builder().put(EngineConfig.INDEX_COMPOUND_ON_FLUSH, false)).get();
         client().prepareIndex("test", "foo").setSource("field", "foo").get();
         refresh();
         assertTotalCompoundSegments(1, 2, "test");
 
-        client().admin().indices().prepareUpdateSettings("test")
-                .setSettings(ImmutableSettings.builder().put(EngineConfig.INDEX_COMPOUND_ON_FLUSH, true)).get();
+        client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.builder().put(EngineConfig.INDEX_COMPOUND_ON_FLUSH, true)).get();
         client().prepareIndex("test", "foo").setSource("field", "foo").get();
         refresh();
         assertTotalCompoundSegments(2, 3, "test");

@@ -248,7 +248,7 @@ public class SignificanceHeuristicTests extends ElasticsearchTestCase {
         }
         try {
             int idx = randomInt(3);
-            long[] values = {1, 2, 3, 4};
+            long[] values = { 1, 2, 3, 4 };
             values[idx] *= -1;
             heuristicIsSuperset.getScore(values[0], values[1], values[2], values[3]);
             fail();
@@ -272,7 +272,7 @@ public class SignificanceHeuristicTests extends ElasticsearchTestCase {
         }
         try {
             int idx = randomInt(3);
-            long[] values = {1, 2, 3, 4};
+            long[] values = { 1, 2, 3, 4 };
             values[idx] *= -1;
             heuristicNotSuperset.getScore(values[0], values[1], values[2], values[3]);
             fail();
@@ -285,7 +285,7 @@ public class SignificanceHeuristicTests extends ElasticsearchTestCase {
     void testAssertions(SignificanceHeuristic heuristic) {
         try {
             int idx = randomInt(3);
-            long[] values = {1, 2, 3, 4};
+            long[] values = { 1, 2, 3, 4 };
             values[idx] *= -1;
             heuristic.getScore(values[0], values[1], values[2], values[3]);
             fail();
@@ -391,11 +391,11 @@ public class SignificanceHeuristicTests extends ElasticsearchTestCase {
         //term is only in the subset, not at all in the other set but that is because the other set is empty.
         // this should actually not happen because only terms that are in the subset are considered now,
         // however, in this case the score should be 0 because a term that does not exist cannot be relevant...
-        assertThat(gnd.getScore(0, randomIntBetween(1, 2), 0, randomIntBetween(2,3)), equalTo(0.0));
+        assertThat(gnd.getScore(0, randomIntBetween(1, 2), 0, randomIntBetween(2, 3)), equalTo(0.0));
         // the terms do not co-occur at all - should be 0
-        assertThat(gnd.getScore(0, randomIntBetween(1, 2), randomIntBetween(2, 3), randomIntBetween(5,6)), equalTo(0.0));
+        assertThat(gnd.getScore(0, randomIntBetween(1, 2), randomIntBetween(2, 3), randomIntBetween(5, 6)), equalTo(0.0));
         // comparison between two terms that do not exist - probably not relevant
-        assertThat(gnd.getScore(0, 0, 0, randomIntBetween(1,2)), equalTo(0.0));
+        assertThat(gnd.getScore(0, 0, 0, randomIntBetween(1, 2)), equalTo(0.0));
         // terms co-occur perfectly - should be 1
         assertThat(gnd.getScore(1, 1, 1, 1), equalTo(1.0));
         gnd = new GND(false);

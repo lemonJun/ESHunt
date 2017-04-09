@@ -35,7 +35,7 @@ import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilde
 /**
  *
  */
-@ClusterScope(scope= ElasticsearchIntegrationTest.Scope.TEST, numDataNodes=0, transportClientRatio = 0)
+@ClusterScope(scope = ElasticsearchIntegrationTest.Scope.TEST, numDataNodes = 0, transportClientRatio = 0)
 public class PluginLuceneCheckerTests extends ElasticsearchIntegrationTest {
 
     /**
@@ -44,19 +44,14 @@ public class PluginLuceneCheckerTests extends ElasticsearchIntegrationTest {
      */
     @Test
     public void testDisableLuceneVersionCheckingPlugin() throws URISyntaxException {
-        String serverNodeId = SimpleNodesInfoTests.startNodeWithPlugins(
-                settingsBuilder().put("plugins.check_lucene", false)
-                        .put("plugins." + PluginsService.ES_PLUGIN_PROPERTIES_FILE_KEY, "es-plugin-test.properties")
-                        .put("plugins." + PluginsService.LOAD_PLUGIN_FROM_CLASSPATH, true).build(),
-                "/org/elasticsearch/plugins/lucene/");
+        String serverNodeId = SimpleNodesInfoTests.startNodeWithPlugins(settingsBuilder().put("plugins.check_lucene", false).put("plugins." + PluginsService.ES_PLUGIN_PROPERTIES_FILE_KEY, "es-plugin-test.properties").put("plugins." + PluginsService.LOAD_PLUGIN_FROM_CLASSPATH, true).build(), "/org/elasticsearch/plugins/lucene/");
         logger.info("--> server {} started" + serverNodeId);
 
         NodesInfoResponse response = client().admin().cluster().prepareNodesInfo().clear().setPlugins(true).execute().actionGet();
         logger.info("--> full json answer, status " + response.toString());
 
-        ElasticsearchAssertions.assertNodeContainsPlugins(response, serverNodeId,
-                Lists.newArrayList("old-lucene"), Lists.newArrayList("old"), Lists.newArrayList("1.0.0"), // JVM Plugin
-                Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);// No Site Plugin
+        ElasticsearchAssertions.assertNodeContainsPlugins(response, serverNodeId, Lists.newArrayList("old-lucene"), Lists.newArrayList("old"), Lists.newArrayList("1.0.0"), // JVM Plugin
+                        Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);// No Site Plugin
     }
 
     /**
@@ -69,18 +64,13 @@ public class PluginLuceneCheckerTests extends ElasticsearchIntegrationTest {
      */
     @Test
     public void testEnableLuceneVersionCheckingPlugin() throws URISyntaxException {
-        String serverNodeId = SimpleNodesInfoTests.startNodeWithPlugins(
-                settingsBuilder().put("plugins.check_lucene", true)
-                        .put("plugins." + PluginsService.ES_PLUGIN_PROPERTIES_FILE_KEY, "es-plugin-test.properties")
-                        .put("plugins." + PluginsService.LOAD_PLUGIN_FROM_CLASSPATH, true).build(),
-                "/org/elasticsearch/plugins/lucene/");
+        String serverNodeId = SimpleNodesInfoTests.startNodeWithPlugins(settingsBuilder().put("plugins.check_lucene", true).put("plugins." + PluginsService.ES_PLUGIN_PROPERTIES_FILE_KEY, "es-plugin-test.properties").put("plugins." + PluginsService.LOAD_PLUGIN_FROM_CLASSPATH, true).build(), "/org/elasticsearch/plugins/lucene/");
         logger.info("--> server {} started" + serverNodeId);
 
         NodesInfoResponse response = client().admin().cluster().prepareNodesInfo().clear().setPlugins(true).execute().actionGet();
         logger.info("--> full json answer, status " + response.toString());
 
-        ElasticsearchAssertions.assertNodeContainsPlugins(response, serverNodeId,
-                Lists.newArrayList("current-lucene"), Lists.newArrayList("current"), Lists.newArrayList("2.0.0"), // JVM Plugin
-                Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);// No Site Plugin
+        ElasticsearchAssertions.assertNodeContainsPlugins(response, serverNodeId, Lists.newArrayList("current-lucene"), Lists.newArrayList("current"), Lists.newArrayList("2.0.0"), // JVM Plugin
+                        Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);// No Site Plugin
     }
 }

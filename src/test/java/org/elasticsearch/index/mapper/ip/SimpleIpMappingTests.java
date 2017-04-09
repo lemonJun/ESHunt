@@ -42,17 +42,11 @@ public class SimpleIpMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testSimpleMapping() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("ip").field("type", "ip").endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("ip").field("type", "ip").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("ip", "127.0.0.1")
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("ip", "127.0.0.1").endObject().bytes());
 
         assertThat(doc.rootDoc().getField("ip").numericValue().longValue(), is(2130706433L));
         assertThat(doc.rootDoc().get("ip"), is(nullValue()));
@@ -85,15 +79,11 @@ public class SimpleIpMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testIgnoreMalformedOption() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1")
-                .field("type", "ip").field("ignore_malformed", true).endObject().startObject("field2").field("type", "ip")
-                .field("ignore_malformed", false).endObject().startObject("field3").field("type", "ip").endObject().endObject().endObject()
-                .endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "ip").field("ignore_malformed", true).endObject().startObject("field2").field("type", "ip").field("ignore_malformed", false).endObject().startObject("field3").field("type", "ip").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1",
-                XContentFactory.jsonBuilder().startObject().field("field1", "").field("field2", "10.20.30.40").endObject().bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field1", "").field("field2", "10.20.30.40").endObject().bytes());
         assertThat(doc.rootDoc().getField("field1"), nullValue());
         assertThat(doc.rootDoc().getField("field2"), notNullValue());
 

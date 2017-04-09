@@ -50,11 +50,7 @@ public abstract class ShardSizeTests extends ElasticsearchIntegrationTest {
      */
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("cluster.routing.operation.hash.type", "djb")
-                .put("cluster.routing.operation.use_type", "false")
-                .build();
+        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal)).put("cluster.routing.operation.hash.type", "djb").put("cluster.routing.operation.use_type", "false").build();
     }
 
     @Override
@@ -63,15 +59,14 @@ public abstract class ShardSizeTests extends ElasticsearchIntegrationTest {
     }
 
     protected void createIdx(String keyFieldMapping) {
-        assertAcked(prepareCreate("idx")
-                .addMapping("type", "key", keyFieldMapping));
+        assertAcked(prepareCreate("idx").addMapping("type", "key", keyFieldMapping));
     }
 
     protected void indexData() throws Exception {
 
         /*
-
-
+        
+        
         ||          ||           size = 3, shard_size = 5               ||           shard_size = size = 3               ||
         ||==========||==================================================||===============================================||
         || shard 1: ||  "1" - 5 | "2" - 4 | "3" - 3 | "4" - 2 | "5" - 1 || "1" - 5 | "3" - 3 | "2" - 4                   ||
@@ -81,8 +76,8 @@ public abstract class ShardSizeTests extends ElasticsearchIntegrationTest {
         || reduced: ||  "1" - 8 | "2" - 5 | "3" - 8 | "4" - 4 | "5" - 2 ||                                               ||
         ||          ||                                                  || "1" - 8, "3" - 8, "2" - 4    <= WRONG         ||
         ||          ||  "1" - 8 | "3" - 8 | "2" - 5     <= CORRECT      ||                                               ||
-
-
+        
+        
         */
 
         List<IndexRequestBuilder> docs = new ArrayList<>();
@@ -118,11 +113,7 @@ public abstract class ShardSizeTests extends ElasticsearchIntegrationTest {
     protected List<IndexRequestBuilder> indexDoc(String shard, String key, int times) throws Exception {
         IndexRequestBuilder[] builders = new IndexRequestBuilder[times];
         for (int i = 0; i < times; i++) {
-            builders[i] = client().prepareIndex("idx", "type").setRouting(shard).setCreate(true).setSource(jsonBuilder()
-                    .startObject()
-                    .field("key", key)
-                    .field("value", 1)
-                    .endObject());
+            builders[i] = client().prepareIndex("idx", "type").setRouting(shard).setCreate(true).setSource(jsonBuilder().startObject().field("key", key).field("value", 1).endObject());
         }
         return Arrays.asList(builders);
     }

@@ -43,52 +43,34 @@ public class CharFilterTests extends ElasticsearchTokenStreamTestCase {
     @Test
     public void testMappingCharFilter() throws Exception {
         Index index = new Index("test");
-        Settings settings = settingsBuilder()
-                .put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT)
-                .put("index.analysis.char_filter.my_mapping.type", "mapping")
-                .putArray("index.analysis.char_filter.my_mapping.mappings", "ph=>f", "qu=>q")
-                .put("index.analysis.analyzer.custom_with_char_filter.tokenizer", "standard")
-                .putArray("index.analysis.analyzer.custom_with_char_filter.char_filter", "my_mapping")
-                .build();
+        Settings settings = settingsBuilder().put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).put("index.analysis.char_filter.my_mapping.type", "mapping").putArray("index.analysis.char_filter.my_mapping.mappings", "ph=>f", "qu=>q").put("index.analysis.analyzer.custom_with_char_filter.tokenizer", "standard").putArray("index.analysis.analyzer.custom_with_char_filter.char_filter", "my_mapping").build();
         Injector parentInjector = new ModulesBuilder().add(new SettingsModule(settings), new EnvironmentModule(new Environment(settings)), new IndicesAnalysisModule()).createInjector();
-        Injector injector = new ModulesBuilder().add(
-                new IndexSettingsModule(index, settings),
-                new IndexNameModule(index),
-                new AnalysisModule(settings, parentInjector.getInstance(IndicesAnalysisService.class)))
-                .createChildInjector(parentInjector);
+        Injector injector = new ModulesBuilder().add(new IndexSettingsModule(index, settings), new IndexNameModule(index), new AnalysisModule(settings, parentInjector.getInstance(IndicesAnalysisService.class))).createChildInjector(parentInjector);
 
         AnalysisService analysisService = injector.getInstance(AnalysisService.class);
 
         NamedAnalyzer analyzer1 = analysisService.analyzer("custom_with_char_filter");
-        
-        assertTokenStreamContents(analyzer1.tokenStream("test", "jeff quit phish"), new String[]{"jeff", "qit", "fish"});
+
+        assertTokenStreamContents(analyzer1.tokenStream("test", "jeff quit phish"), new String[] { "jeff", "qit", "fish" });
 
         // Repeat one more time to make sure that char filter is reinitialized correctly
-        assertTokenStreamContents(analyzer1.tokenStream("test", "jeff quit phish"), new String[]{"jeff", "qit", "fish"});
+        assertTokenStreamContents(analyzer1.tokenStream("test", "jeff quit phish"), new String[] { "jeff", "qit", "fish" });
     }
 
     @Test
     public void testHtmlStripCharFilter() throws Exception {
         Index index = new Index("test");
-        Settings settings = settingsBuilder()
-                .put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT)
-                .put("index.analysis.analyzer.custom_with_char_filter.tokenizer", "standard")
-                .putArray("index.analysis.analyzer.custom_with_char_filter.char_filter", "html_strip")
-                .build();
+        Settings settings = settingsBuilder().put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).put("index.analysis.analyzer.custom_with_char_filter.tokenizer", "standard").putArray("index.analysis.analyzer.custom_with_char_filter.char_filter", "html_strip").build();
         Injector parentInjector = new ModulesBuilder().add(new SettingsModule(settings), new EnvironmentModule(new Environment(settings)), new IndicesAnalysisModule()).createInjector();
-        Injector injector = new ModulesBuilder().add(
-                new IndexSettingsModule(index, settings),
-                new IndexNameModule(index),
-                new AnalysisModule(settings, parentInjector.getInstance(IndicesAnalysisService.class)))
-                .createChildInjector(parentInjector);
+        Injector injector = new ModulesBuilder().add(new IndexSettingsModule(index, settings), new IndexNameModule(index), new AnalysisModule(settings, parentInjector.getInstance(IndicesAnalysisService.class))).createChildInjector(parentInjector);
 
         AnalysisService analysisService = injector.getInstance(AnalysisService.class);
 
         NamedAnalyzer analyzer1 = analysisService.analyzer("custom_with_char_filter");
 
-        assertTokenStreamContents(analyzer1.tokenStream("test", "<b>hello</b>!"), new String[]{"hello"});
+        assertTokenStreamContents(analyzer1.tokenStream("test", "<b>hello</b>!"), new String[] { "hello" });
 
         // Repeat one more time to make sure that char filter is reinitialized correctly
-        assertTokenStreamContents(analyzer1.tokenStream("test", "<b>hello</b>!"), new String[]{"hello"});
+        assertTokenStreamContents(analyzer1.tokenStream("test", "<b>hello</b>!"), new String[] { "hello" });
     }
 }

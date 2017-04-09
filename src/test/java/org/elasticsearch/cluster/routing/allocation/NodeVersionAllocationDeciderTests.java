@@ -60,21 +60,13 @@ public class NodeVersionAllocationDeciderTests extends ElasticsearchAllocationTe
 
     @Test
     public void testDoNotAllocateFromPrimary() {
-        AllocationService strategy = createAllocationService(settingsBuilder()
-                .put("cluster.routing.allocation.concurrent_recoveries", 10)
-                .put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, "always")
-                .put("cluster.routing.allocation.cluster_concurrent_rebalance", -1)
-                .build());
+        AllocationService strategy = createAllocationService(settingsBuilder().put("cluster.routing.allocation.concurrent_recoveries", 10).put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, "always").put("cluster.routing.allocation.cluster_concurrent_rebalance", -1).build());
 
         logger.info("Building initial routing table");
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(5).numberOfReplicas(2))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(5).numberOfReplicas(2)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
@@ -123,9 +115,7 @@ public class NodeVersionAllocationDeciderTests extends ElasticsearchAllocationTe
             assertThat(routingTable.index("test").shard(i).replicaShardsWithState(UNASSIGNED).size(), equalTo(1));
         }
 
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder(clusterState.nodes())
-                .put(newNode("node3", getPreviousVersion())))
-                .build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder(clusterState.nodes()).put(newNode("node3", getPreviousVersion()))).build();
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
 
@@ -136,10 +126,7 @@ public class NodeVersionAllocationDeciderTests extends ElasticsearchAllocationTe
             assertThat(routingTable.index("test").shard(i).replicaShardsWithState(UNASSIGNED).size(), equalTo(1));
         }
 
-
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder(clusterState.nodes())
-                .put(newNode("node4")))
-                .build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder(clusterState.nodes()).put(newNode("node4"))).build();
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
 
@@ -161,14 +148,9 @@ public class NodeVersionAllocationDeciderTests extends ElasticsearchAllocationTe
         }
     }
 
-
     @Test
     public void testRandom() {
-        AllocationService service = createAllocationService(settingsBuilder()
-                .put("cluster.routing.allocation.concurrent_recoveries", 10)
-                .put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, "always")
-                .put("cluster.routing.allocation.cluster_concurrent_rebalance", -1)
-                .build());
+        AllocationService service = createAllocationService(settingsBuilder().put("cluster.routing.allocation.concurrent_recoveries", 10).put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, "always").put("cluster.routing.allocation.cluster_concurrent_rebalance", -1).build());
 
         logger.info("Building initial routing table");
         MetaData.Builder builder = MetaData.builder();
@@ -205,7 +187,7 @@ public class NodeVersionAllocationDeciderTests extends ElasticsearchAllocationTe
                 }
             }
             for (DiscoveryNode node : nodes) {
-               nodesBuilder.put(node);
+                nodesBuilder.put(node);
             }
             clusterState = ClusterState.builder(clusterState).nodes(nodesBuilder).build();
             clusterState = stabilize(clusterState, service);
@@ -214,21 +196,13 @@ public class NodeVersionAllocationDeciderTests extends ElasticsearchAllocationTe
 
     @Test
     public void testRollingRestart() {
-        AllocationService service = createAllocationService(settingsBuilder()
-                .put("cluster.routing.allocation.concurrent_recoveries", 10)
-                .put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, "always")
-                .put("cluster.routing.allocation.cluster_concurrent_rebalance", -1)
-                .build());
+        AllocationService service = createAllocationService(settingsBuilder().put("cluster.routing.allocation.concurrent_recoveries", 10).put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, "always").put("cluster.routing.allocation.cluster_concurrent_rebalance", -1).build());
 
         logger.info("Building initial routing table");
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(5).numberOfReplicas(2))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(5).numberOfReplicas(2)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
@@ -242,30 +216,18 @@ public class NodeVersionAllocationDeciderTests extends ElasticsearchAllocationTe
             assertThat(routingTable.index("test").shard(i).shards().get(1).currentNodeId(), nullValue());
             assertThat(routingTable.index("test").shard(i).shards().get(2).currentNodeId(), nullValue());
         }
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(newNode("old0", getPreviousVersion()))
-                .put(newNode("old1", getPreviousVersion()))
-                .put(newNode("old2", getPreviousVersion()))).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("old0", getPreviousVersion())).put(newNode("old1", getPreviousVersion())).put(newNode("old2", getPreviousVersion()))).build();
         clusterState = stabilize(clusterState, service);
 
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(newNode("old0", getPreviousVersion()))
-                .put(newNode("old1", getPreviousVersion()))
-                .put(newNode("new0"))).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("old0", getPreviousVersion())).put(newNode("old1", getPreviousVersion())).put(newNode("new0"))).build();
 
         clusterState = stabilize(clusterState, service);
 
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(newNode("node0", getPreviousVersion()))
-                .put(newNode("new1"))
-                .put(newNode("new0"))).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node0", getPreviousVersion())).put(newNode("new1")).put(newNode("new0"))).build();
 
         clusterState = stabilize(clusterState, service);
 
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(newNode("new2"))
-                .put(newNode("new1"))
-                .put(newNode("new0"))).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("new2")).put(newNode("new1")).put(newNode("new0"))).build();
 
         clusterState = stabilize(clusterState, service);
         routingTable = clusterState.routingTable();
@@ -287,33 +249,11 @@ public class NodeVersionAllocationDeciderTests extends ElasticsearchAllocationTe
         final DiscoveryNode newNode = new DiscoveryNode("newNode", DummyTransportAddress.INSTANCE, Version.CURRENT);
         final DiscoveryNode oldNode1 = new DiscoveryNode("oldNode1", DummyTransportAddress.INSTANCE, Version.V_1_6_2);
         final DiscoveryNode oldNode2 = new DiscoveryNode("oldNode2", DummyTransportAddress.INSTANCE, Version.V_1_6_2);
-        MetaData metaData = MetaData.builder()
-            .put(IndexMetaData.builder(shard1.getIndex()).numberOfShards(1).numberOfReplicas(1))
-            .put(IndexMetaData.builder(shard2.getIndex()).numberOfShards(1).numberOfReplicas(1))
-            .build();
-        RoutingTable routingTable = RoutingTable.builder()
-            .add(IndexRoutingTable.builder(shard1.getIndex())
-                .addIndexShard(new IndexShardRoutingTable.Builder(shard1, false)
-                    .addShard(new ImmutableShardRouting(shard1.getIndex(), shard1.getId(), newNode.id(), true, ShardRoutingState.STARTED, 10))
-                    .addShard(new ImmutableShardRouting(shard1.getIndex(), shard1.getId(), oldNode1.id(), false, ShardRoutingState.STARTED, 10))
-                    .build())
-            )
-            .add(IndexRoutingTable.builder(shard2.getIndex())
-                .addIndexShard(new IndexShardRoutingTable.Builder(shard2, false)
-                    .addShard(new ImmutableShardRouting(shard2.getIndex(), shard2.getId(), newNode.id(), true, ShardRoutingState.STARTED, 10))
-                    .addShard(new ImmutableShardRouting(shard2.getIndex(), shard2.getId(), oldNode1.id(), false, ShardRoutingState.STARTED, 10))
-                    .build())
-            )
-            .build();
-        ClusterState state = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT)
-            .metaData(metaData)
-            .routingTable(routingTable)
-            .nodes(DiscoveryNodes.builder().put(newNode).put(oldNode1).put(oldNode2)).build();
-        AllocationDeciders allocationDeciders = new AllocationDeciders(ImmutableSettings.EMPTY, new AllocationDecider[] {
-                new NodeVersionAllocationDecider(ImmutableSettings.EMPTY, new RecoverySettings(ImmutableSettings.EMPTY, new NodeSettingsService(ImmutableSettings.EMPTY)))});
-        AllocationService strategy = new AllocationService(ImmutableSettings.EMPTY,
-            allocationDeciders,
-            new ShardsAllocators(), ClusterInfoService.EMPTY);
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder(shard1.getIndex()).numberOfShards(1).numberOfReplicas(1)).put(IndexMetaData.builder(shard2.getIndex()).numberOfShards(1).numberOfReplicas(1)).build();
+        RoutingTable routingTable = RoutingTable.builder().add(IndexRoutingTable.builder(shard1.getIndex()).addIndexShard(new IndexShardRoutingTable.Builder(shard1, false).addShard(new ImmutableShardRouting(shard1.getIndex(), shard1.getId(), newNode.id(), true, ShardRoutingState.STARTED, 10)).addShard(new ImmutableShardRouting(shard1.getIndex(), shard1.getId(), oldNode1.id(), false, ShardRoutingState.STARTED, 10)).build())).add(IndexRoutingTable.builder(shard2.getIndex()).addIndexShard(new IndexShardRoutingTable.Builder(shard2, false).addShard(new ImmutableShardRouting(shard2.getIndex(), shard2.getId(), newNode.id(), true, ShardRoutingState.STARTED, 10)).addShard(new ImmutableShardRouting(shard2.getIndex(), shard2.getId(), oldNode1.id(), false, ShardRoutingState.STARTED, 10)).build())).build();
+        ClusterState state = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).nodes(DiscoveryNodes.builder().put(newNode).put(oldNode1).put(oldNode2)).build();
+        AllocationDeciders allocationDeciders = new AllocationDeciders(ImmutableSettings.EMPTY, new AllocationDecider[] { new NodeVersionAllocationDecider(ImmutableSettings.EMPTY, new RecoverySettings(ImmutableSettings.EMPTY, new NodeSettingsService(ImmutableSettings.EMPTY))) });
+        AllocationService strategy = new AllocationService(ImmutableSettings.EMPTY, allocationDeciders, new ShardsAllocators(), ClusterInfoService.EMPTY);
         RoutingAllocation.Result result = strategy.reroute(state, new AllocationCommands(), true);
         // the two indices must stay as is, the replicas cannot move to oldNode2 because versions don't match
         state = ClusterState.builder(state).routingResult(result).build();
@@ -332,7 +272,7 @@ public class NodeVersionAllocationDeciderTests extends ElasticsearchAllocationTe
         logger.info("complete rebalancing");
         RoutingTable prev = routingTable;
         boolean stable = false;
-        for (int i = 0; i < 1000; i++) {   // at most 200 iters - this should be enough for all tests
+        for (int i = 0; i < 1000; i++) { // at most 200 iters - this should be enough for all tests
             logger.trace("RoutingNodes: {}", clusterState.getRoutingNodes().prettyPrint());
             routingTable = service.applyStartedShards(clusterState, routingNodes.shardsWithState(INITIALIZING)).routingTable();
             clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
@@ -385,22 +325,13 @@ public class NodeVersionAllocationDeciderTests extends ElasticsearchAllocationTe
 
     public void testFailRecoverFromPre132WithCompression() {
         final boolean compress = randomBoolean();
-        AllocationService service = createAllocationService(settingsBuilder()
-                .put("cluster.routing.allocation.concurrent_recoveries", 10)
-                .put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, "INDICES_ALL_ACTIVE")
-                .put("cluster.routing.allocation.cluster_concurrent_rebalance", -1)
-                .put(RecoverySettings.INDICES_RECOVERY_COMPRESS, compress)
-                .build());
+        AllocationService service = createAllocationService(settingsBuilder().put("cluster.routing.allocation.concurrent_recoveries", 10).put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, "INDICES_ALL_ACTIVE").put("cluster.routing.allocation.cluster_concurrent_rebalance", -1).put(RecoverySettings.INDICES_RECOVERY_COMPRESS, compress).build());
 
         logger.info("Building initial routing table");
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
@@ -413,8 +344,7 @@ public class NodeVersionAllocationDeciderTests extends ElasticsearchAllocationTe
             }
         }
         Version version = randomVersion();
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(newNode("old0", version))).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("old0", version))).build();
         clusterState = stabilize(clusterState, service);
         routingTable = clusterState.routingTable();
         for (int i = 0; i < routingTable.index("test").shards().size(); i++) {
@@ -430,9 +360,7 @@ public class NodeVersionAllocationDeciderTests extends ElasticsearchAllocationTe
             }
         }
 
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(newNode("old0",  version))
-                .put(newNode("new0"))).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("old0", version)).put(newNode("new0"))).build();
 
         clusterState = stabilize(clusterState, service);
         routingTable = clusterState.routingTable();
@@ -452,7 +380,6 @@ public class NodeVersionAllocationDeciderTests extends ElasticsearchAllocationTe
                     }
                 }
             }
-
 
         }
     }

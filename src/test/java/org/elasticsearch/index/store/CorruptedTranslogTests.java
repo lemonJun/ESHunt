@@ -59,16 +59,15 @@ import static org.hamcrest.Matchers.notNullValue;
 /**
  * Integration test for corrupted translog files
  */
-@ElasticsearchIntegrationTest.ClusterScope(scope= ElasticsearchIntegrationTest.Scope.SUITE, numDataNodes =0)
+@ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.SUITE, numDataNodes = 0)
 public class CorruptedTranslogTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
         return ImmutableSettings.builder()
-                // we really need local GW here since this also checks for corruption etc.
-                // and we need to make sure primaries are not just trashed if we don't have replicas
-                .put(super.nodeSettings(nodeOrdinal)).put("gateway.type", "local")
-                .put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, MockTransportService.class.getName()).build();
+                        // we really need local GW here since this also checks for corruption etc.
+                        // and we need to make sure primaries are not just trashed if we don't have replicas
+                        .put(super.nodeSettings(nodeOrdinal)).put("gateway.type", "local").put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, MockTransportService.class.getName()).build();
     }
 
     @Test
@@ -76,13 +75,9 @@ public class CorruptedTranslogTests extends ElasticsearchIntegrationTest {
     public void testCorruptTranslogFiles() throws Exception {
         internalCluster().startNodesAsync(1, ImmutableSettings.EMPTY).get();
 
-        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put("index.number_of_shards", 1)
-                .put("index.number_of_replicas", 0)
-                .put("index.refresh_interval", "-1")
-                .put(MockEngineSupport.FLUSH_ON_CLOSE_RATIO, 0.0d) // never flush - always recover from translog
-                .put(IndexShard.INDEX_FLUSH_ON_CLOSE, false) // never flush - always recover from translog
-                .put("index.gateway.local.sync", "1s") // fsync the translog every second
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder().put("index.number_of_shards", 1).put("index.number_of_replicas", 0).put("index.refresh_interval", "-1").put(MockEngineSupport.FLUSH_ON_CLOSE_RATIO, 0.0d) // never flush - always recover from translog
+                        .put(IndexShard.INDEX_FLUSH_ON_CLOSE, false) // never flush - always recover from translog
+                        .put("index.gateway.local.sync", "1s") // fsync the translog every second
         ));
         ensureYellow();
 
@@ -93,7 +88,7 @@ public class CorruptedTranslogTests extends ElasticsearchIntegrationTest {
             builders[i] = client().prepareIndex("test", "type").setSource("foo", "bar");
         }
         disableTranslogFlush("test");
-        indexRandom(false, false, false, Arrays.asList(builders));  // this one
+        indexRandom(false, false, false, Arrays.asList(builders)); // this one
 
         // Corrupt the translog file(s)
         corruptRandomTranslogFiles();
@@ -113,10 +108,9 @@ public class CorruptedTranslogTests extends ElasticsearchIntegrationTest {
         }
     }
 
-
     private void corruptRandomTranslogFiles() throws IOException {
         ClusterState state = client().admin().cluster().prepareState().get().getState();
-        GroupShardsIterator shardIterators = state.getRoutingNodes().getRoutingTable().activePrimaryShardsGrouped(new String[]{"test"}, false);
+        GroupShardsIterator shardIterators = state.getRoutingNodes().getRoutingTable().activePrimaryShardsGrouped(new String[] { "test" }, false);
         List<ShardIterator> iterators = Lists.newArrayList(shardIterators);
         ShardIterator shardIterator = RandomPicks.randomFrom(getRandom(), iterators);
         ShardRouting shardRouting = shardIterator.nextOrNull();
@@ -128,7 +122,7 @@ public class CorruptedTranslogTests extends ElasticsearchIntegrationTest {
         Set<File> files = new TreeSet<>(); // treeset makes sure iteration order is deterministic
         for (FsStats.Info info : nodeStatses.getNodes()[0].getFs()) {
             String path = info.getPath();
-            final String relativeDataLocationPath =  "indices/test/" + Integer.toString(shardRouting.getId()) + "/translog";
+            final String relativeDataLocationPath = "indices/test/" + Integer.toString(shardRouting.getId()) + "/translog";
             File file = new File(path, relativeDataLocationPath);
             logger.info("--> path: {}", file);
             files.addAll(Arrays.asList(file.listFiles(new FileFilter() {
@@ -151,18 +145,16 @@ public class CorruptedTranslogTests extends ElasticsearchIntegrationTest {
                     ByteBuffer bb = ByteBuffer.wrap(new byte[1]);
                     raf.read(bb);
                     bb.flip();
-                    
+
                     // corrupt
                     byte oldValue = bb.get(0);
                     byte newValue = (byte) (oldValue + 1);
                     bb.put(0, newValue);
-                    
+
                     // rewrite
                     raf.position(filePointer);
                     raf.write(bb);
-                    logger.info("--> corrupting file {} --  flipping at position {} from {} to {} file: {}",
-                            fileToCorrupt, filePointer, Integer.toHexString(oldValue),
-                            Integer.toHexString(newValue), fileToCorrupt);
+                    logger.info("--> corrupting file {} --  flipping at position {} from {} to {} file: {}", fileToCorrupt, filePointer, Integer.toHexString(oldValue), Integer.toHexString(newValue), fileToCorrupt);
                 }
             }
         }

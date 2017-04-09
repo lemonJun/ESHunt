@@ -54,32 +54,19 @@ public class GetTermVectorCheckDocFreqTests extends ElasticsearchIntegrationTest
 
     @Override
     public Settings indexSettings() {
-        return ImmutableSettings.builder()
-                .put(super.indexSettings())
-                .put("index.analysis.analyzer.tv_test.tokenizer", "whitespace")
-                .putArray("index.analysis.analyzer.tv_test.filter", "type_as_payload", "lowercase")
-                .build();
+        return ImmutableSettings.builder().put(super.indexSettings()).put("index.analysis.analyzer.tv_test.tokenizer", "whitespace").putArray("index.analysis.analyzer.tv_test.filter", "type_as_payload", "lowercase").build();
     }
 
     @Test
     public void testSimpleTermVectors() throws ElasticsearchException, IOException {
-        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties")
-                        .startObject("field")
-                            .field("type", "string")
-                            .field("term_vector", "with_positions_offsets_payloads")
-                            .field("analyzer", "tv_test")
-                        .endObject()
-                .endObject()
-                .endObject().endObject();
+        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field").field("type", "string").field("term_vector", "with_positions_offsets_payloads").field("analyzer", "tv_test").endObject().endObject().endObject().endObject();
         assertAcked(prepareCreate("test").addMapping("type1", mapping));
         ensureGreen();
         int numDocs = 15;
         for (int i = 0; i < numDocs; i++) {
-            client().prepareIndex("test", "type1", Integer.toString(i))
-                    .setSource(XContentFactory.jsonBuilder().startObject().field("field", "the quick brown fox jumps over the lazy dog")
-                    // 0the3 4quick9 10brown15 16fox19 20jumps25 26over30
-                    // 31the34 35lazy39 40dog43
+            client().prepareIndex("test", "type1", Integer.toString(i)).setSource(XContentFactory.jsonBuilder().startObject().field("field", "the quick brown fox jumps over the lazy dog")
+                            // 0the3 4quick9 10brown15 16fox19 20jumps25 26over30
+                            // 31the34 35lazy39 40dog43
                             .endObject()).execute().actionGet();
             refresh();
         }
@@ -95,10 +82,8 @@ public class GetTermVectorCheckDocFreqTests extends ElasticsearchIntegrationTest
         }
     }
 
-    private void checkWithoutFieldStatistics(int numDocs, String[] values, int[] freq, int[][] pos, int[][] startOffset, int[][] endOffset,
-            int i) throws IOException {
-        TermVectorRequestBuilder resp = client().prepareTermVector("test", "type1", Integer.toString(i)).setPayloads(true).setOffsets(true)
-                .setPositions(true).setTermStatistics(true).setFieldStatistics(false).setSelectedFields();
+    private void checkWithoutFieldStatistics(int numDocs, String[] values, int[] freq, int[][] pos, int[][] startOffset, int[][] endOffset, int i) throws IOException {
+        TermVectorRequestBuilder resp = client().prepareTermVector("test", "type1", Integer.toString(i)).setPayloads(true).setOffsets(true).setPositions(true).setTermStatistics(true).setFieldStatistics(false).setSelectedFields();
         TermVectorResponse response = resp.execute().actionGet();
         assertThat("doc id: " + i + " doesn't exists but should", response.isExists(), equalTo(true));
         Fields fields = response.getFields();
@@ -146,18 +131,15 @@ public class GetTermVectorCheckDocFreqTests extends ElasticsearchIntegrationTest
         response.toXContent(xBuilder, null);
         xBuilder.endObject();
         BytesStream bytesStream = xBuilder.bytesStream();
-        String utf8 = bytesStream.bytes().toUtf8().replaceFirst("\"took\":\\d+,", "");;
-        String expectedString = "{\"_index\":\"test\",\"_type\":\"type1\",\"_id\":\""
-                + i
-                + "\",\"_version\":1,\"found\":true,\"term_vectors\":{\"field\":{\"terms\":{\"brown\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":2,\"start_offset\":10,\"end_offset\":15,\"payload\":\"d29yZA==\"}]},\"dog\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":8,\"start_offset\":40,\"end_offset\":43,\"payload\":\"d29yZA==\"}]},\"fox\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":3,\"start_offset\":16,\"end_offset\":19,\"payload\":\"d29yZA==\"}]},\"jumps\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":4,\"start_offset\":20,\"end_offset\":25,\"payload\":\"d29yZA==\"}]},\"lazy\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":7,\"start_offset\":35,\"end_offset\":39,\"payload\":\"d29yZA==\"}]},\"over\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":5,\"start_offset\":26,\"end_offset\":30,\"payload\":\"d29yZA==\"}]},\"quick\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":1,\"start_offset\":4,\"end_offset\":9,\"payload\":\"d29yZA==\"}]},\"the\":{\"doc_freq\":15,\"ttf\":30,\"term_freq\":2,\"tokens\":[{\"position\":0,\"start_offset\":0,\"end_offset\":3,\"payload\":\"d29yZA==\"},{\"position\":6,\"start_offset\":31,\"end_offset\":34,\"payload\":\"d29yZA==\"}]}}}}}";
+        String utf8 = bytesStream.bytes().toUtf8().replaceFirst("\"took\":\\d+,", "");
+        ;
+        String expectedString = "{\"_index\":\"test\",\"_type\":\"type1\",\"_id\":\"" + i + "\",\"_version\":1,\"found\":true,\"term_vectors\":{\"field\":{\"terms\":{\"brown\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":2,\"start_offset\":10,\"end_offset\":15,\"payload\":\"d29yZA==\"}]},\"dog\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":8,\"start_offset\":40,\"end_offset\":43,\"payload\":\"d29yZA==\"}]},\"fox\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":3,\"start_offset\":16,\"end_offset\":19,\"payload\":\"d29yZA==\"}]},\"jumps\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":4,\"start_offset\":20,\"end_offset\":25,\"payload\":\"d29yZA==\"}]},\"lazy\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":7,\"start_offset\":35,\"end_offset\":39,\"payload\":\"d29yZA==\"}]},\"over\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":5,\"start_offset\":26,\"end_offset\":30,\"payload\":\"d29yZA==\"}]},\"quick\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":1,\"start_offset\":4,\"end_offset\":9,\"payload\":\"d29yZA==\"}]},\"the\":{\"doc_freq\":15,\"ttf\":30,\"term_freq\":2,\"tokens\":[{\"position\":0,\"start_offset\":0,\"end_offset\":3,\"payload\":\"d29yZA==\"},{\"position\":6,\"start_offset\":31,\"end_offset\":34,\"payload\":\"d29yZA==\"}]}}}}}";
         assertThat(utf8, equalTo(expectedString));
 
     }
 
-    private void checkWithoutTermStatistics(int numDocs, String[] values, int[] freq, int[][] pos, int[][] startOffset, int[][] endOffset,
-            int i) throws IOException {
-        TermVectorRequestBuilder resp = client().prepareTermVector("test", "type1", Integer.toString(i)).setPayloads(true).setOffsets(true)
-                .setPositions(true).setTermStatistics(false).setFieldStatistics(true).setSelectedFields();
+    private void checkWithoutTermStatistics(int numDocs, String[] values, int[] freq, int[][] pos, int[][] startOffset, int[][] endOffset, int i) throws IOException {
+        TermVectorRequestBuilder resp = client().prepareTermVector("test", "type1", Integer.toString(i)).setPayloads(true).setOffsets(true).setPositions(true).setTermStatistics(false).setFieldStatistics(true).setSelectedFields();
         assertThat(resp.request().termStatistics(), equalTo(false));
         TermVectorResponse response = resp.execute().actionGet();
         assertThat("doc id: " + i + " doesn't exists but should", response.isExists(), equalTo(true));
@@ -203,18 +185,15 @@ public class GetTermVectorCheckDocFreqTests extends ElasticsearchIntegrationTest
         response.toXContent(xBuilder, null);
         xBuilder.endObject();
         BytesStream bytesStream = xBuilder.bytesStream();
-        String utf8 = bytesStream.bytes().toUtf8().replaceFirst("\"took\":\\d+,", "");;
-        String expectedString = "{\"_index\":\"test\",\"_type\":\"type1\",\"_id\":\""
-                + i
-                + "\",\"_version\":1,\"found\":true,\"term_vectors\":{\"field\":{\"field_statistics\":{\"sum_doc_freq\":120,\"doc_count\":15,\"sum_ttf\":135},\"terms\":{\"brown\":{\"term_freq\":1,\"tokens\":[{\"position\":2,\"start_offset\":10,\"end_offset\":15,\"payload\":\"d29yZA==\"}]},\"dog\":{\"term_freq\":1,\"tokens\":[{\"position\":8,\"start_offset\":40,\"end_offset\":43,\"payload\":\"d29yZA==\"}]},\"fox\":{\"term_freq\":1,\"tokens\":[{\"position\":3,\"start_offset\":16,\"end_offset\":19,\"payload\":\"d29yZA==\"}]},\"jumps\":{\"term_freq\":1,\"tokens\":[{\"position\":4,\"start_offset\":20,\"end_offset\":25,\"payload\":\"d29yZA==\"}]},\"lazy\":{\"term_freq\":1,\"tokens\":[{\"position\":7,\"start_offset\":35,\"end_offset\":39,\"payload\":\"d29yZA==\"}]},\"over\":{\"term_freq\":1,\"tokens\":[{\"position\":5,\"start_offset\":26,\"end_offset\":30,\"payload\":\"d29yZA==\"}]},\"quick\":{\"term_freq\":1,\"tokens\":[{\"position\":1,\"start_offset\":4,\"end_offset\":9,\"payload\":\"d29yZA==\"}]},\"the\":{\"term_freq\":2,\"tokens\":[{\"position\":0,\"start_offset\":0,\"end_offset\":3,\"payload\":\"d29yZA==\"},{\"position\":6,\"start_offset\":31,\"end_offset\":34,\"payload\":\"d29yZA==\"}]}}}}}";
+        String utf8 = bytesStream.bytes().toUtf8().replaceFirst("\"took\":\\d+,", "");
+        ;
+        String expectedString = "{\"_index\":\"test\",\"_type\":\"type1\",\"_id\":\"" + i + "\",\"_version\":1,\"found\":true,\"term_vectors\":{\"field\":{\"field_statistics\":{\"sum_doc_freq\":120,\"doc_count\":15,\"sum_ttf\":135},\"terms\":{\"brown\":{\"term_freq\":1,\"tokens\":[{\"position\":2,\"start_offset\":10,\"end_offset\":15,\"payload\":\"d29yZA==\"}]},\"dog\":{\"term_freq\":1,\"tokens\":[{\"position\":8,\"start_offset\":40,\"end_offset\":43,\"payload\":\"d29yZA==\"}]},\"fox\":{\"term_freq\":1,\"tokens\":[{\"position\":3,\"start_offset\":16,\"end_offset\":19,\"payload\":\"d29yZA==\"}]},\"jumps\":{\"term_freq\":1,\"tokens\":[{\"position\":4,\"start_offset\":20,\"end_offset\":25,\"payload\":\"d29yZA==\"}]},\"lazy\":{\"term_freq\":1,\"tokens\":[{\"position\":7,\"start_offset\":35,\"end_offset\":39,\"payload\":\"d29yZA==\"}]},\"over\":{\"term_freq\":1,\"tokens\":[{\"position\":5,\"start_offset\":26,\"end_offset\":30,\"payload\":\"d29yZA==\"}]},\"quick\":{\"term_freq\":1,\"tokens\":[{\"position\":1,\"start_offset\":4,\"end_offset\":9,\"payload\":\"d29yZA==\"}]},\"the\":{\"term_freq\":2,\"tokens\":[{\"position\":0,\"start_offset\":0,\"end_offset\":3,\"payload\":\"d29yZA==\"},{\"position\":6,\"start_offset\":31,\"end_offset\":34,\"payload\":\"d29yZA==\"}]}}}}}";
         assertThat(utf8, equalTo(expectedString));
 
     }
 
-    private void checkAllInfo(int numDocs, String[] values, int[] freq, int[][] pos, int[][] startOffset, int[][] endOffset, int i)
-            throws IOException {
-        TermVectorRequestBuilder resp = client().prepareTermVector("test", "type1", Integer.toString(i)).setPayloads(true).setOffsets(true)
-                .setPositions(true).setFieldStatistics(true).setTermStatistics(true).setSelectedFields();
+    private void checkAllInfo(int numDocs, String[] values, int[] freq, int[][] pos, int[][] startOffset, int[][] endOffset, int i) throws IOException {
+        TermVectorRequestBuilder resp = client().prepareTermVector("test", "type1", Integer.toString(i)).setPayloads(true).setOffsets(true).setPositions(true).setFieldStatistics(true).setTermStatistics(true).setSelectedFields();
         assertThat(resp.request().fieldStatistics(), equalTo(true));
         TermVectorResponse response = resp.execute().actionGet();
         assertThat("doc id: " + i + " doesn't exists but should", response.isExists(), equalTo(true));
@@ -263,10 +242,9 @@ public class GetTermVectorCheckDocFreqTests extends ElasticsearchIntegrationTest
         response.toXContent(xBuilder, ToXContent.EMPTY_PARAMS);
         xBuilder.endObject();
         BytesStream bytesStream = xBuilder.bytesStream();
-        String utf8 = bytesStream.bytes().toUtf8().replaceFirst("\"took\":\\d+,", "");;
-        String expectedString = "{\"_index\":\"test\",\"_type\":\"type1\",\"_id\":\""
-                + i
-                + "\",\"_version\":1,\"found\":true,\"term_vectors\":{\"field\":{\"field_statistics\":{\"sum_doc_freq\":120,\"doc_count\":15,\"sum_ttf\":135},\"terms\":{\"brown\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":2,\"start_offset\":10,\"end_offset\":15,\"payload\":\"d29yZA==\"}]},\"dog\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":8,\"start_offset\":40,\"end_offset\":43,\"payload\":\"d29yZA==\"}]},\"fox\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":3,\"start_offset\":16,\"end_offset\":19,\"payload\":\"d29yZA==\"}]},\"jumps\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":4,\"start_offset\":20,\"end_offset\":25,\"payload\":\"d29yZA==\"}]},\"lazy\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":7,\"start_offset\":35,\"end_offset\":39,\"payload\":\"d29yZA==\"}]},\"over\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":5,\"start_offset\":26,\"end_offset\":30,\"payload\":\"d29yZA==\"}]},\"quick\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":1,\"start_offset\":4,\"end_offset\":9,\"payload\":\"d29yZA==\"}]},\"the\":{\"doc_freq\":15,\"ttf\":30,\"term_freq\":2,\"tokens\":[{\"position\":0,\"start_offset\":0,\"end_offset\":3,\"payload\":\"d29yZA==\"},{\"position\":6,\"start_offset\":31,\"end_offset\":34,\"payload\":\"d29yZA==\"}]}}}}}";
+        String utf8 = bytesStream.bytes().toUtf8().replaceFirst("\"took\":\\d+,", "");
+        ;
+        String expectedString = "{\"_index\":\"test\",\"_type\":\"type1\",\"_id\":\"" + i + "\",\"_version\":1,\"found\":true,\"term_vectors\":{\"field\":{\"field_statistics\":{\"sum_doc_freq\":120,\"doc_count\":15,\"sum_ttf\":135},\"terms\":{\"brown\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":2,\"start_offset\":10,\"end_offset\":15,\"payload\":\"d29yZA==\"}]},\"dog\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":8,\"start_offset\":40,\"end_offset\":43,\"payload\":\"d29yZA==\"}]},\"fox\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":3,\"start_offset\":16,\"end_offset\":19,\"payload\":\"d29yZA==\"}]},\"jumps\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":4,\"start_offset\":20,\"end_offset\":25,\"payload\":\"d29yZA==\"}]},\"lazy\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":7,\"start_offset\":35,\"end_offset\":39,\"payload\":\"d29yZA==\"}]},\"over\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":5,\"start_offset\":26,\"end_offset\":30,\"payload\":\"d29yZA==\"}]},\"quick\":{\"doc_freq\":15,\"ttf\":15,\"term_freq\":1,\"tokens\":[{\"position\":1,\"start_offset\":4,\"end_offset\":9,\"payload\":\"d29yZA==\"}]},\"the\":{\"doc_freq\":15,\"ttf\":30,\"term_freq\":2,\"tokens\":[{\"position\":0,\"start_offset\":0,\"end_offset\":3,\"payload\":\"d29yZA==\"},{\"position\":6,\"start_offset\":31,\"end_offset\":34,\"payload\":\"d29yZA==\"}]}}}}}";
         assertThat(utf8, equalTo(expectedString));
     }
 

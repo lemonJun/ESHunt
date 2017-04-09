@@ -55,16 +55,7 @@ public class DuelFieldDataTests extends AbstractFieldDataTests {
 
     @Test
     public void testDuelAllTypesSingleValue() throws Exception {
-        final String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                    .startObject("bytes").field("type", "string").field("index", "not_analyzed").startObject("fielddata").field("format", LuceneTestCase.defaultCodecSupportsSortedSet() ? "doc_values" : "fst").endObject().endObject()
-                    .startObject("byte").field("type", "byte").startObject("fielddata").field("format", "doc_values").endObject().endObject()
-                    .startObject("short").field("type", "short").startObject("fielddata").field("format", "doc_values").endObject().endObject()
-                    .startObject("integer").field("type", "integer").startObject("fielddata").field("format", "doc_values").endObject().endObject()
-                    .startObject("long").field("type", "long").startObject("fielddata").field("format", "doc_values").endObject().endObject()
-                    .startObject("float").field("type", "float").startObject("fielddata").field("format", "doc_values").endObject().endObject()
-                    .startObject("double").field("type", "double").startObject("fielddata").field("format", "doc_values").endObject().endObject()
-                .endObject().endObject().endObject().string();
+        final String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("bytes").field("type", "string").field("index", "not_analyzed").startObject("fielddata").field("format", LuceneTestCase.defaultCodecSupportsSortedSet() ? "doc_values" : "fst").endObject().endObject().startObject("byte").field("type", "byte").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("short").field("type", "short").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("integer").field("type", "integer").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("long").field("type", "long").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("float").field("type", "float").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("double").field("type", "double").startObject("fielddata").field("format", "doc_values").endObject().endObject().endObject().endObject().endObject().string();
         final DocumentMapper mapper = mapperService.documentMapperParser().parse(mapping);
         Random random = getRandom();
         int atLeast = scaledRandomIntBetween(1000, 1500);
@@ -131,16 +122,9 @@ public class DuelFieldDataTests extends AbstractFieldDataTests {
         }
     }
 
-
     @Test
     public void testDuelIntegers() throws Exception {
-        final String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                    .startObject("byte").field("type", "byte").startObject("fielddata").field("format", "doc_values").endObject().endObject()
-                    .startObject("short").field("type", "short").startObject("fielddata").field("format", "doc_values").endObject().endObject()
-                    .startObject("integer").field("type", "integer").startObject("fielddata").field("format", "doc_values").endObject().endObject()
-                    .startObject("long").field("type", "long").startObject("fielddata").field("format", "doc_values").endObject().endObject()
-                .endObject().endObject().endObject().string();
+        final String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("byte").field("type", "byte").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("short").field("type", "short").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("integer").field("type", "integer").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("long").field("type", "long").startObject("fielddata").field("format", "doc_values").endObject().endObject().endObject().endObject().endObject().string();
 
         final DocumentMapper mapper = mapperService.documentMapperParser().parse(mapping);
         Random random = getRandom();
@@ -154,7 +138,7 @@ public class DuelFieldDataTests extends AbstractFieldDataTests {
             for (int j = 0; j < numValues; ++j) {
                 vals.add(randomByte());
             }
-            
+
             numValues = vals.size();
             int upto = 0;
             for (Byte bb : vals) {
@@ -218,11 +202,7 @@ public class DuelFieldDataTests extends AbstractFieldDataTests {
 
     @Test
     public void testDuelDoubles() throws Exception {
-        final String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                    .startObject("float").field("type", "float").startObject("fielddata").field("format", "doc_values").endObject().endObject()
-                    .startObject("double").field("type", "double").startObject("fielddata").field("format", "doc_values").endObject().endObject()
-                .endObject().endObject().endObject().string();
+        final String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("float").field("type", "float").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("double").field("type", "double").startObject("fielddata").field("format", "doc_values").endObject().endObject().endObject().endObject().endObject().string();
 
         final DocumentMapper mapper = mapperService.documentMapperParser().parse(mapping);
         Random random = getRandom();
@@ -298,7 +278,6 @@ public class DuelFieldDataTests extends AbstractFieldDataTests {
         }
 
     }
-
 
     @Test
     public void testDuelStrings() throws Exception {
@@ -403,10 +382,7 @@ public class DuelFieldDataTests extends AbstractFieldDataTests {
     }
 
     public void testDuelGeoPoints() throws Exception {
-        final String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                    .startObject("geopoint").field("type", "geo_point").startObject("fielddata").field("format", "doc_values").endObject().endObject()
-                .endObject().endObject().endObject().string();
+        final String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("geopoint").field("type", "geo_point").startObject("fielddata").field("format", "doc_values").endObject().endObject().endObject().endObject().endObject().string();
 
         final DocumentMapper mapper = mapperService.documentMapperParser().parse(mapping);
 
@@ -479,9 +455,8 @@ public class DuelFieldDataTests extends AbstractFieldDataTests {
             }
             return num;
         }
-        return new int[]{(random.nextBoolean() ? -1 * random.nextInt(margin) : random.nextInt(margin))};
+        return new int[] { (random.nextBoolean() ? -1 * random.nextInt(margin) : random.nextInt(margin)) };
     }
-
 
     private static void duelFieldDataBytes(Random random, AtomicReaderContext context, IndexFieldData<?> left, IndexFieldData<?> right, Preprocessor pre) throws Exception {
         AtomicFieldData leftData = random.nextBoolean() ? left.load(context) : left.loadDirect(context);
@@ -513,7 +488,6 @@ public class DuelFieldDataTests extends AbstractFieldDataTests {
         }
     }
 
-
     private static void duelFieldDataDouble(Random random, AtomicReaderContext context, IndexNumericFieldData left, IndexNumericFieldData right) throws Exception {
         AtomicNumericFieldData leftData = random.nextBoolean() ? left.load(context) : left.loadDirect(context);
         AtomicNumericFieldData rightData = random.nextBoolean() ? right.load(context) : right.loadDirect(context);
@@ -535,7 +509,7 @@ public class DuelFieldDataTests extends AbstractFieldDataTests {
                     assertThat(leftDoubleValues.valueAt(j), closeTo(current, 0.0001));
                 }
                 if (j > 0) {
-                   assertThat(Double.compare(previous,current), lessThan(0));
+                    assertThat(Double.compare(previous, current), lessThan(0));
                 }
                 previous = current;
             }
@@ -576,7 +550,8 @@ public class DuelFieldDataTests extends AbstractFieldDataTests {
         for (int i = 0; i < numDocs; ++i) {
             leftValues.setDocument(i);
             final int numValues = leftValues.count();
-            rightValues.setDocument(i);;
+            rightValues.setDocument(i);
+            ;
             assertEquals(numValues, rightValues.count());
             List<GeoPoint> leftPoints = Lists.newArrayList();
             List<GeoPoint> rightPoints = Lists.newArrayList();
@@ -626,15 +601,13 @@ public class DuelFieldDataTests extends AbstractFieldDataTests {
 
         @Override
         public int compare(BytesRef a, BytesRef b) {
-            Double _a  = Double.parseDouble(super.toString(a));
+            Double _a = Double.parseDouble(super.toString(a));
             return _a.compareTo(Double.parseDouble(super.toString(b)));
         }
     }
-
 
     private static enum Type {
         Float, Double, Integer, Long, Bytes, GeoPoint;
     }
 
 }
-

@@ -67,48 +67,22 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
         GetIndexTemplatesResponse response = client().admin().indices().prepareGetTemplates().get();
         assertThat(response.getIndexTemplates(), empty());
 
+        client().admin().indices().preparePutTemplate("template_1").setTemplate("te*").setOrder(0).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("type", "string").field("store", "yes").endObject().startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().endObject().endObject().endObject()).get();
 
-        client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("te*")
-                .setOrder(0)
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("field1").field("type", "string").field("store", "yes").endObject()
-                        .startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject()
-                        .endObject().endObject().endObject())
-                .get();
-
-        client().admin().indices().preparePutTemplate("template_2")
-                .setTemplate("test*")
-                .setOrder(1)
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("field2").field("type", "string").field("store", "no").endObject()
-                        .endObject().endObject().endObject())
-                .get();
+        client().admin().indices().preparePutTemplate("template_2").setTemplate("test*").setOrder(1).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field2").field("type", "string").field("store", "no").endObject().endObject().endObject().endObject()).get();
 
         // test create param
-        assertThrows(client().admin().indices().preparePutTemplate("template_2")
-                .setTemplate("test*")
-                .setCreate(true)
-                .setOrder(1)
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("field2").field("type", "string").field("store", "no").endObject()
-                        .endObject().endObject().endObject())
-                , IndexTemplateAlreadyExistsException.class
-        );
+        assertThrows(client().admin().indices().preparePutTemplate("template_2").setTemplate("test*").setCreate(true).setOrder(1).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field2").field("type", "string").field("store", "no").endObject().endObject().endObject().endObject()), IndexTemplateAlreadyExistsException.class);
 
         response = client().admin().indices().prepareGetTemplates().get();
         assertThat(response.getIndexTemplates(), hasSize(2));
-
 
         // index something into test_index, will match on both templates
         client().prepareIndex("test_index", "type1", "1").setSource("field1", "value1", "field2", "value 2").setRefresh(true).execute().actionGet();
 
         client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().execute().actionGet();
 
-        SearchResponse searchResponse = client().prepareSearch("test_index")
-                .setQuery(termQuery("field1", "value1"))
-                .addField("field1").addField("field2")
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("test_index").setQuery(termQuery("field1", "value1")).addField("field1").addField("field2").execute().actionGet();
 
         assertHitCount(searchResponse, 1);
         assertThat(searchResponse.getHits().getAt(0).field("field1").value().toString(), equalTo("value1"));
@@ -119,10 +93,7 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
         client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().execute().actionGet();
 
         // now only match on one template (template_1)
-        searchResponse = client().prepareSearch("text_index")
-                .setQuery(termQuery("field1", "value1"))
-                .addField("field1").addField("field2")
-                .execute().actionGet();
+        searchResponse = client().prepareSearch("text_index").setQuery(termQuery("field1", "value1")).addField("field1").addField("field2").execute().actionGet();
         if (searchResponse.getFailedShards() > 0) {
             logger.warn("failed search " + Arrays.toString(searchResponse.getShardFailures()));
         }
@@ -135,22 +106,9 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
     public void testDeleteIndexTemplate() throws Exception {
         final int existingTemplates = admin().cluster().prepareState().execute().actionGet().getState().metaData().templates().size();
         logger.info("--> put template_1 and template_2");
-        client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("te*")
-                .setOrder(0)
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("field1").field("type", "string").field("store", "yes").endObject()
-                        .startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject()
-                        .endObject().endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().preparePutTemplate("template_1").setTemplate("te*").setOrder(0).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("type", "string").field("store", "yes").endObject().startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().endObject().endObject().endObject()).execute().actionGet();
 
-        client().admin().indices().preparePutTemplate("template_2")
-                .setTemplate("test*")
-                .setOrder(1)
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("field2").field("type", "string").field("store", "no").endObject()
-                        .endObject().endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().preparePutTemplate("template_2").setTemplate("test*").setOrder(1).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field2").field("type", "string").field("store", "no").endObject().endObject().endObject().endObject()).execute().actionGet();
 
         logger.info("--> explicitly delete template_1");
         admin().indices().prepareDeleteTemplate("template_1").execute().actionGet();
@@ -158,16 +116,8 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
         assertThat(admin().cluster().prepareState().execute().actionGet().getState().metaData().templates().containsKey("template_2"), equalTo(true));
         assertThat(admin().cluster().prepareState().execute().actionGet().getState().metaData().templates().containsKey("template_1"), equalTo(false));
 
-
         logger.info("--> put template_1 back");
-        client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("te*")
-                .setOrder(0)
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("field1").field("type", "string").field("store", "yes").endObject()
-                        .startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject()
-                        .endObject().endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().preparePutTemplate("template_1").setTemplate("te*").setOrder(0).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("type", "string").field("store", "yes").endObject().startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().endObject().endObject().endObject()).execute().actionGet();
 
         logger.info("--> delete template*");
         admin().indices().prepareDeleteTemplate("template*").execute().actionGet();
@@ -181,14 +131,7 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
     @Test
     public void testThatGetIndexTemplatesWorks() throws Exception {
         logger.info("--> put template_1");
-        client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("te*")
-                .setOrder(0)
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("field1").field("type", "string").field("store", "yes").endObject()
-                        .startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject()
-                        .endObject().endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().preparePutTemplate("template_1").setTemplate("te*").setOrder(0).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("type", "string").field("store", "yes").endObject().startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().endObject().endObject().endObject()).execute().actionGet();
 
         logger.info("--> get template template_1");
         GetIndexTemplatesResponse getTemplate1Response = client().admin().indices().prepareGetTemplates("template_1").execute().actionGet();
@@ -205,34 +148,13 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
     @Test
     public void testThatGetIndexTemplatesWithSimpleRegexWorks() throws Exception {
         logger.info("--> put template_1");
-        client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("te*")
-                .setOrder(0)
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("field1").field("type", "string").field("store", "yes").endObject()
-                        .startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject()
-                        .endObject().endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().preparePutTemplate("template_1").setTemplate("te*").setOrder(0).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("type", "string").field("store", "yes").endObject().startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().endObject().endObject().endObject()).execute().actionGet();
 
         logger.info("--> put template_2");
-        client().admin().indices().preparePutTemplate("template_2")
-                .setTemplate("te*")
-                .setOrder(0)
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("field1").field("type", "string").field("store", "yes").endObject()
-                        .startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject()
-                        .endObject().endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().preparePutTemplate("template_2").setTemplate("te*").setOrder(0).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("type", "string").field("store", "yes").endObject().startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().endObject().endObject().endObject()).execute().actionGet();
 
         logger.info("--> put template3");
-        client().admin().indices().preparePutTemplate("template3")
-                .setTemplate("te*")
-                .setOrder(0)
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("field1").field("type", "string").field("store", "yes").endObject()
-                        .startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject()
-                        .endObject().endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().preparePutTemplate("template3").setTemplate("te*").setOrder(0).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("type", "string").field("store", "yes").endObject().startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().endObject().endObject().endObject()).execute().actionGet();
 
         logger.info("--> get template template_*");
         GetIndexTemplatesResponse getTemplate1Response = client().admin().indices().prepareGetTemplates("template_*").execute().actionGet();
@@ -279,9 +201,7 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
     }
 
     private void testExpectActionRequestValidationException(String... names) {
-        assertThrows(client().admin().indices().prepareGetTemplates(names),
-                ActionRequestValidationException.class,
-                "get template with " + Arrays.toString(names));
+        assertThrows(client().admin().indices().prepareGetTemplates(names), ActionRequestValidationException.class, "get template with " + Arrays.toString(names));
     }
 
     @Test
@@ -293,10 +213,7 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
         GetIndexTemplatesResponse response = client().admin().indices().prepareGetTemplates().get();
         assertThat(response.getIndexTemplates(), empty());
 
-        client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("te*")
-                .addMapping("type1", "abcde")
-                .get();
+        client().admin().indices().preparePutTemplate("template_1").setTemplate("te*").addMapping("type1", "abcde").get();
 
         response = client().admin().indices().prepareGetTemplates().get();
         assertThat(response.getIndexTemplates(), hasSize(1));
@@ -306,7 +223,7 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
         try {
             createIndex("test");
             fail("create index should have failed due to broken index templates mapping");
-        } catch(ElasticsearchParseException e) {
+        } catch (ElasticsearchParseException e) {
             //everything fine
         }
     }
@@ -320,10 +237,7 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
         GetIndexTemplatesResponse response = client().admin().indices().prepareGetTemplates().get();
         assertThat(response.getIndexTemplates(), empty());
 
-        client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("te*")
-                .setSettings(ImmutableSettings.builder().put("does_not_exist", "test"))
-                .get();
+        client().admin().indices().preparePutTemplate("template_1").setTemplate("te*").setSettings(ImmutableSettings.builder().put("does_not_exist", "test")).get();
 
         response = client().admin().indices().prepareGetTemplates().get();
         assertThat(response.getIndexTemplates(), hasSize(1));
@@ -339,15 +253,7 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
 
     public void testIndexTemplateWithAliases() throws Exception {
 
-        client().admin().indices().preparePutTemplate("template_with_aliases")
-                .setTemplate("te*")
-                .addMapping("type1", "{\"type1\" : {\"properties\" : {\"value\" : {\"type\" : \"string\"}}}}")
-                .addAlias(new Alias("simple_alias"))
-                .addAlias(new Alias("templated_alias-{index}"))
-                .addAlias(new Alias("filtered_alias").filter("{\"type\":{\"value\":\"type2\"}}"))
-                .addAlias(new Alias("complex_filtered_alias")
-                        .filter(FilterBuilders.termsFilter("_type",  "typeX", "typeY", "typeZ").execution("bool").cache(true)))
-                .get();
+        client().admin().indices().preparePutTemplate("template_with_aliases").setTemplate("te*").addMapping("type1", "{\"type1\" : {\"properties\" : {\"value\" : {\"type\" : \"string\"}}}}").addAlias(new Alias("simple_alias")).addAlias(new Alias("templated_alias-{index}")).addAlias(new Alias("filtered_alias").filter("{\"type\":{\"value\":\"type2\"}}")).addAlias(new Alias("complex_filtered_alias").filter(FilterBuilders.termsFilter("_type", "typeX", "typeY", "typeZ").execution("bool").cache(true))).get();
 
         assertAcked(prepareCreate("test_index").addMapping("type1").addMapping("type2").addMapping("typeX").addMapping("typeY").addMapping("typeZ"));
         ensureGreen();
@@ -391,20 +297,7 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testIndexTemplateWithAliasesInSource() {
-        client().admin().indices().preparePutTemplate("template_1")
-                .setSource("{\n" +
-                        "    \"template\" : \"*\",\n" +
-                        "    \"aliases\" : {\n" +
-                        "        \"my_alias\" : {\n" +
-                        "            \"filter\" : {\n" +
-                        "                \"type\" : {\n" +
-                        "                    \"value\" : \"type2\"\n" +
-                        "                }\n" +
-                        "            }\n" +
-                        "        }\n" +
-                        "    }\n" +
-                        "}").get();
-
+        client().admin().indices().preparePutTemplate("template_1").setSource("{\n" + "    \"template\" : \"*\",\n" + "    \"aliases\" : {\n" + "        \"my_alias\" : {\n" + "            \"filter\" : {\n" + "                \"type\" : {\n" + "                    \"value\" : \"type2\"\n" + "                }\n" + "            }\n" + "        }\n" + "    }\n" + "}").get();
 
         assertAcked(prepareCreate("test_index").addMapping("type1").addMapping("type2"));
         ensureGreen();
@@ -427,20 +320,7 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testIndexTemplateWithAliasesSource() {
-        client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("te*")
-                .setAliases(
-                        "    {\n" +
-                        "        \"alias1\" : {},\n" +
-                        "        \"alias2\" : {\n" +
-                        "            \"filter\" : {\n" +
-                        "                \"type\" : {\n" +
-                        "                    \"value\" : \"type2\"\n" +
-                        "                }\n" +
-                        "            }\n" +
-                        "         },\n" +
-                        "        \"alias3\" : { \"routing\" : \"1\" }" +
-                        "    }\n").get();
+        client().admin().indices().preparePutTemplate("template_1").setTemplate("te*").setAliases("    {\n" + "        \"alias1\" : {},\n" + "        \"alias2\" : {\n" + "            \"filter\" : {\n" + "                \"type\" : {\n" + "                    \"value\" : \"type2\"\n" + "                }\n" + "            }\n" + "         },\n" + "        \"alias3\" : { \"routing\" : \"1\" }" + "    }\n").get();
 
         assertAcked(prepareCreate("test_index").addMapping("type1").addMapping("type2"));
         ensureGreen();
@@ -466,11 +346,7 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testDuplicateAlias() throws Exception {
-        client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("te*")
-                .addAlias(new Alias("my_alias").filter(termFilter("field", "value1")))
-                .addAlias(new Alias("my_alias").filter(termFilter("field", "value2")))
-                .get();
+        client().admin().indices().preparePutTemplate("template_1").setTemplate("te*").addAlias(new Alias("my_alias").filter(termFilter("field", "value1"))).addAlias(new Alias("my_alias").filter(termFilter("field", "value2"))).get();
 
         GetIndexTemplatesResponse response = client().admin().indices().prepareGetTemplates("template_1").get();
         assertThat(response.getIndexTemplates().size(), equalTo(1));
@@ -482,9 +358,7 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
     public void testAliasInvalidFilterValidJson() throws Exception {
 
         //invalid filter but valid json: put index template works fine, fails during index creation
-        client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("te*")
-                .addAlias(new Alias("invalid_alias").filter("{ \"invalid\": {} }")).get();
+        client().admin().indices().preparePutTemplate("template_1").setTemplate("te*").addAlias(new Alias("invalid_alias").filter("{ \"invalid\": {} }")).get();
 
         GetIndexTemplatesResponse response = client().admin().indices().prepareGetTemplates("template_1").get();
         assertThat(response.getIndexTemplates().size(), equalTo(1));
@@ -494,7 +368,7 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
         try {
             createIndex("test");
             fail("index creation should have failed due to invalid alias filter in matching index template");
-        } catch(ElasticsearchIllegalArgumentException e) {
+        } catch (ElasticsearchIllegalArgumentException e) {
             assertThat(e.getMessage(), equalTo("failed to parse filter for alias [invalid_alias]"));
             assertThat(e.getCause(), instanceOf(QueryParsingException.class));
             assertThat(e.getCause().getMessage(), equalTo("[test] No filter registered for [invalid]"));
@@ -505,13 +379,11 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
     public void testAliasInvalidFilterInvalidJson() throws Exception {
 
         //invalid json: put index template fails
-        PutIndexTemplateRequestBuilder putIndexTemplateRequestBuilder = client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("te*")
-                .addAlias(new Alias("invalid_alias").filter("abcde"));
+        PutIndexTemplateRequestBuilder putIndexTemplateRequestBuilder = client().admin().indices().preparePutTemplate("template_1").setTemplate("te*").addAlias(new Alias("invalid_alias").filter("abcde"));
 
         try {
             putIndexTemplateRequestBuilder.get();
-        } catch(ElasticsearchIllegalArgumentException e) {
+        } catch (ElasticsearchIllegalArgumentException e) {
             assertThat(e.getMessage(), equalTo("failed to parse filter for alias [invalid_alias]"));
         }
 
@@ -524,23 +396,19 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
 
         createIndex("index");
 
-        client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("te*")
-                .addAlias(new Alias("index")).get();
+        client().admin().indices().preparePutTemplate("template_1").setTemplate("te*").addAlias(new Alias("index")).get();
 
         try {
             createIndex("test");
             fail("index creation should have failed due to alias with existing index name in mathching index template");
-        } catch(InvalidAliasNameException e) {
+        } catch (InvalidAliasNameException e) {
             assertThat(e.getMessage(), equalTo("[test] Invalid alias name [index], an index exists with the same name as the alias"));
         }
     }
 
     @Test
     public void testAliasEmptyName() throws Exception {
-        PutIndexTemplateRequestBuilder putIndexTemplateRequestBuilder = client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("te*")
-                .addAlias(new Alias("  ").indexRouting("1,2,3"));
+        PutIndexTemplateRequestBuilder putIndexTemplateRequestBuilder = client().admin().indices().preparePutTemplate("template_1").setTemplate("te*").addAlias(new Alias("  ").indexRouting("1,2,3"));
 
         try {
             putIndexTemplateRequestBuilder.get();
@@ -552,9 +420,7 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testAliasWithMultipleIndexRoutings() throws Exception {
-        PutIndexTemplateRequestBuilder putIndexTemplateRequestBuilder = client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("te*")
-                .addAlias(new Alias("alias").indexRouting("1,2,3"));
+        PutIndexTemplateRequestBuilder putIndexTemplateRequestBuilder = client().admin().indices().preparePutTemplate("template_1").setTemplate("te*").addAlias(new Alias("alias").indexRouting("1,2,3"));
 
         try {
             putIndexTemplateRequestBuilder.get();
@@ -566,20 +432,9 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testMultipleAliasesPrecedence() throws Exception {
-        client().admin().indices().preparePutTemplate("template1")
-                .setTemplate("*")
-                .setOrder(0)
-                .addAlias(new Alias("alias1"))
-                .addAlias(new Alias("{index}-alias"))
-                .addAlias(new Alias("alias3").filter(FilterBuilders.missingFilter("test")))
-                .addAlias(new Alias("alias4")).get();
+        client().admin().indices().preparePutTemplate("template1").setTemplate("*").setOrder(0).addAlias(new Alias("alias1")).addAlias(new Alias("{index}-alias")).addAlias(new Alias("alias3").filter(FilterBuilders.missingFilter("test"))).addAlias(new Alias("alias4")).get();
 
-        client().admin().indices().preparePutTemplate("template2")
-                .setTemplate("te*")
-                .setOrder(1)
-                .addAlias(new Alias("alias1").routing("test"))
-                .addAlias(new Alias("alias3")).get();
-
+        client().admin().indices().preparePutTemplate("template2").setTemplate("te*").setOrder(1).addAlias(new Alias("alias1").routing("test")).addAlias(new Alias("alias3")).get();
 
         assertAcked(prepareCreate("test").addAlias(new Alias("test-alias").searchRouting("test-routing")));
 
@@ -605,29 +460,13 @@ public class SimpleIndexTemplateTests extends ElasticsearchIntegrationTest {
     @Test
     public void testStrictAliasParsingInIndicesCreatedViaTemplates() throws Exception {
         // Indexing into a should succeed, because the field mapping for field 'field' is defined in the test mapping.
-        client().admin().indices().preparePutTemplate("template1")
-                .setTemplate("a*")
-                .setOrder(0)
-                .addMapping("test", "field", "type=string")
-                .addAlias(new Alias("alias1").filter(termFilter("field", "value"))).get();
+        client().admin().indices().preparePutTemplate("template1").setTemplate("a*").setOrder(0).addMapping("test", "field", "type=string").addAlias(new Alias("alias1").filter(termFilter("field", "value"))).get();
         // Indexing into b should succeed, because the field mapping for field 'field' is defined in the _default_ mapping and the test type exists.
-        client().admin().indices().preparePutTemplate("template2")
-                .setTemplate("b*")
-                .setOrder(0)
-                .addMapping("_default_", "field", "type=string")
-                .addMapping("test")
-                .addAlias(new Alias("alias2").filter(termFilter("field", "value"))).get();
+        client().admin().indices().preparePutTemplate("template2").setTemplate("b*").setOrder(0).addMapping("_default_", "field", "type=string").addMapping("test").addAlias(new Alias("alias2").filter(termFilter("field", "value"))).get();
         // Indexing into c should succeed, because the field mapping for field 'field' is defined in the _default_ mapping.
-        client().admin().indices().preparePutTemplate("template3")
-                .setTemplate("c*")
-                .setOrder(0)
-                .addMapping("_default_", "field", "type=string")
-                .addAlias(new Alias("alias3").filter(termFilter("field", "value"))).get();
+        client().admin().indices().preparePutTemplate("template3").setTemplate("c*").setOrder(0).addMapping("_default_", "field", "type=string").addAlias(new Alias("alias3").filter(termFilter("field", "value"))).get();
         // Indexing into d index should fail, since there is field with name 'field' in the mapping
-        client().admin().indices().preparePutTemplate("template4")
-                .setTemplate("d*")
-                .setOrder(0)
-                .addAlias(new Alias("alias4").filter(termFilter("field", "value"))).get();
+        client().admin().indices().preparePutTemplate("template4").setTemplate("d*").setOrder(0).addAlias(new Alias("alias4").filter(termFilter("field", "value"))).get();
 
         client().prepareIndex("a1", "test", "test").setSource("{}").get();
         BulkResponse response = client().prepareBulk().add(new IndexRequest("a2", "test", "test").source("{}")).get();

@@ -38,82 +38,67 @@ public class DiscoveryNodeFiltersTests extends ElasticsearchTestCase {
 
     @Test
     public void nameMatch() {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("xxx.name", "name1")
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("xxx.name", "name1").build();
         DiscoveryNodeFilters filters = DiscoveryNodeFilters.buildFromSettings(OR, "xxx.", settings);
 
-        DiscoveryNode node = new DiscoveryNode("name1", "id1", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String>of(), Version.CURRENT);
+        DiscoveryNode node = new DiscoveryNode("name1", "id1", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of(), Version.CURRENT);
         assertThat(filters.match(node), equalTo(true));
 
-        node = new DiscoveryNode("name2", "id2", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String>of(), Version.CURRENT);
+        node = new DiscoveryNode("name2", "id2", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of(), Version.CURRENT);
         assertThat(filters.match(node), equalTo(false));
     }
 
     @Test
     public void idMatch() {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("xxx._id", "id1")
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("xxx._id", "id1").build();
         DiscoveryNodeFilters filters = DiscoveryNodeFilters.buildFromSettings(OR, "xxx.", settings);
 
-        DiscoveryNode node = new DiscoveryNode("name1", "id1", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String>of(), Version.CURRENT);
+        DiscoveryNode node = new DiscoveryNode("name1", "id1", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of(), Version.CURRENT);
         assertThat(filters.match(node), equalTo(true));
 
-        node = new DiscoveryNode("name2", "id2", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String>of(), Version.CURRENT);
+        node = new DiscoveryNode("name2", "id2", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of(), Version.CURRENT);
         assertThat(filters.match(node), equalTo(false));
     }
 
     @Test
     public void idOrNameMatch() {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("xxx._id", "id1,blah")
-                .put("xxx.name", "blah,name2")
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("xxx._id", "id1,blah").put("xxx.name", "blah,name2").build();
         DiscoveryNodeFilters filters = DiscoveryNodeFilters.buildFromSettings(OR, "xxx.", settings);
 
-        DiscoveryNode node = new DiscoveryNode("name1", "id1", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String>of(), Version.CURRENT);
+        DiscoveryNode node = new DiscoveryNode("name1", "id1", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of(), Version.CURRENT);
         assertThat(filters.match(node), equalTo(true));
 
-        node = new DiscoveryNode("name2", "id2", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String>of(), Version.CURRENT);
+        node = new DiscoveryNode("name2", "id2", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of(), Version.CURRENT);
         assertThat(filters.match(node), equalTo(true));
 
-        node = new DiscoveryNode("name3", "id3", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String>of(), Version.CURRENT);
+        node = new DiscoveryNode("name3", "id3", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of(), Version.CURRENT);
         assertThat(filters.match(node), equalTo(false));
     }
 
     @Test
     public void tagAndGroupMatch() {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("xxx.tag", "A")
-                .put("xxx.group", "B")
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("xxx.tag", "A").put("xxx.group", "B").build();
         DiscoveryNodeFilters filters = DiscoveryNodeFilters.buildFromSettings(AND, "xxx.", settings);
 
-        DiscoveryNode node = new DiscoveryNode("name1", "id1", DummyTransportAddress.INSTANCE,
-                ImmutableMap.<String, String>of("tag", "A", "group", "B"), Version.CURRENT);
+        DiscoveryNode node = new DiscoveryNode("name1", "id1", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of("tag", "A", "group", "B"), Version.CURRENT);
         assertThat(filters.match(node), equalTo(true));
 
-        node = new DiscoveryNode("name2", "id2", DummyTransportAddress.INSTANCE,
-                ImmutableMap.<String, String>of("tag", "A", "group", "B", "name", "X"), Version.CURRENT);
+        node = new DiscoveryNode("name2", "id2", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of("tag", "A", "group", "B", "name", "X"), Version.CURRENT);
         assertThat(filters.match(node), equalTo(true));
 
-        node = new DiscoveryNode("name3", "id3", DummyTransportAddress.INSTANCE,
-                ImmutableMap.<String, String>of("tag", "A", "group", "F", "name", "X"), Version.CURRENT);
+        node = new DiscoveryNode("name3", "id3", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of("tag", "A", "group", "F", "name", "X"), Version.CURRENT);
         assertThat(filters.match(node), equalTo(false));
 
-        node = new DiscoveryNode("name4", "id4", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String>of(), Version.CURRENT);
+        node = new DiscoveryNode("name4", "id4", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of(), Version.CURRENT);
         assertThat(filters.match(node), equalTo(false));
     }
 
     @Test
     public void starMatch() {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("xxx.name", "*")
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("xxx.name", "*").build();
         DiscoveryNodeFilters filters = DiscoveryNodeFilters.buildFromSettings(OR, "xxx.", settings);
 
-        DiscoveryNode node = new DiscoveryNode("name1", "id1", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String>of(), Version.CURRENT);
+        DiscoveryNode node = new DiscoveryNode("name1", "id1", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of(), Version.CURRENT);
         assertThat(filters.match(node), equalTo(true));
     }
 }

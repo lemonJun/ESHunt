@@ -43,21 +43,13 @@ public class DetailedErrorsEnabledTest extends ElasticsearchIntegrationTest {
     // Build our cluster settings
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put(InternalNode.HTTP_ENABLED, true)
-                .build();
+        return ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put(InternalNode.HTTP_ENABLED, true).build();
     }
 
     @Test
     public void testThatErrorTraceWorksByDefault() throws Exception {
         // Make the HTTP request
-        HttpResponse response = new HttpRequestBuilder(HttpClients.createDefault())
-                .httpTransport(internalCluster().getDataNodeInstance(HttpServerTransport.class))
-                .path("/")
-                .addParam("error_trace", "true")
-                .method(HttpDeleteWithEntity.METHOD_NAME)
-                .execute();
+        HttpResponse response = new HttpRequestBuilder(HttpClients.createDefault()).httpTransport(internalCluster().getDataNodeInstance(HttpServerTransport.class)).path("/").addParam("error_trace", "true").method(HttpDeleteWithEntity.METHOD_NAME).execute();
 
         assertThat(response.getHeaders().get("Content-Type"), containsString("application/json"));
         assertThat(response.getBody(), containsString("\"error_trace\":{\"message\":\"Validation Failed"));

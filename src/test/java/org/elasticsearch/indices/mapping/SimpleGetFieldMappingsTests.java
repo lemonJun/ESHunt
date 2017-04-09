@@ -55,21 +55,14 @@ public class SimpleGetFieldMappingsTests extends ElasticsearchIntegrationTest {
     }
 
     private XContentBuilder getMappingForType(String type) throws IOException {
-        return jsonBuilder().startObject().startObject(type).startObject("properties")
-                .startObject("field1").field("type", "string").endObject()
-                .startObject("obj").startObject("properties").startObject("subfield").field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject()
-                .endObject().endObject().endObject();
+        return jsonBuilder().startObject().startObject(type).startObject("properties").startObject("field1").field("type", "string").endObject().startObject("obj").startObject("properties").startObject("subfield").field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject().endObject().endObject().endObject();
     }
 
     @Test
     public void simpleGetFieldMappings() throws Exception {
 
-        assertAcked(prepareCreate("indexa")
-                .addMapping("typeA", getMappingForType("typeA"))
-                .addMapping("typeB", getMappingForType("typeB")));
-        assertAcked(client().admin().indices().prepareCreate("indexb")
-                .addMapping("typeA", getMappingForType("typeA"))
-                .addMapping("typeB", getMappingForType("typeB")));
+        assertAcked(prepareCreate("indexa").addMapping("typeA", getMappingForType("typeA")).addMapping("typeB", getMappingForType("typeB")));
+        assertAcked(client().admin().indices().prepareCreate("indexb").addMapping("typeA", getMappingForType("typeA")).addMapping("typeB", getMappingForType("typeB")));
 
         ensureYellow();
 
@@ -150,7 +143,6 @@ public class SimpleGetFieldMappingsTests extends ElasticsearchIntegrationTest {
         assertThat((Map<String, Object>) response.fieldMappings("test", "type", "subfield").sourceAsMap().get("subfield"), hasEntry("index", (Object) "not_analyzed"));
         assertThat((Map<String, Object>) response.fieldMappings("test", "type", "subfield").sourceAsMap().get("subfield"), hasEntry("type", (Object) "string"));
 
-
     }
 
     //fix #6552
@@ -166,7 +158,6 @@ public class SimpleGetFieldMappingsTests extends ElasticsearchIntegrationTest {
         response.toXContent(responseBuilder, new ToXContent.MapParams(params));
         responseBuilder.endObject();
         String responseStrings = responseBuilder.string();
-
 
         XContentBuilder prettyJsonBuilder = XContentFactory.jsonBuilder().prettyPrint();
         prettyJsonBuilder.copyCurrentStructure(XContentFactory.xContent(responseStrings).createParser(responseStrings));
@@ -189,9 +180,7 @@ public class SimpleGetFieldMappingsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testGetFieldMappingsWithBlocks() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("typeA", getMappingForType("typeA"))
-                .addMapping("typeB", getMappingForType("typeB")));
+        assertAcked(prepareCreate("test").addMapping("typeA", getMappingForType("typeA")).addMapping("typeB", getMappingForType("typeB")));
         ensureYellow();
 
         for (String block : Arrays.asList(SETTING_BLOCKS_READ, SETTING_BLOCKS_WRITE, SETTING_READ_ONLY)) {

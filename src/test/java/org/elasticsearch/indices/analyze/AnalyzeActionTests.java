@@ -36,7 +36,7 @@ import static org.hamcrest.Matchers.*;
  *
  */
 public class AnalyzeActionTests extends ElasticsearchIntegrationTest {
-    
+
     @Test
     public void simpleAnalyzerTests() throws Exception {
         assertAcked(prepareCreate("test").addAlias(new Alias("alias")));
@@ -63,7 +63,7 @@ public class AnalyzeActionTests extends ElasticsearchIntegrationTest {
             assertThat(token.getEndOffset(), equalTo(14));
         }
     }
-    
+
     @Test
     public void analyzeNumericField() throws ElasticsearchException, IOException {
         assertAcked(prepareCreate("test").addAlias(new Alias("alias")).addMapping("test", "long", "type=long", "double", "type=double"));
@@ -108,12 +108,7 @@ public class AnalyzeActionTests extends ElasticsearchIntegrationTest {
     @Test
     public void analyzeWithCharFilters() throws Exception {
 
-        assertAcked(prepareCreate("test").addAlias(new Alias("alias"))
-                .setSettings(settingsBuilder().put(indexSettings())
-                        .put("index.analysis.char_filter.custom_mapping.type", "mapping")
-                        .putArray("index.analysis.char_filter.custom_mapping.mappings", "ph=>f", "qu=>q")
-                        .put("index.analysis.analyzer.custom_with_char_filter.tokenizer", "standard")
-                        .putArray("index.analysis.analyzer.custom_with_char_filter.char_filter", "custom_mapping")));
+        assertAcked(prepareCreate("test").addAlias(new Alias("alias")).setSettings(settingsBuilder().put(indexSettings()).put("index.analysis.char_filter.custom_mapping.type", "mapping").putArray("index.analysis.char_filter.custom_mapping.mappings", "ph=>f", "qu=>q").put("index.analysis.analyzer.custom_with_char_filter.tokenizer", "standard").putArray("index.analysis.analyzer.custom_with_char_filter.char_filter", "custom_mapping")));
         ensureGreen();
 
         AnalyzeResponse analyzeResponse = client().admin().indices().prepareAnalyze("<h2><b>THIS</b> IS A</h2> <a href=\"#\">TEST</a>").setTokenizer("standard").setCharFilters("html_strip").get();
@@ -142,19 +137,7 @@ public class AnalyzeActionTests extends ElasticsearchIntegrationTest {
         assertAcked(prepareCreate("test").addAlias(new Alias("alias")));
         ensureGreen();
 
-        client().admin().indices().preparePutMapping("test")
-                .setType("document").setSource(
-                "{\n" +
-                        "    \"document\":{\n" +
-                        "        \"properties\":{\n" +
-                        "            \"simple\":{\n" +
-                        "                \"type\":\"string\",\n" +
-                        "                \"analyzer\": \"simple\"\n" +
-                        "            }\n" +
-                        "        }\n" +
-                        "    }\n" +
-                        "}"
-        ).get();
+        client().admin().indices().preparePutMapping("test").setType("document").setSource("{\n" + "    \"document\":{\n" + "        \"properties\":{\n" + "            \"simple\":{\n" + "                \"type\":\"string\",\n" + "                \"analyzer\": \"simple\"\n" + "            }\n" + "        }\n" + "    }\n" + "}").get();
 
         for (int i = 0; i < 10; i++) {
             final AnalyzeRequestBuilder requestBuilder = client().admin().indices().prepareAnalyze("THIS IS A TEST");
@@ -181,7 +164,7 @@ public class AnalyzeActionTests extends ElasticsearchIntegrationTest {
         assertTokens(response, "this", "is", "a", "test");
     }
 
-    private void assertTokens(AnalyzeResponse response, String ... tokens) {
+    private void assertTokens(AnalyzeResponse response, String... tokens) {
         assertThat(response.getTokens(), hasSize(tokens.length));
         for (int i = 0; i < tokens.length; i++) {
             assertThat(response.getTokens().get(i).getTerm(), is(tokens[i]));

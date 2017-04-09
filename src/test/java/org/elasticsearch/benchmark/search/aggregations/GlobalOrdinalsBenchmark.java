@@ -71,47 +71,15 @@ public class GlobalOrdinalsBenchmark {
         Bootstrap.initializeNatives(true, false);
         Random random = new Random();
 
-        Settings settings = settingsBuilder()
-                .put("index.refresh_interval", "-1")
-                .put("gateway.type", "local")
-                .put(SETTING_NUMBER_OF_SHARDS, 1)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .put(TransportModule.TRANSPORT_TYPE_KEY, "local")
-                .build();
+        Settings settings = settingsBuilder().put("index.refresh_interval", "-1").put("gateway.type", "local").put(SETTING_NUMBER_OF_SHARDS, 1).put(SETTING_NUMBER_OF_REPLICAS, 0).put(TransportModule.TRANSPORT_TYPE_KEY, "local").build();
 
         String clusterName = GlobalOrdinalsBenchmark.class.getSimpleName();
-        node = (InternalNode) nodeBuilder().clusterName(clusterName)
-                    .settings(settingsBuilder().put(settings))
-                    .node();
+        node = (InternalNode) nodeBuilder().clusterName(clusterName).settings(settingsBuilder().put(settings)).node();
 
         client = node.client();
 
         try {
-            client.admin().indices().prepareCreate(INDEX_NAME)
-                    .addMapping(TYPE_NAME, jsonBuilder().startObject().startObject(TYPE_NAME)
-                            .startArray("dynamic_templates")
-                                .startObject()
-                                    .startObject("default")
-                                        .field("match", "*")
-                                        .field("match_mapping_type", "string")
-                                        .startObject("mapping")
-                                            .field("type", "string")
-                                            .field("index", "not_analyzed")
-                                            .startObject("fields")
-                                                .startObject("doc_values")
-                                                    .field("type", "string")
-                                                    .field("index", "no")
-                                                    .startObject("fielddata")
-                                                        .field("format", "doc_values")
-                                                    .endObject()
-                                                .endObject()
-                                            .endObject()
-                                        .endObject()
-                                    .endObject()
-                                .endObject()
-                            .endArray()
-                    .endObject().endObject())
-                    .get();
+            client.admin().indices().prepareCreate(INDEX_NAME).addMapping(TYPE_NAME, jsonBuilder().startObject().startObject(TYPE_NAME).startArray("dynamic_templates").startObject().startObject("default").field("match", "*").field("match_mapping_type", "string").startObject("mapping").field("type", "string").field("index", "not_analyzed").startObject("fields").startObject("doc_values").field("type", "string").field("index", "no").startObject("fielddata").field("format", "doc_values").endObject().endObject().endObject().endObject().endObject().endObject().endArray().endObject().endObject()).get();
             ObjectOpenHashSet<String> uniqueTerms = ObjectOpenHashSet.newInstance();
             for (int i = 0; i < FIELD_LIMIT; i++) {
                 boolean added;
@@ -141,10 +109,7 @@ public class GlobalOrdinalsBenchmark {
                         tracker.put(fieldSuffix, ++index);
                     }
                 }
-                builder.add(
-                        client.prepareIndex(INDEX_NAME, TYPE_NAME, String.valueOf(i))
-                        .setSource(fieldValues)
-                );
+                builder.add(client.prepareIndex(INDEX_NAME, TYPE_NAME, String.valueOf(i)).setSource(fieldValues));
 
                 if (builder.numberOfActions() >= 1000) {
                     builder.get();
@@ -162,9 +127,7 @@ public class GlobalOrdinalsBenchmark {
             }
         }
 
-        client.admin().cluster().prepareUpdateSettings()
-                .setTransientSettings(ImmutableSettings.builder().put("logger.index.fielddata.ordinals", "DEBUG"))
-                .get();
+        client.admin().cluster().prepareUpdateSettings().setTransientSettings(ImmutableSettings.builder().put("logger.index.fielddata.ordinals", "DEBUG")).get();
 
         client.admin().indices().prepareRefresh(INDEX_NAME).execute().actionGet();
         COUNT = client.prepareCount(INDEX_NAME).setQuery(matchAllQuery()).execute().actionGet().getCount();
@@ -211,11 +174,7 @@ public class GlobalOrdinalsBenchmark {
         System.out.println("--> Warmup (" + name + ")...");
         // run just the child query, warm up first
         for (int j = 0; j < QUERY_WARMUP; j++) {
-            SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                    .setSearchType(SearchType.COUNT)
-                    .setQuery(matchAllQuery())
-                    .addAggregation(AggregationBuilders.terms(name).field(field).executionHint(executionHint))
-                    .get();
+            SearchResponse searchResponse = client.prepareSearch(INDEX_NAME).setSearchType(SearchType.COUNT).setQuery(matchAllQuery()).addAggregation(AggregationBuilders.terms(name).field(field).executionHint(executionHint)).get();
             if (j == 0) {
                 System.out.println("--> Loading (" + field + "): took: " + searchResponse.getTook());
             }
@@ -225,15 +184,10 @@ public class GlobalOrdinalsBenchmark {
         }
         System.out.println("--> Warmup (" + name + ") DONE");
 
-
         System.out.println("--> Running (" + name + ")...");
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
-            SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                    .setSearchType(SearchType.COUNT)
-                    .setQuery(matchAllQuery())
-                    .addAggregation(AggregationBuilders.terms(name).field(field).executionHint(executionHint))
-                    .get();
+            SearchResponse searchResponse = client.prepareSearch(INDEX_NAME).setSearchType(SearchType.COUNT).setQuery(matchAllQuery()).addAggregation(AggregationBuilders.terms(name).field(field).executionHint(executionHint)).get();
             if (searchResponse.getHits().totalHits() != COUNT) {
                 System.err.println("--> mismatch on hits");
             }

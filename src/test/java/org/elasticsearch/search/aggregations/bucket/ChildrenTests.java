@@ -50,11 +50,7 @@ public class ChildrenTests extends ElasticsearchIntegrationTest {
 
     @Override
     public void setupSuiteScopeCluster() throws Exception {
-        assertAcked(
-                prepareCreate("test")
-                    .addMapping("article", "_id", "index=not_analyzed")
-                    .addMapping("comment", "_parent", "type=article", "_id", "index=not_analyzed")
-        );
+        assertAcked(prepareCreate("test").addMapping("article", "_id", "index=not_analyzed").addMapping("comment", "_parent", "type=article", "_id", "index=not_analyzed"));
 
         List<IndexRequestBuilder> requests = new ArrayList<>();
         String[] uniqueCategories = new String[randomIntBetween(1, 25)];
@@ -67,7 +63,7 @@ public class ChildrenTests extends ElasticsearchIntegrationTest {
         for (int i = 0; i < numParentDocs; i++) {
             String id = Integer.toString(i);
 
-            String[] categories = new String[randomIntBetween(1,1)];
+            String[] categories = new String[randomIntBetween(1, 1)];
             for (int j = 0; j < categories.length; j++) {
                 String category = categories[j] = uniqueCategories[catIndex++ % uniqueCategories.length];
                 Control control = categoryToControl.get(category);
@@ -103,10 +99,10 @@ public class ChildrenTests extends ElasticsearchIntegrationTest {
             }
         }
 
-        requests.add(client().prepareIndex("test", "article", "a").setSource("category", new String[]{"a"}, "randomized", false));
-        requests.add(client().prepareIndex("test", "article", "b").setSource("category", new String[]{"a", "b"}, "randomized", false));
-        requests.add(client().prepareIndex("test", "article", "c").setSource("category", new String[]{"a", "b", "c"}, "randomized", false));
-        requests.add(client().prepareIndex("test", "article", "d").setSource("category", new String[]{"c"}, "randomized", false));
+        requests.add(client().prepareIndex("test", "article", "a").setSource("category", new String[] { "a" }, "randomized", false));
+        requests.add(client().prepareIndex("test", "article", "b").setSource("category", new String[] { "a", "b" }, "randomized", false));
+        requests.add(client().prepareIndex("test", "article", "c").setSource("category", new String[] { "a", "b", "c" }, "randomized", false));
+        requests.add(client().prepareIndex("test", "article", "d").setSource("category", new String[] { "c" }, "randomized", false));
         requests.add(client().prepareIndex("test", "comment", "a").setParent("a").setSource("{}"));
         requests.add(client().prepareIndex("test", "comment", "c").setParent("c").setSource("{}"));
 
@@ -116,16 +112,7 @@ public class ChildrenTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testChildrenAggs() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("test")
-                .setQuery(matchQuery("randomized", true))
-                .addAggregation(
-                        terms("category").field("category").size(0).subAggregation(
-                                children("to_comment").childType("comment").subAggregation(
-                                        terms("commenters").field("commenter").size(0).subAggregation(
-                                                topHits("top_comments")
-                                        ))
-                        )
-                ).get();
+        SearchResponse searchResponse = client().prepareSearch("test").setQuery(matchQuery("randomized", true)).addAggregation(terms("category").field("category").size(0).subAggregation(children("to_comment").childType("comment").subAggregation(terms("commenters").field("commenter").size(0).subAggregation(topHits("top_comments"))))).get();
         assertSearchResponse(searchResponse);
 
         Terms categoryTerms = searchResponse.getAggregations().get("category");
@@ -156,13 +143,7 @@ public class ChildrenTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testParentWithMultipleBuckets() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("test")
-                .setQuery(matchQuery("randomized", false))
-                .addAggregation(
-                        terms("category").field("category").size(0).subAggregation(
-                                children("to_comment").childType("comment").subAggregation(topHits("top_comments").addSort("_id", SortOrder.ASC))
-                        )
-                ).get();
+        SearchResponse searchResponse = client().prepareSearch("test").setQuery(matchQuery("randomized", false)).addAggregation(terms("category").field("category").size(0).subAggregation(children("to_comment").childType("comment").subAggregation(topHits("top_comments").addSort("_id", SortOrder.ASC)))).get();
         assertSearchResponse(searchResponse);
 
         Terms categoryTerms = searchResponse.getAggregations().get("category");
@@ -222,11 +203,7 @@ public class ChildrenTests extends ElasticsearchIntegrationTest {
     @Test
     public void testWithDeletes() throws Exception {
         String indexName = "xyz";
-        assertAcked(
-                prepareCreate(indexName)
-                        .addMapping("parent")
-                        .addMapping("child", "_parent", "type=parent", "count", "type=long")
-        );
+        assertAcked(prepareCreate(indexName).addMapping("parent").addMapping("child", "_parent", "type=parent", "count", "type=long"));
 
         List<IndexRequestBuilder> requests = new ArrayList<>();
         requests.add(client().prepareIndex(indexName, "parent", "1").setSource("{}"));
@@ -237,9 +214,7 @@ public class ChildrenTests extends ElasticsearchIntegrationTest {
         indexRandom(true, requests);
 
         for (int i = 0; i < 10; i++) {
-            SearchResponse searchResponse = client().prepareSearch(indexName)
-                    .addAggregation(children("children").childType("child").subAggregation(sum("counts").field("count")))
-                    .get();
+            SearchResponse searchResponse = client().prepareSearch(indexName).addAggregation(children("children").childType("child").subAggregation(sum("counts").field("count"))).get();
 
             assertNoFailures(searchResponse);
             Children children = searchResponse.getAggregations().get("children");
@@ -249,10 +224,7 @@ public class ChildrenTests extends ElasticsearchIntegrationTest {
             assertThat(count.getValue(), equalTo(4.));
 
             String idToUpdate = Integer.toString(randomInt(3));
-            UpdateResponse updateResponse = client().prepareUpdate(indexName, "child", idToUpdate)
-                    .setParent("1")
-                    .setDoc("count", 1)
-                    .get();
+            UpdateResponse updateResponse = client().prepareUpdate(indexName, "child", idToUpdate).setParent("1").setDoc("count", 1).get();
             assertThat(updateResponse.getVersion(), greaterThan(1l));
             refresh();
         }
@@ -260,10 +232,7 @@ public class ChildrenTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testNonExistingChildType() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("test")
-                .addAggregation(
-                        children("non-existing").childType("xyz")
-                ).get();
+        SearchResponse searchResponse = client().prepareSearch("test").addAggregation(children("non-existing").childType("xyz")).get();
         assertSearchResponse(searchResponse);
 
         Children children = searchResponse.getAggregations().get("non-existing");
@@ -276,11 +245,7 @@ public class ChildrenTests extends ElasticsearchIntegrationTest {
         String indexName = "prodcatalog";
         String masterType = "masterprod";
         String childType = "variantsku";
-        assertAcked(
-                prepareCreate(indexName)
-                        .addMapping(masterType, "brand", "type=string", "name", "type=string", "material", "type=string")
-                        .addMapping(childType, "_parent", "type=masterprod", "color", "type=string", "size", "type=string")
-        );
+        assertAcked(prepareCreate(indexName).addMapping(masterType, "brand", "type=string", "name", "type=string", "material", "type=string").addMapping(childType, "_parent", "type=masterprod", "color", "type=string", "size", "type=string"));
 
         List<IndexRequestBuilder> requests = new ArrayList<>();
         requests.add(client().prepareIndex(indexName, masterType, "1").setSource("brand", "Levis", "name", "Style 501", "material", "Denim"));
@@ -301,13 +266,7 @@ public class ChildrenTests extends ElasticsearchIntegrationTest {
         requests.add(client().prepareIndex(indexName, childType, "12").setParent("2").setSource("color", "green", "size", "44"));
         indexRandom(true, requests);
 
-        SearchResponse response = client().prepareSearch(indexName).setTypes(masterType)
-                .setQuery(hasChildQuery(childType, termQuery("color", "orange")))
-                .addAggregation(children("my-refinements")
-                                .childType(childType)
-                                .subAggregation(terms("my-colors").field("color"))
-                                .subAggregation(terms("my-sizes").field("size"))
-                ).get();
+        SearchResponse response = client().prepareSearch(indexName).setTypes(masterType).setQuery(hasChildQuery(childType, termQuery("color", "orange"))).addAggregation(children("my-refinements").childType(childType).subAggregation(terms("my-colors").field("color")).subAggregation(terms("my-sizes").field("size"))).get();
         assertNoFailures(response);
         assertHitCount(response, 1);
 
@@ -337,32 +296,14 @@ public class ChildrenTests extends ElasticsearchIntegrationTest {
         String grandParentType = "continent";
         String parentType = "country";
         String childType = "city";
-        assertAcked(
-                prepareCreate(indexName)
-                        .setSettings(ImmutableSettings.builder()
-                                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)
-                        )
-                        .addMapping(grandParentType)
-                        .addMapping(parentType, "_parent", "type=" + grandParentType)
-                        .addMapping(childType, "_parent", "type=" + parentType)
-        );
+        assertAcked(prepareCreate(indexName).setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)).addMapping(grandParentType).addMapping(parentType, "_parent", "type=" + grandParentType).addMapping(childType, "_parent", "type=" + parentType));
 
         client().prepareIndex(indexName, grandParentType, "1").setSource("name", "europe").get();
         client().prepareIndex(indexName, parentType, "2").setParent("1").setSource("name", "belgium").get();
         client().prepareIndex(indexName, childType, "3").setParent("2").setRouting("1").setSource("name", "brussels").get();
         refresh();
 
-        SearchResponse response = client().prepareSearch(indexName)
-                .setQuery(matchQuery("name", "europe"))
-                .addAggregation(
-                        children(parentType).childType(parentType).subAggregation(
-                                children(childType).childType(childType).subAggregation(
-                                        terms("name").field("name")
-                                )
-                        )
-                )
-                .get();
+        SearchResponse response = client().prepareSearch(indexName).setQuery(matchQuery("name", "europe")).addAggregation(children(parentType).childType(parentType).subAggregation(children(childType).childType(childType).subAggregation(terms("name").field("name")))).get();
         assertNoFailures(response);
         assertHitCount(response, 1);
 

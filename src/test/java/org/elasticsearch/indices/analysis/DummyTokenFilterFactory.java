@@ -23,11 +23,13 @@ import org.apache.lucene.analysis.TokenStream;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 
 public class DummyTokenFilterFactory implements TokenFilterFactory {
-    @Override public String name() {
+    @Override
+    public String name() {
         return "dummy_token_filter";
     }
 
-    @Override public TokenStream create(TokenStream tokenStream) {
+    @Override
+    public TokenStream create(TokenStream tokenStream) {
         return null;
     }
 }

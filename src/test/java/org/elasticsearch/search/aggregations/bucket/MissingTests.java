@@ -53,33 +53,21 @@ public class MissingTests extends ElasticsearchIntegrationTest {
         numDocs = randomIntBetween(5, 20);
         numDocsMissing = randomIntBetween(1, numDocs - 1);
         for (int i = 0; i < numDocsMissing; i++) {
-            builders.add(client().prepareIndex("idx", "type", ""+i).setSource(jsonBuilder()
-                    .startObject()
-                    .field("value", i)
-                    .endObject()));
+            builders.add(client().prepareIndex("idx", "type", "" + i).setSource(jsonBuilder().startObject().field("value", i).endObject()));
         }
         for (int i = numDocsMissing; i < numDocs; i++) {
-            builders.add(client().prepareIndex("idx", "type", ""+i).setSource(jsonBuilder()
-                    .startObject()
-                    .field("tag", "tag1")
-                    .endObject()));
+            builders.add(client().prepareIndex("idx", "type", "" + i).setSource(jsonBuilder().startObject().field("tag", "tag1").endObject()));
         }
 
         createIndex("unmapped_idx");
         numDocsUnmapped = randomIntBetween(2, 5);
         for (int i = 0; i < numDocsUnmapped; i++) {
-            builders.add(client().prepareIndex("unmapped_idx", "type", ""+i).setSource(jsonBuilder()
-                    .startObject()
-                    .field("value", i)
-                    .endObject()));
+            builders.add(client().prepareIndex("unmapped_idx", "type", "" + i).setSource(jsonBuilder().startObject().field("value", i).endObject()));
         }
 
         prepareCreate("empty_bucket_idx").addMapping("type", "value", "type=integer").execute().actionGet();
         for (int i = 0; i < 2; i++) {
-            builders.add(client().prepareIndex("empty_bucket_idx", "type", ""+i).setSource(jsonBuilder()
-                    .startObject()
-                    .field("value", i*2)
-                    .endObject()));
+            builders.add(client().prepareIndex("empty_bucket_idx", "type", "" + i).setSource(jsonBuilder().startObject().field("value", i * 2).endObject()));
         }
 
         indexRandom(true, builders);
@@ -88,12 +76,9 @@ public class MissingTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void unmapped() throws Exception {
-        SearchResponse response = client().prepareSearch("unmapped_idx")
-                .addAggregation(missing("missing_tag").field("tag"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("unmapped_idx").addAggregation(missing("missing_tag").field("tag")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Missing missing = response.getAggregations().get("missing_tag");
         assertThat(missing, notNullValue());
@@ -103,12 +88,9 @@ public class MissingTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void partiallyUnmapped() throws Exception {
-        SearchResponse response = client().prepareSearch("idx", "unmapped_idx")
-                .addAggregation(missing("missing_tag").field("tag"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx", "unmapped_idx").addAggregation(missing("missing_tag").field("tag")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Missing missing = response.getAggregations().get("missing_tag");
         assertThat(missing, notNullValue());
@@ -118,12 +100,9 @@ public class MissingTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void simple() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(missing("missing_tag").field("tag"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(missing("missing_tag").field("tag")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Missing missing = response.getAggregations().get("missing_tag");
         assertThat(missing, notNullValue());
@@ -133,10 +112,7 @@ public class MissingTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void withSubAggregation() throws Exception {
-        SearchResponse response = client().prepareSearch("idx", "unmapped_idx")
-                .addAggregation(missing("missing_tag").field("tag")
-                        .subAggregation(avg("avg_value").field("value")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx", "unmapped_idx").addAggregation(missing("missing_tag").field("tag").subAggregation(avg("avg_value").field("value"))).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -164,13 +140,9 @@ public class MissingTests extends ElasticsearchIntegrationTest {
     @Test
     public void withInheritedSubMissing() throws Exception {
 
-        SearchResponse response = client().prepareSearch("idx", "unmapped_idx")
-                .addAggregation(missing("top_missing").field("tag")
-                        .subAggregation(missing("sub_missing")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx", "unmapped_idx").addAggregation(missing("top_missing").field("tag").subAggregation(missing("sub_missing"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Missing topMissing = response.getAggregations().get("top_missing");
         assertThat(topMissing, notNullValue());
@@ -186,11 +158,7 @@ public class MissingTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void emptyAggregation() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0)
-                        .subAggregation(missing("missing")))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx").setQuery(matchAllQuery()).addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0).subAggregation(missing("missing"))).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(2l));
         Histogram histo = searchResponse.getAggregations().get("histo");
@@ -203,6 +171,5 @@ public class MissingTests extends ElasticsearchIntegrationTest {
         assertThat(missing.getName(), equalTo("missing"));
         assertThat(missing.getDocCount(), is(0l));
     }
-
 
 }

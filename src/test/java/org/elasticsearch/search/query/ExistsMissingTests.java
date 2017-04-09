@@ -36,7 +36,6 @@ import java.util.*;
 
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.*;
 
-
 public class ExistsMissingTests extends ElasticsearchIntegrationTest {
 
     public void testExistsFilterOnEmptyIndex() throws Exception {
@@ -55,43 +54,11 @@ public class ExistsMissingTests extends ElasticsearchIntegrationTest {
         assertSearchResponse(resp);
     }
 
-
     public void testExistsMissing() throws Exception {
 
-        XContentBuilder mapping = XContentBuilder.builder(JsonXContent.jsonXContent)
-            .startObject()
-                .startObject("type")
-                    .startObject(FieldNamesFieldMapper.NAME)
+        XContentBuilder mapping = XContentBuilder.builder(JsonXContent.jsonXContent).startObject().startObject("type").startObject(FieldNamesFieldMapper.NAME)
                         // by setting randomly index to no we also test the pre-1.3 behavior
-                        .field("index", randomFrom("no", "not_analyzed"))
-                        .field("store", randomFrom("no", "yes"))
-                    .endObject()
-                    .startObject("properties")
-                        .startObject("foo")
-                            .field("type", "string")
-                        .endObject()
-                        .startObject("bar")
-                            .field("type", "object")
-                            .startObject("properties")
-                                .startObject("foo")
-                                    .field("type", "string")
-                                .endObject()
-                                .startObject("bar")
-                                    .field("type", "object")
-                                    .startObject("properties")
-                                        .startObject("bar")
-                                            .field("type", "string")
-                                        .endObject()
-                                    .endObject()
-                                .endObject()
-                                .startObject("baz")
-                                    .field("type", "long")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                .endObject()
-            .endObject();
+                        .field("index", randomFrom("no", "not_analyzed")).field("store", randomFrom("no", "yes")).endObject().startObject("properties").startObject("foo").field("type", "string").endObject().startObject("bar").field("type", "object").startObject("properties").startObject("foo").field("type", "string").endObject().startObject("bar").field("type", "object").startObject("properties").startObject("bar").field("type", "string").endObject().endObject().endObject().startObject("baz").field("type", "long").endObject().endObject().endObject().endObject().endObject().endObject();
 
         assertAcked(client().admin().indices().prepareCreate("idx").addMapping("type", mapping));
         @SuppressWarnings("unchecked")
@@ -99,11 +66,9 @@ public class ExistsMissingTests extends ElasticsearchIntegrationTest {
                 // simple property
                 ImmutableMap.of("foo", "bar"),
                 // object fields
-                ImmutableMap.of("bar", ImmutableMap.of("foo", "bar", "bar", ImmutableMap.of("bar", "foo"))),
-                ImmutableMap.of("bar", ImmutableMap.of("baz", 42)),
+                ImmutableMap.of("bar", ImmutableMap.of("foo", "bar", "bar", ImmutableMap.of("bar", "foo"))), ImmutableMap.of("bar", ImmutableMap.of("baz", 42)),
                 // empty doc
-                ImmutableMap.of()
-        };
+                ImmutableMap.of() };
         List<IndexRequestBuilder> reqs = new ArrayList<IndexRequestBuilder>();
         for (Map<String, Object> source : sources) {
             reqs.add(client().prepareIndex("idx", "type").setSource(source));

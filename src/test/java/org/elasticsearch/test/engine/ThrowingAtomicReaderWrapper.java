@@ -40,14 +40,7 @@ public class ThrowingAtomicReaderWrapper extends FilterAtomicReader {
      * when the corresponding method is called.
      */
     public enum Flags {
-        TermVectors,
-        Terms,
-        TermsEnum,
-        Intersect,
-        DocsEnum,
-        DocsAndPositionsEnum,
-        Fields,
-        Norms, NumericDocValues, BinaryDocValues, SortedDocValues, SortedSetDocValues;
+        TermVectors, Terms, TermsEnum, Intersect, DocsEnum, DocsAndPositionsEnum, Fields, Norms, NumericDocValues, BinaryDocValues, SortedDocValues, SortedSetDocValues;
     }
 
     /**
@@ -72,7 +65,6 @@ public class ThrowingAtomicReaderWrapper extends FilterAtomicReader {
         super(in);
         this.thrower = thrower;
     }
-
 
     @Override
     public Fields fields() throws IOException {
@@ -157,7 +149,6 @@ public class ThrowingAtomicReaderWrapper extends FilterAtomicReader {
             return super.docsAndPositions(liveDocs, reuse, flags);
         }
     }
-
 
     @Override
     public NumericDocValues getNumericDocValues(String field) throws IOException {

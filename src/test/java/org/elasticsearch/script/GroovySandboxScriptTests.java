@@ -40,9 +40,7 @@ public class GroovySandboxScriptTests extends ElasticsearchIntegrationTest {
     @Test
     public void testSandboxedGroovyScript() throws Exception {
         int nodes = randomIntBetween(1, 3);
-        Settings nodeSettings = ImmutableSettings.builder()
-                .put(GroovyScriptEngineService.GROOVY_SCRIPT_SANDBOX_ENABLED, true)
-                .build();
+        Settings nodeSettings = ImmutableSettings.builder().put(GroovyScriptEngineService.GROOVY_SCRIPT_SANDBOX_ENABLED, true).build();
         internalCluster().startNodesAsync(nodes, nodeSettings).get();
         client().admin().cluster().prepareHealth().setWaitForNodes(nodes + "").get();
 
@@ -62,57 +60,41 @@ public class GroovySandboxScriptTests extends ElasticsearchIntegrationTest {
         testSuccess("def n = [1,2,3]; GroovyCollections.max(n)");
 
         // Fail cases
-        testFailure("pr = Runtime.getRuntime().exec(\\\"touch /tmp/gotcha\\\"); pr.waitFor()",
-                "Method calls not allowed on [java.lang.Runtime]");
+        testFailure("pr = Runtime.getRuntime().exec(\\\"touch /tmp/gotcha\\\"); pr.waitFor()", "Method calls not allowed on [java.lang.Runtime]");
 
-        testFailure("d = new DateTime(); d.getClass().getDeclaredMethod(\\\"plus\\\").setAccessible(true)",
-                "Expression [MethodCallExpression] is not allowed: d.getClass()");
+        testFailure("d = new DateTime(); d.getClass().getDeclaredMethod(\\\"plus\\\").setAccessible(true)", "Expression [MethodCallExpression] is not allowed: d.getClass()");
 
-        testFailure("d = new DateTime(); d.\\\"${'get' + 'Class'}\\\"()." +
-                        "\\\"${'getDeclared' + 'Method'}\\\"(\\\"now\\\").\\\"${'set' + 'Accessible'}\\\"(false)",
-                "Expression [MethodCallExpression] is not allowed: d.$(get + Class)().$(getDeclared + Method)(now).$(set + Accessible)(false)");
+        testFailure("d = new DateTime(); d.\\\"${'get' + 'Class'}\\\"()." + "\\\"${'getDeclared' + 'Method'}\\\"(\\\"now\\\").\\\"${'set' + 'Accessible'}\\\"(false)", "Expression [MethodCallExpression] is not allowed: d.$(get + Class)().$(getDeclared + Method)(now).$(set + Accessible)(false)");
 
-        testFailure("Class.forName(\\\"DateTime\\\").getDeclaredMethod(\\\"plus\\\").setAccessible(true)",
-                "Expression [MethodCallExpression] is not allowed: java.lang.Class.forName(DateTime)");
+        testFailure("Class.forName(\\\"DateTime\\\").getDeclaredMethod(\\\"plus\\\").setAccessible(true)", "Expression [MethodCallExpression] is not allowed: java.lang.Class.forName(DateTime)");
 
         testFailure("Eval.me('2 + 2')", "Method calls not allowed on [groovy.util.Eval]");
 
         testFailure("Eval.x(5, 'x + 2')", "Method calls not allowed on [groovy.util.Eval]");
 
-        testFailure("t = new java.util.concurrent.ThreadPoolExecutor(2, 2, 0L, TimeUnit.MILLISECONDS, " +
-                "new java.util.concurrent.LinkedBlockingQueue<Runnable>()); t.execute({ println 5 })",
-                "Expression [ConstructorCallExpression] is not allowed: new java.util.concurrent.ThreadPoolExecutor");
+        testFailure("t = new java.util.concurrent.ThreadPoolExecutor(2, 2, 0L, TimeUnit.MILLISECONDS, " + "new java.util.concurrent.LinkedBlockingQueue<Runnable>()); t.execute({ println 5 })", "Expression [ConstructorCallExpression] is not allowed: new java.util.concurrent.ThreadPoolExecutor");
 
-        testFailure("d = new Date(); java.lang.reflect.Field f = Date.class.getDeclaredField(\\\"fastTime\\\");" +
-                " f.setAccessible(true); f.get(\\\"fastTime\\\")",
-                "Method calls not allowed on [java.lang.reflect.Field]");
+        testFailure("d = new Date(); java.lang.reflect.Field f = Date.class.getDeclaredField(\\\"fastTime\\\");" + " f.setAccessible(true); f.get(\\\"fastTime\\\")", "Method calls not allowed on [java.lang.reflect.Field]");
 
-        testFailure("t = new Thread({ println 3 }); t.start(); t.join()",
-                "Expression [ConstructorCallExpression] is not allowed: new java.lang.Thread");
+        testFailure("t = new Thread({ println 3 }); t.start(); t.join()", "Expression [ConstructorCallExpression] is not allowed: new java.lang.Thread");
 
         testFailure("Thread.start({ println 4 })", "Method calls not allowed on [java.lang.Thread]");
 
-        testFailure("import java.util.concurrent.ThreadPoolExecutor;",
-                "Importing [java.util.concurrent.ThreadPoolExecutor] is not allowed");
+        testFailure("import java.util.concurrent.ThreadPoolExecutor;", "Importing [java.util.concurrent.ThreadPoolExecutor] is not allowed");
 
         testFailure("s = new java.net.URL();", "Expression [ConstructorCallExpression] is not allowed: new java.net.URL()");
 
-        testFailure("def methodName = 'ex'; Runtime.\\\"${'get' + 'Runtime'}\\\"().\\\"${methodName}ec\\\"(\\\"touch /tmp/gotcha2\\\")",
-                "Expression [MethodCallExpression] is not allowed: java.lang.Runtime.$(get + Runtime)().$methodNameec(touch /tmp/gotcha2)");
+        testFailure("def methodName = 'ex'; Runtime.\\\"${'get' + 'Runtime'}\\\"().\\\"${methodName}ec\\\"(\\\"touch /tmp/gotcha2\\\")", "Expression [MethodCallExpression] is not allowed: java.lang.Runtime.$(get + Runtime)().$methodNameec(touch /tmp/gotcha2)");
 
-        testFailure("def c = [doc['foo'].value, 3, 4].&size;  c()",
-                "Expression [MethodPointerExpression] is not allowed");
+        testFailure("def c = [doc['foo'].value, 3, 4].&size;  c()", "Expression [MethodPointerExpression] is not allowed");
 
-        testFailure("[doc['foo'].value, 3, 4].invokeMethod([1,2],\\\"size\\\", new Object[0])",
-                "Expression [MethodCallExpression] is not allowed: [doc[foo].value, 3, 4].invokeMethod([1, 2], size, [])");
+        testFailure("[doc['foo'].value, 3, 4].invokeMethod([1,2],\\\"size\\\", new Object[0])", "Expression [MethodCallExpression] is not allowed: [doc[foo].value, 3, 4].invokeMethod([1, 2], size, [])");
     }
 
     @Test
     public void testDynamicBlacklist() throws Exception {
         int nodes = randomIntBetween(1, 3);
-        Settings nodeSettings = ImmutableSettings.builder()
-                .put(GroovyScriptEngineService.GROOVY_SCRIPT_SANDBOX_ENABLED, true)
-                .build();
+        Settings nodeSettings = ImmutableSettings.builder().put(GroovyScriptEngineService.GROOVY_SCRIPT_SANDBOX_ENABLED, true).build();
         internalCluster().startNodesAsync(nodes, nodeSettings).get();
         client().admin().cluster().prepareHealth().setWaitForNodes(nodes + "").get();
 
@@ -122,35 +104,25 @@ public class GroovySandboxScriptTests extends ElasticsearchIntegrationTest {
         testSuccess("[doc['foo'].value, 3, 4].size()");
 
         // Now we blacklist two methods, .isEmpty() and .size()
-        Settings blacklistSettings = ImmutableSettings.builder()
-                .put(GroovyScriptEngineService.GROOVY_SCRIPT_BLACKLIST_PATCH, "isEmpty,size")
-                .build();
+        Settings blacklistSettings = ImmutableSettings.builder().put(GroovyScriptEngineService.GROOVY_SCRIPT_BLACKLIST_PATCH, "isEmpty,size").build();
 
         client().admin().cluster().prepareUpdateSettings().setTransientSettings(blacklistSettings).get();
 
-        testFailure("[doc['foo'].value, 3, 4].isEmpty()",
-                "Expression [MethodCallExpression] is not allowed: [doc[foo].value, 3, 4].isEmpty()");
-        testFailure("[doc['foo'].value, 3, 4].size()",
-                "Expression [MethodCallExpression] is not allowed: [doc[foo].value, 3, 4].size()");
+        testFailure("[doc['foo'].value, 3, 4].isEmpty()", "Expression [MethodCallExpression] is not allowed: [doc[foo].value, 3, 4].isEmpty()");
+        testFailure("[doc['foo'].value, 3, 4].size()", "Expression [MethodCallExpression] is not allowed: [doc[foo].value, 3, 4].size()");
     }
 
     public void testSuccess(String script) {
         logger.info("--> script: " + script);
-        SearchResponse resp = client().prepareSearch("test")
-                .setSource("{\"query\": {\"match_all\": {}}," +
-                        "\"sort\":{\"_script\": {\"script\": \""+ script +
-                        "; doc['foo'].value + 2\", \"type\": \"number\", \"lang\": \"groovy\"}}}").get();
+        SearchResponse resp = client().prepareSearch("test").setSource("{\"query\": {\"match_all\": {}}," + "\"sort\":{\"_script\": {\"script\": \"" + script + "; doc['foo'].value + 2\", \"type\": \"number\", \"lang\": \"groovy\"}}}").get();
         assertNoFailures(resp);
-        assertThat(resp.getHits().getAt(0).getSortValues(), equalTo(new Object[]{7.0}));
+        assertThat(resp.getHits().getAt(0).getSortValues(), equalTo(new Object[] { 7.0 }));
     }
 
     public void testFailure(String script, String failMessage) {
         logger.info("--> script: " + script);
         try {
-            client().prepareSearch("test")
-                    .setSource("{\"query\": {\"match_all\": {}}," +
-                            "\"sort\":{\"_script\": {\"script\": \""+ script +
-                            "; doc['foo'].value + 2\", \"type\": \"number\", \"lang\": \"groovy\"}}}").get();
+            client().prepareSearch("test").setSource("{\"query\": {\"match_all\": {}}," + "\"sort\":{\"_script\": {\"script\": \"" + script + "; doc['foo'].value + 2\", \"type\": \"number\", \"lang\": \"groovy\"}}}").get();
             fail("script: " + script + " failed to be caught be the sandbox!");
         } catch (SearchPhaseExecutionException e) {
             String msg = ExceptionsHelper.detailedMessage(ExceptionsHelper.unwrapCause(e));

@@ -35,16 +35,13 @@ public class KeepTypesFilterFactoryTests extends ElasticsearchTokenStreamTestCas
 
     @Test
     public void testKeepTypes() throws IOException {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("index.analysis.filter.keep_numbers.type", "keep_types")
-                .putArray("index.analysis.filter.keep_numbers.types", new String[] {"<NUM>", "<SOMETHINGELSE>"})
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("index.analysis.filter.keep_numbers.type", "keep_types").putArray("index.analysis.filter.keep_numbers.types", new String[] { "<NUM>", "<SOMETHINGELSE>" }).build();
         AnalysisService analysisService = AnalysisTestsHelper.createAnalysisServiceFromSettings(settings);
         TokenFilterFactory tokenFilter = analysisService.tokenFilter("keep_numbers");
         assertThat(tokenFilter, instanceOf(KeepTypesFilterFactory.class));
         String source = "Hello 123 world";
-        String[] expected = new String[]{"123"};
+        String[] expected = new String[] { "123" };
         Tokenizer tokenizer = new StandardTokenizer(TEST_VERSION_CURRENT, new StringReader(source));
-        assertTokenStreamContents(tokenFilter.create(tokenizer), expected, new int[]{2});
+        assertTokenStreamContents(tokenFilter.create(tokenizer), expected, new int[] { 2 });
     }
 }

@@ -19,8 +19,6 @@
 
 package org.elasticsearch.search.rescore;
 
-
-
 import org.apache.lucene.search.Explanation;
 import org.apache.lucene.util.English;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -60,25 +58,20 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         createIndex("test");
         // this
         int iters = scaledRandomIntBetween(10, 20);
-        for (int i = 0; i < iters; i ++) {
+        for (int i = 0; i < iters; i++) {
             client().prepareIndex("test", "type", Integer.toString(i)).setSource("f", Integer.toString(i)).execute().actionGet();
         }
         ensureYellow();
         refresh();
 
         int numShards = getNumShards("test").numPrimaries;
-        for (int j = 0 ; j < iters; j++) {
-            SearchResponse searchResponse = client().prepareSearch()
-                    .setQuery(QueryBuilders.matchAllQuery())
-                    .setRescorer(RescoreBuilder.queryRescorer(
-                            QueryBuilders.functionScoreQuery(QueryBuilders.matchAllQuery())
-                                    .boostMode("replace").add(ScoreFunctionBuilders.factorFunction(100))).setQueryWeight(0.0f).setRescoreQueryWeight(1.0f))
-                    .setRescoreWindow(1).setSize(randomIntBetween(2,10)).execute().actionGet();
+        for (int j = 0; j < iters; j++) {
+            SearchResponse searchResponse = client().prepareSearch().setQuery(QueryBuilders.matchAllQuery()).setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.functionScoreQuery(QueryBuilders.matchAllQuery()).boostMode("replace").add(ScoreFunctionBuilders.factorFunction(100))).setQueryWeight(0.0f).setRescoreQueryWeight(1.0f)).setRescoreWindow(1).setSize(randomIntBetween(2, 10)).execute().actionGet();
             assertFirstHit(searchResponse, hasScore(100.f));
             int numPending100 = numShards;
             for (int i = 0; i < searchResponse.getHits().hits().length; i++) {
                 float score = searchResponse.getHits().hits()[i].getScore();
-                if  (score == 100f) {
+                if (score == 100f) {
                     assertThat(numPending100--, greaterThanOrEqualTo(0));
                 } else {
                     assertThat(numPending100, equalTo(0));
@@ -89,44 +82,28 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testRescorePhrase() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping(
-                        "type1",
-                        jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1")
-                                .field("analyzer", "whitespace").field("type", "string").endObject().endObject().endObject().endObject())
-                .setSettings(ImmutableSettings.settingsBuilder().put(indexSettings()).put("index.number_of_shards", 2)));
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("analyzer", "whitespace").field("type", "string").endObject().endObject().endObject().endObject()).setSettings(ImmutableSettings.settingsBuilder().put(indexSettings()).put("index.number_of_shards", 2)));
 
         client().prepareIndex("test", "type1", "1").setSource("field1", "the quick brown fox").execute().actionGet();
-        client().prepareIndex("test", "type1", "2").setSource("field1", "the quick lazy huge brown fox jumps over the tree").execute()
-                .actionGet();
-        client().prepareIndex("test", "type1", "3")
-                .setSource("field1", "quick huge brown", "field2", "the quick lazy huge brown fox jumps over the tree").get();
+        client().prepareIndex("test", "type1", "2").setSource("field1", "the quick lazy huge brown fox jumps over the tree").execute().actionGet();
+        client().prepareIndex("test", "type1", "3").setSource("field1", "quick huge brown", "field2", "the quick lazy huge brown fox jumps over the tree").get();
         ensureYellow();
         refresh();
-        SearchResponse searchResponse = client().prepareSearch()
-                .setQuery(QueryBuilders.matchQuery("field1", "the quick brown").operator(MatchQueryBuilder.Operator.OR))
-                .setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "quick brown").slop(2).boost(4.0f)))
-                .setRescoreWindow(5).execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setQuery(QueryBuilders.matchQuery("field1", "the quick brown").operator(MatchQueryBuilder.Operator.OR)).setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "quick brown").slop(2).boost(4.0f))).setRescoreWindow(5).execute().actionGet();
 
         assertThat(searchResponse.getHits().totalHits(), equalTo(3l));
         assertThat(searchResponse.getHits().getHits()[0].getId(), equalTo("1"));
         assertThat(searchResponse.getHits().getHits()[1].getId(), equalTo("3"));
         assertThat(searchResponse.getHits().getHits()[2].getId(), equalTo("2"));
 
-        searchResponse = client().prepareSearch()
-                .setQuery(QueryBuilders.matchQuery("field1", "the quick brown").operator(MatchQueryBuilder.Operator.OR))
-                .setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "the quick brown").slop(3)))
-                .setRescoreWindow(5).execute().actionGet();
+        searchResponse = client().prepareSearch().setQuery(QueryBuilders.matchQuery("field1", "the quick brown").operator(MatchQueryBuilder.Operator.OR)).setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "the quick brown").slop(3))).setRescoreWindow(5).execute().actionGet();
 
         assertHitCount(searchResponse, 3);
         assertFirstHit(searchResponse, hasId("1"));
         assertSecondHit(searchResponse, hasId("2"));
         assertThirdHit(searchResponse, hasId("3"));
 
-        searchResponse = client().prepareSearch()
-                .setQuery(QueryBuilders.matchQuery("field1", "the quick brown").operator(MatchQueryBuilder.Operator.OR))
-                .setRescorer(RescoreBuilder.queryRescorer((QueryBuilders.matchPhraseQuery("field1", "the quick brown"))))
-                .setRescoreWindow(5).execute().actionGet();
+        searchResponse = client().prepareSearch().setQuery(QueryBuilders.matchQuery("field1", "the quick brown").operator(MatchQueryBuilder.Operator.OR)).setRescorer(RescoreBuilder.queryRescorer((QueryBuilders.matchPhraseQuery("field1", "the quick brown")))).setRescoreWindow(5).execute().actionGet();
 
         assertHitCount(searchResponse, 3);
         assertFirstHit(searchResponse, hasId("1"));
@@ -142,9 +119,7 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         builder.put("index.analysis.filter.synonym.type", "synonym");
         builder.putArray("index.analysis.filter.synonym.synonyms", "ave => ave, avenue", "street => str, street");
 
-        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                .startObject("field1").field("type", "string").field("index_analyzer", "whitespace").field("search_analyzer", "synonym")
-                .endObject().endObject().endObject().endObject();
+        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("type", "string").field("index_analyzer", "whitespace").field("search_analyzer", "synonym").endObject().endObject().endObject().endObject();
 
         assertAcked(client().admin().indices().prepareCreate("test").addMapping("type1", mapping).setSettings(builder.put("index.number_of_shards", 1)));
 
@@ -165,14 +140,7 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         client().prepareIndex("test", "type1", "12").setSource("field1", "3st street boston massachusetts").execute().actionGet();
         ensureYellow();
         client().admin().indices().prepareRefresh("test").execute().actionGet();
-        SearchResponse searchResponse = client()
-                .prepareSearch()
-                .setQuery(QueryBuilders.matchQuery("field1", "lexington avenue massachusetts").operator(MatchQueryBuilder.Operator.OR))
-                .setFrom(0)
-                .setSize(5)
-                .setRescorer(
-                        RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "lexington avenue massachusetts").slop(3))
-                                .setQueryWeight(0.6f).setRescoreQueryWeight(2.0f)).setRescoreWindow(20).execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setQuery(QueryBuilders.matchQuery("field1", "lexington avenue massachusetts").operator(MatchQueryBuilder.Operator.OR)).setFrom(0).setSize(5).setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "lexington avenue massachusetts").slop(3)).setQueryWeight(0.6f).setRescoreQueryWeight(2.0f)).setRescoreWindow(20).execute().actionGet();
 
         assertThat(searchResponse.getHits().hits().length, equalTo(5));
         assertHitCount(searchResponse, 9);
@@ -180,15 +148,7 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         assertSecondHit(searchResponse, hasId("6"));
         assertThirdHit(searchResponse, hasId("3"));
 
-        searchResponse = client()
-                .prepareSearch()
-                .setQuery(QueryBuilders.matchQuery("field1", "lexington avenue massachusetts").operator(MatchQueryBuilder.Operator.OR))
-                .setFrom(0)
-                .setSize(5)
-                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .setRescorer(
-                        RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "lexington avenue massachusetts").slop(3))
-                                .setQueryWeight(0.6f).setRescoreQueryWeight(2.0f)).setRescoreWindow(20).execute().actionGet();
+        searchResponse = client().prepareSearch().setQuery(QueryBuilders.matchQuery("field1", "lexington avenue massachusetts").operator(MatchQueryBuilder.Operator.OR)).setFrom(0).setSize(5).setSearchType(SearchType.DFS_QUERY_THEN_FETCH).setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "lexington avenue massachusetts").slop(3)).setQueryWeight(0.6f).setRescoreQueryWeight(2.0f)).setRescoreWindow(20).execute().actionGet();
 
         assertThat(searchResponse.getHits().hits().length, equalTo(5));
         assertHitCount(searchResponse, 9);
@@ -197,15 +157,7 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         assertThirdHit(searchResponse, hasId("3"));
 
         // Make sure non-zero from works:
-        searchResponse = client()
-                .prepareSearch()
-                .setQuery(QueryBuilders.matchQuery("field1", "lexington avenue massachusetts").operator(MatchQueryBuilder.Operator.OR))
-                .setFrom(2)
-                .setSize(5)
-                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .setRescorer(
-                        RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "lexington avenue massachusetts").slop(3))
-                                .setQueryWeight(0.6f).setRescoreQueryWeight(2.0f)).setRescoreWindow(20).execute().actionGet();
+        searchResponse = client().prepareSearch().setQuery(QueryBuilders.matchQuery("field1", "lexington avenue massachusetts").operator(MatchQueryBuilder.Operator.OR)).setFrom(2).setSize(5).setSearchType(SearchType.DFS_QUERY_THEN_FETCH).setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "lexington avenue massachusetts").slop(3)).setQueryWeight(0.6f).setRescoreQueryWeight(2.0f)).setRescoreWindow(20).execute().actionGet();
 
         assertThat(searchResponse.getHits().hits().length, equalTo(5));
         assertHitCount(searchResponse, 9);
@@ -221,9 +173,7 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         builder.put("index.analysis.filter.synonym.type", "synonym");
         builder.putArray("index.analysis.filter.synonym.synonyms", "ave => ave, avenue", "street => str, street");
 
-        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                .startObject("field1").field("type", "string").field("index_analyzer", "whitespace").field("search_analyzer", "synonym")
-                .endObject().endObject().endObject().endObject();
+        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("type", "string").field("index_analyzer", "whitespace").field("search_analyzer", "synonym").endObject().endObject().endObject().endObject();
 
         assertAcked(client().admin().indices().prepareCreate("test").addMapping("type1", mapping).setSettings(builder.put("index.number_of_shards", 1)));
 
@@ -235,11 +185,7 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         ensureYellow();
         client().admin().indices().prepareRefresh("test").execute().actionGet();
 
-        SearchResponse searchResponse = client()
-                .prepareSearch()
-                .setQuery(QueryBuilders.matchQuery("field1", "massachusetts"))
-                .setFrom(0)
-            .setSize(5).execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setQuery(QueryBuilders.matchQuery("field1", "massachusetts")).setFrom(0).setSize(5).execute().actionGet();
         assertThat(searchResponse.getHits().hits().length, equalTo(4));
         assertHitCount(searchResponse, 4);
         assertFirstHit(searchResponse, hasId("3"));
@@ -248,14 +194,7 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         assertFourthHit(searchResponse, hasId("2"));
 
         // Now, rescore only top 2 hits w/ proximity:
-        searchResponse = client()
-                .prepareSearch()
-                .setQuery(QueryBuilders.matchQuery("field1", "massachusetts"))
-                .setFrom(0)
-                .setSize(5)
-                .setRescorer(
-                        RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "lexington avenue massachusetts").slop(3))
-                                .setQueryWeight(0.6f).setRescoreQueryWeight(2.0f)).setRescoreWindow(2).execute().actionGet();
+        searchResponse = client().prepareSearch().setQuery(QueryBuilders.matchQuery("field1", "massachusetts")).setFrom(0).setSize(5).setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "lexington avenue massachusetts").slop(3)).setQueryWeight(0.6f).setRescoreQueryWeight(2.0f)).setRescoreWindow(2).execute().actionGet();
         // Only top 2 hits were re-ordered:
         assertThat(searchResponse.getHits().hits().length, equalTo(4));
         assertHitCount(searchResponse, 4);
@@ -265,14 +204,7 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         assertFourthHit(searchResponse, hasId("2"));
 
         // Now, rescore only top 3 hits w/ proximity:
-        searchResponse = client()
-                .prepareSearch()
-                .setQuery(QueryBuilders.matchQuery("field1", "massachusetts"))
-                .setFrom(0)
-                .setSize(5)
-                .setRescorer(
-                        RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "lexington avenue massachusetts").slop(3))
-                                .setQueryWeight(0.6f).setRescoreQueryWeight(2.0f)).setRescoreWindow(3).execute().actionGet();
+        searchResponse = client().prepareSearch().setQuery(QueryBuilders.matchQuery("field1", "massachusetts")).setFrom(0).setSize(5).setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "lexington avenue massachusetts").slop(3)).setQueryWeight(0.6f).setRescoreQueryWeight(2.0f)).setRescoreWindow(3).execute().actionGet();
 
         // Only top 3 hits were re-ordered:
         assertThat(searchResponse.getHits().hits().length, equalTo(4));
@@ -292,9 +224,7 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         builder.put("index.analysis.filter.synonym.type", "synonym");
         builder.putArray("index.analysis.filter.synonym.synonyms", "ave => ave, avenue", "street => str, street");
 
-        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                .startObject("field1").field("type", "string").field("index_analyzer", "whitespace").field("search_analyzer", "synonym")
-                .endObject().endObject().endObject().endObject();
+        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("type", "string").field("index_analyzer", "whitespace").field("search_analyzer", "synonym").endObject().endObject().endObject().endObject();
 
         assertAcked(client().admin().indices().prepareCreate("test").addMapping("type1", mapping).setSettings(builder.put("index.number_of_shards", 1)));
 
@@ -306,11 +236,7 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         ensureYellow();
         client().admin().indices().prepareRefresh("test").execute().actionGet();
 
-        SearchResponse searchResponse = client()
-                .prepareSearch()
-                .setQuery(QueryBuilders.matchQuery("field1", "massachusetts").operator(MatchQueryBuilder.Operator.OR))
-                .setFrom(0)
-            .setSize(5).execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setQuery(QueryBuilders.matchQuery("field1", "massachusetts").operator(MatchQueryBuilder.Operator.OR)).setFrom(0).setSize(5).execute().actionGet();
         assertThat(searchResponse.getHits().hits().length, equalTo(4));
         assertHitCount(searchResponse, 4);
         assertFirstHit(searchResponse, hasId("3"));
@@ -319,14 +245,7 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         assertFourthHit(searchResponse, hasId("2"));
 
         // Now, penalizing rescore (nothing matches the rescore query):
-        searchResponse = client()
-                .prepareSearch()
-                .setQuery(QueryBuilders.matchQuery("field1", "massachusetts").operator(MatchQueryBuilder.Operator.OR))
-                .setFrom(0)
-                .setSize(5)
-                .setRescorer(
-                        RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "lexington avenue massachusetts").slop(3))
-                                .setQueryWeight(1.0f).setRescoreQueryWeight(-1f)).setRescoreWindow(3).execute().actionGet();
+        searchResponse = client().prepareSearch().setQuery(QueryBuilders.matchQuery("field1", "massachusetts").operator(MatchQueryBuilder.Operator.OR)).setFrom(0).setSize(5).setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "lexington avenue massachusetts").slop(3)).setQueryWeight(1.0f).setRescoreQueryWeight(-1f)).setRescoreWindow(3).execute().actionGet();
 
         // 6 and 1 got worse, and then the hit (2) outside the rescore window were sorted ahead:
         assertFirstHit(searchResponse, hasId("3"));
@@ -367,10 +286,10 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
             assertThat("query: " + query, hits[i].getScore(), equalTo(rHits[i].getScore()));
         }
         for (int i = 0; i < hits.length; i++) {
-            if (hits[i].getScore() == hits[hits.length-1].getScore()) {
+            if (hits[i].getScore() == hits[hits.length - 1].getScore()) {
                 return; // we need to cut off here since this is the tail of the queue and we might not have fetched enough docs
             }
-            assertThat("query: " + query,hits[i].getId(), equalTo(rHits[i].getId()));
+            assertThat("query: " + query, hits[i].getId(), equalTo(rHits[i].getId()));
         }
     }
 
@@ -389,7 +308,7 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
             Arrays.sort(hits, searchHitsComparator);
             Arrays.sort(otherHits, searchHitsComparator);
             for (int i = 0; i < hits.length; i++) {
-                if (hits[i].getScore() == hits[hits.length-1].getScore()) {
+                if (hits[i].getScore() == hits[hits.length - 1].getScore()) {
                     return; // we need to cut off here since this is the tail of the queue and we might not have fetched enough docs
                 }
                 assertThat(query, hits[i].getId(), equalTo(rightHits.getHits()[i].getId()));
@@ -407,63 +326,25 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         for (int i = 0; i < iters; i++) {
             int resultSize = numDocs;
             int rescoreWindow = between(1, 3) * resultSize;
-            String intToEnglish = English.intToEnglish(between(0, numDocs-1));
+            String intToEnglish = English.intToEnglish(between(0, numDocs - 1));
             String query = intToEnglish.split(" ")[0];
-            SearchResponse rescored = client()
-                    .prepareSearch()
-                    .setSearchType(SearchType.QUERY_THEN_FETCH)
-                    .setPreference("test") // ensure we hit the same shards for tie-breaking
-                    .setQuery(QueryBuilders.matchQuery("field1", query).operator(MatchQueryBuilder.Operator.OR))
-                    .setFrom(0)
-                    .setSize(resultSize)
-                    .setRescorer(
-                            RescoreBuilder
-                                    .queryRescorer(
-                                            QueryBuilders
-                                                    .constantScoreQuery(QueryBuilders.matchPhraseQuery("field1", intToEnglish).slop(3)))
-                                    .setQueryWeight(1.0f)
-                                    .setRescoreQueryWeight(0.0f)) // no weight - so we basically use the same score as the actual query
-                    .setRescoreWindow(rescoreWindow).execute().actionGet();
+            SearchResponse rescored = client().prepareSearch().setSearchType(SearchType.QUERY_THEN_FETCH).setPreference("test") // ensure we hit the same shards for tie-breaking
+                            .setQuery(QueryBuilders.matchQuery("field1", query).operator(MatchQueryBuilder.Operator.OR)).setFrom(0).setSize(resultSize).setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.constantScoreQuery(QueryBuilders.matchPhraseQuery("field1", intToEnglish).slop(3))).setQueryWeight(1.0f).setRescoreQueryWeight(0.0f)) // no weight - so we basically use the same score as the actual query
+                            .setRescoreWindow(rescoreWindow).execute().actionGet();
 
-            SearchResponse plain = client().prepareSearch()
-                    .setSearchType(SearchType.QUERY_THEN_FETCH)
-                    .setPreference("test") // ensure we hit the same shards for tie-breaking
-                    .setQuery(QueryBuilders.matchQuery("field1", query).operator(MatchQueryBuilder.Operator.OR)).setFrom(0).setSize(resultSize)
-                    .execute().actionGet();
-            
+            SearchResponse plain = client().prepareSearch().setSearchType(SearchType.QUERY_THEN_FETCH).setPreference("test") // ensure we hit the same shards for tie-breaking
+                            .setQuery(QueryBuilders.matchQuery("field1", query).operator(MatchQueryBuilder.Operator.OR)).setFrom(0).setSize(resultSize).execute().actionGet();
+
             // check equivalence
             assertEquivalent(query, plain, rescored);
 
-            rescored = client()
-                    .prepareSearch()
-                    .setSearchType(SearchType.QUERY_THEN_FETCH)
-                    .setPreference("test") // ensure we hit the same shards for tie-breaking
-                    .setQuery(QueryBuilders.matchQuery("field1", query).operator(MatchQueryBuilder.Operator.OR))
-                    .setFrom(0)
-                    .setSize(resultSize)
-                    .setRescorer(
-                            RescoreBuilder
-                                    .queryRescorer(
-                                            QueryBuilders
-                                                    .constantScoreQuery(QueryBuilders.matchPhraseQuery("field1", "not in the index").slop(3)))
-                                    .setQueryWeight(1.0f)
-                                    .setRescoreQueryWeight(1.0f))
-                    .setRescoreWindow(rescoreWindow).execute().actionGet();
+            rescored = client().prepareSearch().setSearchType(SearchType.QUERY_THEN_FETCH).setPreference("test") // ensure we hit the same shards for tie-breaking
+                            .setQuery(QueryBuilders.matchQuery("field1", query).operator(MatchQueryBuilder.Operator.OR)).setFrom(0).setSize(resultSize).setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.constantScoreQuery(QueryBuilders.matchPhraseQuery("field1", "not in the index").slop(3))).setQueryWeight(1.0f).setRescoreQueryWeight(1.0f)).setRescoreWindow(rescoreWindow).execute().actionGet();
             // check equivalence
             assertEquivalent(query, plain, rescored);
 
-            rescored = client()
-                    .prepareSearch()
-                    .setSearchType(SearchType.QUERY_THEN_FETCH)
-                    .setPreference("test") // ensure we hit the same shards for tie-breaking
-                    .setQuery(QueryBuilders.matchQuery("field1", query).operator(MatchQueryBuilder.Operator.OR))
-                    .setFrom(0)
-                    .setSize(resultSize)
-                    .setRescorer(
-                            RescoreBuilder
-                                    .queryRescorer(
-                                            QueryBuilders.matchPhraseQuery("field1", intToEnglish).slop(0))
-                                    .setQueryWeight(1.0f).setRescoreQueryWeight(1.0f)).setRescoreWindow(2 * rescoreWindow).execute().actionGet();
+            rescored = client().prepareSearch().setSearchType(SearchType.QUERY_THEN_FETCH).setPreference("test") // ensure we hit the same shards for tie-breaking
+                            .setQuery(QueryBuilders.matchQuery("field1", query).operator(MatchQueryBuilder.Operator.OR)).setFrom(0).setSize(resultSize).setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", intToEnglish).slop(0)).setQueryWeight(1.0f).setRescoreQueryWeight(1.0f)).setRescoreWindow(2 * rescoreWindow).execute().actionGet();
             // check equivalence or if the first match differs we check if the phrase is a substring of the top doc
             assertEquivalentOrSubstringMatch(intToEnglish, plain, rescored);
         }
@@ -471,31 +352,16 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testExplain() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping(
-                        "type1",
-                        jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1")
-                                .field("analyzer", "whitespace").field("type", "string").endObject().endObject().endObject().endObject())
-        );
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("analyzer", "whitespace").field("type", "string").endObject().endObject().endObject().endObject()));
         ensureGreen();
         client().prepareIndex("test", "type1", "1").setSource("field1", "the quick brown fox").execute().actionGet();
-        client().prepareIndex("test", "type1", "2").setSource("field1", "the quick lazy huge brown fox jumps over the tree").execute()
-                .actionGet();
-        client().prepareIndex("test", "type1", "3")
-                .setSource("field1", "quick huge brown", "field2", "the quick lazy huge brown fox jumps over the tree").execute()
-                .actionGet();
+        client().prepareIndex("test", "type1", "2").setSource("field1", "the quick lazy huge brown fox jumps over the tree").execute().actionGet();
+        client().prepareIndex("test", "type1", "3").setSource("field1", "quick huge brown", "field2", "the quick lazy huge brown fox jumps over the tree").execute().actionGet();
         ensureYellow();
         refresh();
 
         {
-            SearchResponse searchResponse = client()
-                    .prepareSearch()
-                    .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                    .setQuery(QueryBuilders.matchQuery("field1", "the quick brown").operator(MatchQueryBuilder.Operator.OR))
-                    .setRescorer(
-                            RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "the quick brown").slop(2).boost(4.0f))
-                                    .setQueryWeight(0.5f).setRescoreQueryWeight(0.4f)).setRescoreWindow(5).setExplain(true).execute()
-                    .actionGet();
+            SearchResponse searchResponse = client().prepareSearch().setSearchType(SearchType.DFS_QUERY_THEN_FETCH).setQuery(QueryBuilders.matchQuery("field1", "the quick brown").operator(MatchQueryBuilder.Operator.OR)).setRescorer(RescoreBuilder.queryRescorer(QueryBuilders.matchPhraseQuery("field1", "the quick brown").slop(2).boost(4.0f)).setQueryWeight(0.5f).setRescoreQueryWeight(0.4f)).setRescoreWindow(5).setExplain(true).execute().actionGet();
             assertHitCount(searchResponse, 3);
             assertFirstHit(searchResponse, hasId("1"));
             assertSecondHit(searchResponse, hasId("2"));
@@ -516,22 +382,16 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
             }
         }
 
-        String[] scoreModes = new String[]{ "max", "min", "avg", "total", "multiply", "" };
-        String[] descriptionModes = new String[]{ "max of:", "min of:", "avg of:", "sum of:", "product of:", "sum of:" };
+        String[] scoreModes = new String[] { "max", "min", "avg", "total", "multiply", "" };
+        String[] descriptionModes = new String[] { "max of:", "min of:", "avg of:", "sum of:", "product of:", "sum of:" };
         for (int innerMode = 0; innerMode < scoreModes.length; innerMode++) {
-            QueryRescorer innerRescoreQuery = RescoreBuilder.queryRescorer(QueryBuilders.matchQuery("field1", "the quick brown").boost(4.0f))
-                .setQueryWeight(0.5f).setRescoreQueryWeight(0.4f);
+            QueryRescorer innerRescoreQuery = RescoreBuilder.queryRescorer(QueryBuilders.matchQuery("field1", "the quick brown").boost(4.0f)).setQueryWeight(0.5f).setRescoreQueryWeight(0.4f);
 
             if (!"".equals(scoreModes[innerMode])) {
                 innerRescoreQuery.setScoreMode(scoreModes[innerMode]);
             }
 
-            SearchResponse searchResponse = client()
-                    .prepareSearch()
-                    .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                    .setQuery(QueryBuilders.matchQuery("field1", "the quick brown").operator(MatchQueryBuilder.Operator.OR))
-                    .setRescorer(innerRescoreQuery).setRescoreWindow(5).setExplain(true).execute()
-                    .actionGet();
+            SearchResponse searchResponse = client().prepareSearch().setSearchType(SearchType.DFS_QUERY_THEN_FETCH).setQuery(QueryBuilders.matchQuery("field1", "the quick brown").operator(MatchQueryBuilder.Operator.OR)).setRescorer(innerRescoreQuery).setRescoreWindow(5).setExplain(true).execute().actionGet();
             assertHitCount(searchResponse, 3);
             assertFirstHit(searchResponse, hasId("1"));
             assertSecondHit(searchResponse, hasId("2"));
@@ -542,20 +402,13 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
             }
 
             for (int outerMode = 0; outerMode < scoreModes.length; outerMode++) {
-                QueryRescorer outerRescoreQuery = RescoreBuilder.queryRescorer(QueryBuilders.matchQuery("field1", "the quick brown")
-                        .boost(4.0f)).setQueryWeight(0.5f).setRescoreQueryWeight(0.4f);
+                QueryRescorer outerRescoreQuery = RescoreBuilder.queryRescorer(QueryBuilders.matchQuery("field1", "the quick brown").boost(4.0f)).setQueryWeight(0.5f).setRescoreQueryWeight(0.4f);
 
                 if (!"".equals(scoreModes[outerMode])) {
                     outerRescoreQuery.setScoreMode(scoreModes[outerMode]);
                 }
 
-                searchResponse = client()
-                        .prepareSearch()
-                        .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                        .setQuery(QueryBuilders.matchQuery("field1", "the quick brown").operator(MatchQueryBuilder.Operator.OR))
-                        .addRescorer(innerRescoreQuery).setRescoreWindow(5)
-                        .addRescorer(outerRescoreQuery).setRescoreWindow(10)
-                        .setExplain(true).get();
+                searchResponse = client().prepareSearch().setSearchType(SearchType.DFS_QUERY_THEN_FETCH).setQuery(QueryBuilders.matchQuery("field1", "the quick brown").operator(MatchQueryBuilder.Operator.OR)).addRescorer(innerRescoreQuery).setRescoreWindow(5).addRescorer(outerRescoreQuery).setRescoreWindow(10).setExplain(true).get();
                 assertHitCount(searchResponse, 3);
                 assertFirstHit(searchResponse, hasId("1"));
                 assertSecondHit(searchResponse, hasId("2"));
@@ -574,7 +427,7 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
     public void testScoring() throws Exception {
         int numDocs = indexRandomNumbers("keyword");
 
-        String[] scoreModes = new String[]{ "max", "min", "avg", "total", "multiply", "" };
+        String[] scoreModes = new String[] { "max", "min", "avg", "total", "multiply", "" };
         float primaryWeight = 1.1f;
         float secondaryWeight = 1.6f;
 
@@ -582,33 +435,14 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
             for (int i = 0; i < numDocs - 4; i++) {
                 String[] intToEnglish = new String[] { English.intToEnglish(i), English.intToEnglish(i + 1), English.intToEnglish(i + 2), English.intToEnglish(i + 3) };
 
-                QueryRescorer rescoreQuery = RescoreBuilder
-                        .queryRescorer(
-                                QueryBuilders.boolQuery()
-                                        .disableCoord(true)
-                                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", intToEnglish[0])).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("5.0f")))
-                                    .should(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", intToEnglish[1])).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("7.0f")))
-                                    .should(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", intToEnglish[3])).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("0.0f"))))
-                        .setQueryWeight(primaryWeight)
-                        .setRescoreQueryWeight(secondaryWeight);
+                QueryRescorer rescoreQuery = RescoreBuilder.queryRescorer(QueryBuilders.boolQuery().disableCoord(true).should(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", intToEnglish[0])).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("5.0f"))).should(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", intToEnglish[1])).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("7.0f"))).should(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", intToEnglish[3])).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("0.0f")))).setQueryWeight(primaryWeight).setRescoreQueryWeight(secondaryWeight);
 
                 if (!"".equals(scoreMode)) {
                     rescoreQuery.setScoreMode(scoreMode);
                 }
 
-                SearchResponse rescored = client()
-                        .prepareSearch()
-                        .setPreference("test") // ensure we hit the same shards for tie-breaking
-                        .setQuery(QueryBuilders.boolQuery()
-                                .disableCoord(true)
-                                .should(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", intToEnglish[0])).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("2.0f")))
-                                .should(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", intToEnglish[1])).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("3.0f")))
-                                .should(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", intToEnglish[2])).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("5.0f")))
-                                .should(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", intToEnglish[3])).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("0.2f"))))
-                        .setFrom(0)
-                        .setSize(10)
-                        .setRescorer(rescoreQuery)
-                        .setRescoreWindow(50).execute().actionGet();
+                SearchResponse rescored = client().prepareSearch().setPreference("test") // ensure we hit the same shards for tie-breaking
+                                .setQuery(QueryBuilders.boolQuery().disableCoord(true).should(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", intToEnglish[0])).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("2.0f"))).should(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", intToEnglish[1])).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("3.0f"))).should(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", intToEnglish[2])).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("5.0f"))).should(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", intToEnglish[3])).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("0.2f")))).setFrom(0).setSize(10).setRescorer(rescoreQuery).setRescoreWindow(50).execute().actionGet();
 
                 assertHitCount(rescored, 4);
 
@@ -660,12 +494,8 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
     @Test
     public void testMultipleRescores() throws Exception {
         int numDocs = indexRandomNumbers("keyword", 1, true);
-        QueryRescorer eightIsGreat = RescoreBuilder.queryRescorer(
-                QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", English.intToEnglish(8))).boostMode(CombineFunction.REPLACE)
-                .add(ScoreFunctionBuilders.scriptFunction("1000.0f"))).setScoreMode("total");
-        QueryRescorer sevenIsBetter = RescoreBuilder.queryRescorer(
-                QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", English.intToEnglish(7))).boostMode(CombineFunction.REPLACE)
-                .add(ScoreFunctionBuilders.scriptFunction("10000.0f"))).setScoreMode("total");
+        QueryRescorer eightIsGreat = RescoreBuilder.queryRescorer(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", English.intToEnglish(8))).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("1000.0f"))).setScoreMode("total");
+        QueryRescorer sevenIsBetter = RescoreBuilder.queryRescorer(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("field1", English.intToEnglish(7))).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("10000.0f"))).setScoreMode("total");
 
         // First set the rescore window large enough that both rescores take effect
         SearchRequestBuilder request = client().prepareSearch().setRescoreWindow(numDocs);
@@ -680,12 +510,8 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         // We have no idea what the second hit will be because we didn't get a chance to look for seven
 
         // Now use one rescore to drag the number we're looking for into the window of another
-        QueryRescorer ninetyIsGood = RescoreBuilder.queryRescorer(
-                QueryBuilders.functionScoreQuery(QueryBuilders.queryStringQuery("*ninety*")).boostMode(CombineFunction.REPLACE)
-                .add(ScoreFunctionBuilders.scriptFunction("1000.0f"))).setScoreMode("total");
-        QueryRescorer oneToo = RescoreBuilder.queryRescorer(
-                QueryBuilders.functionScoreQuery(QueryBuilders.queryStringQuery("*one*")).boostMode(CombineFunction.REPLACE)
-                .add(ScoreFunctionBuilders.scriptFunction("1000.0f"))).setScoreMode("total");
+        QueryRescorer ninetyIsGood = RescoreBuilder.queryRescorer(QueryBuilders.functionScoreQuery(QueryBuilders.queryStringQuery("*ninety*")).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("1000.0f"))).setScoreMode("total");
+        QueryRescorer oneToo = RescoreBuilder.queryRescorer(QueryBuilders.functionScoreQuery(QueryBuilders.queryStringQuery("*one*")).boostMode(CombineFunction.REPLACE).add(ScoreFunctionBuilders.scriptFunction("1000.0f"))).setScoreMode("total");
         request.clearRescorers().addRescorer(ninetyIsGood).addRescorer(oneToo, 10);
         response = request.setSize(2).get();
         assertFirstHit(response, hasId("91"));
@@ -704,12 +530,7 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
             builder.put(SETTING_NUMBER_OF_SHARDS, shards);
         }
 
-        assertAcked(prepareCreate("test")
-                .addMapping(
-                        "type1",
-                        jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1")
-                                .field("analyzer", analyzer).field("type", "string").endObject().endObject().endObject().endObject())
-                .setSettings(builder));
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("analyzer", analyzer).field("type", "string").endObject().endObject().endObject().endObject()).setSettings(builder));
         int numDocs = randomIntBetween(100, 150);
         IndexRequestBuilder[] docs = new IndexRequestBuilder[numDocs];
         for (int i = 0; i < numDocs; i++) {
@@ -727,8 +548,8 @@ public class QueryRescorerTests extends ElasticsearchIntegrationTest {
         settings.put(SETTING_NUMBER_OF_SHARDS, 1);
         settings.put(SETTING_NUMBER_OF_REPLICAS, 0);
         assertAcked(prepareCreate("test").setSettings(settings));
-        for(int i=0;i<5;i++) {
-            client().prepareIndex("test", "type", ""+i).setSource("text", "hello world").get();
+        for (int i = 0; i < 5; i++) {
+            client().prepareIndex("test", "type", "" + i).setSource("text", "hello world").get();
         }
         refresh();
 

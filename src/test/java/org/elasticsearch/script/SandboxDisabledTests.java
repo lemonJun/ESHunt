@@ -32,23 +32,19 @@ import static org.hamcrest.Matchers.containsString;
  * Test that a system where the sandbox is disabled while dynamic scripting is
  * also disabled does not allow a script to be sent
  */
-@ElasticsearchIntegrationTest.ClusterScope(scope=ElasticsearchIntegrationTest.Scope.SUITE)
+@ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.SUITE)
 public class SandboxDisabledTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal))
-                .put(GroovyScriptEngineService.GROOVY_SCRIPT_SANDBOX_ENABLED, false)
-                .put("script.inline", false).build();
+        return ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put(GroovyScriptEngineService.GROOVY_SCRIPT_SANDBOX_ENABLED, false).put("script.inline", false).build();
     }
 
     @Test
     public void testScriptingDisabledWhileSandboxDisabled() {
         client().prepareIndex("test", "doc", "1").setSource("foo", 5).setRefresh(true).get();
         try {
-            client().prepareSearch("test")
-                    .setSource("{\"query\": {\"match_all\": {}}," +
-                            "\"sort\":{\"_script\": {\"script\": \"doc['foo'].value + 2\", \"type\": \"number\", \"lang\": \"groovy\"}}}").get();
+            client().prepareSearch("test").setSource("{\"query\": {\"match_all\": {}}," + "\"sort\":{\"_script\": {\"script\": \"doc['foo'].value + 2\", \"type\": \"number\", \"lang\": \"groovy\"}}}").get();
             fail("shards should fail because the sandbox and dynamic scripting are disabled");
         } catch (Exception e) {
             assertThat(ExceptionsHelper.detailedMessage(e), containsString("scripts of type [inline], operation [search] and lang [groovy] are disabled"));

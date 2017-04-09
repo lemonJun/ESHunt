@@ -19,7 +19,6 @@
 
 package org.elasticsearch.indices.mapping;
 
-
 import com.google.common.collect.Sets;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -52,18 +51,14 @@ public class ConcurrentDynamicTemplateTests extends ElasticsearchIntegrationTest
     @Test // see #3544
     public void testConcurrentDynamicMapping() throws Exception {
         final String fieldName = "field";
-        final String mapping = "{ \"" + mappingType + "\": {" +
-                "\"dynamic_templates\": ["
-                + "{ \"" + fieldName + "\": {" + "\"path_match\": \"*\"," + "\"mapping\": {" + "\"type\": \"string\"," + "\"store\": \"yes\","
-                + "\"index\": \"analyzed\", \"analyzer\": \"whitespace\" } } } ] } }";
+        final String mapping = "{ \"" + mappingType + "\": {" + "\"dynamic_templates\": [" + "{ \"" + fieldName + "\": {" + "\"path_match\": \"*\"," + "\"mapping\": {" + "\"type\": \"string\"," + "\"store\": \"yes\"," + "\"index\": \"analyzed\", \"analyzer\": \"whitespace\" } } } ] } }";
         // The 'fieldNames' array is used to help with retrieval of index terms
         // after testing
 
         int iters = scaledRandomIntBetween(5, 15);
         for (int i = 0; i < iters; i++) {
             cluster().wipeIndices("test");
-            assertAcked(prepareCreate("test")
-                    .addMapping(mappingType, mapping));
+            assertAcked(prepareCreate("test").addMapping(mappingType, mapping));
             ensureYellow();
             int numDocs = scaledRandomIntBetween(10, 100);
             final CountDownLatch latch = new CountDownLatch(numDocs);
@@ -106,12 +101,7 @@ public class ConcurrentDynamicTemplateTests extends ElasticsearchIntegrationTest
         for (int i = 0; i < numDocs; ++i) {
             int fieldIdx = i % numberOfFields;
             fieldsIdx.add(fieldIdx);
-            builders[i] = client().prepareIndex("idx", "type").setSource(jsonBuilder()
-                    .startObject()
-                    .field("str_value_" + fieldIdx, "s" + i)
-                    .field("l_value_" + fieldIdx, i)
-                    .field("d_value_" + fieldIdx, (double)i + 0.01)
-                    .endObject());
+            builders[i] = client().prepareIndex("idx", "type").setSource(jsonBuilder().startObject().field("str_value_" + fieldIdx, "s" + i).field("l_value_" + fieldIdx, i).field("d_value_" + fieldIdx, (double) i + 0.01).endObject());
         }
         indexRandom(false, builders);
         for (Integer fieldIdx : fieldsIdx) {

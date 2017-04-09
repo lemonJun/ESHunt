@@ -36,10 +36,10 @@ import java.util.Map;
 public class ScriptValuesTests extends ElasticsearchTestCase {
 
     private static class FakeSearchScript implements SearchScript {
-        
+
         private final Object[][] values;
         int index;
-        
+
         FakeSearchScript(Object[][] values) {
             this.values = values;
             index = -1;

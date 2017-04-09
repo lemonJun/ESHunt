@@ -39,7 +39,6 @@ public class SlowClusterStateProcessing extends SingleNodeDisruption {
     final long delayDurationMin;
     final long delayDurationMax;
 
-
     public SlowClusterStateProcessing(Random random) {
         this(null, random);
     }
@@ -48,22 +47,18 @@ public class SlowClusterStateProcessing extends SingleNodeDisruption {
         this(disruptedNode, random, 100, 200, 300, 20000);
     }
 
-    public SlowClusterStateProcessing(String disruptedNode, Random random, long intervalBetweenDelaysMin,
-                                      long intervalBetweenDelaysMax, long delayDurationMin, long delayDurationMax) {
+    public SlowClusterStateProcessing(String disruptedNode, Random random, long intervalBetweenDelaysMin, long intervalBetweenDelaysMax, long delayDurationMin, long delayDurationMax) {
         this(random, intervalBetweenDelaysMin, intervalBetweenDelaysMax, delayDurationMin, delayDurationMax);
         this.disruptedNode = disruptedNode;
     }
 
-    public SlowClusterStateProcessing(Random random,
-                                      long intervalBetweenDelaysMin, long intervalBetweenDelaysMax, long delayDurationMin,
-                                      long delayDurationMax) {
+    public SlowClusterStateProcessing(Random random, long intervalBetweenDelaysMin, long intervalBetweenDelaysMax, long delayDurationMin, long delayDurationMax) {
         super(random);
         this.intervalBetweenDelaysMin = intervalBetweenDelaysMin;
         this.intervalBetweenDelaysMax = intervalBetweenDelaysMax;
         this.delayDurationMin = delayDurationMin;
         this.delayDurationMax = delayDurationMax;
     }
-
 
     @Override
     public void startDisrupting() {
@@ -88,7 +83,6 @@ public class SlowClusterStateProcessing extends SingleNodeDisruption {
         }
         worker = null;
     }
-
 
     private boolean interruptClusterStateProcessing(final TimeValue duration) throws InterruptedException {
         final String disruptionNodeCopy = disruptedNode;

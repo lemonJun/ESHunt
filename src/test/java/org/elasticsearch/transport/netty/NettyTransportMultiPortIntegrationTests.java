@@ -47,26 +47,14 @@ public class NettyTransportMultiPortIntegrationTests extends ElasticsearchIntegr
     protected Settings nodeSettings(int nodeOrdinal) {
         if (randomPort == -1) {
             randomPort = randomIntBetween(49152, 65525);
-            randomPortRange = String.format(Locale.ROOT, "%s-%s", randomPort, randomPort+10);
+            randomPortRange = String.format(Locale.ROOT, "%s-%s", randomPort, randomPort + 10);
         }
-        return settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("network.host", "127.0.0.1")
-                .put(TransportModule.TRANSPORT_TYPE_KEY, NettyTransport.class.getName())
-                .put("node.mode", "network")
-                .put("transport.profiles.client1.port", randomPortRange)
-                .put("transport.profiles.client1.publish_host", "127.0.0.7")
-                .put("transport.profiles.client1.publish_port", "4321")
-                .put("transport.profiles.client1.reuse_address", true)
-                .build();
+        return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("network.host", "127.0.0.1").put(TransportModule.TRANSPORT_TYPE_KEY, NettyTransport.class.getName()).put("node.mode", "network").put("transport.profiles.client1.port", randomPortRange).put("transport.profiles.client1.publish_host", "127.0.0.7").put("transport.profiles.client1.publish_port", "4321").put("transport.profiles.client1.reuse_address", true).build();
     }
 
     @Test
     public void testThatTransportClientCanConnect() throws Exception {
-        Settings settings = settingsBuilder()
-                .put("cluster.name", internalCluster().getClusterName())
-                .put(TransportModule.TRANSPORT_TYPE_KEY, NettyTransport.class.getName())
-                .build();
+        Settings settings = settingsBuilder().put("cluster.name", internalCluster().getClusterName()).put(TransportModule.TRANSPORT_TYPE_KEY, NettyTransport.class.getName()).build();
         try (TransportClient transportClient = new TransportClient(settings, false)) {
             transportClient.addTransportAddress(new InetSocketTransportAddress("127.0.0.1", randomPort));
             ClusterHealthResponse response = transportClient.admin().cluster().prepareHealth().get();

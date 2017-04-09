@@ -42,11 +42,11 @@ public class SearchSourceBuilderTest extends ElasticsearchTestCase {
         assertIncludes(builder);
         assertExcludes(builder, "foo");
 
-        builder.fetchSource(null, new String[]{"foo"});
+        builder.fetchSource(null, new String[] { "foo" });
         assertIncludes(builder);
         assertExcludes(builder, "foo");
 
-        builder.fetchSource(new String[]{"foo"}, null);
+        builder.fetchSource(new String[] { "foo" }, null);
         assertIncludes(builder, "foo");
         assertExcludes(builder);
 
@@ -54,7 +54,7 @@ public class SearchSourceBuilderTest extends ElasticsearchTestCase {
         assertIncludes(builder, "foo");
         assertExcludes(builder, "bar");
 
-        builder.fetchSource(new String[]{"foo"}, new String[]{"bar", "baz"});
+        builder.fetchSource(new String[] { "foo" }, new String[] { "bar", "baz" });
         assertIncludes(builder, "foo");
         assertExcludes(builder, "bar", "baz");
     }

@@ -17,6 +17,7 @@
  * under the License.
  */
 package org.elasticsearch.gateway.local.state.meta;
+
 import com.carrotsearch.randomizedtesting.LifecycleScope;
 import com.google.common.collect.Iterators;
 
@@ -71,8 +72,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 
 public class MetaDataStateFormatTest extends ElasticsearchTestCase {
-    
-    private Path newTempDirPath(){
+
+    private Path newTempDirPath() {
         return newTempDir(LifecycleScope.TEST).toPath();
     }
 
@@ -111,7 +112,7 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
         final long id = addDummyFiles("foo-", dirs);
         Format format = new Format(randomFrom(XContentType.values()), "foo-");
         DummyState state = new DummyState(randomRealisticUnicodeOfCodepointLengthBetween(1, 1000), randomInt(), randomLong(), randomDouble(), randomBoolean());
-        int version = between(0, Integer.MAX_VALUE/2);
+        int version = between(0, Integer.MAX_VALUE / 2);
         format.write(state, version, toFiles(dirs));
         for (Path file : dirs) {
             Path[] list = content("*", file);
@@ -136,8 +137,8 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
             Path stateDir = list[0];
             assertThat(Files.isDirectory(stateDir), is(true));
             list = content("foo-*", stateDir);
-            assertEquals(list.length,1);
-            assertThat(list[0].getFileName().toString(), equalTo("foo-"+ (id+1) + ".st"));
+            assertEquals(list.length, 1);
+            assertThat(list[0].getFileName().toString(), equalTo("foo-" + (id + 1) + ".st"));
             DummyState read = format.read(list[0].toFile());
             assertThat(read, equalTo(state2));
 
@@ -154,7 +155,7 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
 
         Format format = new Format(randomFrom(XContentType.values()), "foo-");
         DummyState state = new DummyState(randomRealisticUnicodeOfCodepointLengthBetween(1, 1000), randomInt(), randomLong(), randomDouble(), randomBoolean());
-        int version = between(0, Integer.MAX_VALUE/2);
+        int version = between(0, Integer.MAX_VALUE / 2);
         format.write(state, version, toFiles(dirs));
         for (Path file : dirs) {
             Path[] list = content("*", file);
@@ -178,7 +179,7 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
         final long id = addDummyFiles("foo-", dirs);
         Format format = new Format(randomFrom(XContentType.values()), "foo-");
         DummyState state = new DummyState(randomRealisticUnicodeOfCodepointLengthBetween(1, 1000), randomInt(), randomLong(), randomDouble(), randomBoolean());
-        int version = between(0, Integer.MAX_VALUE/2);
+        int version = between(0, Integer.MAX_VALUE / 2);
         format.write(state, version, toFiles(dirs));
         for (Path file : dirs) {
             Path[] list = content("*", file);
@@ -210,7 +211,7 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
                 checksumBeforeCorruption = CodecUtil.retrieveChecksum(input);
             }
             try (FileChannel raf = FileChannel.open(fileToCorrupt, StandardOpenOption.READ, StandardOpenOption.WRITE)) {
-                raf.position(randomIntBetween(0, (int)Math.min(Integer.MAX_VALUE, raf.size()-1)));
+                raf.position(randomIntBetween(0, (int) Math.min(Integer.MAX_VALUE, raf.size() - 1)));
                 long filePointer = raf.position();
                 ByteBuffer bb = ByteBuffer.wrap(new byte[1]);
                 raf.read(bb);
@@ -236,8 +237,7 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
             msg.append(" checksum value after corruption: ").append(actualChecksumAfterCorruption).append("]");
             msg.append(" file: ").append(fileToCorrupt.getFileName().toString()).append(" length: ").append(dir.fileLength(fileToCorrupt.getFileName().toString()));
             logger.debug(msg.toString());
-            assumeTrue("Checksum collision - " + msg.toString(),
-                    checksumAfterCorruption != checksumBeforeCorruption // collision
+            assumeTrue("Checksum collision - " + msg.toString(), checksumAfterCorruption != checksumBeforeCorruption // collision
                             || actualChecksumAfterCorruption != checksumBeforeCorruption); // checksum corrupted
         }
     }
@@ -317,7 +317,7 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
 
         MetaData state = format.loadLatestState(logger, toFiles(dirs));
         final Path path = randomFrom(dirs);
-        assertTrue(Files.exists(path.resolve(MetaDataStateFormat.STATE_DIR_NAME).resolve("global-" + (v+1) + ".st")));
+        assertTrue(Files.exists(path.resolve(MetaDataStateFormat.STATE_DIR_NAME).resolve("global-" + (v + 1) + ".st")));
         assertEquals(state.uuid(), uuid);
     }
 
@@ -339,7 +339,7 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
             for (int j = 0; j < numLegacy; j++) {
                 XContentType type = format.format();
                 if (randomBoolean() && (j < numStates - 1 || dirs.length > 0 && i != 0)) {
-                    Path file = dirs[i].resolve(MetaDataStateFormat.STATE_DIR_NAME).resolve("global-"+j);
+                    Path file = dirs[i].resolve(MetaDataStateFormat.STATE_DIR_NAME).resolve("global-" + j);
                     Files.createFile(file); // randomly create 0-byte files -- there is extra logic to skip them
                 } else {
                     try (XContentBuilder xcontentBuilder = XContentFactory.contentBuilder(type, Files.newOutputStream(dirs[i].resolve(MetaDataStateFormat.STATE_DIR_NAME).resolve("global-" + j)))) {
@@ -351,7 +351,7 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
             }
             for (int j = numLegacy; j < numStates; j++) {
                 format.write(meta.get(j), j, dirs[i].toFile());
-                if (randomBoolean() && (j < numStates - 1 || dirs.length > 0 && i != 0)) {  // corrupt a file that we do not necessarily need here....
+                if (randomBoolean() && (j < numStates - 1 || dirs.length > 0 && i != 0)) { // corrupt a file that we do not necessarily need here....
                     Path file = dirs[i].resolve(MetaDataStateFormat.STATE_DIR_NAME).resolve("global-" + j + ".st");
                     corruptedFiles.add(file);
                     MetaDataStateFormatTest.corruptFile(file, logger);
@@ -362,10 +362,10 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
         List<Path> dirList = Arrays.asList(dirs);
         Collections.shuffle(dirList, getRandom());
         MetaData loadedMetaData = format.loadLatestState(logger, toFiles(dirList.toArray(new Path[0])));
-        MetaData latestMetaData = meta.get(numStates-1);
+        MetaData latestMetaData = meta.get(numStates - 1);
         assertThat(loadedMetaData.uuid(), not(equalTo("_na_")));
         assertThat(loadedMetaData.uuid(), equalTo(latestMetaData.uuid()));
-        ImmutableOpenMap<String,IndexMetaData> indices = loadedMetaData.indices();
+        ImmutableOpenMap<String, IndexMetaData> indices = loadedMetaData.indices();
         assertThat(indices.size(), equalTo(latestMetaData.indices().size()));
         for (IndexMetaData original : latestMetaData) {
             IndexMetaData deserialized = indices.get(original.getIndex());
@@ -378,7 +378,7 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
         // now corrupt all the latest ones and make sure we fail to load the state
         if (numStates > numLegacy) {
             for (int i = 0; i < dirs.length; i++) {
-                Path file = dirs[i].resolve(MetaDataStateFormat.STATE_DIR_NAME).resolve("global-" + (numStates-1) + ".st");
+                Path file = dirs[i].resolve(MetaDataStateFormat.STATE_DIR_NAME).resolve("global-" + (numStates - 1) + ".st");
                 if (corruptedFiles.contains(file)) {
                     continue;
                 }
@@ -399,16 +399,14 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
         MetaData.Builder mdBuilder = MetaData.builder();
         mdBuilder.generateUuidIfNeeded();
         for (int i = 0; i < numIndices; i++) {
-            mdBuilder.put(indexBuilder(randomAsciiOfLength(10) + "idx-"+i));
+            mdBuilder.put(indexBuilder(randomAsciiOfLength(10) + "idx-" + i));
         }
         return mdBuilder.build();
     }
 
     private IndexMetaData.Builder indexBuilder(String index) throws IOException {
-        return IndexMetaData.builder(index)
-                .settings(ImmutableSettings.settingsBuilder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, randomIntBetween(1, 10)).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, randomIntBetween(0, 5)));
+        return IndexMetaData.builder(index).settings(ImmutableSettings.settingsBuilder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, randomIntBetween(1, 10)).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, randomIntBetween(0, 5)));
     }
-
 
     private class Format extends MetaDataStateFormat<DummyState> {
 
@@ -428,7 +426,7 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
 
         @Override
         protected Directory newDirectory(File dir) throws IOException {
-            MockDirectoryWrapper  mock = new MockDirectoryWrapper(getRandom(), super.newDirectory(dir));
+            MockDirectoryWrapper mock = new MockDirectoryWrapper(getRandom(), super.newDirectory(dir));
             closeAfterSuite(new CloseableDirectory(mock, suiteFailureMarker));
             return mock;
         }
@@ -443,13 +441,7 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
 
         @Override
         public String toString() {
-            return "DummyState{" +
-                    "string='" + string + '\'' +
-                    ", aInt=" + aInt +
-                    ", aLong=" + aLong +
-                    ", aDouble=" + aDouble +
-                    ", aBoolean=" + aBoolean +
-                    '}';
+            return "DummyState{" + "string='" + string + '\'' + ", aInt=" + aInt + ", aLong=" + aLong + ", aDouble=" + aDouble + ", aBoolean=" + aBoolean + '}';
         }
 
         public DummyState(String string, int aInt, long aLong, double aDouble, boolean aBoolean) {
@@ -476,15 +468,21 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
 
             DummyState that = (DummyState) o;
 
-            if (aBoolean != that.aBoolean) return false;
-            if (Double.compare(that.aDouble, aDouble) != 0) return false;
-            if (aInt != that.aInt) return false;
-            if (aLong != that.aLong) return false;
+            if (aBoolean != that.aBoolean)
+                return false;
+            if (Double.compare(that.aDouble, aDouble) != 0)
+                return false;
+            if (aInt != that.aInt)
+                return false;
+            if (aLong != that.aLong)
+                return false;
             return string.equals(that.string);
 
         }
@@ -504,8 +502,8 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
 
         public DummyState parse(XContentParser parser) throws IOException {
             String fieldName = null;
-            parser.nextToken();  // start object
-            while(parser.nextToken() != XContentParser.Token.END_OBJECT) {
+            parser.nextToken(); // start object
+            while (parser.nextToken() != XContentParser.Token.END_OBJECT) {
                 XContentParser.Token token = parser.currentToken();
                 if (token == XContentParser.Token.FIELD_NAME) {
                     fieldName = parser.currentName();
@@ -527,7 +525,7 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
                             fail("unexpected numeric value " + token);
                             break;
                     }
-                }else if (token == XContentParser.Token.VALUE_BOOLEAN) {
+                } else if (token == XContentParser.Token.VALUE_BOOLEAN) {
                     assertTrue("boolean".equals(fieldName));
                     aBoolean = parser.booleanValue();
                 } else {
@@ -543,8 +541,7 @@ public class MetaDataStateFormatTest extends ElasticsearchTestCase {
         private final BaseDirectoryWrapper dir;
         private final TestRuleMarkFailure failureMarker;
 
-        public CloseableDirectory(BaseDirectoryWrapper dir,
-                                  TestRuleMarkFailure failureMarker) {
+        public CloseableDirectory(BaseDirectoryWrapper dir, TestRuleMarkFailure failureMarker) {
             this.dir = dir;
             this.failureMarker = failureMarker;
         }

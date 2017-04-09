@@ -141,18 +141,13 @@ public class MultiFieldTests extends ElasticsearchSingleNodeTest {
         Settings settings = indexService.settingsService().getSettings();
         DocumentMapperParser mapperParser = indexService.mapperService().documentMapperParser();
 
-        DocumentMapper builderDocMapper = doc("test", settings, rootObject("person").add(
-                stringField("name").store(true)
-                        .addMultiField(stringField("indexed").index(true).tokenized(true))
-                        .addMultiField(stringField("not_indexed").index(false).store(true))
-        )).build(mapperParser);
+        DocumentMapper builderDocMapper = doc("test", settings, rootObject("person").add(stringField("name").store(true).addMultiField(stringField("indexed").index(true).tokenized(true)).addMultiField(stringField("not_indexed").index(false).store(true)))).build(mapperParser);
         builderDocMapper.refreshSource();
 
         String builtMapping = builderDocMapper.mappingSource().string();
-//        System.out.println(builtMapping);
+        //        System.out.println(builtMapping);
         // reparse it
         DocumentMapper docMapper = mapperParser.parse(builtMapping);
-
 
         BytesReference json = new BytesArray(copyToBytesFromClasspath("/org/elasticsearch/index/mapper/multifield/test-data.json"));
         Document doc = docMapper.parse(json).rootDoc();
@@ -264,10 +259,7 @@ public class MultiFieldTests extends ElasticsearchSingleNodeTest {
         assertThat(docMapper.mappers().fullName("a.b").mapper().fieldType().stored(), equalTo(false));
         assertThat(docMapper.mappers().fullName("a.b").mapper().fieldType().tokenized(), equalTo(false));
 
-        BytesReference json = jsonBuilder().startObject()
-                .field("_id", "1")
-                .field("a", "-1,-1")
-                .endObject().bytes();
+        BytesReference json = jsonBuilder().startObject().field("_id", "1").field("a", "-1,-1").endObject().bytes();
         Document doc = docMapper.parse(json).rootDoc();
 
         IndexableField f = doc.getField("a");
@@ -296,10 +288,7 @@ public class MultiFieldTests extends ElasticsearchSingleNodeTest {
         assertThat(docMapper.mappers().fullName("b.a").mapper().fieldType().stored(), equalTo(false));
         assertThat(docMapper.mappers().fullName("b.a").mapper().fieldType().tokenized(), equalTo(false));
 
-        json = jsonBuilder().startObject()
-                .field("_id", "1")
-                .field("b", "-1,-1")
-                .endObject().bytes();
+        json = jsonBuilder().startObject().field("_id", "1").field("b", "-1,-1").endObject().bytes();
         doc = docMapper.parse(json).rootDoc();
 
         f = doc.getField("b");
@@ -316,10 +305,7 @@ public class MultiFieldTests extends ElasticsearchSingleNodeTest {
         assertThat(f.fieldType().stored(), equalTo(false));
         assertThat(f.fieldType().indexed(), equalTo(true));
 
-        json = jsonBuilder().startObject()
-                .field("_id", "1")
-                .startArray("b").startArray().value(-1).value(-1).endArray().startArray().value(-2).value(-2).endArray().endArray()
-                .endObject().bytes();
+        json = jsonBuilder().startObject().field("_id", "1").startArray("b").startArray().value(-1).value(-1).endArray().startArray().value(-2).value(-2).endArray().endArray().endObject().bytes();
         doc = docMapper.parse(json).rootDoc();
 
         f = doc.getFields("b")[0];
@@ -364,10 +350,7 @@ public class MultiFieldTests extends ElasticsearchSingleNodeTest {
         assertThat(docMapper.mappers().fullName("a.b").mapper().fieldType().stored(), equalTo(false));
         assertThat(docMapper.mappers().fullName("a.b").mapper().fieldType().tokenized(), equalTo(true));
 
-        BytesReference json = jsonBuilder().startObject()
-                .field("_id", "1")
-                .field("a", "complete me")
-                .endObject().bytes();
+        BytesReference json = jsonBuilder().startObject().field("_id", "1").field("a", "complete me").endObject().bytes();
         Document doc = docMapper.parse(json).rootDoc();
 
         IndexableField f = doc.getField("a");
@@ -396,10 +379,7 @@ public class MultiFieldTests extends ElasticsearchSingleNodeTest {
         assertThat(docMapper.mappers().fullName("b.a").mapper().fieldType().stored(), equalTo(false));
         assertThat(docMapper.mappers().fullName("b.a").mapper().fieldType().tokenized(), equalTo(false));
 
-        json = jsonBuilder().startObject()
-                .field("_id", "1")
-                .field("b", "complete me")
-                .endObject().bytes();
+        json = jsonBuilder().startObject().field("_id", "1").field("b", "complete me").endObject().bytes();
         doc = docMapper.parse(json).rootDoc();
 
         f = doc.getField("b");
@@ -426,8 +406,7 @@ public class MultiFieldTests extends ElasticsearchSingleNodeTest {
             multiFieldNames[i] = randomAsciiOfLength(4);
         }
 
-        XContentBuilder builder = jsonBuilder().startObject().startObject("type").startObject("properties")
-                .startObject("my_field").field("type", "string").startObject("fields");
+        XContentBuilder builder = jsonBuilder().startObject().startObject("type").startObject("properties").startObject("my_field").field("type", "string").startObject("fields");
         for (String multiFieldName : multiFieldNames) {
             builder = builder.startObject(multiFieldName).field("type", "string").endObject();
         }
@@ -465,10 +444,8 @@ public class MultiFieldTests extends ElasticsearchSingleNodeTest {
         possibleSettings.put("aSetting", "aValue");
 
         // Generate a mapping with the a random subset of possible fielddata settings
-        XContentBuilder builder = jsonBuilder().startObject().startObject("type").startObject("properties")
-                .startObject("my_field").field("type", "string").startObject("fields").startObject(MY_MULTI_FIELD)
-                .field("type", "string").startObject("fielddata");
-        String[] keys = possibleSettings.keySet().toArray(new String[]{});
+        XContentBuilder builder = jsonBuilder().startObject().startObject("type").startObject("properties").startObject("my_field").field("type", "string").startObject("fields").startObject(MY_MULTI_FIELD).field("type", "string").startObject("fielddata");
+        String[] keys = possibleSettings.keySet().toArray(new String[] {});
         Collections.shuffle(Arrays.asList(keys));
         for (int i = randomIntBetween(0, possibleSettings.size() - 1); i >= 0; --i)
             builder.field(keys[i], possibleSettings.get(keys[i]));

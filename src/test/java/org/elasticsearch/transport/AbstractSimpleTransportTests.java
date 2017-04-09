@@ -66,16 +66,10 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
     public void setUp() throws Exception {
         super.setUp();
         threadPool = new ThreadPool(getClass().getName());
-        serviceA = build(
-                ImmutableSettings.builder().put("name", "TS_A", TransportService.SETTING_TRACE_LOG_INCLUDE, "", TransportService.SETTING_TRACE_LOG_EXCLUDE, "NOTHING").build(),
-                version0
-        );
-        nodeA = new DiscoveryNode("TS_A", "TS_A", serviceA.boundAddress().publishAddress(), ImmutableMap.<String, String>of(), version0);
-        serviceB = build(
-                ImmutableSettings.builder().put("name", "TS_B", TransportService.SETTING_TRACE_LOG_INCLUDE, "", TransportService.SETTING_TRACE_LOG_EXCLUDE, "NOTHING").build(),
-                version1
-        );
-        nodeB = new DiscoveryNode("TS_B", "TS_B", serviceB.boundAddress().publishAddress(), ImmutableMap.<String, String>of(), version1);
+        serviceA = build(ImmutableSettings.builder().put("name", "TS_A", TransportService.SETTING_TRACE_LOG_INCLUDE, "", TransportService.SETTING_TRACE_LOG_EXCLUDE, "NOTHING").build(), version0);
+        nodeA = new DiscoveryNode("TS_A", "TS_A", serviceA.boundAddress().publishAddress(), ImmutableMap.<String, String> of(), version0);
+        serviceB = build(ImmutableSettings.builder().put("name", "TS_B", TransportService.SETTING_TRACE_LOG_INCLUDE, "", TransportService.SETTING_TRACE_LOG_EXCLUDE, "NOTHING").build(), version1);
+        nodeB = new DiscoveryNode("TS_B", "TS_B", serviceB.boundAddress().publishAddress(), ImmutableMap.<String, String> of(), version1);
 
         // wait till all nodes are properly connected and the event has been sent, so tests in this class
         // will not get this callback called on the connections done in this setup
@@ -137,29 +131,28 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
             }
         });
 
-        TransportFuture<StringMessageResponse> res = serviceB.submitRequest(nodeA, "sayHello",
-                new StringMessageRequest("moshe"), new BaseTransportResponseHandler<StringMessageResponse>() {
-                    @Override
-                    public StringMessageResponse newInstance() {
-                        return new StringMessageResponse();
-                    }
+        TransportFuture<StringMessageResponse> res = serviceB.submitRequest(nodeA, "sayHello", new StringMessageRequest("moshe"), new BaseTransportResponseHandler<StringMessageResponse>() {
+            @Override
+            public StringMessageResponse newInstance() {
+                return new StringMessageResponse();
+            }
 
-                    @Override
-                    public String executor() {
-                        return ThreadPool.Names.GENERIC;
-                    }
+            @Override
+            public String executor() {
+                return ThreadPool.Names.GENERIC;
+            }
 
-                    @Override
-                    public void handleResponse(StringMessageResponse response) {
-                        assertThat("hello moshe", equalTo(response.message));
-                    }
+            @Override
+            public void handleResponse(StringMessageResponse response) {
+                assertThat("hello moshe", equalTo(response.message));
+            }
 
-                    @Override
-                    public void handleException(TransportException exp) {
-                        exp.printStackTrace();
-                        assertThat("got exception instead of a response: " + exp.getMessage(), false, equalTo(true));
-                    }
-                });
+            @Override
+            public void handleException(TransportException exp) {
+                exp.printStackTrace();
+                assertThat("got exception instead of a response: " + exp.getMessage(), false, equalTo(true));
+            }
+        });
 
         try {
             StringMessageResponse message = res.get();
@@ -168,29 +161,28 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
             assertThat(e.getMessage(), false, equalTo(true));
         }
 
-        res = serviceB.submitRequest(nodeA, "sayHello",
-                new StringMessageRequest("moshe"), TransportRequestOptions.options().withCompress(true), new BaseTransportResponseHandler<StringMessageResponse>() {
-                    @Override
-                    public StringMessageResponse newInstance() {
-                        return new StringMessageResponse();
-                    }
+        res = serviceB.submitRequest(nodeA, "sayHello", new StringMessageRequest("moshe"), TransportRequestOptions.options().withCompress(true), new BaseTransportResponseHandler<StringMessageResponse>() {
+            @Override
+            public StringMessageResponse newInstance() {
+                return new StringMessageResponse();
+            }
 
-                    @Override
-                    public String executor() {
-                        return ThreadPool.Names.GENERIC;
-                    }
+            @Override
+            public String executor() {
+                return ThreadPool.Names.GENERIC;
+            }
 
-                    @Override
-                    public void handleResponse(StringMessageResponse response) {
-                        assertThat("hello moshe", equalTo(response.message));
-                    }
+            @Override
+            public void handleResponse(StringMessageResponse response) {
+                assertThat("hello moshe", equalTo(response.message));
+            }
 
-                    @Override
-                    public void handleException(TransportException exp) {
-                        exp.printStackTrace();
-                        assertThat("got exception instead of a response: " + exp.getMessage(), false, equalTo(true));
-                    }
-                });
+            @Override
+            public void handleException(TransportException exp) {
+                exp.printStackTrace();
+                assertThat("got exception instead of a response: " + exp.getMessage(), false, equalTo(true));
+            }
+        });
 
         try {
             StringMessageResponse message = res.get();
@@ -226,28 +218,27 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
             }
         });
 
-        TransportFuture<TransportResponse.Empty> res = serviceB.submitRequest(nodeA, "sayHello",
-                TransportRequest.Empty.INSTANCE, TransportRequestOptions.options().withCompress(true), new BaseTransportResponseHandler<TransportResponse.Empty>() {
-                    @Override
-                    public TransportResponse.Empty newInstance() {
-                        return TransportResponse.Empty.INSTANCE;
-                    }
+        TransportFuture<TransportResponse.Empty> res = serviceB.submitRequest(nodeA, "sayHello", TransportRequest.Empty.INSTANCE, TransportRequestOptions.options().withCompress(true), new BaseTransportResponseHandler<TransportResponse.Empty>() {
+            @Override
+            public TransportResponse.Empty newInstance() {
+                return TransportResponse.Empty.INSTANCE;
+            }
 
-                    @Override
-                    public String executor() {
-                        return ThreadPool.Names.GENERIC;
-                    }
+            @Override
+            public String executor() {
+                return ThreadPool.Names.GENERIC;
+            }
 
-                    @Override
-                    public void handleResponse(TransportResponse.Empty response) {
-                    }
+            @Override
+            public void handleResponse(TransportResponse.Empty response) {
+            }
 
-                    @Override
-                    public void handleException(TransportException exp) {
-                        exp.printStackTrace();
-                        assertThat("got exception instead of a response: " + exp.getMessage(), false, equalTo(true));
-                    }
-                });
+            @Override
+            public void handleException(TransportException exp) {
+                exp.printStackTrace();
+                assertThat("got exception instead of a response: " + exp.getMessage(), false, equalTo(true));
+            }
+        });
 
         try {
             TransportResponse.Empty message = res.get();
@@ -284,29 +275,28 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
             }
         });
 
-        TransportFuture<StringMessageResponse> res = serviceB.submitRequest(nodeA, "sayHello",
-                new StringMessageRequest("moshe"), TransportRequestOptions.options().withCompress(true), new BaseTransportResponseHandler<StringMessageResponse>() {
-                    @Override
-                    public StringMessageResponse newInstance() {
-                        return new StringMessageResponse();
-                    }
+        TransportFuture<StringMessageResponse> res = serviceB.submitRequest(nodeA, "sayHello", new StringMessageRequest("moshe"), TransportRequestOptions.options().withCompress(true), new BaseTransportResponseHandler<StringMessageResponse>() {
+            @Override
+            public StringMessageResponse newInstance() {
+                return new StringMessageResponse();
+            }
 
-                    @Override
-                    public String executor() {
-                        return ThreadPool.Names.GENERIC;
-                    }
+            @Override
+            public String executor() {
+                return ThreadPool.Names.GENERIC;
+            }
 
-                    @Override
-                    public void handleResponse(StringMessageResponse response) {
-                        assertThat("hello moshe", equalTo(response.message));
-                    }
+            @Override
+            public void handleResponse(StringMessageResponse response) {
+                assertThat("hello moshe", equalTo(response.message));
+            }
 
-                    @Override
-                    public void handleException(TransportException exp) {
-                        exp.printStackTrace();
-                        assertThat("got exception instead of a response: " + exp.getMessage(), false, equalTo(true));
-                    }
-                });
+            @Override
+            public void handleException(TransportException exp) {
+                exp.printStackTrace();
+                assertThat("got exception instead of a response: " + exp.getMessage(), false, equalTo(true));
+            }
+        });
 
         try {
             StringMessageResponse message = res.get();
@@ -338,28 +328,27 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
             }
         });
 
-        TransportFuture<StringMessageResponse> res = serviceB.submitRequest(nodeA, "sayHelloException",
-                new StringMessageRequest("moshe"), new BaseTransportResponseHandler<StringMessageResponse>() {
-                    @Override
-                    public StringMessageResponse newInstance() {
-                        return new StringMessageResponse();
-                    }
+        TransportFuture<StringMessageResponse> res = serviceB.submitRequest(nodeA, "sayHelloException", new StringMessageRequest("moshe"), new BaseTransportResponseHandler<StringMessageResponse>() {
+            @Override
+            public StringMessageResponse newInstance() {
+                return new StringMessageResponse();
+            }
 
-                    @Override
-                    public String executor() {
-                        return ThreadPool.Names.GENERIC;
-                    }
+            @Override
+            public String executor() {
+                return ThreadPool.Names.GENERIC;
+            }
 
-                    @Override
-                    public void handleResponse(StringMessageResponse response) {
-                        fail("got response instead of exception");
-                    }
+            @Override
+            public void handleResponse(StringMessageResponse response) {
+                fail("got response instead of exception");
+            }
 
-                    @Override
-                    public void handleException(TransportException exp) {
-                        assertThat("bad message !!!", equalTo(exp.getCause().getMessage()));
-                    }
-                });
+            @Override
+            public void handleException(TransportException exp) {
+                assertThat("bad message !!!", equalTo(exp.getCause().getMessage()));
+            }
+        });
 
         try {
             res.txGet();
@@ -417,8 +406,7 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
                 }
             }
         });
-        TransportFuture<TransportResponse.Empty> foobar = serviceB.submitRequest(nodeA, "foobar",
-                new StringMessageRequest(""), options(), EmptyTransportResponseHandler.INSTANCE_SAME);
+        TransportFuture<TransportResponse.Empty> foobar = serviceB.submitRequest(nodeA, "foobar", new StringMessageRequest(""), options(), EmptyTransportResponseHandler.INSTANCE_SAME);
         latch2.countDown();
         try {
             foobar.txGet();
@@ -446,37 +434,36 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
             public void messageReceived(StringMessageRequest request, TransportChannel channel) {
                 assertThat("moshe", equalTo(request.message));
                 // don't send back a response
-//                try {
-//                    channel.sendResponse(new StringMessage("hello " + request.message));
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                    assertThat(e.getMessage(), false, equalTo(true));
-//                }
+                //                try {
+                //                    channel.sendResponse(new StringMessage("hello " + request.message));
+                //                } catch (IOException e) {
+                //                    e.printStackTrace();
+                //                    assertThat(e.getMessage(), false, equalTo(true));
+                //                }
             }
         });
 
-        TransportFuture<StringMessageResponse> res = serviceB.submitRequest(nodeA, "sayHelloTimeoutNoResponse",
-                new StringMessageRequest("moshe"), options().withTimeout(100), new BaseTransportResponseHandler<StringMessageResponse>() {
-                    @Override
-                    public StringMessageResponse newInstance() {
-                        return new StringMessageResponse();
-                    }
+        TransportFuture<StringMessageResponse> res = serviceB.submitRequest(nodeA, "sayHelloTimeoutNoResponse", new StringMessageRequest("moshe"), options().withTimeout(100), new BaseTransportResponseHandler<StringMessageResponse>() {
+            @Override
+            public StringMessageResponse newInstance() {
+                return new StringMessageResponse();
+            }
 
-                    @Override
-                    public String executor() {
-                        return ThreadPool.Names.GENERIC;
-                    }
+            @Override
+            public String executor() {
+                return ThreadPool.Names.GENERIC;
+            }
 
-                    @Override
-                    public void handleResponse(StringMessageResponse response) {
-                        fail("got response instead of exception");
-                    }
+            @Override
+            public void handleResponse(StringMessageResponse response) {
+                fail("got response instead of exception");
+            }
 
-                    @Override
-                    public void handleException(TransportException exp) {
-                        assertThat(exp, instanceOf(ReceiveTimeoutTransportException.class));
-                    }
-                });
+            @Override
+            public void handleException(TransportException exp) {
+                assertThat(exp, instanceOf(ReceiveTimeoutTransportException.class));
+            }
+        });
 
         try {
             StringMessageResponse message = res.txGet();
@@ -518,30 +505,29 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
             }
         });
         final CountDownLatch latch = new CountDownLatch(1);
-        TransportFuture<StringMessageResponse> res = serviceB.submitRequest(nodeA, "sayHelloTimeoutDelayedResponse",
-                new StringMessageRequest("300ms"), options().withTimeout(100), new BaseTransportResponseHandler<StringMessageResponse>() {
-                    @Override
-                    public StringMessageResponse newInstance() {
-                        return new StringMessageResponse();
-                    }
+        TransportFuture<StringMessageResponse> res = serviceB.submitRequest(nodeA, "sayHelloTimeoutDelayedResponse", new StringMessageRequest("300ms"), options().withTimeout(100), new BaseTransportResponseHandler<StringMessageResponse>() {
+            @Override
+            public StringMessageResponse newInstance() {
+                return new StringMessageResponse();
+            }
 
-                    @Override
-                    public String executor() {
-                        return ThreadPool.Names.GENERIC;
-                    }
+            @Override
+            public String executor() {
+                return ThreadPool.Names.GENERIC;
+            }
 
-                    @Override
-                    public void handleResponse(StringMessageResponse response) {
-                        latch.countDown();
-                        fail("got response instead of exception");
-                    }
+            @Override
+            public void handleResponse(StringMessageResponse response) {
+                latch.countDown();
+                fail("got response instead of exception");
+            }
 
-                    @Override
-                    public void handleException(TransportException exp) {
-                        latch.countDown();
-                        assertThat(exp, instanceOf(ReceiveTimeoutTransportException.class));
-                    }
-                });
+            @Override
+            public void handleException(TransportException exp) {
+                latch.countDown();
+                assertThat(exp, instanceOf(ReceiveTimeoutTransportException.class));
+            }
+        });
 
         try {
             StringMessageResponse message = res.txGet();
@@ -554,29 +540,28 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
         for (int i = 0; i < 10; i++) {
             final int counter = i;
             // now, try and send another request, this times, with a short timeout
-            res = serviceB.submitRequest(nodeA, "sayHelloTimeoutDelayedResponse",
-                    new StringMessageRequest(counter + "ms"), options().withTimeout(3000), new BaseTransportResponseHandler<StringMessageResponse>() {
-                        @Override
-                        public StringMessageResponse newInstance() {
-                            return new StringMessageResponse();
-                        }
+            res = serviceB.submitRequest(nodeA, "sayHelloTimeoutDelayedResponse", new StringMessageRequest(counter + "ms"), options().withTimeout(3000), new BaseTransportResponseHandler<StringMessageResponse>() {
+                @Override
+                public StringMessageResponse newInstance() {
+                    return new StringMessageResponse();
+                }
 
-                        @Override
-                        public String executor() {
-                            return ThreadPool.Names.GENERIC;
-                        }
+                @Override
+                public String executor() {
+                    return ThreadPool.Names.GENERIC;
+                }
 
-                        @Override
-                        public void handleResponse(StringMessageResponse response) {
-                            assertThat("hello " + counter + "ms", equalTo(response.message));
-                        }
+                @Override
+                public void handleResponse(StringMessageResponse response) {
+                    assertThat("hello " + counter + "ms", equalTo(response.message));
+                }
 
-                        @Override
-                        public void handleException(TransportException exp) {
-                            exp.printStackTrace();
-                            fail("got exception instead of a response for " + counter + ": " + exp.getDetailedMessage());
-                        }
-                    });
+                @Override
+                public void handleException(TransportException exp) {
+                    exp.printStackTrace();
+                    fail("got exception instead of a response for " + counter + ": " + exp.getDetailedMessage());
+                }
+            });
 
             StringMessageResponse message = res.txGet();
             assertThat(message.message, equalTo("hello " + counter + "ms"));
@@ -584,7 +569,6 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
 
         serviceA.removeHandler("sayHelloTimeoutDelayedResponse");
     }
-
 
     @Test
     @TestLogging(value = "test. transport.tracer:TRACE")
@@ -693,9 +677,7 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
             excludeSettings = "DOESN'T_MATCH";
         }
 
-        serviceA.applySettings(ImmutableSettings.builder()
-                .put(TransportService.SETTING_TRACE_LOG_INCLUDE, includeSettings, TransportService.SETTING_TRACE_LOG_EXCLUDE, excludeSettings)
-                .build());
+        serviceA.applySettings(ImmutableSettings.builder().put(TransportService.SETTING_TRACE_LOG_INCLUDE, includeSettings, TransportService.SETTING_TRACE_LOG_EXCLUDE, excludeSettings).build());
 
         tracer.reset(4);
         serviceA.sendRequest(nodeB, "test", new StringMessageRequest(""), noopResponseHandler);
@@ -726,7 +708,6 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
         public volatile boolean sawResponseReceived;
 
         public AtomicReference<CountDownLatch> expectedEvents = new AtomicReference<>();
-
 
         @Override
         public void receivedRequest(long requestId, String action) {
@@ -772,7 +753,6 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
             expectedEvents.set(new CountDownLatch(expectedCount));
         }
     }
-
 
     static class StringMessageRequest extends TransportRequest {
 
@@ -834,11 +814,9 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
         }
     }
 
-
     static class Version0Request extends TransportRequest {
 
         int value1;
-
 
         @Override
         public void readFrom(StreamInput in) throws IOException {
@@ -1144,28 +1122,27 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
 
         serviceB.addFailToSendNoConnectRule(nodeA);
 
-        TransportFuture<StringMessageResponse> res = serviceB.submitRequest(nodeA, "sayHello",
-                new StringMessageRequest("moshe"), new BaseTransportResponseHandler<StringMessageResponse>() {
-                    @Override
-                    public StringMessageResponse newInstance() {
-                        return new StringMessageResponse();
-                    }
+        TransportFuture<StringMessageResponse> res = serviceB.submitRequest(nodeA, "sayHello", new StringMessageRequest("moshe"), new BaseTransportResponseHandler<StringMessageResponse>() {
+            @Override
+            public StringMessageResponse newInstance() {
+                return new StringMessageResponse();
+            }
 
-                    @Override
-                    public String executor() {
-                        return ThreadPool.Names.GENERIC;
-                    }
+            @Override
+            public String executor() {
+                return ThreadPool.Names.GENERIC;
+            }
 
-                    @Override
-                    public void handleResponse(StringMessageResponse response) {
-                        fail("got response instead of exception");
-                    }
+            @Override
+            public void handleResponse(StringMessageResponse response) {
+                fail("got response instead of exception");
+            }
 
-                    @Override
-                    public void handleException(TransportException exp) {
-                        assertThat(exp.getCause().getMessage(), endsWith("DISCONNECT: simulated"));
-                    }
-                });
+            @Override
+            public void handleException(TransportException exp) {
+                assertThat(exp.getCause().getMessage(), endsWith("DISCONNECT: simulated"));
+            }
+        });
 
         try {
             res.txGet();
@@ -1213,28 +1190,27 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
 
         serviceB.addUnresponsiveRule(nodeA);
 
-        TransportFuture<StringMessageResponse> res = serviceB.submitRequest(nodeA, "sayHello",
-                new StringMessageRequest("moshe"), TransportRequestOptions.options().withTimeout(100), new BaseTransportResponseHandler<StringMessageResponse>() {
-                    @Override
-                    public StringMessageResponse newInstance() {
-                        return new StringMessageResponse();
-                    }
+        TransportFuture<StringMessageResponse> res = serviceB.submitRequest(nodeA, "sayHello", new StringMessageRequest("moshe"), TransportRequestOptions.options().withTimeout(100), new BaseTransportResponseHandler<StringMessageResponse>() {
+            @Override
+            public StringMessageResponse newInstance() {
+                return new StringMessageResponse();
+            }
 
-                    @Override
-                    public String executor() {
-                        return ThreadPool.Names.GENERIC;
-                    }
+            @Override
+            public String executor() {
+                return ThreadPool.Names.GENERIC;
+            }
 
-                    @Override
-                    public void handleResponse(StringMessageResponse response) {
-                        fail("got response instead of exception");
-                    }
+            @Override
+            public void handleResponse(StringMessageResponse response) {
+                fail("got response instead of exception");
+            }
 
-                    @Override
-                    public void handleException(TransportException exp) {
-                        assertThat(exp, instanceOf(ReceiveTimeoutTransportException.class));
-                    }
-                });
+            @Override
+            public void handleException(TransportException exp) {
+                assertThat(exp, instanceOf(ReceiveTimeoutTransportException.class));
+            }
+        });
 
         try {
             res.txGet();
@@ -1259,7 +1235,6 @@ public abstract class AbstractSimpleTransportTests extends ElasticsearchTestCase
 
         serviceA.removeHandler("sayHello");
     }
-
 
     @Test
     public void testHostOnMessages() throws InterruptedException {

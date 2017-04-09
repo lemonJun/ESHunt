@@ -46,29 +46,24 @@ public class PatternCaptureTokenFilterTests extends ElasticsearchTokenStreamTest
         Index index = new Index("test");
         Settings settings = settingsBuilder().loadFromClasspath("org/elasticsearch/index/analysis/pattern_capture.json").put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).build();
         Injector parentInjector = new ModulesBuilder().add(new SettingsModule(settings), new EnvironmentModule(new Environment(settings)), new IndicesAnalysisModule()).createInjector();
-        Injector injector = new ModulesBuilder().add(
-                new IndexSettingsModule(index, settings),
-                new IndexNameModule(index),
-                new AnalysisModule(settings, parentInjector.getInstance(IndicesAnalysisService.class)))
-                .createChildInjector(parentInjector);
+        Injector injector = new ModulesBuilder().add(new IndexSettingsModule(index, settings), new IndexNameModule(index), new AnalysisModule(settings, parentInjector.getInstance(IndicesAnalysisService.class))).createChildInjector(parentInjector);
 
         AnalysisService analysisService = injector.getInstance(AnalysisService.class);
 
         NamedAnalyzer analyzer1 = analysisService.analyzer("single");
 
-        assertTokenStreamContents(analyzer1.tokenStream("test", "foobarbaz"), new String[]{"foobarbaz","foobar","foo"});
+        assertTokenStreamContents(analyzer1.tokenStream("test", "foobarbaz"), new String[] { "foobarbaz", "foobar", "foo" });
 
         NamedAnalyzer analyzer2 = analysisService.analyzer("multi");
 
-        assertTokenStreamContents(analyzer2.tokenStream("test", "abc123def"), new String[]{"abc123def","abc","123","def"});
+        assertTokenStreamContents(analyzer2.tokenStream("test", "abc123def"), new String[] { "abc123def", "abc", "123", "def" });
 
         NamedAnalyzer analyzer3 = analysisService.analyzer("preserve");
 
-        assertTokenStreamContents(analyzer3.tokenStream("test", "foobarbaz"), new String[]{"foobar","foo"});
+        assertTokenStreamContents(analyzer3.tokenStream("test", "foobarbaz"), new String[] { "foobar", "foo" });
     }
-    
-    
-    @Test(expected=ElasticsearchIllegalArgumentException.class)
+
+    @Test(expected = ElasticsearchIllegalArgumentException.class)
     public void testNoPatterns() {
         new PatternCaptureGroupTokenFilterFactory(new Index("test"), settingsBuilder().put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).build(), "pattern_capture", settingsBuilder().put("pattern", "foobar").build());
     }

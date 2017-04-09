@@ -34,7 +34,6 @@ import java.util.Map;
  */
 public class CustomSuggester extends Suggester<CustomSuggester.CustomSuggestionsContext> {
 
-
     // This is a pretty dumb implementation which returns the original text + fieldName + custom config option + 12 or 123
     @Override
     public Suggest.Suggestion<? extends Suggest.Suggestion.Entry<? extends Suggest.Suggestion.Entry.Option>> innerExecute(String name, CustomSuggestionsContext suggestion, IndexSearcher searcher, CharsRefBuilder spare) throws IOException {
@@ -57,7 +56,7 @@ public class CustomSuggester extends Suggester<CustomSuggester.CustomSuggestions
 
     @Override
     public String[] names() {
-        return new String[] {"custom"};
+        return new String[] { "custom" };
     }
 
     @Override

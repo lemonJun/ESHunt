@@ -50,28 +50,14 @@ public class SimpleGetMappingsTests extends ElasticsearchIntegrationTest {
         assertThat(response.mappings().get("index").size(), equalTo(0));
     }
 
-
     private XContentBuilder getMappingForType(String type) throws IOException {
-        return jsonBuilder().startObject().startObject(type).startObject("properties")
-                .startObject("field1").field("type", "string").endObject()
-                .endObject().endObject().endObject();
+        return jsonBuilder().startObject().startObject(type).startObject("properties").startObject("field1").field("type", "string").endObject().endObject().endObject().endObject();
     }
-
 
     @Test
     public void simpleGetMappings() throws Exception {
-        client().admin().indices().prepareCreate("indexa")
-                .addMapping("typeA", getMappingForType("typeA"))
-                .addMapping("typeB", getMappingForType("typeB"))
-                .addMapping("Atype", getMappingForType("Atype"))
-                .addMapping("Btype", getMappingForType("Btype"))
-                .execute().actionGet();
-        client().admin().indices().prepareCreate("indexb")
-                .addMapping("typeA", getMappingForType("typeA"))
-                .addMapping("typeB", getMappingForType("typeB"))
-                .addMapping("Atype", getMappingForType("Atype"))
-                .addMapping("Btype", getMappingForType("Btype"))
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("indexa").addMapping("typeA", getMappingForType("typeA")).addMapping("typeB", getMappingForType("typeB")).addMapping("Atype", getMappingForType("Atype")).addMapping("Btype", getMappingForType("Btype")).execute().actionGet();
+        client().admin().indices().prepareCreate("indexb").addMapping("typeA", getMappingForType("typeA")).addMapping("typeB", getMappingForType("typeB")).addMapping("Atype", getMappingForType("Atype")).addMapping("Btype", getMappingForType("Btype")).execute().actionGet();
 
         ClusterHealthResponse clusterHealth = client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().execute().actionGet();
         assertThat(clusterHealth.isTimedOut(), equalTo(false));
@@ -148,10 +134,7 @@ public class SimpleGetMappingsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testGetMappingsWithBlocks() throws IOException {
-        client().admin().indices().prepareCreate("test")
-                .addMapping("typeA", getMappingForType("typeA"))
-                .addMapping("typeB", getMappingForType("typeB"))
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test").addMapping("typeA", getMappingForType("typeA")).addMapping("typeB", getMappingForType("typeB")).execute().actionGet();
         ensureGreen();
 
         for (String block : Arrays.asList(SETTING_BLOCKS_READ, SETTING_BLOCKS_WRITE, SETTING_READ_ONLY)) {

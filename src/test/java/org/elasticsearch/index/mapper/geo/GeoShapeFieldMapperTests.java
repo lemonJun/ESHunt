@@ -44,11 +44,7 @@ public class GeoShapeFieldMapperTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testDefaultConfiguration() throws IOException {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("location")
-                    .field("type", "geo_shape")
-                .endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
         FieldMapper fieldMapper = defaultMapper.mappers().name("location").mapper();
@@ -68,35 +64,25 @@ public class GeoShapeFieldMapperTests extends ElasticsearchSingleNodeTest {
      * @throws IOException
      */
     public void testOrientationParsing() throws IOException {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("location")
-                .field("type", "geo_shape")
-                .field("orientation", "left")
-                .endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").field("orientation", "left").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
         FieldMapper fieldMapper = defaultMapper.mappers().name("location").mapper();
         assertThat(fieldMapper, instanceOf(GeoShapeFieldMapper.class));
 
-        ShapeBuilder.Orientation orientation = ((GeoShapeFieldMapper)fieldMapper).orientation();
+        ShapeBuilder.Orientation orientation = ((GeoShapeFieldMapper) fieldMapper).orientation();
         assertThat(orientation, equalTo(ShapeBuilder.Orientation.CLOCKWISE));
         assertThat(orientation, equalTo(ShapeBuilder.Orientation.LEFT));
         assertThat(orientation, equalTo(ShapeBuilder.Orientation.CW));
 
         // explicit right orientation test
-        mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("location")
-                .field("type", "geo_shape")
-                .field("orientation", "right")
-                .endObject().endObject()
-                .endObject().endObject().string();
+        mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").field("orientation", "right").endObject().endObject().endObject().endObject().string();
 
         defaultMapper = createIndex("test2").mapperService().documentMapperParser().parse(mapping);
         fieldMapper = defaultMapper.mappers().name("location").mapper();
         assertThat(fieldMapper, instanceOf(GeoShapeFieldMapper.class));
 
-        orientation = ((GeoShapeFieldMapper)fieldMapper).orientation();
+        orientation = ((GeoShapeFieldMapper) fieldMapper).orientation();
         assertThat(orientation, equalTo(ShapeBuilder.Orientation.COUNTER_CLOCKWISE));
         assertThat(orientation, equalTo(ShapeBuilder.Orientation.RIGHT));
         assertThat(orientation, equalTo(ShapeBuilder.Orientation.CCW));
@@ -104,14 +90,7 @@ public class GeoShapeFieldMapperTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testGeohashConfiguration() throws IOException {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("location")
-                    .field("type", "geo_shape")
-                    .field("tree", "geohash")
-                    .field("tree_levels", "4")
-                    .field("distance_error_pct", "0.1")
-                .endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").field("tree", "geohash").field("tree_levels", "4").field("distance_error_pct", "0.1").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
         FieldMapper fieldMapper = defaultMapper.mappers().name("location").mapper();
@@ -127,14 +106,7 @@ public class GeoShapeFieldMapperTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testQuadtreeConfiguration() throws IOException {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("location")
-                    .field("type", "geo_shape")
-                    .field("tree", "quadtree")
-                    .field("tree_levels", "6")
-                    .field("distance_error_pct", "0.5")
-                .endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").field("tree", "quadtree").field("tree_levels", "6").field("distance_error_pct", "0.5").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
         FieldMapper fieldMapper = defaultMapper.mappers().name("location").mapper();
@@ -147,23 +119,14 @@ public class GeoShapeFieldMapperTests extends ElasticsearchSingleNodeTest {
         assertThat(strategy.getGrid(), instanceOf(QuadPrefixTree.class));
         assertThat(strategy.getGrid().getMaxLevels(), equalTo(6));
     }
-    
+
     @Test
     public void testLevelPrecisionConfiguration() throws IOException {
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
 
         {
-            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                    .startObject("properties").startObject("location")
-                        .field("type", "geo_shape")
-                        .field("tree", "quadtree")
-                        .field("tree_levels", "6")
-                        .field("precision", "70m")
-                        .field("distance_error_pct", "0.5")
-                    .endObject().endObject()
-                    .endObject().endObject().string();
+            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").field("tree", "quadtree").field("tree_levels", "6").field("precision", "70m").field("distance_error_pct", "0.5").endObject().endObject().endObject().endObject().string();
 
-            
             DocumentMapper defaultMapper = parser.parse(mapping);
             FieldMapper fieldMapper = defaultMapper.mappers().name("location").mapper();
             assertThat(fieldMapper, instanceOf(GeoShapeFieldMapper.class));
@@ -174,19 +137,11 @@ public class GeoShapeFieldMapperTests extends ElasticsearchSingleNodeTest {
             assertThat(strategy.getDistErrPct(), equalTo(0.5));
             assertThat(strategy.getGrid(), instanceOf(QuadPrefixTree.class));
             /* 70m is more precise so it wins */
-            assertThat(strategy.getGrid().getMaxLevels(), equalTo(GeoUtils.quadTreeLevelsForPrecision(70d))); 
+            assertThat(strategy.getGrid().getMaxLevels(), equalTo(GeoUtils.quadTreeLevelsForPrecision(70d)));
         }
-        
+
         {
-            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                    .startObject("properties").startObject("location")
-                        .field("type", "geo_shape")
-                        .field("tree", "geohash")
-                        .field("tree_levels", "6")
-                        .field("precision", "70m")
-                        .field("distance_error_pct", "0.5")
-                    .endObject().endObject()
-                    .endObject().endObject().string();
+            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").field("tree", "geohash").field("tree_levels", "6").field("precision", "70m").field("distance_error_pct", "0.5").endObject().endObject().endObject().endObject().string();
 
             DocumentMapper defaultMapper = parser.parse(mapping);
             FieldMapper fieldMapper = defaultMapper.mappers().name("location").mapper();
@@ -198,19 +153,11 @@ public class GeoShapeFieldMapperTests extends ElasticsearchSingleNodeTest {
             assertThat(strategy.getDistErrPct(), equalTo(0.5));
             assertThat(strategy.getGrid(), instanceOf(GeohashPrefixTree.class));
             /* 70m is more precise so it wins */
-            assertThat(strategy.getGrid().getMaxLevels(), equalTo(GeoUtils.geoHashLevelsForPrecision(70d))); 
+            assertThat(strategy.getGrid().getMaxLevels(), equalTo(GeoUtils.geoHashLevelsForPrecision(70d)));
         }
-        
+
         {
-            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                    .startObject("properties").startObject("location")
-                        .field("type", "geo_shape")
-                        .field("tree", "geohash")
-                        .field("tree_levels",  GeoUtils.geoHashLevelsForPrecision(70d)+1)
-                        .field("precision", "70m")
-                        .field("distance_error_pct", "0.5")
-                    .endObject().endObject()
-                    .endObject().endObject().string();
+            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").field("tree", "geohash").field("tree_levels", GeoUtils.geoHashLevelsForPrecision(70d) + 1).field("precision", "70m").field("distance_error_pct", "0.5").endObject().endObject().endObject().endObject().string();
 
             DocumentMapper defaultMapper = parser.parse(mapping);
             FieldMapper fieldMapper = defaultMapper.mappers().name("location").mapper();
@@ -221,19 +168,11 @@ public class GeoShapeFieldMapperTests extends ElasticsearchSingleNodeTest {
 
             assertThat(strategy.getDistErrPct(), equalTo(0.5));
             assertThat(strategy.getGrid(), instanceOf(GeohashPrefixTree.class));
-            assertThat(strategy.getGrid().getMaxLevels(),  equalTo(GeoUtils.geoHashLevelsForPrecision(70d)+1)); 
+            assertThat(strategy.getGrid().getMaxLevels(), equalTo(GeoUtils.geoHashLevelsForPrecision(70d) + 1));
         }
-        
+
         {
-            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                    .startObject("properties").startObject("location")
-                        .field("type", "geo_shape")
-                        .field("tree", "quadtree")
-                        .field("tree_levels", GeoUtils.quadTreeLevelsForPrecision(70d)+1)
-                        .field("precision", "70m")
-                        .field("distance_error_pct", "0.5")
-                    .endObject().endObject()
-                    .endObject().endObject().string();
+            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").field("tree", "quadtree").field("tree_levels", GeoUtils.quadTreeLevelsForPrecision(70d) + 1).field("precision", "70m").field("distance_error_pct", "0.5").endObject().endObject().endObject().endObject().string();
 
             DocumentMapper defaultMapper = parser.parse(mapping);
             FieldMapper fieldMapper = defaultMapper.mappers().name("location").mapper();
@@ -244,23 +183,16 @@ public class GeoShapeFieldMapperTests extends ElasticsearchSingleNodeTest {
 
             assertThat(strategy.getDistErrPct(), equalTo(0.5));
             assertThat(strategy.getGrid(), instanceOf(QuadPrefixTree.class));
-            assertThat(strategy.getGrid().getMaxLevels(), equalTo(GeoUtils.quadTreeLevelsForPrecision(70d)+1)); 
+            assertThat(strategy.getGrid().getMaxLevels(), equalTo(GeoUtils.quadTreeLevelsForPrecision(70d) + 1));
         }
     }
-    
+
     @Test
     public void testLevelDefaults() throws IOException {
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
         {
-            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                    .startObject("properties").startObject("location")
-                        .field("type", "geo_shape")
-                        .field("tree", "quadtree")
-                        .field("distance_error_pct", "0.5")
-                    .endObject().endObject()
-                    .endObject().endObject().string();
+            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").field("tree", "quadtree").field("distance_error_pct", "0.5").endObject().endObject().endObject().endObject().string();
 
-            
             DocumentMapper defaultMapper = parser.parse(mapping);
             FieldMapper fieldMapper = defaultMapper.mappers().name("location").mapper();
             assertThat(fieldMapper, instanceOf(GeoShapeFieldMapper.class));
@@ -271,17 +203,11 @@ public class GeoShapeFieldMapperTests extends ElasticsearchSingleNodeTest {
             assertThat(strategy.getDistErrPct(), equalTo(0.5));
             assertThat(strategy.getGrid(), instanceOf(QuadPrefixTree.class));
             /* 50m is default */
-            assertThat(strategy.getGrid().getMaxLevels(), equalTo(GeoUtils.quadTreeLevelsForPrecision(50d))); 
+            assertThat(strategy.getGrid().getMaxLevels(), equalTo(GeoUtils.quadTreeLevelsForPrecision(50d)));
         }
-        
+
         {
-            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                    .startObject("properties").startObject("location")
-                        .field("type", "geo_shape")
-                        .field("tree", "geohash")
-                        .field("distance_error_pct", "0.5")
-                    .endObject().endObject()
-                    .endObject().endObject().string();
+            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").field("tree", "geohash").field("distance_error_pct", "0.5").endObject().endObject().endObject().endObject().string();
 
             DocumentMapper defaultMapper = parser.parse(mapping);
             FieldMapper fieldMapper = defaultMapper.mappers().name("location").mapper();
@@ -293,22 +219,16 @@ public class GeoShapeFieldMapperTests extends ElasticsearchSingleNodeTest {
             assertThat(strategy.getDistErrPct(), equalTo(0.5));
             assertThat(strategy.getGrid(), instanceOf(GeohashPrefixTree.class));
             /* 50m is default */
-            assertThat(strategy.getGrid().getMaxLevels(), equalTo(GeoUtils.geoHashLevelsForPrecision(50d))); 
+            assertThat(strategy.getGrid().getMaxLevels(), equalTo(GeoUtils.geoHashLevelsForPrecision(50d)));
         }
     }
 
     @Test
     public void testGeoShapeMapperMerge() throws Exception {
-        String stage1Mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties")
-                .startObject("shape").field("type", "geo_shape").field("tree", "geohash").field("strategy", "recursive")
-                .field("precision", "1m").field("tree_levels", 8).field("distance_error_pct", 0.01).field("orientation", "ccw")
-                .endObject().endObject().endObject().endObject().string();
+        String stage1Mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("shape").field("type", "geo_shape").field("tree", "geohash").field("strategy", "recursive").field("precision", "1m").field("tree_levels", 8).field("distance_error_pct", 0.01).field("orientation", "ccw").endObject().endObject().endObject().endObject().string();
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
         DocumentMapper stage1 = parser.parse(stage1Mapping);
-        String stage2Mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("shape").field("type", "geo_shape").field("tree", "quadtree")
-                .field("strategy", "term").field("precision", "1km").field("tree_levels", 26).field("distance_error_pct", 26)
-                .field("orientation", "cw").endObject().endObject().endObject().endObject().string();
+        String stage2Mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("shape").field("type", "geo_shape").field("tree", "quadtree").field("strategy", "term").field("precision", "1km").field("tree_levels", 26).field("distance_error_pct", 26).field("orientation", "cw").endObject().endObject().endObject().endObject().string();
         DocumentMapper stage2 = parser.parse(stage2Mapping);
 
         DocumentMapper.MergeResult mergeResult = stage1.merge(stage2, mergeFlags().simulate(false));
@@ -334,9 +254,7 @@ public class GeoShapeFieldMapperTests extends ElasticsearchSingleNodeTest {
         assertThat(geoShapeFieldMapper.orientation(), equalTo(ShapeBuilder.Orientation.CCW));
 
         // correct mapping
-        stage2Mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("shape").field("type", "geo_shape").field("precision", "1m")
-                .field("distance_error_pct", 0.001).field("orientation", "cw").endObject().endObject().endObject().endObject().string();
+        stage2Mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("shape").field("type", "geo_shape").field("precision", "1m").field("distance_error_pct", 0.001).field("orientation", "cw").endObject().endObject().endObject().endObject().string();
         stage2 = parser.parse(stage2Mapping);
         mergeResult = stage1.merge(stage2, mergeFlags().simulate(false));
 

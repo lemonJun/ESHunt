@@ -64,11 +64,7 @@ public class GeoShapeIntegrationTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testNullShape() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("location")
-                .field("type", "geo_shape")
-                .endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").endObject().endObject().endObject().endObject().string();
         assertAcked(prepareCreate("test").addMapping("type1", mapping));
         ensureGreen();
 
@@ -79,48 +75,26 @@ public class GeoShapeIntegrationTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testIndexPointsFilterRectangle() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("location")
-                .field("type", "geo_shape")
-                .field("tree", "quadtree")
-                .endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").field("tree", "quadtree").endObject().endObject().endObject().endObject().string();
         assertAcked(prepareCreate("test").addMapping("type1", mapping));
         ensureGreen();
 
         indexRandom(true,
 
-                client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject()
-                        .field("name", "Document 1")
-                        .startObject("location")
-                        .field("type", "point")
-                        .startArray("coordinates").value(-30).value(-30).endArray()
-                        .endObject()
-                        .endObject()),
+                        client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject().field("name", "Document 1").startObject("location").field("type", "point").startArray("coordinates").value(-30).value(-30).endArray().endObject().endObject()),
 
-                client().prepareIndex("test", "type1", "2").setSource(jsonBuilder().startObject()
-                        .field("name", "Document 2")
-                        .startObject("location")
-                        .field("type", "point")
-                        .startArray("coordinates").value(-45).value(-50).endArray()
-                        .endObject()
-                        .endObject()));
+                        client().prepareIndex("test", "type1", "2").setSource(jsonBuilder().startObject().field("name", "Document 2").startObject("location").field("type", "point").startArray("coordinates").value(-45).value(-50).endArray().endObject().endObject()));
 
         ShapeBuilder shape = ShapeBuilder.newEnvelope().topLeft(-45, 45).bottomRight(45, -45);
 
-        SearchResponse searchResponse = client().prepareSearch()
-                .setQuery(filteredQuery(matchAllQuery(),
-                        geoIntersectionFilter("location", shape)))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setQuery(filteredQuery(matchAllQuery(), geoIntersectionFilter("location", shape))).execute().actionGet();
 
         assertSearchResponse(searchResponse);
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(1l));
         assertThat(searchResponse.getHits().hits().length, equalTo(1));
         assertThat(searchResponse.getHits().getAt(0).id(), equalTo("1"));
 
-        searchResponse = client().prepareSearch()
-                .setQuery(geoShapeQuery("location", shape))
-                .execute().actionGet();
+        searchResponse = client().prepareSearch().setQuery(geoShapeQuery("location", shape)).execute().actionGet();
 
         assertSearchResponse(searchResponse);
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(1l));
@@ -131,37 +105,18 @@ public class GeoShapeIntegrationTests extends ElasticsearchIntegrationTest {
     @Test
     public void testEdgeCases() throws Exception {
 
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("location")
-                .field("type", "geo_shape")
-                .field("tree", "quadtree")
-                .endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").field("tree", "quadtree").endObject().endObject().endObject().endObject().string();
         assertAcked(prepareCreate("test").addMapping("type1", mapping));
         ensureGreen();
 
-        indexRandom(true, client().prepareIndex("test", "type1", "blakely").setSource(jsonBuilder().startObject()
-                .field("name", "Blakely Island")
-                .startObject("location")
-                .field("type", "polygon")
-                .startArray("coordinates").startArray()
-                .startArray().value(-122.83).value(48.57).endArray()
-                .startArray().value(-122.77).value(48.56).endArray()
-                .startArray().value(-122.79).value(48.53).endArray()
-                .startArray().value(-122.83).value(48.57).endArray() // close the polygon
-                .endArray().endArray()
-                .endObject()
-                .endObject()));
-
+        indexRandom(true, client().prepareIndex("test", "type1", "blakely").setSource(jsonBuilder().startObject().field("name", "Blakely Island").startObject("location").field("type", "polygon").startArray("coordinates").startArray().startArray().value(-122.83).value(48.57).endArray().startArray().value(-122.77).value(48.56).endArray().startArray().value(-122.79).value(48.53).endArray().startArray().value(-122.83).value(48.57).endArray() // close the polygon
+                        .endArray().endArray().endObject().endObject()));
 
         ShapeBuilder query = ShapeBuilder.newEnvelope().topLeft(-122.88, 48.62).bottomRight(-122.82, 48.54);
 
         // This search would fail if both geoshape indexing and geoshape filtering
         // used the bottom-level optimization in SpatialPrefixTree#recursiveGetNodes.
-        SearchResponse searchResponse = client().prepareSearch()
-                .setQuery(filteredQuery(matchAllQuery(),
-                        geoIntersectionFilter("location", query)))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setQuery(filteredQuery(matchAllQuery(), geoIntersectionFilter("location", query))).execute().actionGet();
 
         assertSearchResponse(searchResponse);
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(1l));
@@ -171,42 +126,23 @@ public class GeoShapeIntegrationTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testIndexedShapeReference() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("location")
-                .field("type", "geo_shape")
-                .field("tree", "quadtree")
-                .endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").field("tree", "quadtree").endObject().endObject().endObject().endObject().string();
         assertAcked(prepareCreate("test").addMapping("type1", mapping));
         createIndex("shapes");
         ensureGreen();
 
         ShapeBuilder shape = ShapeBuilder.newEnvelope().topLeft(-45, 45).bottomRight(45, -45);
 
-        indexRandom(true,
-            client().prepareIndex("shapes", "shape_type", "Big_Rectangle").setSource(jsonBuilder().startObject()
-                .field("shape", shape).endObject()),
-            client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject()
-                .field("name", "Document 1")
-                .startObject("location")
-                .field("type", "point")
-                .startArray("coordinates").value(-30).value(-30).endArray()
-                .endObject()
-                .endObject()));
+        indexRandom(true, client().prepareIndex("shapes", "shape_type", "Big_Rectangle").setSource(jsonBuilder().startObject().field("shape", shape).endObject()), client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject().field("name", "Document 1").startObject("location").field("type", "point").startArray("coordinates").value(-30).value(-30).endArray().endObject().endObject()));
 
-        SearchResponse searchResponse = client().prepareSearch("test")
-                .setQuery(filteredQuery(matchAllQuery(),
-                        geoIntersectionFilter("location", "Big_Rectangle", "shape_type")))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("test").setQuery(filteredQuery(matchAllQuery(), geoIntersectionFilter("location", "Big_Rectangle", "shape_type"))).execute().actionGet();
 
         assertSearchResponse(searchResponse);
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(1l));
         assertThat(searchResponse.getHits().hits().length, equalTo(1));
         assertThat(searchResponse.getHits().getAt(0).id(), equalTo("1"));
 
-        searchResponse = client().prepareSearch("test")
-                .setQuery(geoShapeQuery("location", "Big_Rectangle", "shape_type"))
-                .execute().actionGet();
+        searchResponse = client().prepareSearch("test").setQuery(geoShapeQuery("location", "Big_Rectangle", "shape_type")).execute().actionGet();
 
         assertSearchResponse(searchResponse);
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(1l));
@@ -216,14 +152,10 @@ public class GeoShapeIntegrationTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testReusableBuilder() throws IOException {
-        ShapeBuilder polygon = ShapeBuilder.newPolygon()
-                .point(170, -10).point(190, -10).point(190, 10).point(170, 10)
-                .hole().point(175, -5).point(185, -5).point(185, 5).point(175, 5).close()
-                .close();
+        ShapeBuilder polygon = ShapeBuilder.newPolygon().point(170, -10).point(190, -10).point(190, 10).point(170, 10).hole().point(175, -5).point(185, -5).point(185, 5).point(175, 5).close().close();
         assertUnmodified(polygon);
 
-        ShapeBuilder linestring = ShapeBuilder.newLineString()
-                .point(170, -10).point(190, -10).point(190, 10).point(170, 10);
+        ShapeBuilder linestring = ShapeBuilder.newLineString().point(170, -10).point(190, -10).point(190, 10).point(170, 10);
         assertUnmodified(linestring);
     }
 
@@ -236,20 +168,7 @@ public class GeoShapeIntegrationTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testParsingMultipleShapes() throws Exception {
-        String mapping = XContentFactory.jsonBuilder()
-                .startObject()
-                .startObject("type1")
-                .startObject("properties")
-                .startObject("location1")
-                .field("type", "geo_shape")
-                .endObject()
-                .startObject("location2")
-                .field("type", "geo_shape")
-                .endObject()
-                .endObject()
-                .endObject()
-                .endObject()
-                .string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location1").field("type", "geo_shape").endObject().startObject("location2").field("type", "geo_shape").endObject().endObject().endObject().endObject().string();
 
         assertAcked(prepareCreate("test").addMapping("type1", mapping));
         ensureYellow();
@@ -260,12 +179,7 @@ public class GeoShapeIntegrationTests extends ElasticsearchIntegrationTest {
 
         indexRandom(true, client().prepareIndex("test", "type1", "1").setSource(o1));
 
-        String filter = "{\"geo_shape\": {\"location2\": {\"indexed_shape\": {"
-                + "\"id\": \"1\","
-                + "\"type\": \"type1\","
-                + "\"index\": \"test\","
-                + "\"path\": \"location2\""
-                + "}}}}";
+        String filter = "{\"geo_shape\": {\"location2\": {\"indexed_shape\": {" + "\"id\": \"1\"," + "\"type\": \"type1\"," + "\"index\": \"test\"," + "\"path\": \"location2\"" + "}}}}";
 
         SearchResponse result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).setPostFilter(filter).execute().actionGet();
         assertSearchResponse(result);
@@ -278,77 +192,40 @@ public class GeoShapeIntegrationTests extends ElasticsearchIntegrationTest {
         assertAcked(prepareCreate("test").addMapping("type", "location", "type=geo_shape"));
 
         String location = "\"location\" : {\"type\":\"polygon\", \"coordinates\":[[[-10,-10],[10,-10],[10,10],[-10,10],[-10,-10]]]}";
-        indexRandom(true,
-                client().prepareIndex("shapes", "type", "1")
-                .setSource(
-                        String.format(
-                                Locale.ROOT, "{ %s, \"1\" : { %s, \"2\" : { %s, \"3\" : { %s } }} }", location, location, location, location
-                        )
-                ),
-                client().prepareIndex("test", "type", "1")
-                .setSource(jsonBuilder().startObject().startObject("location")
-                        .field("type", "polygon")
-                        .startArray("coordinates").startArray()
-                        .startArray().value(-20).value(-20).endArray()
-                        .startArray().value(20).value(-20).endArray()
-                        .startArray().value(20).value(20).endArray()
-                        .startArray().value(-20).value(20).endArray()
-                        .startArray().value(-20).value(-20).endArray()
-                        .endArray().endArray()
-                        .endObject().endObject()));
+        indexRandom(true, client().prepareIndex("shapes", "type", "1").setSource(String.format(Locale.ROOT, "{ %s, \"1\" : { %s, \"2\" : { %s, \"3\" : { %s } }} }", location, location, location, location)), client().prepareIndex("test", "type", "1").setSource(jsonBuilder().startObject().startObject("location").field("type", "polygon").startArray("coordinates").startArray().startArray().value(-20).value(-20).endArray().startArray().value(20).value(-20).endArray().startArray().value(20).value(20).endArray().startArray().value(-20).value(20).endArray().startArray().value(-20).value(-20).endArray().endArray().endArray().endObject().endObject()));
         ensureSearchable("test", "shapes");
 
-        GeoShapeFilterBuilder filter = FilterBuilders.geoShapeFilter("location", "1", "type", ShapeRelation.INTERSECTS)
-                .indexedShapeIndex("shapes")
-                .indexedShapePath("location");
-        SearchResponse result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery())
-                .setPostFilter(filter).get();
+        GeoShapeFilterBuilder filter = FilterBuilders.geoShapeFilter("location", "1", "type", ShapeRelation.INTERSECTS).indexedShapeIndex("shapes").indexedShapePath("location");
+        SearchResponse result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).setPostFilter(filter).get();
         assertSearchResponse(result);
         assertHitCount(result, 1);
-        filter = FilterBuilders.geoShapeFilter("location", "1", "type", ShapeRelation.INTERSECTS)
-                .indexedShapeIndex("shapes")
-                .indexedShapePath("1.location");
-        result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery())
-                .setPostFilter(filter).get();
+        filter = FilterBuilders.geoShapeFilter("location", "1", "type", ShapeRelation.INTERSECTS).indexedShapeIndex("shapes").indexedShapePath("1.location");
+        result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).setPostFilter(filter).get();
         assertSearchResponse(result);
         assertHitCount(result, 1);
-        filter = FilterBuilders.geoShapeFilter("location", "1", "type", ShapeRelation.INTERSECTS)
-                .indexedShapeIndex("shapes")
-                .indexedShapePath("1.2.location");
-        result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery())
-                .setPostFilter(filter).get();
+        filter = FilterBuilders.geoShapeFilter("location", "1", "type", ShapeRelation.INTERSECTS).indexedShapeIndex("shapes").indexedShapePath("1.2.location");
+        result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).setPostFilter(filter).get();
         assertSearchResponse(result);
         assertHitCount(result, 1);
-        filter = FilterBuilders.geoShapeFilter("location", "1", "type", ShapeRelation.INTERSECTS)
-                .indexedShapeIndex("shapes")
-                .indexedShapePath("1.2.3.location");
-        result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery())
-                .setPostFilter(filter).get();
+        filter = FilterBuilders.geoShapeFilter("location", "1", "type", ShapeRelation.INTERSECTS).indexedShapeIndex("shapes").indexedShapePath("1.2.3.location");
+        result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).setPostFilter(filter).get();
         assertSearchResponse(result);
         assertHitCount(result, 1);
 
         // now test the query variant
-        GeoShapeQueryBuilder query = QueryBuilders.geoShapeQuery("location", "1", "type")
-                .indexedShapeIndex("shapes")
-                .indexedShapePath("location");
+        GeoShapeQueryBuilder query = QueryBuilders.geoShapeQuery("location", "1", "type").indexedShapeIndex("shapes").indexedShapePath("location");
         result = client().prepareSearch("test").setQuery(query).get();
         assertSearchResponse(result);
         assertHitCount(result, 1);
-        query = QueryBuilders.geoShapeQuery("location", "1", "type")
-                .indexedShapeIndex("shapes")
-                .indexedShapePath("1.location");
+        query = QueryBuilders.geoShapeQuery("location", "1", "type").indexedShapeIndex("shapes").indexedShapePath("1.location");
         result = client().prepareSearch("test").setQuery(query).get();
         assertSearchResponse(result);
         assertHitCount(result, 1);
-        query = QueryBuilders.geoShapeQuery("location", "1", "type")
-                .indexedShapeIndex("shapes")
-                .indexedShapePath("1.2.location");
+        query = QueryBuilders.geoShapeQuery("location", "1", "type").indexedShapeIndex("shapes").indexedShapePath("1.2.location");
         result = client().prepareSearch("test").setQuery(query).get();
         assertSearchResponse(result);
         assertHitCount(result, 1);
-        query = QueryBuilders.geoShapeQuery("location", "1", "type")
-                .indexedShapeIndex("shapes")
-                .indexedShapePath("1.2.3.location");
+        query = QueryBuilders.geoShapeQuery("location", "1", "type").indexedShapeIndex("shapes").indexedShapePath("1.2.3.location");
         result = client().prepareSearch("test").setQuery(query).get();
         assertSearchResponse(result);
         assertHitCount(result, 1);
@@ -356,26 +233,11 @@ public class GeoShapeIntegrationTests extends ElasticsearchIntegrationTest {
 
     @Test // Issue 2944
     public void testThatShapeIsReturnedEvenWhenExclusionsAreSet() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("location")
-                .field("type", "geo_shape")
-                .endObject().endObject()
-                .startObject("_source")
-                .startArray("excludes").value("nonExistingField").endArray()
-                .endObject()
-                .endObject().endObject()
-                .string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_shape").endObject().endObject().startObject("_source").startArray("excludes").value("nonExistingField").endArray().endObject().endObject().endObject().string();
         assertAcked(prepareCreate("test").addMapping("type1", mapping));
         ensureGreen();
 
-        indexRandom(true,
-                client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject()
-                    .field("name", "Document 1")
-                    .startObject("location")
-                    .field("type", "envelope")
-                    .startArray("coordinates").startArray().value(-45.0).value(45).endArray().startArray().value(45).value(-45).endArray().endArray()
-                    .endObject()
-                    .endObject()));
+        indexRandom(true, client().prepareIndex("test", "type1", "1").setSource(jsonBuilder().startObject().field("name", "Document 1").startObject("location").field("type", "envelope").startArray("coordinates").startArray().value(-45.0).value(45).endArray().startArray().value(45).value(-45).endArray().endArray().endObject().endObject()));
 
         SearchResponse searchResponse = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
         assertThat(searchResponse.getHits().totalHits(), equalTo(1L));
@@ -414,8 +276,7 @@ public class GeoShapeIntegrationTests extends ElasticsearchIntegrationTest {
         ShapeBuilder filterShape = (gcb.getShapeAt(randomIntBetween(0, gcb.numShapes() - 1)));
 
         GeoShapeFilterBuilder filter = FilterBuilders.geoShapeFilter("location", filterShape, ShapeRelation.INTERSECTS);
-        SearchResponse result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery())
-                .setPostFilter(filter).get();
+        SearchResponse result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).setPostFilter(filter).get();
         assertSearchResponse(result);
         assertHitCount(result, 1);
     }
@@ -425,48 +286,20 @@ public class GeoShapeIntegrationTests extends ElasticsearchIntegrationTest {
         createIndex("shapes");
         assertAcked(prepareCreate("test").addMapping("type", "location", "type=geo_shape"));
 
-        XContentBuilder docSource = jsonBuilder().startObject().startObject("location")
-                .field("type", "geometrycollection")
-                .startArray("geometries")
-                .startObject()
-                .field("type", "point")
-                .startArray("coordinates")
-                .value(100.0).value(0.0)
-                .endArray()
-                .endObject()
-                .startObject()
-                .field("type", "linestring")
-                .startArray("coordinates")
-                .startArray()
-                .value(101.0).value(0.0)
-                .endArray()
-                .startArray()
-                .value(102.0).value(1.0)
-                .endArray()
-                .endArray()
-                .endObject()
-                .endArray()
-                .endObject().endObject();
-        indexRandom(true,
-                client().prepareIndex("test", "type", "1")
-                        .setSource(docSource));
+        XContentBuilder docSource = jsonBuilder().startObject().startObject("location").field("type", "geometrycollection").startArray("geometries").startObject().field("type", "point").startArray("coordinates").value(100.0).value(0.0).endArray().endObject().startObject().field("type", "linestring").startArray("coordinates").startArray().value(101.0).value(0.0).endArray().startArray().value(102.0).value(1.0).endArray().endArray().endObject().endArray().endObject().endObject();
+        indexRandom(true, client().prepareIndex("test", "type", "1").setSource(docSource));
         ensureSearchable("test");
 
         GeoShapeFilterBuilder filter = FilterBuilders.geoShapeFilter("location", ShapeBuilder.newGeometryCollection().polygon(ShapeBuilder.newPolygon().point(99.0, -1.0).point(99.0, 3.0).point(103.0, 3.0).point(103.0, -1.0).point(99.0, -1.0)), ShapeRelation.INTERSECTS);
-        SearchResponse result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery())
-                .setPostFilter(filter).get();
+        SearchResponse result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).setPostFilter(filter).get();
         assertSearchResponse(result);
         assertHitCount(result, 1);
         filter = FilterBuilders.geoShapeFilter("location", ShapeBuilder.newGeometryCollection().polygon(ShapeBuilder.newPolygon().point(199.0, -11.0).point(199.0, 13.0).point(193.0, 13.0).point(193.0, -11.0).point(199.0, -11.0)), ShapeRelation.INTERSECTS);
-        result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery())
-                .setPostFilter(filter).get();
+        result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).setPostFilter(filter).get();
         assertSearchResponse(result);
         assertHitCount(result, 0);
-        filter = FilterBuilders.geoShapeFilter("location", ShapeBuilder.newGeometryCollection()
-                .polygon(ShapeBuilder.newPolygon().point(99.0, -1.0).point(99.0, 3.0).point(103.0, 3.0).point(103.0, -1.0).point(99.0, -1.0))
-                .polygon(ShapeBuilder.newPolygon().point(199.0, -11.0).point(199.0, 13.0).point(193.0, 13.0).point(193.0, -11.0).point(199.0, -11.0)), ShapeRelation.INTERSECTS);
-        result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery())
-                .setPostFilter(filter).get();
+        filter = FilterBuilders.geoShapeFilter("location", ShapeBuilder.newGeometryCollection().polygon(ShapeBuilder.newPolygon().point(99.0, -1.0).point(99.0, 3.0).point(103.0, 3.0).point(103.0, -1.0).point(99.0, -1.0)).polygon(ShapeBuilder.newPolygon().point(199.0, -11.0).point(199.0, 13.0).point(193.0, 13.0).point(193.0, -11.0).point(199.0, -11.0)), ShapeRelation.INTERSECTS);
+        result = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).setPostFilter(filter).get();
         assertSearchResponse(result);
         assertHitCount(result, 1);
     }
@@ -477,28 +310,18 @@ public class GeoShapeIntegrationTests extends ElasticsearchIntegrationTest {
      */
     public void testOrientationPersistence() throws Exception {
         String idxName = "orientation";
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("shape")
-                .startObject("properties").startObject("location")
-                .field("type", "geo_shape")
-                .field("orientation", "left")
-                .endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("shape").startObject("properties").startObject("location").field("type", "geo_shape").field("orientation", "left").endObject().endObject().endObject().endObject().string();
 
         // create index
         assertAcked(prepareCreate(idxName).addMapping("shape", mapping));
 
-        mapping = XContentFactory.jsonBuilder().startObject().startObject("shape")
-                .startObject("properties").startObject("location")
-                .field("type", "geo_shape")
-                .field("orientation", "right")
-                .endObject().endObject()
-                .endObject().endObject().string();
+        mapping = XContentFactory.jsonBuilder().startObject().startObject("shape").startObject("properties").startObject("location").field("type", "geo_shape").field("orientation", "right").endObject().endObject().endObject().endObject().string();
 
-        assertAcked(prepareCreate(idxName+"2").addMapping("shape", mapping));
-        ensureGreen(idxName, idxName+"2");
+        assertAcked(prepareCreate(idxName + "2").addMapping("shape", mapping));
+        ensureGreen(idxName, idxName + "2");
 
         internalCluster().fullRestart();
-        ensureGreen(idxName, idxName+"2");
+        ensureGreen(idxName, idxName + "2");
 
         // left orientation test
         IndicesService indicesService = internalCluster().getInstance(IndicesService.class, findNodeName(idxName));
@@ -506,19 +329,19 @@ public class GeoShapeIntegrationTests extends ElasticsearchIntegrationTest {
         FieldMapper fieldMapper = indexService.mapperService().smartNameFieldMapper("location");
         assertThat(fieldMapper, instanceOf(GeoShapeFieldMapper.class));
 
-        GeoShapeFieldMapper gsfm = (GeoShapeFieldMapper)fieldMapper;
+        GeoShapeFieldMapper gsfm = (GeoShapeFieldMapper) fieldMapper;
         ShapeBuilder.Orientation orientation = gsfm.orientation();
         assertThat(orientation, equalTo(ShapeBuilder.Orientation.CLOCKWISE));
         assertThat(orientation, equalTo(ShapeBuilder.Orientation.LEFT));
         assertThat(orientation, equalTo(ShapeBuilder.Orientation.CW));
 
         // right orientation test
-        indicesService = internalCluster().getInstance(IndicesService.class, findNodeName(idxName+"2"));
-        indexService = indicesService.indexService(idxName+"2");
+        indicesService = internalCluster().getInstance(IndicesService.class, findNodeName(idxName + "2"));
+        indexService = indicesService.indexService(idxName + "2");
         fieldMapper = indexService.mapperService().smartNameFieldMapper("location");
         assertThat(fieldMapper, instanceOf(GeoShapeFieldMapper.class));
 
-        gsfm = (GeoShapeFieldMapper)fieldMapper;
+        gsfm = (GeoShapeFieldMapper) fieldMapper;
         orientation = gsfm.orientation();
         assertThat(orientation, equalTo(ShapeBuilder.Orientation.COUNTER_CLOCKWISE));
         assertThat(orientation, equalTo(ShapeBuilder.Orientation.RIGHT));

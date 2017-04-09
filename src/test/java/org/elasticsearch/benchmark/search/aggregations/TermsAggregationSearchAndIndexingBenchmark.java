@@ -73,26 +73,18 @@ public class TermsAggregationSearchAndIndexingBenchmark {
 
     public static void main(String[] args) throws Exception {
         Bootstrap.initializeNatives(true, false);
-        Settings settings = settingsBuilder()
-                .put("refresh_interval", "-1")
-                .put(SETTING_NUMBER_OF_SHARDS, 1)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put("refresh_interval", "-1").put(SETTING_NUMBER_OF_SHARDS, 1).put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
         String clusterName = TermsAggregationSearchAndIndexingBenchmark.class.getSimpleName();
         nodes = new InternalNode[1];
         for (int i = 0; i < nodes.length; i++) {
-            nodes[i] = (InternalNode) nodeBuilder().settings(settingsBuilder().put(settings).put("name", "node1"))
-                    .clusterName(clusterName)
-                    .node();
+            nodes[i] = (InternalNode) nodeBuilder().settings(settingsBuilder().put(settings).put("name", "node1")).clusterName(clusterName).node();
         }
         Client client = nodes[0].client();
 
         client.admin().cluster().prepareHealth(indexName).setWaitForGreenStatus().setTimeout("10s").execute().actionGet();
         try {
-            client.admin().indices().prepareCreate(indexName)
-                    .addMapping(typeName, generateMapping("eager", "lazy"))
-                    .get();
+            client.admin().indices().prepareCreate(indexName).addMapping(typeName, generateMapping("eager", "lazy")).get();
             Thread.sleep(5000);
 
             long startTime = System.currentTimeMillis();
@@ -118,7 +110,7 @@ public class TermsAggregationSearchAndIndexingBenchmark {
                     builder.field("s_value", sValue);
                     builder.field("s_value_dv", sValue);
 
-                    for (String field : new String[] {"sm_value", "sm_value_dv"}) {
+                    for (String field : new String[] { "sm_value", "sm_value_dv" }) {
                         builder.startArray(field);
                         for (int k = 0; k < NUMBER_OF_MULTI_VALUE_TERMS; k++) {
                             builder.value(sValues[ThreadLocalRandom.current().nextInt(sValues.length)]);
@@ -126,8 +118,7 @@ public class TermsAggregationSearchAndIndexingBenchmark {
                         builder.endArray();
                     }
 
-                    request.add(Requests.indexRequest(indexName).type("type1").id(Integer.toString(counter))
-                            .source(builder));
+                    request.add(Requests.indexRequest(indexName).type("type1").id(Integer.toString(counter)).source(builder));
                 }
                 BulkResponse response = request.execute().actionGet();
                 if (response.hasFailures()) {
@@ -146,13 +137,9 @@ public class TermsAggregationSearchAndIndexingBenchmark {
                 System.err.println("--> Timed out waiting for cluster health");
             }
         }
-        client.admin().indices().preparePutMapping(indexName)
-                .setType(typeName)
-                .setSource(generateMapping("lazy", "lazy"))
-                .get();
+        client.admin().indices().preparePutMapping(indexName).setType(typeName).setSource(generateMapping("lazy", "lazy")).get();
         client.admin().indices().prepareRefresh().execute().actionGet();
         System.out.println("--> Number of docs in index: " + client.prepareCount().setQuery(matchAllQuery()).execute().actionGet().getCount());
-
 
         String[] nodeIds = new String[nodes.length];
         for (int i = 0; i < nodeIds.length; i++) {
@@ -167,8 +154,7 @@ public class TermsAggregationSearchAndIndexingBenchmark {
 
         List<TestResult> testResults = new ArrayList<>();
         for (TestRun testRun : testRuns) {
-            client.admin().indices().preparePutMapping(indexName).setType(typeName)
-                    .setSource(generateMapping(testRun.indexedFieldEagerLoading, testRun.docValuesEagerLoading)).get();
+            client.admin().indices().preparePutMapping(indexName).setType(typeName).setSource(generateMapping(testRun.indexedFieldEagerLoading, testRun.docValuesEagerLoading)).get();
             client.admin().indices().prepareClearCache(indexName).setFieldDataCache(true).get();
             SearchThread searchThread = new SearchThread(client, testRun.termsAggsField, testRun.termsAggsExecutionHint);
             RefreshThread refreshThread = new RefreshThread(client);
@@ -222,12 +208,8 @@ public class TermsAggregationSearchAndIndexingBenchmark {
                 for (long docId = 1; run && docId < docIdLimit;) {
                     try {
                         for (int j = 0; j < 8; j++) {
-                            GetResponse getResponse = client
-                                    .prepareGet(indexName, "type1", String.valueOf(++docId))
-                                    .get();
-                            client.prepareIndex(indexName, "type1", getResponse.getId())
-                                    .setSource(getResponse.getSource())
-                                    .get();
+                            GetResponse getResponse = client.prepareGet(indexName, "type1", String.valueOf(++docId)).get();
+                            client.prepareIndex(indexName, "type1", getResponse.getId()).setSource(getResponse.getSource()).get();
                         }
                         long startTime = System.currentTimeMillis();
                         client.admin().indices().prepareRefresh(indexName).execute().actionGet();
@@ -305,10 +287,7 @@ public class TermsAggregationSearchAndIndexingBenchmark {
             int numExecutedQueries = 0;
             while (run) {
                 try {
-                    SearchResponse searchResponse = Method.AGGREGATION.addTermsAgg(client.prepareSearch()
-                            .setSearchType(SearchType.COUNT)
-                            .setQuery(matchAllQuery()), "test", field, executionHint)
-                            .execute().actionGet();
+                    SearchResponse searchResponse = Method.AGGREGATION.addTermsAgg(client.prepareSearch().setSearchType(SearchType.COUNT).setQuery(matchAllQuery()), "test", field, executionHint).execute().actionGet();
                     if (searchResponse.getHits().totalHits() != COUNT) {
                         System.err.println("--> mismatch on hits");
                     }
@@ -332,23 +311,7 @@ public class TermsAggregationSearchAndIndexingBenchmark {
     }
 
     private static XContentBuilder generateMapping(String loading1, String loading2) throws IOException {
-        return jsonBuilder().startObject().startObject("type1").startObject("properties")
-                .startObject("s_value")
-                .field("type", "string")
-                .field("index", "not_analyzed")
-                .startObject("fielddata")
-                .field("loading", loading1)
-                .endObject()
-                .endObject()
-                .startObject("s_value_dv")
-                .field("type", "string")
-                .field("index", "no")
-                .startObject("fielddata")
-                .field("loading", loading2)
-                .field("format", "doc_values")
-                .endObject()
-                .endObject()
-                .endObject().endObject().endObject();
+        return jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("s_value").field("type", "string").field("index", "not_analyzed").startObject("fielddata").field("loading", loading1).endObject().endObject().startObject("s_value_dv").field("type", "string").field("index", "no").startObject("fielddata").field("loading", loading2).field("format", "doc_values").endObject().endObject().endObject().endObject().endObject();
     }
 
 }

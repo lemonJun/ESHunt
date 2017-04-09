@@ -44,7 +44,7 @@ import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsNull.notNullValue;
 
 @ElasticsearchIntegrationTest.SuiteScopeTest
-public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
+public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest {
 
     private static final String STRING_FIELD_NAME = "s_value";
     private static final String LONG_FIELD_NAME = "l_value";
@@ -62,34 +62,18 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
         createIndex("idx");
         List<IndexRequestBuilder> builders = new ArrayList<>();
         int numDocs = between(10, 200);
-        int numUniqueTerms = between(2,numDocs/2);
+        int numUniqueTerms = between(2, numDocs / 2);
         for (int i = 0; i < numDocs; i++) {
-            builders.add(client().prepareIndex("idx", "type", ""+i).setSource(jsonBuilder()
-                    .startObject()
-                    .field(STRING_FIELD_NAME, "val" + randomInt(numUniqueTerms))
-                    .field(LONG_FIELD_NAME, randomInt(numUniqueTerms))
-                    .field(DOUBLE_FIELD_NAME, 1.0 * randomInt(numUniqueTerms))
-                    .endObject()));
+            builders.add(client().prepareIndex("idx", "type", "" + i).setSource(jsonBuilder().startObject().field(STRING_FIELD_NAME, "val" + randomInt(numUniqueTerms)).field(LONG_FIELD_NAME, randomInt(numUniqueTerms)).field(DOUBLE_FIELD_NAME, 1.0 * randomInt(numUniqueTerms)).endObject()));
         }
         assertAcked(prepareCreate("idx_single_shard").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)));
         for (int i = 0; i < numDocs; i++) {
-            builders.add(client().prepareIndex("idx_single_shard", "type", ""+i).setSource(jsonBuilder()
-                    .startObject()
-                    .field(STRING_FIELD_NAME, "val" + randomInt(numUniqueTerms))
-                    .field(LONG_FIELD_NAME, randomInt(numUniqueTerms))
-                    .field(DOUBLE_FIELD_NAME, 1.0 * randomInt(numUniqueTerms))
-                    .endObject()));
+            builders.add(client().prepareIndex("idx_single_shard", "type", "" + i).setSource(jsonBuilder().startObject().field(STRING_FIELD_NAME, "val" + randomInt(numUniqueTerms)).field(LONG_FIELD_NAME, randomInt(numUniqueTerms)).field(DOUBLE_FIELD_NAME, 1.0 * randomInt(numUniqueTerms)).endObject()));
         }
-        numRoutingValues = between(1,40);
+        numRoutingValues = between(1, 40);
         assertAcked(prepareCreate("idx_with_routing").addMapping("type", "{ \"type\" : { \"_routing\" : { \"required\" : true, \"path\" : \"" + ROUTING_FIELD_NAME + "\" } } }"));
         for (int i = 0; i < numDocs; i++) {
-            builders.add(client().prepareIndex("idx_single_shard", "type", ""+i).setSource(jsonBuilder()
-                    .startObject()
-                    .field(STRING_FIELD_NAME, "val" + randomInt(numUniqueTerms))
-                    .field(LONG_FIELD_NAME, randomInt(numUniqueTerms))
-                    .field(DOUBLE_FIELD_NAME, 1.0 * randomInt(numUniqueTerms))
-                    .field(ROUTING_FIELD_NAME, String.valueOf(randomInt(numRoutingValues)))
-                    .endObject()));
+            builders.add(client().prepareIndex("idx_single_shard", "type", "" + i).setSource(jsonBuilder().startObject().field(STRING_FIELD_NAME, "val" + randomInt(numUniqueTerms)).field(LONG_FIELD_NAME, randomInt(numUniqueTerms)).field(DOUBLE_FIELD_NAME, 1.0 * randomInt(numUniqueTerms)).field(ROUTING_FIELD_NAME, String.valueOf(randomInt(numRoutingValues))).endObject()));
         }
         indexRandom(true, builders);
         ensureSearchable();
@@ -100,7 +84,7 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
         assertThat(accurateTerms, notNullValue());
         assertThat(accurateTerms.getName(), equalTo("terms"));
         assertThat(accurateTerms.getDocCountError(), equalTo(0l));
-    
+
         Terms testTerms = testResponse.getAggregations().get("terms");
         assertThat(testTerms, notNullValue());
         assertThat(testTerms.getName(), equalTo("terms"));
@@ -108,7 +92,7 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
         Collection<Bucket> testBuckets = testTerms.getBuckets();
         assertThat(testBuckets.size(), lessThanOrEqualTo(size));
         assertThat(accurateTerms.getBuckets().size(), greaterThanOrEqualTo(testBuckets.size()));
-    
+
         for (Terms.Bucket testBucket : testBuckets) {
             assertThat(testBucket, notNullValue());
             Terms.Bucket accurateBucket = accurateTerms.getBucketByKey(testBucket.getKey());
@@ -118,14 +102,14 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
             assertThat(testBucket.getDocCount() + testBucket.getDocCountError(), greaterThanOrEqualTo(accurateBucket.getDocCount()));
             assertThat(testBucket.getDocCount() - testBucket.getDocCountError(), lessThanOrEqualTo(accurateBucket.getDocCount()));
         }
-        
-        for (Terms.Bucket accurateBucket: accurateTerms.getBuckets()) {
+
+        for (Terms.Bucket accurateBucket : accurateTerms.getBuckets()) {
             assertThat(accurateBucket, notNullValue());
             Terms.Bucket testBucket = accurateTerms.getBucketByKey(accurateBucket.getKey());
             if (testBucket == null) {
                 assertThat(accurateBucket.getDocCount(), lessThanOrEqualTo(testTerms.getDocCountError()));
             }
-            
+
         }
     }
 
@@ -134,7 +118,7 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
         assertThat(accurateTerms, notNullValue());
         assertThat(accurateTerms.getName(), equalTo("terms"));
         assertThat(accurateTerms.getDocCountError(), equalTo(0l));
-    
+
         Terms testTerms = testResponse.getAggregations().get("terms");
         assertThat(testTerms, notNullValue());
         assertThat(testTerms.getName(), equalTo("terms"));
@@ -142,7 +126,7 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
         Collection<Bucket> testBuckets = testTerms.getBuckets();
         assertThat(testBuckets.size(), lessThanOrEqualTo(size));
         assertThat(accurateTerms.getBuckets().size(), greaterThanOrEqualTo(testBuckets.size()));
-    
+
         for (Terms.Bucket testBucket : testBuckets) {
             assertThat(testBucket, notNullValue());
             Terms.Bucket accurateBucket = accurateTerms.getBucketByKey(testBucket.getKey());
@@ -159,7 +143,7 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
         assertThat(testTerms.getDocCountError(), equalTo(0l));
         Collection<Bucket> testBuckets = testTerms.getBuckets();
         assertThat(testBuckets.size(), lessThanOrEqualTo(size));
-    
+
         for (Terms.Bucket testBucket : testBuckets) {
             assertThat(testBucket, notNullValue());
             assertThat(testBucket.getDocCountError(), equalTo(0l));
@@ -171,15 +155,15 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
         assertThat(accurateTerms, notNullValue());
         assertThat(accurateTerms.getName(), equalTo("terms"));
         assertThat(accurateTerms.getDocCountError(), equalTo(0l));
-    
+
         Terms testTerms = testResponse.getAggregations().get("terms");
         assertThat(testTerms, notNullValue());
         assertThat(testTerms.getName(), equalTo("terms"));
-        assertThat(testTerms.getDocCountError(),anyOf(equalTo(-1l), equalTo(0l)));
+        assertThat(testTerms.getDocCountError(), anyOf(equalTo(-1l), equalTo(0l)));
         Collection<Bucket> testBuckets = testTerms.getBuckets();
         assertThat(testBuckets.size(), lessThanOrEqualTo(size));
         assertThat(accurateTerms.getBuckets().size(), greaterThanOrEqualTo(testBuckets.size()));
-    
+
         for (Terms.Bucket testBucket : testBuckets) {
             assertThat(testBucket, notNullValue());
             Terms.Bucket accurateBucket = accurateTerms.getBucketByKey(testBucket.getKey());
@@ -193,27 +177,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void stringValueField() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -224,27 +192,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void stringValueField_singleShard() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -255,16 +207,8 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void stringValueField_withRouting() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_with_routing").setTypes("type").setRouting(String.valueOf(between(1, numRoutingValues)))
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_with_routing").setTypes("type").setRouting(String.valueOf(between(1, numRoutingValues))).addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -275,29 +219,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void stringValueField_docCountAsc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.count(true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.count(true)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.count(true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.count(true)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -308,29 +234,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void stringValueField_termSortAsc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.term(true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.term(true)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.term(true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.term(true)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -341,29 +249,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void stringValueField_termSortDesc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.term(false))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.term(false)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.term(false))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.term(false)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -374,31 +264,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void stringValueField_subAggAsc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.aggregation("sortAgg", true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values()))
-                        .subAggregation(sum("sortAgg").field(LONG_FIELD_NAME)))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.aggregation("sortAgg", true)).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(sum("sortAgg").field(LONG_FIELD_NAME))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.aggregation("sortAgg", true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values()))
-                        .subAggregation(sum("sortAgg").field(LONG_FIELD_NAME)))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.aggregation("sortAgg", true)).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(sum("sortAgg").field(LONG_FIELD_NAME))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -409,31 +279,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void stringValueField_subAggDesc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.aggregation("sortAgg", false))
-                        .collectMode(randomFrom(SubAggCollectionMode.values()))
-                        .subAggregation(sum("sortAgg").field(LONG_FIELD_NAME)))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.aggregation("sortAgg", false)).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(sum("sortAgg").field(LONG_FIELD_NAME))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(STRING_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.aggregation("sortAgg", false))
-                        .collectMode(randomFrom(SubAggCollectionMode.values()))
-                        .subAggregation(sum("sortAgg").field(LONG_FIELD_NAME)))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(STRING_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.aggregation("sortAgg", false)).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(sum("sortAgg").field(LONG_FIELD_NAME))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -444,27 +294,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void longValueField() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -475,27 +309,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void longValueField_singleShard() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -506,16 +324,8 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void longValueField_withRouting() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_with_routing").setTypes("type").setRouting(String.valueOf(between(1, numRoutingValues)))
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_with_routing").setTypes("type").setRouting(String.valueOf(between(1, numRoutingValues))).addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -526,29 +336,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void longValueField_docCountAsc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.count(true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.count(true)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.count(true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.count(true)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -559,29 +351,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void longValueField_termSortAsc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.term(true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.term(true)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.term(true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.term(true)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -592,29 +366,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void longValueField_termSortDesc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.term(false))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.term(false)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.term(false))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.term(false)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -625,31 +381,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void longValueField_subAggAsc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.aggregation("sortAgg", true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values()))
-                        .subAggregation(sum("sortAgg").field(LONG_FIELD_NAME)))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.aggregation("sortAgg", true)).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(sum("sortAgg").field(LONG_FIELD_NAME))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.aggregation("sortAgg", true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values()))
-                        .subAggregation(sum("sortAgg").field(LONG_FIELD_NAME)))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.aggregation("sortAgg", true)).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(sum("sortAgg").field(LONG_FIELD_NAME))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -660,31 +396,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void longValueField_subAggDesc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.aggregation("sortAgg", false))
-                        .collectMode(randomFrom(SubAggCollectionMode.values()))
-                        .subAggregation(sum("sortAgg").field(DOUBLE_FIELD_NAME)))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.aggregation("sortAgg", false)).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(sum("sortAgg").field(DOUBLE_FIELD_NAME))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(LONG_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.aggregation("sortAgg", false))
-                        .collectMode(randomFrom(SubAggCollectionMode.values()))
-                        .subAggregation(sum("sortAgg").field(DOUBLE_FIELD_NAME)))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(LONG_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.aggregation("sortAgg", false)).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(sum("sortAgg").field(DOUBLE_FIELD_NAME))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -695,27 +411,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void doubleValueField() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -726,27 +426,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void doubleValueField_singleShard() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -757,16 +441,8 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void doubleValueField_withRouting() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_with_routing").setTypes("type").setRouting(String.valueOf(between(1, numRoutingValues)))
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_with_routing").setTypes("type").setRouting(String.valueOf(between(1, numRoutingValues))).addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -777,29 +453,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void doubleValueField_docCountAsc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.count(true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.count(true)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.count(true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.count(true)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -810,29 +468,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void doubleValueField_termSortAsc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.term(true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.term(true)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.term(true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.term(true)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -843,29 +483,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void doubleValueField_termSortDesc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.term(false))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.term(false)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.term(false))
-                        .collectMode(randomFrom(SubAggCollectionMode.values())))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.term(false)).collectMode(randomFrom(SubAggCollectionMode.values()))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -876,31 +498,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void doubleValueField_subAggAsc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.aggregation("sortAgg", true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values()))
-                        .subAggregation(sum("sortAgg").field(LONG_FIELD_NAME)))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.aggregation("sortAgg", true)).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(sum("sortAgg").field(LONG_FIELD_NAME))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.aggregation("sortAgg", true))
-                        .collectMode(randomFrom(SubAggCollectionMode.values()))
-                        .subAggregation(sum("sortAgg").field(LONG_FIELD_NAME)))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.aggregation("sortAgg", true)).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(sum("sortAgg").field(LONG_FIELD_NAME))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 
@@ -911,31 +513,11 @@ public class TermsDocCountErrorTests extends ElasticsearchIntegrationTest{
     public void doubleValueField_subAggDesc() throws Exception {
         int size = randomIntBetween(1, 20);
         int shardSize = randomIntBetween(size, size * 2);
-        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(0)
-                        .shardSize(0)
-                        .order(Order.aggregation("sortAgg", false))
-                        .collectMode(randomFrom(SubAggCollectionMode.values()))
-                        .subAggregation(sum("sortAgg").field(LONG_FIELD_NAME)))
-                .execute().actionGet();
+        SearchResponse accurateResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(0).shardSize(0).order(Order.aggregation("sortAgg", false)).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(sum("sortAgg").field(LONG_FIELD_NAME))).execute().actionGet();
 
         assertSearchResponse(accurateResponse);
-        
-        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(DOUBLE_FIELD_NAME)
-                        .showTermDocCountError(true)
-                        .size(size)
-                        .shardSize(shardSize)
-                        .order(Order.aggregation("sortAgg", false))
-                        .collectMode(randomFrom(SubAggCollectionMode.values()))
-                        .subAggregation(sum("sortAgg").field(LONG_FIELD_NAME)))
-                .execute().actionGet();
+
+        SearchResponse testResponse = client().prepareSearch("idx_single_shard").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(DOUBLE_FIELD_NAME).showTermDocCountError(true).size(size).shardSize(shardSize).order(Order.aggregation("sortAgg", false)).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(sum("sortAgg").field(LONG_FIELD_NAME))).execute().actionGet();
 
         assertSearchResponse(testResponse);
 

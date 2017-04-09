@@ -40,7 +40,7 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.*;
 
-@LuceneTestCase.SuppressCodecs({"MockFixedIntBlock", "MockVariableIntBlock", "MockSep", "MockRandom", "Lucene3x"})
+@LuceneTestCase.SuppressCodecs({ "MockFixedIntBlock", "MockVariableIntBlock", "MockSep", "MockRandom", "Lucene3x" })
 public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
 
     /*
@@ -102,9 +102,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         String thirdHlValue = "This is the third value to test <b>highlighting</b> with postings.";
 
         //default behaviour: using the WholeBreakIterator, despite the multi valued paragraph separator we get back a single snippet for multiple values
-        assertThat(snippets[0], equalTo(firstHlValue + (char)8233 + secondHlValue + (char)8233 + thirdHlValue));
-
-
+        assertThat(snippets[0], equalTo(firstHlValue + (char) 8233 + secondHlValue + (char) 8233 + thirdHlValue));
 
         highlighter = new XPostingsHighlighter() {
             Iterator<String> valuesIterator = Arrays.asList(firstValue, secondValue, thirdValue).iterator();
@@ -112,7 +110,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
 
             @Override
             protected String[][] loadFieldValues(IndexSearcher searcher, String[] fields, int[] docids, int maxLength) throws IOException {
-                return new String[][]{new String[]{valuesIterator.next()}};
+                return new String[][] { new String[] { valuesIterator.next() } };
             }
 
             @Override
@@ -204,8 +202,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         String thirdHlValue = "This is the third value to test <b>highlighting</b> with postings.";
         //default behaviour: using the WholeBreakIterator, despite the multi valued paragraph separator we get back a single snippet for multiple values
         //but only the first and the third value are returned since there are no matches in the second one.
-        assertThat(snippets[0], equalTo(firstHlValue + (char)8233 + secondValue + (char)8233 + thirdHlValue));
-
+        assertThat(snippets[0], equalTo(firstHlValue + (char) 8233 + secondValue + (char) 8233 + thirdHlValue));
 
         highlighter = new XPostingsHighlighter() {
             Iterator<String> valuesIterator = Arrays.asList(firstValue, secondValue, thirdValue).iterator();
@@ -213,7 +210,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
 
             @Override
             protected String[][] loadFieldValues(IndexSearcher searcher, String[] fields, int[] docids, int maxLength) throws IOException {
-                return new String[][]{new String[]{valuesIterator.next()}};
+                return new String[][] { new String[] { valuesIterator.next() } };
             }
 
             @Override
@@ -291,7 +288,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
 
             @Override
             protected String[][] loadFieldValues(IndexSearcher searcher, String[] fields, int[] docids, int maxLength) throws IOException {
-                return new String[][]{new String[]{valuesIterator.next()}};
+                return new String[][] { new String[] { valuesIterator.next() } };
             }
 
             @Override
@@ -374,7 +371,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
 
             @Override
             protected String[][] loadFieldValues(IndexSearcher searcher, String[] fields, int[] docids, int maxLength) throws IOException {
-                return new String[][]{new String[]{valuesIterator.next()}};
+                return new String[][] { new String[] { valuesIterator.next() } };
             }
 
             @Override
@@ -449,7 +446,6 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         //default behaviour that we want to change
         assertThat(snippets[0], equalTo("This <b>test</b> is another test. ... <b>Test</b> <b>test</b> <b>test</b> test."));
 
-
         final CustomPassageFormatter passageFormatter = new CustomPassageFormatter("<b>", "</b>", new DefaultEncoder());
         highlighter = new XPostingsHighlighter() {
             @Override
@@ -465,7 +461,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
             docids[i] = scoreDocs[i].doc;
             maxPassages[i] = 5;
         }
-        Map<String, Object[]> highlights = highlighter.highlightFieldsAsObjects(new String[]{"body"}, query, searcher, docids, maxPassages);
+        Map<String, Object[]> highlights = highlighter.highlightFieldsAsObjects(new String[] { "body" }, query, searcher, docids, maxPassages);
         assertThat(highlights, notNullValue());
         assertThat(highlights.size(), equalTo(1));
         Object[] objectSnippets = highlights.get("body");
@@ -564,7 +560,6 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         body2.setStringValue("highlighter.");
         iw.addDocument(doc);
 
-
         IndexReader ir = iw.getReader();
         iw.close();
 
@@ -578,7 +573,6 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         //default behaviour: getting a fragment that spans across different values
         assertThat(snippets[0], equalTo("Just a test <b>highlighting</b> from postings highlighter."));
 
-
         highlighter = new XPostingsHighlighter() {
             @Override
             protected char getMultiValuedSeparator(String field) {
@@ -589,14 +583,11 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         snippets = highlighter.highlight("body", query, searcher, topDocs);
         assertThat(snippets.length, equalTo(1));
         //getting a fragment that doesn't span across different values since we used the paragraph separator between the different values
-        assertThat(snippets[0], equalTo("Just a test <b>highlighting</b> from postings" + (char)8233));
+        assertThat(snippets[0], equalTo("Just a test <b>highlighting</b> from postings" + (char) 8233));
 
         ir.close();
         dir.close();
     }
-
-
-
 
     /*
     The following are all the existing postings highlighter tests, to make sure we don't have regression in our own fork
@@ -701,7 +692,6 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         XPostingsHighlighter highlighter = new XPostingsHighlighter(maxLength);
         String snippets[] = highlighter.highlight("body", query, searcher, topDocs);
 
-
         ir.close();
         dir.close();
         return snippets;
@@ -789,7 +779,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         offsetsType.setIndexOptions(FieldInfo.IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
         Document doc = new Document();
 
-        for(int i = 0; i < 3 ; i++) {
+        for (int i = 0; i < 3; i++) {
             Field body = new Field("body", "", offsetsType);
             body.setStringValue("This is a multivalued field");
             doc.add(body);
@@ -807,8 +797,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         assertEquals(1, topDocs.totalHits);
         String snippets[] = highlighter.highlight("body", query, searcher, topDocs);
         assertEquals(1, snippets.length);
-        assertTrue("Snippet should have maximum 40 characters plus the pre and post tags",
-                snippets[0].length() == (40 + "<b></b>".length()));
+        assertTrue("Snippet should have maximum 40 characters plus the pre and post tags", snippets[0].length() == (40 + "<b></b>".length()));
 
         ir.close();
         dir.close();
@@ -846,7 +835,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         query.add(new TermQuery(new Term("title", "best")), BooleanClause.Occur.SHOULD);
         TopDocs topDocs = searcher.search(query, null, 10, Sort.INDEXORDER);
         assertEquals(2, topDocs.totalHits);
-        Map<String,String[]> snippets = highlighter.highlightFields(new String [] { "body", "title" }, query, searcher, topDocs);
+        Map<String, String[]> snippets = highlighter.highlightFields(new String[] { "body", "title" }, query, searcher, topDocs);
         assertEquals(2, snippets.size());
         assertEquals("Just a test <b>highlighting</b> from postings. ", snippets.get("body")[0]);
         assertEquals("<b>Highlighting</b> the first term. ", snippets.get("body")[1]);
@@ -978,15 +967,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
 
     @Test
     public void testBuddhism() throws Exception {
-        String text = "This eight-volume set brings together seminal papers in Buddhist studies from a vast " +
-                "range of academic disciplines published over the last forty years. With a new introduction " +
-                "by the editor, this collection is a unique and unrivalled research resource for both " +
-                "student and scholar. Coverage includes: - Buddhist origins; early history of Buddhism in " +
-                "South and Southeast Asia - early Buddhist Schools and Doctrinal History; Theravada Doctrine " +
-                "- the Origins and nature of Mahayana Buddhism; some Mahayana religious topics - Abhidharma " +
-                "and Madhyamaka - Yogacara, the Epistemological tradition, and Tathagatagarbha - Tantric " +
-                "Buddhism (Including China and Japan); Buddhism in Nepal and Tibet - Buddhism in South and " +
-                "Southeast Asia, and - Buddhism in China, East Asia, and Japan.";
+        String text = "This eight-volume set brings together seminal papers in Buddhist studies from a vast " + "range of academic disciplines published over the last forty years. With a new introduction " + "by the editor, this collection is a unique and unrivalled research resource for both " + "student and scholar. Coverage includes: - Buddhist origins; early history of Buddhism in " + "South and Southeast Asia - early Buddhist Schools and Doctrinal History; Theravada Doctrine " + "- the Origins and nature of Mahayana Buddhism; some Mahayana religious topics - Abhidharma " + "and Madhyamaka - Yogacara, the Epistemological tradition, and Tathagatagarbha - Tantric " + "Buddhism (Including China and Japan); Buddhism in Nepal and Tibet - Buddhism in South and " + "Southeast Asia, and - Buddhism in China, East Asia, and Japan.";
         Directory dir = newDirectory();
         Analyzer analyzer = new MockAnalyzer(random(), MockTokenizer.SIMPLE, true);
         RandomIndexWriter iw = new RandomIndexWriter(random(), dir, analyzer);
@@ -1015,10 +996,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
 
     @Test
     public void testCuriousGeorge() throws Exception {
-        String text = "It’s the formula for success for preschoolers—Curious George and fire trucks! " +
-                "Curious George and the Firefighters is a story based on H. A. and Margret Rey’s " +
-                "popular primate and painted in the original watercolor and charcoal style. " +
-                "Firefighters are a famously brave lot, but can they withstand a visit from one curious monkey?";
+        String text = "It’s the formula for success for preschoolers—Curious George and fire trucks! " + "Curious George and the Firefighters is a story based on H. A. and Margret Rey’s " + "popular primate and painted in the original watercolor and charcoal style. " + "Firefighters are a famously brave lot, but can they withstand a visit from one curious monkey?";
         Directory dir = newDirectory();
         Analyzer analyzer = new MockAnalyzer(random(), MockTokenizer.SIMPLE, true);
         RandomIndexWriter iw = new RandomIndexWriter(random(), dir, analyzer);
@@ -1046,8 +1024,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
 
     @Test
     public void testCambridgeMA() throws Exception {
-        BufferedReader r = new BufferedReader(new InputStreamReader(
-                this.getClass().getResourceAsStream("CambridgeMA.utf8"), "UTF-8"));
+        BufferedReader r = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("CambridgeMA.utf8"), "UTF-8"));
         String text = r.readLine();
         r.close();
         Directory dir = newDirectory();
@@ -1068,7 +1045,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         query.add(new TermQuery(new Term("body", "massachusetts")), BooleanClause.Occur.SHOULD);
         TopDocs topDocs = searcher.search(query, 10);
         assertEquals(1, topDocs.totalHits);
-        XPostingsHighlighter highlighter = new XPostingsHighlighter(Integer.MAX_VALUE-1);
+        XPostingsHighlighter highlighter = new XPostingsHighlighter(Integer.MAX_VALUE - 1);
         String snippets[] = highlighter.highlight("body", query, searcher, topDocs, 2);
         assertEquals(1, snippets.length);
         assertTrue(snippets[0].contains("<b>Square</b>"));
@@ -1130,7 +1107,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         query2.add(new TermQuery(new Term("body", "both")), BooleanClause.Occur.MUST_NOT);
         TopDocs topDocs = searcher.search(query, 10);
         assertEquals(1, topDocs.totalHits);
-        XPostingsHighlighter highlighter = new XPostingsHighlighter(Integer.MAX_VALUE-1);
+        XPostingsHighlighter highlighter = new XPostingsHighlighter(Integer.MAX_VALUE - 1);
         String snippets[] = highlighter.highlight("body", query, searcher, topDocs, 2);
         assertEquals(1, snippets.length);
         assertFalse(snippets[0].contains("<b>both</b>"));
@@ -1205,7 +1182,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         int[] docIDs = new int[2];
         docIDs[0] = hits[0].doc;
         docIDs[1] = hits[1].doc;
-        String snippets[] = highlighter.highlightFields(new String[] {"body"}, query, searcher, docIDs, new int[] { 1 }).get("body");
+        String snippets[] = highlighter.highlightFields(new String[] { "body" }, query, searcher, docIDs, new int[] { 1 }).get("body");
         assertEquals(2, snippets.length);
         assertEquals("Just a test <b>highlighting</b> from postings. ", snippets[0]);
         assertEquals("<b>Highlighting</b> the first term. ", snippets[1]);
@@ -1285,8 +1262,8 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         IndexSearcher searcher = newSearcher(ir);
         XPostingsHighlighter highlighter = new XPostingsHighlighter();
         Query query = new TermQuery(new Term("body", "highlighting"));
-        int[] docIDs = new int[] {0};
-        String snippets[] = highlighter.highlightFields(new String[] {"body"}, query, searcher, docIDs, new int[] { 2 }).get("body");
+        int[] docIDs = new int[] { 0 };
+        String snippets[] = highlighter.highlightFields(new String[] { "body" }, query, searcher, docIDs, new int[] { 2 }).get("body");
         assertEquals(1, snippets.length);
         assertEquals("test this is.  another sentence this test has.  ", snippets[0]);
 
@@ -1322,8 +1299,8 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
             }
         };
         Query query = new TermQuery(new Term("body", "highlighting"));
-        int[] docIDs = new int[] {0};
-        String snippets[] = highlighter.highlightFields(new String[] {"body"}, query, searcher, docIDs, new int[] { 2 }).get("body");
+        int[] docIDs = new int[] { 0 };
+        String snippets[] = highlighter.highlightFields(new String[] { "body" }, query, searcher, docIDs, new int[] { 2 }).get("body");
         assertEquals(1, snippets.length);
         assertNull(snippets[0]);
 
@@ -1359,8 +1336,8 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
             }
         };
         Query query = new TermQuery(new Term("body", "highlighting"));
-        int[] docIDs = new int[] {0};
-        String snippets[] = highlighter.highlightFields(new String[] {"body"}, query, searcher, docIDs, new int[] { 2 }).get("body");
+        int[] docIDs = new int[] { 0 };
+        String snippets[] = highlighter.highlightFields(new String[] { "body" }, query, searcher, docIDs, new int[] { 2 }).get("body");
         assertEquals(1, snippets.length);
         assertEquals("test this is.  another sentence this test has.  far away is that planet.", snippets[0]);
 
@@ -1391,8 +1368,8 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         IndexSearcher searcher = newSearcher(ir);
         XPostingsHighlighter highlighter = new XPostingsHighlighter();
         Query query = new TermQuery(new Term("bogus", "highlighting"));
-        int[] docIDs = new int[] {0};
-        String snippets[] = highlighter.highlightFields(new String[] {"bogus"}, query, searcher, docIDs, new int[] { 2 }).get("bogus");
+        int[] docIDs = new int[] { 0 };
+        String snippets[] = highlighter.highlightFields(new String[] { "bogus" }, query, searcher, docIDs, new int[] { 2 }).get("bogus");
         assertEquals(1, snippets.length);
         assertNull(snippets[0]);
 
@@ -1429,7 +1406,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         Query query = new TermQuery(new Term("body", "highlighting"));
         int[] docIDs = new int[1];
         docIDs[0] = docID;
-        String snippets[] = highlighter.highlightFields(new String[] {"body"}, query, searcher, docIDs, new int[] { 2 }).get("body");
+        String snippets[] = highlighter.highlightFields(new String[] { "body" }, query, searcher, docIDs, new int[] { 2 }).get("body");
         assertEquals(1, snippets.length);
         assertEquals("   ", snippets[0]);
 
@@ -1466,7 +1443,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         Query query = new TermQuery(new Term("body", "highlighting"));
         int[] docIDs = new int[1];
         docIDs[0] = docID;
-        String snippets[] = highlighter.highlightFields(new String[] {"body"}, query, searcher, docIDs, new int[] { 2 }).get("body");
+        String snippets[] = highlighter.highlightFields(new String[] { "body" }, query, searcher, docIDs, new int[] { 2 }).get("body");
         assertEquals(1, snippets.length);
         assertNull(snippets[0]);
 
@@ -1485,14 +1462,14 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         offsetsType.setIndexOptions(FieldInfo.IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
 
         int numDocs = scaledRandomIntBetween(100, 1000);
-        for(int i=0;i<numDocs;i++) {
+        for (int i = 0; i < numDocs; i++) {
             Document doc = new Document();
             String content = "the answer is " + i;
             if ((i & 1) == 0) {
                 content += " some more terms";
             }
             doc.add(new Field("body", content, offsetsType));
-            doc.add(newStringField("id", ""+i, Field.Store.YES));
+            doc.add(newStringField("id", "" + i, Field.Store.YES));
             iw.addDocument(doc);
 
             if (random().nextInt(10) == 2) {
@@ -1511,11 +1488,11 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
 
         String snippets[] = highlighter.highlight("body", query, searcher, hits);
         assertEquals(numDocs, snippets.length);
-        for(int hit=0;hit<numDocs;hit++) {
+        for (int hit = 0; hit < numDocs; hit++) {
             Document doc = searcher.doc(hits.scoreDocs[hit].doc);
             int id = Integer.parseInt(doc.get("id"));
             String expected = "the <b>answer</b> is " + id;
-            if ((id  & 1) == 0) {
+            if ((id & 1) == 0) {
                 expected += " some more terms";
             }
             assertEquals(expected, snippets[hit]);
@@ -1552,7 +1529,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         BooleanQuery query = new BooleanQuery();
         query.add(new TermQuery(new Term("body", "test")), BooleanClause.Occur.SHOULD);
         query.add(new TermQuery(new Term("title", "test")), BooleanClause.Occur.SHOULD);
-        Map<String,String[]> snippets = highlighter.highlightFields(new String[] { "title", "body" }, query, searcher, new int[] { 0 }, new int[] { 1, 2 });
+        Map<String, String[]> snippets = highlighter.highlightFields(new String[] { "title", "body" }, query, searcher, new int[] { 0 }, new int[] { 1, 2 });
         String titleHighlight = snippets.get("title")[0];
         String bodyHighlight = snippets.get("body")[0];
         assertEquals("This is a <b>test</b>. ", titleHighlight);
@@ -1671,7 +1648,7 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
                     public String[] format(Passage passages[], String content) {
                         // Just turns the String snippet into a length 2
                         // array of String
-                        return new String[] {"blah blah", defaultFormatter.format(passages, content).toString()};
+                        return new String[] { "blah blah", defaultFormatter.format(passages, content).toString() };
                     }
                 };
             }
@@ -1682,10 +1659,10 @@ public class XPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
         assertEquals(1, topDocs.totalHits);
         int[] docIDs = new int[1];
         docIDs[0] = topDocs.scoreDocs[0].doc;
-        Map<String,Object[]> snippets = highlighter.highlightFieldsAsObjects(new String[]{"body"}, query, searcher, docIDs, new int[] {1});
+        Map<String, Object[]> snippets = highlighter.highlightFieldsAsObjects(new String[] { "body" }, query, searcher, docIDs, new int[] { 1 });
         Object[] bodySnippets = snippets.get("body");
         assertEquals(1, bodySnippets.length);
-        assertTrue(Arrays.equals(new String[] {"blah blah", "Just a test <b>highlighting</b> from postings. "}, (String[]) bodySnippets[0]));
+        assertTrue(Arrays.equals(new String[] { "blah blah", "Just a test <b>highlighting</b> from postings. " }, (String[]) bodySnippets[0]));
 
         ir.close();
         dir.close();

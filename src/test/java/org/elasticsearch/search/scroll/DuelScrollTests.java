@@ -47,20 +47,13 @@ public class DuelScrollTests extends ElasticsearchIntegrationTest {
     public void testDuel_queryThenFetch() throws Exception {
         TestContext context = create(SearchType.DFS_QUERY_THEN_FETCH, SearchType.QUERY_THEN_FETCH);
 
-        SearchResponse control = client().prepareSearch("index")
-                .setSearchType(context.searchType)
-                .addSort(context.sort)
-                .setSize(context.numDocs).get();
+        SearchResponse control = client().prepareSearch("index").setSearchType(context.searchType).addSort(context.sort).setSize(context.numDocs).get();
         assertNoFailures(control);
         SearchHits sh = control.getHits();
         assertThat(sh.totalHits(), equalTo((long) context.numDocs));
         assertThat(sh.getHits().length, equalTo(context.numDocs));
 
-        SearchResponse searchScrollResponse = client().prepareSearch("index")
-                .setSearchType(context.searchType)
-                .addSort(context.sort)
-                .setSize(context.scrollRequestSize)
-                .setScroll("10m").get();
+        SearchResponse searchScrollResponse = client().prepareSearch("index").setSearchType(context.searchType).addSort(context.sort).setSize(context.scrollRequestSize).setScroll("10m").get();
 
         assertNoFailures(searchScrollResponse);
         assertThat(searchScrollResponse.getHits().getTotalHits(), equalTo((long) context.numDocs));
@@ -105,11 +98,7 @@ public class DuelScrollTests extends ElasticsearchIntegrationTest {
         // a subsequent scroll call can return hits that should have been in the hits of the first scroll call.
 
         TestContext context = create(SearchType.DFS_QUERY_AND_FETCH, SearchType.QUERY_AND_FETCH);
-        SearchResponse searchScrollResponse = client().prepareSearch("index")
-                .setSearchType(context.searchType)
-                .addSort(context.sort)
-                .setSize(context.scrollRequestSize)
-                .setScroll("10m").get();
+        SearchResponse searchScrollResponse = client().prepareSearch("index").setSearchType(context.searchType).addSort(context.sort).setSize(context.scrollRequestSize).setScroll("10m").get();
 
         assertNoFailures(searchScrollResponse);
         assertThat(searchScrollResponse.getHits().getTotalHits(), equalTo((long) context.numDocs));
@@ -132,27 +121,8 @@ public class DuelScrollTests extends ElasticsearchIntegrationTest {
         clearScroll(scrollId);
     }
 
-
     private TestContext create(SearchType... searchTypes) throws Exception {
-        assertAcked(prepareCreate("index").addMapping("type", jsonBuilder().startObject().startObject("type").startObject("properties")
-                .startObject("field1")
-                    .field("type", "long")
-                .endObject()
-                .startObject("field2")
-                    .field("type", "string")
-                .endObject()
-                .startObject("nested")
-                    .field("type", "nested")
-                    .startObject("properties")
-                        .startObject("field3")
-                            .field("type", "long")
-                        .endObject()
-                        .startObject("field4")
-                            .field("type", "string")
-                        .endObject()
-                    .endObject()
-                .endObject()
-                .endObject().endObject().endObject()));
+        assertAcked(prepareCreate("index").addMapping("type", jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "long").endObject().startObject("field2").field("type", "string").endObject().startObject("nested").field("type", "nested").startObject("properties").startObject("field3").field("type", "long").endObject().startObject("field4").field("type", "string").endObject().endObject().endObject().endObject().endObject().endObject()));
 
         int numDocs = 2 + randomInt(512);
         int scrollRequestSize = randomIntBetween(1, rarely() ? numDocs : numDocs / 2);
@@ -161,23 +131,16 @@ public class DuelScrollTests extends ElasticsearchIntegrationTest {
         int numMissingDocs = atMost(numDocs / 100);
         IntOpenHashSet missingDocs = new IntOpenHashSet(numMissingDocs);
         for (int i = 0; i < numMissingDocs; i++) {
-            while (!missingDocs.add(randomInt(numDocs))) {}
+            while (!missingDocs.add(randomInt(numDocs))) {
+            }
         }
 
         for (int i = 1; i <= numDocs; i++) {
-            IndexRequestBuilder indexRequestBuilder = client()
-                    .prepareIndex("index", "type", String.valueOf(i));
+            IndexRequestBuilder indexRequestBuilder = client().prepareIndex("index", "type", String.valueOf(i));
             if (missingDocs.contains(i)) {
                 indexRequestBuilder.setSource("x", "y");
             } else {
-                indexRequestBuilder.setSource(jsonBuilder().startObject()
-                        .field("field1", i)
-                        .field("field2", String.valueOf(i))
-                        .startObject("nested")
-                            .field("field3", i)
-                            .field("field4", String.valueOf(i))
-                        .endObject()
-                        .endObject());
+                indexRequestBuilder.setSource(jsonBuilder().startObject().field("field1", i).field("field2", String.valueOf(i)).startObject("nested").field("field3", i).field("field4", String.valueOf(i)).endObject().endObject());
             }
 
             if (unevenRouting && randomInt(3) <= 2) {
@@ -192,8 +155,7 @@ public class DuelScrollTests extends ElasticsearchIntegrationTest {
             if (randomBoolean()) {
                 sort = SortBuilders.fieldSort("field1").missing(1);
             } else {
-                sort = SortBuilders.fieldSort("field2")
-                        .missing("1");
+                sort = SortBuilders.fieldSort("field2").missing("1");
             }
         } else {
             if (randomBoolean()) {
@@ -209,7 +171,6 @@ public class DuelScrollTests extends ElasticsearchIntegrationTest {
         logger.info("numDocs={}, scrollRequestSize={}, sort={}, searchType={}", numDocs, scrollRequestSize, sort, searchType);
         return new TestContext(numDocs, scrollRequestSize, sort, searchType);
     }
-
 
     class TestContext {
 

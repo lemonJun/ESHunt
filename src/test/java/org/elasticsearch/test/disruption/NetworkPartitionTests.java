@@ -17,9 +17,7 @@
  * under the License.
  */
 
-
 package org.elasticsearch.test.disruption;
-
 
 import org.apache.lucene.util.LuceneTestCase;
 import org.elasticsearch.common.settings.ImmutableSettings;
@@ -37,9 +35,7 @@ public class NetworkPartitionTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-                .put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, MockTransportService.class.getName())
-                .build();
+        return ImmutableSettings.builder().put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, MockTransportService.class.getName()).build();
     }
 
     @Test

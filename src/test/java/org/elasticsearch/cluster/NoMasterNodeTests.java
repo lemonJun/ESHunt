@@ -59,14 +59,7 @@ public class NoMasterNodeTests extends ElasticsearchIntegrationTest {
         boolean autoCreateIndex = randomBoolean();
         logger.info("auto_create_index set to {}", autoCreateIndex);
 
-        Settings settings = settingsBuilder()
-                .put("discovery.type", "zen")
-                .put("action.auto_create_index", autoCreateIndex)
-                .put("discovery.zen.minimum_master_nodes", 2)
-                .put("discovery.zen.ping_timeout", "200ms")
-                .put("discovery.initial_state_timeout", "500ms")
-                .put(DiscoverySettings.NO_MASTER_BLOCK, "all")
-                .build();
+        Settings settings = settingsBuilder().put("discovery.type", "zen").put("action.auto_create_index", autoCreateIndex).put("discovery.zen.minimum_master_nodes", 2).put("discovery.zen.ping_timeout", "200ms").put("discovery.initial_state_timeout", "500ms").put(DiscoverySettings.NO_MASTER_BLOCK, "all").build();
 
         TimeValue timeout = TimeValue.timeValueMillis(200);
 
@@ -84,68 +77,37 @@ public class NoMasterNodeTests extends ElasticsearchIntegrationTest {
             }
         });
 
-        assertThrows(client().prepareGet("test", "type1", "1"),
-                ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE
-        );
+        assertThrows(client().prepareGet("test", "type1", "1"), ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE);
 
-        assertThrows(client().prepareGet("no_index", "type1", "1"),
-                ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE
-        );
+        assertThrows(client().prepareGet("no_index", "type1", "1"), ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE);
 
-        assertThrows(client().prepareMultiGet().add("test", "type1", "1"),
-                ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE
-        );
+        assertThrows(client().prepareMultiGet().add("test", "type1", "1"), ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE);
 
-        assertThrows(client().prepareMultiGet().add("no_index", "type1", "1"),
-                ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE
-        );
+        assertThrows(client().prepareMultiGet().add("no_index", "type1", "1"), ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE);
 
         PercolateSourceBuilder percolateSource = new PercolateSourceBuilder();
         percolateSource.setDoc(docBuilder().setDoc(new HashMap()));
-        assertThrows(client().preparePercolate()
-                        .setIndices("test").setDocumentType("type1")
-                        .setSource(percolateSource),
-                ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE
-        );
+        assertThrows(client().preparePercolate().setIndices("test").setDocumentType("type1").setSource(percolateSource), ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE);
 
         percolateSource = new PercolateSourceBuilder();
         percolateSource.setDoc(docBuilder().setDoc(new HashMap()));
-        assertThrows(client().preparePercolate()
-                        .setIndices("no_index").setDocumentType("type1")
-                        .setSource(percolateSource),
-                ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE
-        );
+        assertThrows(client().preparePercolate().setIndices("no_index").setDocumentType("type1").setSource(percolateSource), ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE);
 
+        assertThrows(client().admin().indices().prepareAnalyze("test", "this is a test"), ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE);
 
-        assertThrows(client().admin().indices().prepareAnalyze("test", "this is a test"),
-                ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE
-        );
+        assertThrows(client().admin().indices().prepareAnalyze("no_index", "this is a test"), ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE);
 
-        assertThrows(client().admin().indices().prepareAnalyze("no_index", "this is a test"),
-                ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE
-        );
+        assertThrows(client().prepareCount("test"), ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE);
 
-        assertThrows(client().prepareCount("test"),
-                ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE
-        );
+        assertThrows(client().prepareCount("no_index"), ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE);
 
-        assertThrows(client().prepareCount("no_index"),
-                ClusterBlockException.class, RestStatus.SERVICE_UNAVAILABLE
-        );
+        checkWriteAction(false, timeout, client().prepareUpdate("test", "type1", "1").setScript("test script", ScriptService.ScriptType.INLINE).setTimeout(timeout));
 
-        checkWriteAction(false, timeout,
-                client().prepareUpdate("test", "type1", "1").setScript("test script", ScriptService.ScriptType.INLINE).setTimeout(timeout));
+        checkWriteAction(autoCreateIndex, timeout, client().prepareUpdate("no_index", "type1", "1").setScript("test script", ScriptService.ScriptType.INLINE).setTimeout(timeout));
 
+        checkWriteAction(false, timeout, client().prepareIndex("test", "type1", "1").setSource(XContentFactory.jsonBuilder().startObject().endObject()).setTimeout(timeout));
 
-        checkWriteAction(autoCreateIndex, timeout,
-                client().prepareUpdate("no_index", "type1", "1").setScript("test script", ScriptService.ScriptType.INLINE).setTimeout(timeout));
-
-
-        checkWriteAction(false, timeout,
-                client().prepareIndex("test", "type1", "1").setSource(XContentFactory.jsonBuilder().startObject().endObject()).setTimeout(timeout));
-
-        checkWriteAction(autoCreateIndex, timeout,
-                client().prepareIndex("no_index", "type1", "1").setSource(XContentFactory.jsonBuilder().startObject().endObject()).setTimeout(timeout));
+        checkWriteAction(autoCreateIndex, timeout, client().prepareIndex("no_index", "type1", "1").setSource(XContentFactory.jsonBuilder().startObject().endObject()).setTimeout(timeout));
 
         BulkRequestBuilder bulkRequestBuilder = client().prepareBulk();
         bulkRequestBuilder.add(client().prepareIndex("test", "type1", "1").setSource(XContentFactory.jsonBuilder().startObject().endObject()));
@@ -210,14 +172,7 @@ public class NoMasterNodeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testNoMasterActions_writeMasterBlock() throws Exception {
-        Settings settings = settingsBuilder()
-                .put("discovery.type", "zen")
-                .put("action.auto_create_index", false)
-                .put("discovery.zen.minimum_master_nodes", 2)
-                .put("discovery.zen.ping_timeout", "200ms")
-                .put("discovery.initial_state_timeout", "500ms")
-                .put(DiscoverySettings.NO_MASTER_BLOCK, "write")
-                .build();
+        Settings settings = settingsBuilder().put("discovery.type", "zen").put("action.auto_create_index", false).put("discovery.zen.minimum_master_nodes", 2).put("discovery.zen.ping_timeout", "200ms").put("discovery.initial_state_timeout", "500ms").put(DiscoverySettings.NO_MASTER_BLOCK, "write").build();
 
         internalCluster().startNode(settings);
         // start a second node, create an index, and then shut it down so we have no master block
@@ -241,7 +196,6 @@ public class NoMasterNodeTests extends ElasticsearchIntegrationTest {
                 return state.blocks().hasGlobalBlock(DiscoverySettings.NO_MASTER_BLOCK_ID);
             }
         }), equalTo(true));
-
 
         GetResponse getResponse = client().prepareGet("test1", "type1", "1").get();
         assertExists(getResponse);

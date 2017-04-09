@@ -86,10 +86,9 @@ public class BytesStreamsTests extends ElasticsearchTestCase {
 
         // bulk-write with wrong args
         try {
-            out.writeBytes(new byte[]{}, 0, 1);
+            out.writeBytes(new byte[] {}, 0, 1);
             fail("expected IllegalArgumentException: length > (size-offset)");
-        }
-        catch (IllegalArgumentException iax1) {
+        } catch (IllegalArgumentException iax1) {
             // expected
         }
 
@@ -263,38 +262,38 @@ public class BytesStreamsTests extends ElasticsearchTestCase {
         assumeTrue(Constants.JRE_IS_64BIT);
         BytesStreamOutput out = new BytesStreamOutput();
         out.writeBoolean(false);
-        out.writeByte((byte)1);
-        out.writeShort((short)-1);
+        out.writeByte((byte) 1);
+        out.writeShort((short) -1);
         out.writeInt(-1);
         out.writeVInt(2);
         out.writeLong(-3);
         out.writeVLong(4);
         out.writeFloat(1.1f);
         out.writeDouble(2.2);
-        int[] intArray = {1, 2, 3};
+        int[] intArray = { 1, 2, 3 };
         out.writeGenericValue(intArray);
-        long[] longArray = {1, 2, 3};
+        long[] longArray = { 1, 2, 3 };
         out.writeGenericValue(longArray);
-        float[] floatArray = {1.1f, 2.2f, 3.3f};
+        float[] floatArray = { 1.1f, 2.2f, 3.3f };
         out.writeGenericValue(floatArray);
-        double[] doubleArray = {1.1, 2.2, 3.3};
+        double[] doubleArray = { 1.1, 2.2, 3.3 };
         out.writeGenericValue(doubleArray);
         out.writeString("hello");
         out.writeString("goodbye");
         BytesStreamInput in = new BytesStreamInput(out.bytes().toBytes());
         assertThat(in.readBoolean(), equalTo(false));
-        assertThat(in.readByte(), equalTo((byte)1));
-        assertThat(in.readShort(), equalTo((short)-1));
+        assertThat(in.readByte(), equalTo((byte) 1));
+        assertThat(in.readShort(), equalTo((short) -1));
         assertThat(in.readInt(), equalTo(-1));
         assertThat(in.readVInt(), equalTo(2));
-        assertThat(in.readLong(), equalTo((long)-3));
-        assertThat(in.readVLong(), equalTo((long)4));
-        assertThat((double)in.readFloat(), closeTo(1.1, 0.0001));
+        assertThat(in.readLong(), equalTo((long) -3));
+        assertThat(in.readVLong(), equalTo((long) 4));
+        assertThat((double) in.readFloat(), closeTo(1.1, 0.0001));
         assertThat(in.readDouble(), closeTo(2.2, 0.0001));
-        assertThat(in.readGenericValue(), equalTo((Object)intArray));
-        assertThat(in.readGenericValue(), equalTo((Object)longArray));
-        assertThat(in.readGenericValue(), equalTo((Object)floatArray));
-        assertThat(in.readGenericValue(), equalTo((Object)doubleArray));
+        assertThat(in.readGenericValue(), equalTo((Object) intArray));
+        assertThat(in.readGenericValue(), equalTo((Object) longArray));
+        assertThat(in.readGenericValue(), equalTo((Object) floatArray));
+        assertThat(in.readGenericValue(), equalTo((Object) doubleArray));
         assertThat(in.readString(), equalTo("hello"));
         assertThat(in.readString(), equalTo("goodbye"));
         in.close();
@@ -316,10 +315,9 @@ public class BytesStreamsTests extends ElasticsearchTestCase {
 
         // writing a single byte must fail
         try {
-            out.writeByte((byte)0);
+            out.writeByte((byte) 0);
             fail("expected IllegalStateException: stream closed");
-        }
-        catch (IllegalStateException iex1) {
+        } catch (IllegalStateException iex1) {
             // expected
         }
 
@@ -327,8 +325,7 @@ public class BytesStreamsTests extends ElasticsearchTestCase {
         try {
             out.writeBytes(new byte[0], 0, 0);
             fail("expected IllegalStateException: stream closed");
-        }
-        catch (IllegalStateException iex1) {
+        } catch (IllegalStateException iex1) {
             // expected
         }
 
@@ -336,8 +333,7 @@ public class BytesStreamsTests extends ElasticsearchTestCase {
         try {
             out.bytes().toBytes();
             fail("expected IllegalStateException: stream closed");
-        }
-        catch (IllegalStateException iex1) {
+        } catch (IllegalStateException iex1) {
             // expected
         }
 

@@ -42,7 +42,6 @@ import static org.hamcrest.Matchers.empty;
 
 public class ClusterHealthResponsesTests extends ElasticsearchTestCase {
 
-
     private void assertIndexHealth(ClusterIndexHealth indexHealth, ShardCounter counter, IndexMetaData indexMetaData) {
         assertThat(indexHealth.getStatus(), equalTo(counter.status()));
         assertThat(indexHealth.getNumberOfShards(), equalTo(indexMetaData.getNumberOfShards()));

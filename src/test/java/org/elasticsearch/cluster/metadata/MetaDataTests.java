@@ -42,14 +42,10 @@ public class MetaDataTests extends ElasticsearchTestCase {
 
     @Test
     public void testIndexOptions_strict() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("foo").putAlias(AliasMetaData.builder("foofoobar")))
-                .put(indexBuilder("foobar").putAlias(AliasMetaData.builder("foofoobar")))
-                .put(indexBuilder("foofoo-closed").state(IndexMetaData.State.CLOSE))
-                .put(indexBuilder("foofoo").putAlias(AliasMetaData.builder("barbaz")));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("foo").putAlias(AliasMetaData.builder("foofoobar"))).put(indexBuilder("foobar").putAlias(AliasMetaData.builder("foofoobar"))).put(indexBuilder("foofoo-closed").state(IndexMetaData.State.CLOSE)).put(indexBuilder("foofoo").putAlias(AliasMetaData.builder("barbaz")));
         MetaData md = mdBuilder.build();
 
-        IndicesOptions[] indicesOptions = new IndicesOptions[]{ IndicesOptions.strictExpandOpen(), IndicesOptions.strictExpand()};
+        IndicesOptions[] indicesOptions = new IndicesOptions[] { IndicesOptions.strictExpandOpen(), IndicesOptions.strictExpand() };
 
         for (IndicesOptions options : indicesOptions) {
             String[] results = md.concreteIndices(options, "foo");
@@ -128,15 +124,11 @@ public class MetaDataTests extends ElasticsearchTestCase {
 
     @Test
     public void testIndexOptions_lenient() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("foo").putAlias(AliasMetaData.builder("foofoobar")))
-                .put(indexBuilder("foobar").putAlias(AliasMetaData.builder("foofoobar")))
-                .put(indexBuilder("foofoo-closed").state(IndexMetaData.State.CLOSE))
-                .put(indexBuilder("foofoo").putAlias(AliasMetaData.builder("barbaz")));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("foo").putAlias(AliasMetaData.builder("foofoobar"))).put(indexBuilder("foobar").putAlias(AliasMetaData.builder("foofoobar"))).put(indexBuilder("foofoo-closed").state(IndexMetaData.State.CLOSE)).put(indexBuilder("foofoo").putAlias(AliasMetaData.builder("barbaz")));
         MetaData md = mdBuilder.build();
 
         IndicesOptions lenientExpand = IndicesOptions.fromOptions(true, true, true, true);
-        IndicesOptions[] indicesOptions = new IndicesOptions[]{ IndicesOptions.lenientExpandOpen(), lenientExpand};
+        IndicesOptions[] indicesOptions = new IndicesOptions[] { IndicesOptions.lenientExpandOpen(), lenientExpand };
 
         for (IndicesOptions options : indicesOptions) {
             String[] results = md.concreteIndices(options, "foo");
@@ -192,16 +184,12 @@ public class MetaDataTests extends ElasticsearchTestCase {
 
     @Test
     public void testIndexOptions_allowUnavailableDisallowEmpty() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("foo"))
-                .put(indexBuilder("foobar"))
-                .put(indexBuilder("foofoo-closed").state(IndexMetaData.State.CLOSE))
-                .put(indexBuilder("foofoo").putAlias(AliasMetaData.builder("barbaz")));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("foo")).put(indexBuilder("foobar")).put(indexBuilder("foofoo-closed").state(IndexMetaData.State.CLOSE)).put(indexBuilder("foofoo").putAlias(AliasMetaData.builder("barbaz")));
         MetaData md = mdBuilder.build();
 
         IndicesOptions expandOpen = IndicesOptions.fromOptions(true, false, true, false);
         IndicesOptions expand = IndicesOptions.fromOptions(true, false, true, true);
-        IndicesOptions[] indicesOptions = new IndicesOptions[]{expandOpen, expand};
+        IndicesOptions[] indicesOptions = new IndicesOptions[] { expandOpen, expand };
 
         for (IndicesOptions options : indicesOptions) {
             String[] results = md.concreteIndices(options, "foo");
@@ -211,7 +199,7 @@ public class MetaDataTests extends ElasticsearchTestCase {
             try {
                 md.concreteIndices(options, "bar");
                 fail();
-            } catch(IndexMissingException e) {
+            } catch (IndexMissingException e) {
                 assertThat(e.index().name(), equalTo("bar"));
             }
 
@@ -239,10 +227,7 @@ public class MetaDataTests extends ElasticsearchTestCase {
 
     @Test
     public void testIndexOptions_wildcardExpansion() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("foo").state(IndexMetaData.State.CLOSE))
-                .put(indexBuilder("bar"))
-                .put(indexBuilder("foobar").putAlias(AliasMetaData.builder("barbaz")));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("foo").state(IndexMetaData.State.CLOSE)).put(indexBuilder("bar")).put(indexBuilder("foobar").putAlias(AliasMetaData.builder("barbaz")));
         MetaData md = mdBuilder.build();
 
         // Only closed
@@ -306,11 +291,7 @@ public class MetaDataTests extends ElasticsearchTestCase {
 
     @Test
     public void testIndexOptions_noExpandWildcards() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("foo").putAlias(AliasMetaData.builder("foofoobar")))
-                .put(indexBuilder("foobar").putAlias(AliasMetaData.builder("foofoobar")))
-                .put(indexBuilder("foofoo-closed").state(IndexMetaData.State.CLOSE))
-                .put(indexBuilder("foofoo").putAlias(AliasMetaData.builder("barbaz")));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("foo").putAlias(AliasMetaData.builder("foofoobar"))).put(indexBuilder("foobar").putAlias(AliasMetaData.builder("foofoobar"))).put(indexBuilder("foofoo-closed").state(IndexMetaData.State.CLOSE)).put(indexBuilder("foofoo").putAlias(AliasMetaData.builder("barbaz")));
         MetaData md = mdBuilder.build();
 
         //ignore unavailable and allow no indices
@@ -400,11 +381,7 @@ public class MetaDataTests extends ElasticsearchTestCase {
 
     @Test
     public void testIndexOptions_singleIndexNoExpandWildcards() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("foo").putAlias(AliasMetaData.builder("foofoobar")))
-                .put(indexBuilder("foobar").putAlias(AliasMetaData.builder("foofoobar")))
-                .put(indexBuilder("foofoo-closed").state(IndexMetaData.State.CLOSE))
-                .put(indexBuilder("foofoo").putAlias(AliasMetaData.builder("barbaz")));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("foo").putAlias(AliasMetaData.builder("foofoobar"))).put(indexBuilder("foobar").putAlias(AliasMetaData.builder("foofoobar"))).put(indexBuilder("foofoo-closed").state(IndexMetaData.State.CLOSE)).put(indexBuilder("foofoo").putAlias(AliasMetaData.builder("barbaz")));
         MetaData md = mdBuilder.build();
 
         //error on both unavailable and no indices + every alias needs to expand to a single index
@@ -426,21 +403,21 @@ public class MetaDataTests extends ElasticsearchTestCase {
         try {
             md.concreteIndices(IndicesOptions.strictSingleIndexNoExpandForbidClosed(), "foofoobar");
             fail();
-        } catch(ElasticsearchIllegalArgumentException e) {
+        } catch (ElasticsearchIllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("Alias [foofoobar] has more than one indices associated with it"));
         }
 
         try {
             md.concreteIndices(IndicesOptions.strictSingleIndexNoExpandForbidClosed(), "foo", "foofoobar");
             fail();
-        } catch(ElasticsearchIllegalArgumentException e) {
+        } catch (ElasticsearchIllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("Alias [foofoobar] has more than one indices associated with it"));
         }
 
         try {
             md.concreteIndices(IndicesOptions.strictSingleIndexNoExpandForbidClosed(), "foofoo-closed", "foofoobar");
             fail();
-        } catch(IndexClosedException e) {
+        } catch (IndexClosedException e) {
             assertThat(e.getMessage(), containsString("[foofoo-closed] closed"));
         }
 
@@ -471,7 +448,6 @@ public class MetaDataTests extends ElasticsearchTestCase {
             assertThat(e.index().name(), equalTo("bar"));
         }
 
-
         options = IndicesOptions.lenientExpandOpen();
         results = md.concreteIndices(options, Strings.EMPTY_ARRAY);
         assertThat(results, emptyArray());
@@ -492,49 +468,35 @@ public class MetaDataTests extends ElasticsearchTestCase {
 
     @Test
     public void testConvertWildcardsJustIndicesTests() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("testXXX"))
-                .put(indexBuilder("testXYY"))
-                .put(indexBuilder("testYYY"))
-                .put(indexBuilder("kuku"));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("testXXX")).put(indexBuilder("testXYY")).put(indexBuilder("testYYY")).put(indexBuilder("kuku"));
         MetaData md = mdBuilder.build();
-        assertThat(newHashSet(md.convertFromWildcards(new String[]{"testXXX"}, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX")));
-        assertThat(newHashSet(md.convertFromWildcards(new String[]{"testXXX", "testYYY"}, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testYYY")));
-        assertThat(newHashSet(md.convertFromWildcards(new String[]{"testXXX", "ku*"}, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "kuku")));
-        assertThat(newHashSet(md.convertFromWildcards(new String[]{"test*"}, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testXYY", "testYYY")));
-        assertThat(newHashSet(md.convertFromWildcards(new String[]{"testX*"}, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testXYY")));
-        assertThat(newHashSet(md.convertFromWildcards(new String[]{"testX*", "kuku"}, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testXYY", "kuku")));
+        assertThat(newHashSet(md.convertFromWildcards(new String[] { "testXXX" }, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX")));
+        assertThat(newHashSet(md.convertFromWildcards(new String[] { "testXXX", "testYYY" }, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testYYY")));
+        assertThat(newHashSet(md.convertFromWildcards(new String[] { "testXXX", "ku*" }, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "kuku")));
+        assertThat(newHashSet(md.convertFromWildcards(new String[] { "test*" }, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testXYY", "testYYY")));
+        assertThat(newHashSet(md.convertFromWildcards(new String[] { "testX*" }, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testXYY")));
+        assertThat(newHashSet(md.convertFromWildcards(new String[] { "testX*", "kuku" }, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testXYY", "kuku")));
     }
 
     @Test
     public void testConvertWildcardsTests() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("testXXX").putAlias(AliasMetaData.builder("alias1")).putAlias(AliasMetaData.builder("alias2")))
-                .put(indexBuilder("testXYY").putAlias(AliasMetaData.builder("alias2")))
-                .put(indexBuilder("testYYY").putAlias(AliasMetaData.builder("alias3")))
-                .put(indexBuilder("kuku"));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("testXXX").putAlias(AliasMetaData.builder("alias1")).putAlias(AliasMetaData.builder("alias2"))).put(indexBuilder("testXYY").putAlias(AliasMetaData.builder("alias2"))).put(indexBuilder("testYYY").putAlias(AliasMetaData.builder("alias3"))).put(indexBuilder("kuku"));
         MetaData md = mdBuilder.build();
-        assertThat(newHashSet(md.convertFromWildcards(new String[]{"testYY*", "alias*"}, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("alias1", "alias2", "alias3", "testYYY")));
-        assertThat(newHashSet(md.convertFromWildcards(new String[]{"-kuku"}, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testXYY", "testYYY")));
-        assertThat(newHashSet(md.convertFromWildcards(new String[]{"+test*", "-testYYY"}, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testXYY")));
-        assertThat(newHashSet(md.convertFromWildcards(new String[]{"+testX*", "+testYYY"}, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testXYY", "testYYY")));
-        assertThat(newHashSet(md.convertFromWildcards(new String[]{"+testYYY", "+testX*"}, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testXYY", "testYYY")));
+        assertThat(newHashSet(md.convertFromWildcards(new String[] { "testYY*", "alias*" }, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("alias1", "alias2", "alias3", "testYYY")));
+        assertThat(newHashSet(md.convertFromWildcards(new String[] { "-kuku" }, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testXYY", "testYYY")));
+        assertThat(newHashSet(md.convertFromWildcards(new String[] { "+test*", "-testYYY" }, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testXYY")));
+        assertThat(newHashSet(md.convertFromWildcards(new String[] { "+testX*", "+testYYY" }, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testXYY", "testYYY")));
+        assertThat(newHashSet(md.convertFromWildcards(new String[] { "+testYYY", "+testX*" }, IndicesOptions.lenientExpandOpen())), equalTo(newHashSet("testXXX", "testXYY", "testYYY")));
     }
 
     @Test
     public void testConvertWildcardsOpenClosedIndicesTests() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("testXXX").state(State.OPEN))
-                .put(indexBuilder("testXXY").state(State.OPEN))
-                .put(indexBuilder("testXYY").state(State.CLOSE))
-                .put(indexBuilder("testYYY").state(State.OPEN))
-                .put(indexBuilder("testYYX").state(State.CLOSE))
-                .put(indexBuilder("kuku").state(State.OPEN));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("testXXX").state(State.OPEN)).put(indexBuilder("testXXY").state(State.OPEN)).put(indexBuilder("testXYY").state(State.CLOSE)).put(indexBuilder("testYYY").state(State.OPEN)).put(indexBuilder("testYYX").state(State.CLOSE)).put(indexBuilder("kuku").state(State.OPEN));
         MetaData md = mdBuilder.build();
         // Can't test when wildcard expansion is turned off here as convertFromWildcards shouldn't be called in this case.  Tests for this are covered in the concreteIndices() tests
-        assertThat(newHashSet(md.convertFromWildcards(new String[]{"testX*"}, IndicesOptions.fromOptions(true, true, true, true))), equalTo(newHashSet("testXXX", "testXXY", "testXYY")));
-        assertThat(newHashSet(md.convertFromWildcards(new String[]{"testX*"}, IndicesOptions.fromOptions(true, true, false, true))), equalTo(newHashSet("testXYY")));
-        assertThat(newHashSet(md.convertFromWildcards(new String[]{"testX*"}, IndicesOptions.fromOptions(true, true, true, false))), equalTo(newHashSet("testXXX", "testXXY")));
+        assertThat(newHashSet(md.convertFromWildcards(new String[] { "testX*" }, IndicesOptions.fromOptions(true, true, true, true))), equalTo(newHashSet("testXXX", "testXXY", "testXYY")));
+        assertThat(newHashSet(md.convertFromWildcards(new String[] { "testX*" }, IndicesOptions.fromOptions(true, true, false, true))), equalTo(newHashSet("testXYY")));
+        assertThat(newHashSet(md.convertFromWildcards(new String[] { "testX*" }, IndicesOptions.fromOptions(true, true, true, false))), equalTo(newHashSet("testXXX", "testXXY")));
     }
 
     private IndexMetaData.Builder indexBuilder(String index) {
@@ -543,48 +505,35 @@ public class MetaDataTests extends ElasticsearchTestCase {
 
     @Test(expected = IndexMissingException.class)
     public void testConcreteIndicesIgnoreIndicesOneMissingIndex() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("testXXX"))
-                .put(indexBuilder("kuku"));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("testXXX")).put(indexBuilder("kuku"));
         MetaData md = mdBuilder.build();
         md.concreteIndices(IndicesOptions.strictExpandOpen(), "testZZZ");
     }
 
     @Test
     public void testConcreteIndicesIgnoreIndicesOneMissingIndexOtherFound() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("testXXX"))
-                .put(indexBuilder("kuku"));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("testXXX")).put(indexBuilder("kuku"));
         MetaData md = mdBuilder.build();
         assertThat(newHashSet(md.concreteIndices(IndicesOptions.lenientExpandOpen(), "testXXX", "testZZZ")), equalTo(newHashSet("testXXX")));
     }
 
     @Test(expected = IndexMissingException.class)
     public void testConcreteIndicesIgnoreIndicesAllMissing() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("testXXX"))
-                .put(indexBuilder("kuku"));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("testXXX")).put(indexBuilder("kuku"));
         MetaData md = mdBuilder.build();
         assertThat(newHashSet(md.concreteIndices(IndicesOptions.strictExpandOpen(), "testMo", "testMahdy")), equalTo(newHashSet("testXXX")));
     }
 
     @Test
     public void testConcreteIndicesIgnoreIndicesEmptyRequest() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("testXXX"))
-                .put(indexBuilder("kuku"));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("testXXX")).put(indexBuilder("kuku"));
         MetaData md = mdBuilder.build();
-        assertThat(newHashSet(md.concreteIndices(IndicesOptions.lenientExpandOpen(), new String[]{})), equalTo(Sets.newHashSet("kuku", "testXXX")));
+        assertThat(newHashSet(md.concreteIndices(IndicesOptions.lenientExpandOpen(), new String[] {})), equalTo(Sets.newHashSet("kuku", "testXXX")));
     }
 
     @Test
     public void testConcreteIndicesWildcardExpansion() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("testXXX").state(State.OPEN))
-                .put(indexBuilder("testXXY").state(State.OPEN))
-                .put(indexBuilder("testXYY").state(State.CLOSE))
-                .put(indexBuilder("testYYY").state(State.OPEN))
-                .put(indexBuilder("testYYX").state(State.OPEN));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("testXXX").state(State.OPEN)).put(indexBuilder("testXXY").state(State.OPEN)).put(indexBuilder("testXYY").state(State.CLOSE)).put(indexBuilder("testYYY").state(State.OPEN)).put(indexBuilder("testYYX").state(State.OPEN));
         MetaData md = mdBuilder.build();
         assertThat(newHashSet(md.concreteIndices(IndicesOptions.fromOptions(true, true, false, false), "testX*")), equalTo(new HashSet<String>()));
         assertThat(newHashSet(md.concreteIndices(IndicesOptions.fromOptions(true, true, true, false), "testX*")), equalTo(newHashSet("testXXX", "testXXY")));
@@ -600,14 +549,14 @@ public class MetaDataTests extends ElasticsearchTestCase {
         for (int i = 0; i < 10; i++) {
             String[] allIndices = null;
             switch (randomIntBetween(0, 2)) {
-            case 0:
-                break;
-            case 1:
-                allIndices = new String[0];
-                break;
-            case 2:
-                allIndices = new String[] { MetaData.ALL };
-                break;
+                case 0:
+                    break;
+                case 1:
+                    allIndices = new String[0];
+                    break;
+                case 2:
+                    allIndices = new String[] { MetaData.ALL };
+                    break;
             }
 
             IndicesOptions indicesOptions = IndicesOptions.fromOptions(randomBoolean(), randomBoolean(), randomBoolean(), randomBoolean());
@@ -623,11 +572,7 @@ public class MetaDataTests extends ElasticsearchTestCase {
             }
 
             // with existing indices, asking for all indices should return all open/closed indices depending on options
-            metadata = MetaData.builder()
-                    .put(indexBuilder("aaa").state(State.OPEN).putAlias(AliasMetaData.builder("aaa_alias1")))
-                    .put(indexBuilder("bbb").state(State.OPEN).putAlias(AliasMetaData.builder("bbb_alias1")))
-                    .put(indexBuilder("ccc").state(State.CLOSE).putAlias(AliasMetaData.builder("ccc_alias1")))
-                    .build();
+            metadata = MetaData.builder().put(indexBuilder("aaa").state(State.OPEN).putAlias(AliasMetaData.builder("aaa_alias1"))).put(indexBuilder("bbb").state(State.OPEN).putAlias(AliasMetaData.builder("bbb_alias1"))).put(indexBuilder("ccc").state(State.CLOSE).putAlias(AliasMetaData.builder("ccc_alias1"))).build();
             if (indicesOptions.expandWildcardsOpen() || indicesOptions.expandWildcardsClosed() || indicesOptions.allowNoIndices()) {
                 String[] concreteIndices = metadata.concreteIndices(indicesOptions, allIndices);
                 assertThat(concreteIndices, notNullValue());
@@ -649,9 +594,8 @@ public class MetaDataTests extends ElasticsearchTestCase {
      * check for correct exception type depending on indicesOptions and provided index name list
      */
     private void checkCorrectException(MetaData metadata, IndicesOptions indicesOptions, String[] allIndices) {
-     // two different exception types possible
-        if (!(indicesOptions.expandWildcardsOpen() || indicesOptions.expandWildcardsClosed())
-                && (allIndices == null || allIndices.length == 0)) {
+        // two different exception types possible
+        if (!(indicesOptions.expandWildcardsOpen() || indicesOptions.expandWildcardsClosed()) && (allIndices == null || allIndices.length == 0)) {
             try {
                 metadata.concreteIndices(indicesOptions, allIndices);
                 fail("no wildcard expansion and null or empty list argument should trigger ElasticsearchIllegalArgumentException");
@@ -677,11 +621,7 @@ public class MetaDataTests extends ElasticsearchTestCase {
             IndicesOptions indicesOptions = IndicesOptions.fromOptions(randomBoolean(), randomBoolean(), randomBoolean(), randomBoolean());
             MetaData metadata = MetaData.builder().build();
 
-            metadata = MetaData.builder()
-                    .put(indexBuilder("aaa").state(State.OPEN).putAlias(AliasMetaData.builder("aaa_alias1")))
-                    .put(indexBuilder("bbb").state(State.OPEN).putAlias(AliasMetaData.builder("bbb_alias1")))
-                    .put(indexBuilder("ccc").state(State.CLOSE).putAlias(AliasMetaData.builder("ccc_alias1")))
-                    .build();
+            metadata = MetaData.builder().put(indexBuilder("aaa").state(State.OPEN).putAlias(AliasMetaData.builder("aaa_alias1"))).put(indexBuilder("bbb").state(State.OPEN).putAlias(AliasMetaData.builder("bbb_alias1"))).put(indexBuilder("ccc").state(State.CLOSE).putAlias(AliasMetaData.builder("ccc_alias1"))).build();
 
             // asking for non existing wildcard pattern should return empty list or exception
             if (indicesOptions.allowNoIndices()) {
@@ -711,22 +651,22 @@ public class MetaDataTests extends ElasticsearchTestCase {
 
     @Test
     public void testIsAllIndices_explicitAll() throws Exception {
-        assertThat(MetaData.isAllIndices(new String[]{"_all"}), equalTo(true));
+        assertThat(MetaData.isAllIndices(new String[] { "_all" }), equalTo(true));
     }
 
     @Test
     public void testIsAllIndices_explicitAllPlusOther() throws Exception {
-        assertThat(MetaData.isAllIndices(new String[]{"_all", "other"}), equalTo(false));
+        assertThat(MetaData.isAllIndices(new String[] { "_all", "other" }), equalTo(false));
     }
 
     @Test
     public void testIsAllIndices_normalIndexes() throws Exception {
-        assertThat(MetaData.isAllIndices(new String[]{"index1", "index2", "index3"}), equalTo(false));
+        assertThat(MetaData.isAllIndices(new String[] { "index1", "index2", "index3" }), equalTo(false));
     }
 
     @Test
     public void testIsAllIndices_wildcard() throws Exception {
-        assertThat(MetaData.isAllIndices(new String[]{"*"}), equalTo(false));
+        assertThat(MetaData.isAllIndices(new String[] { "*" }), equalTo(false));
     }
 
     @Test
@@ -741,97 +681,94 @@ public class MetaDataTests extends ElasticsearchTestCase {
 
     @Test
     public void testIsExplicitAllIndices_explicitAll() throws Exception {
-        assertThat(MetaData.isExplicitAllPattern(new String[]{"_all"}), equalTo(true));
+        assertThat(MetaData.isExplicitAllPattern(new String[] { "_all" }), equalTo(true));
     }
 
     @Test
     public void testIsExplicitAllIndices_explicitAllPlusOther() throws Exception {
-        assertThat(MetaData.isExplicitAllPattern(new String[]{"_all", "other"}), equalTo(false));
+        assertThat(MetaData.isExplicitAllPattern(new String[] { "_all", "other" }), equalTo(false));
     }
 
     @Test
     public void testIsExplicitAllIndices_normalIndexes() throws Exception {
-        assertThat(MetaData.isExplicitAllPattern(new String[]{"index1", "index2", "index3"}), equalTo(false));
+        assertThat(MetaData.isExplicitAllPattern(new String[] { "index1", "index2", "index3" }), equalTo(false));
     }
 
     @Test
     public void testIsExplicitAllIndices_wildcard() throws Exception {
-        assertThat(MetaData.isExplicitAllPattern(new String[]{"*"}), equalTo(false));
+        assertThat(MetaData.isExplicitAllPattern(new String[] { "*" }), equalTo(false));
     }
 
     @Test
     public void testIsPatternMatchingAllIndices_explicitList() throws Exception {
         //even though it does identify all indices, it's not a pattern but just an explicit list of them
-        String[] concreteIndices = new String[]{"index1", "index2", "index3"};
+        String[] concreteIndices = new String[] { "index1", "index2", "index3" };
         MetaData metaData = metaDataBuilder(concreteIndices);
         assertThat(metaData.isPatternMatchingAllIndices(concreteIndices, concreteIndices), equalTo(false));
     }
 
     @Test
     public void testIsPatternMatchingAllIndices_onlyWildcard() throws Exception {
-        String[] indicesOrAliases = new String[]{"*"};
-        String[] concreteIndices = new String[]{"index1", "index2", "index3"};
+        String[] indicesOrAliases = new String[] { "*" };
+        String[] concreteIndices = new String[] { "index1", "index2", "index3" };
         MetaData metaData = metaDataBuilder(concreteIndices);
         assertThat(metaData.isPatternMatchingAllIndices(indicesOrAliases, concreteIndices), equalTo(true));
     }
 
     @Test
     public void testIsPatternMatchingAllIndices_matchingTrailingWildcard() throws Exception {
-        String[] indicesOrAliases = new String[]{"index*"};
-        String[] concreteIndices = new String[]{"index1", "index2", "index3"};
+        String[] indicesOrAliases = new String[] { "index*" };
+        String[] concreteIndices = new String[] { "index1", "index2", "index3" };
         MetaData metaData = metaDataBuilder(concreteIndices);
         assertThat(metaData.isPatternMatchingAllIndices(indicesOrAliases, concreteIndices), equalTo(true));
     }
 
     @Test
     public void testIsPatternMatchingAllIndices_nonMatchingTrailingWildcard() throws Exception {
-        String[] indicesOrAliases = new String[]{"index*"};
-        String[] concreteIndices = new String[]{"index1", "index2", "index3"};
-        String[] allConcreteIndices = new String[]{"index1", "index2", "index3", "a", "b"};
+        String[] indicesOrAliases = new String[] { "index*" };
+        String[] concreteIndices = new String[] { "index1", "index2", "index3" };
+        String[] allConcreteIndices = new String[] { "index1", "index2", "index3", "a", "b" };
         MetaData metaData = metaDataBuilder(allConcreteIndices);
         assertThat(metaData.isPatternMatchingAllIndices(indicesOrAliases, concreteIndices), equalTo(false));
     }
 
     @Test
     public void testIsPatternMatchingAllIndices_matchingSingleExclusion() throws Exception {
-        String[] indicesOrAliases = new String[]{"-index1", "+index1"};
-        String[] concreteIndices = new String[]{"index1", "index2", "index3"};
+        String[] indicesOrAliases = new String[] { "-index1", "+index1" };
+        String[] concreteIndices = new String[] { "index1", "index2", "index3" };
         MetaData metaData = metaDataBuilder(concreteIndices);
         assertThat(metaData.isPatternMatchingAllIndices(indicesOrAliases, concreteIndices), equalTo(true));
     }
 
     @Test
     public void testIsPatternMatchingAllIndices_nonMatchingSingleExclusion() throws Exception {
-        String[] indicesOrAliases = new String[]{"-index1"};
-        String[] concreteIndices = new String[]{"index2", "index3"};
-        String[] allConcreteIndices = new String[]{"index1", "index2", "index3"};
+        String[] indicesOrAliases = new String[] { "-index1" };
+        String[] concreteIndices = new String[] { "index2", "index3" };
+        String[] allConcreteIndices = new String[] { "index1", "index2", "index3" };
         MetaData metaData = metaDataBuilder(allConcreteIndices);
         assertThat(metaData.isPatternMatchingAllIndices(indicesOrAliases, concreteIndices), equalTo(false));
     }
 
     @Test
     public void testIsPatternMatchingAllIndices_matchingTrailingWildcardAndExclusion() throws Exception {
-        String[] indicesOrAliases = new String[]{"index*", "-index1", "+index1"};
-        String[] concreteIndices = new String[]{"index1", "index2", "index3"};
+        String[] indicesOrAliases = new String[] { "index*", "-index1", "+index1" };
+        String[] concreteIndices = new String[] { "index1", "index2", "index3" };
         MetaData metaData = metaDataBuilder(concreteIndices);
         assertThat(metaData.isPatternMatchingAllIndices(indicesOrAliases, concreteIndices), equalTo(true));
     }
 
     @Test
     public void testIsPatternMatchingAllIndices_nonMatchingTrailingWildcardAndExclusion() throws Exception {
-        String[] indicesOrAliases = new String[]{"index*", "-index1"};
-        String[] concreteIndices = new String[]{"index2", "index3"};
-        String[] allConcreteIndices = new String[]{"index1", "index2", "index3"};
+        String[] indicesOrAliases = new String[] { "index*", "-index1" };
+        String[] concreteIndices = new String[] { "index2", "index3" };
+        String[] allConcreteIndices = new String[] { "index1", "index2", "index3" };
         MetaData metaData = metaDataBuilder(allConcreteIndices);
         assertThat(metaData.isPatternMatchingAllIndices(indicesOrAliases, concreteIndices), equalTo(false));
     }
 
     @Test
     public void testIndexOptions_failClosedIndicesAndAliases() {
-        MetaData.Builder mdBuilder = MetaData.builder()
-                .put(indexBuilder("foo1-closed").state(IndexMetaData.State.CLOSE).putAlias(AliasMetaData.builder("foobar1-closed")).putAlias(AliasMetaData.builder("foobar2-closed")))
-                .put(indexBuilder("foo2-closed").state(IndexMetaData.State.CLOSE).putAlias(AliasMetaData.builder("foobar2-closed")))
-                .put(indexBuilder("foo3").putAlias(AliasMetaData.builder("foobar2-closed")));
+        MetaData.Builder mdBuilder = MetaData.builder().put(indexBuilder("foo1-closed").state(IndexMetaData.State.CLOSE).putAlias(AliasMetaData.builder("foobar1-closed")).putAlias(AliasMetaData.builder("foobar2-closed"))).put(indexBuilder("foo2-closed").state(IndexMetaData.State.CLOSE).putAlias(AliasMetaData.builder("foobar2-closed"))).put(indexBuilder("foo3").putAlias(AliasMetaData.builder("foobar2-closed")));
         MetaData md = mdBuilder.build();
 
         IndicesOptions options = IndicesOptions.strictExpandOpenAndForbidClosed();

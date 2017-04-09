@@ -52,36 +52,7 @@ public class RestTestParserTests extends ElasticsearchTestCase {
 
     @Test
     public void testParseTestSetupAndSections() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                        "setup:\n" +
-                        "  - do:\n" +
-                        "        indices.create:\n" +
-                        "          index: test_index\n" +
-                        "\n" +
-                        "---\n" +
-                        "\"Get index mapping\":\n" +
-                        "  - do:\n" +
-                        "      indices.get_mapping:\n" +
-                        "        index: test_index\n" +
-                        "\n" +
-                        "  - match: {test_index.test_type.properties.text.type:     string}\n" +
-                        "  - match: {test_index.test_type.properties.text.analyzer: whitespace}\n" +
-                        "\n" +
-                        "---\n" +
-                        "\"Get type mapping - pre 1.0\":\n" +
-                        "\n" +
-                        "  - skip:\n" +
-                        "      version:     \"0.90.9 - 999\"\n" +
-                        "      reason:      \"for newer versions the index name is always returned\"\n" +
-                        "\n" +
-                        "  - do:\n" +
-                        "      indices.get_mapping:\n" +
-                        "        index: test_index\n" +
-                        "        type: test_type\n" +
-                        "\n" +
-                        "  - match: {test_type.properties.text.type:     string}\n" +
-                        "  - match: {test_type.properties.text.analyzer: whitespace}\n"
-        );
+        parser = YamlXContent.yamlXContent.createParser("setup:\n" + "  - do:\n" + "        indices.create:\n" + "          index: test_index\n" + "\n" + "---\n" + "\"Get index mapping\":\n" + "  - do:\n" + "      indices.get_mapping:\n" + "        index: test_index\n" + "\n" + "  - match: {test_index.test_type.properties.text.type:     string}\n" + "  - match: {test_index.test_type.properties.text.analyzer: whitespace}\n" + "\n" + "---\n" + "\"Get type mapping - pre 1.0\":\n" + "\n" + "  - skip:\n" + "      version:     \"0.90.9 - 999\"\n" + "      reason:      \"for newer versions the index name is always returned\"\n" + "\n" + "  - do:\n" + "      indices.get_mapping:\n" + "        index: test_index\n" + "        type: test_type\n" + "\n" + "  - match: {test_type.properties.text.type:     string}\n" + "  - match: {test_type.properties.text.analyzer: whitespace}\n");
 
         RestTestSuiteParser testParser = new RestTestSuiteParser();
         RestTestSuite restTestSuite = testParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -138,35 +109,7 @@ public class RestTestParserTests extends ElasticsearchTestCase {
 
     @Test
     public void testParseTestSingleTestSection() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-        "---\n" +
-                "\"Index with ID\":\n" +
-                "\n" +
-                " - do:\n" +
-                "      index:\n" +
-                "          index:  test-weird-index-中文\n" +
-                "          type:   weird.type\n" +
-                "          id:     1\n" +
-                "          body:   { foo: bar }\n" +
-                "\n" +
-                " - is_true:   ok\n" +
-                " - match:   { _index:   test-weird-index-中文 }\n" +
-                " - match:   { _type:    weird.type }\n" +
-                " - match:   { _id:      \"1\"}\n" +
-                " - match:   { _version: 1}\n" +
-                "\n" +
-                " - do:\n" +
-                "      get:\n" +
-                "          index:  test-weird-index-中文\n" +
-                "          type:   weird.type\n" +
-                "          id:     1\n" +
-                "\n" +
-                " - match:   { _index:   test-weird-index-中文 }\n" +
-                " - match:   { _type:    weird.type }\n" +
-                " - match:   { _id:      \"1\"}\n" +
-                " - match:   { _version: 1}\n" +
-                " - match:   { _source: { foo: bar }}"
-        );
+        parser = YamlXContent.yamlXContent.createParser("---\n" + "\"Index with ID\":\n" + "\n" + " - do:\n" + "      index:\n" + "          index:  test-weird-index-中文\n" + "          type:   weird.type\n" + "          id:     1\n" + "          body:   { foo: bar }\n" + "\n" + " - is_true:   ok\n" + " - match:   { _index:   test-weird-index-中文 }\n" + " - match:   { _type:    weird.type }\n" + " - match:   { _id:      \"1\"}\n" + " - match:   { _version: 1}\n" + "\n" + " - do:\n" + "      get:\n" + "          index:  test-weird-index-中文\n" + "          type:   weird.type\n" + "          id:     1\n" + "\n" + " - match:   { _index:   test-weird-index-中文 }\n" + " - match:   { _type:    weird.type }\n" + " - match:   { _id:      \"1\"}\n" + " - match:   { _version: 1}\n" + " - match:   { _source: { foo: bar }}");
 
         RestTestSuiteParser testParser = new RestTestSuiteParser();
         RestTestSuite restTestSuite = testParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -237,50 +180,7 @@ public class RestTestParserTests extends ElasticsearchTestCase {
 
     @Test
     public void testParseTestMultipleTestSections() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-        "---\n" +
-                "\"Missing document (partial doc)\":\n" +
-                "\n" +
-                "  - do:\n" +
-                "      catch:      missing\n" +
-                "      update:\n" +
-                "          index:  test_1\n" +
-                "          type:   test\n" +
-                "          id:     1\n" +
-                "          body:   { doc: { foo: bar } }\n" +
-                "\n" +
-                "  - do:\n" +
-                "      update:\n" +
-                "          index: test_1\n" +
-                "          type:  test\n" +
-                "          id:    1\n" +
-                "          body:  { doc: { foo: bar } }\n" +
-                "          ignore: 404\n" +
-                "\n" +
-                "---\n" +
-                "\"Missing document (script)\":\n" +
-                "\n" +
-                "\n" +
-                "  - do:\n" +
-                "      catch:      missing\n" +
-                "      update:\n" +
-                "          index:  test_1\n" +
-                "          type:   test\n" +
-                "          id:     1\n" +
-                "          body:\n" +
-                "            script: \"ctx._source.foo = bar\"\n" +
-                "            params: { bar: 'xxx' }\n" +
-                "\n" +
-                "  - do:\n" +
-                "      update:\n" +
-                "          index:  test_1\n" +
-                "          type:   test\n" +
-                "          id:     1\n" +
-                "          ignore: 404\n" +
-                "          body:\n" +
-                "            script:       \"ctx._source.foo = bar\"\n" +
-                "            params:       { bar: 'xxx' }\n"
-        );
+        parser = YamlXContent.yamlXContent.createParser("---\n" + "\"Missing document (partial doc)\":\n" + "\n" + "  - do:\n" + "      catch:      missing\n" + "      update:\n" + "          index:  test_1\n" + "          type:   test\n" + "          id:     1\n" + "          body:   { doc: { foo: bar } }\n" + "\n" + "  - do:\n" + "      update:\n" + "          index: test_1\n" + "          type:  test\n" + "          id:    1\n" + "          body:  { doc: { foo: bar } }\n" + "          ignore: 404\n" + "\n" + "---\n" + "\"Missing document (script)\":\n" + "\n" + "\n" + "  - do:\n" + "      catch:      missing\n" + "      update:\n" + "          index:  test_1\n" + "          type:   test\n" + "          id:     1\n" + "          body:\n" + "            script: \"ctx._source.foo = bar\"\n" + "            params: { bar: 'xxx' }\n" + "\n" + "  - do:\n" + "      update:\n" + "          index:  test_1\n" + "          type:   test\n" + "          id:     1\n" + "          ignore: 404\n" + "          body:\n" + "            script:       \"ctx._source.foo = bar\"\n" + "            params:       { bar: 'xxx' }\n");
 
         RestTestSuiteParser testParser = new RestTestSuiteParser();
         RestTestSuite restTestSuite = testParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -329,33 +229,7 @@ public class RestTestParserTests extends ElasticsearchTestCase {
 
     @Test(expected = RestTestParseException.class)
     public void testParseTestDuplicateTestSections() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "---\n" +
-                        "\"Missing document (script)\":\n" +
-                        "\n" +
-                        "  - do:\n" +
-                        "      catch:      missing\n" +
-                        "      update:\n" +
-                        "          index:  test_1\n" +
-                        "          type:   test\n" +
-                        "          id:     1\n" +
-                        "          body:   { doc: { foo: bar } }\n" +
-                        "\n" +
-                        "---\n" +
-                        "\"Missing document (script)\":\n" +
-                        "\n" +
-                        "\n" +
-                        "  - do:\n" +
-                        "      catch:      missing\n" +
-                        "      update:\n" +
-                        "          index:  test_1\n" +
-                        "          type:   test\n" +
-                        "          id:     1\n" +
-                        "          body:\n" +
-                        "            script: \"ctx._source.foo = bar\"\n" +
-                        "            params: { bar: 'xxx' }\n" +
-                        "\n"
-        );
+        parser = YamlXContent.yamlXContent.createParser("---\n" + "\"Missing document (script)\":\n" + "\n" + "  - do:\n" + "      catch:      missing\n" + "      update:\n" + "          index:  test_1\n" + "          type:   test\n" + "          id:     1\n" + "          body:   { doc: { foo: bar } }\n" + "\n" + "---\n" + "\"Missing document (script)\":\n" + "\n" + "\n" + "  - do:\n" + "      catch:      missing\n" + "      update:\n" + "          index:  test_1\n" + "          type:   test\n" + "          id:     1\n" + "          body:\n" + "            script: \"ctx._source.foo = bar\"\n" + "            params: { bar: 'xxx' }\n" + "\n");
 
         RestTestSuiteParser testParser = new RestTestSuiteParser();
         testParser.parse(new RestTestSuiteParseContext("api", "suite", parser));

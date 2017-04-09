@@ -41,7 +41,6 @@ public class StringMapAdjustOrPutBenchmark {
         long ITERATIONS = 10;
         boolean REUSE = true;
 
-
         String[] values = new String[NUMBER_OF_KEYS];
         for (int i = 0; i < values.length; i++) {
             values[i] = RandomStrings.randomAsciiOfLength(ThreadLocalRandom.current(), STRING_SIZE);
@@ -68,7 +67,7 @@ public class StringMapAdjustOrPutBenchmark {
         System.out.println("TObjectIntHashMap: " + stopWatch.totalTime() + ", " + stopWatch.totalTime().millisFrac() / ITERATIONS + "ms");
 
         stopWatch = new StopWatch().start();
-//        TObjectIntCustomHashMap<String> iMap = new TObjectIntCustomHashMap<String>(new StringIdentityHashingStrategy());
+        //        TObjectIntCustomHashMap<String> iMap = new TObjectIntCustomHashMap<String>(new StringIdentityHashingStrategy());
         ObjectIntOpenHashMap<String> iMap = new ObjectIntOpenHashMap<>();
         for (long iter = 0; iter < ITERATIONS; iter++) {
             if (REUSE) {
@@ -155,7 +154,6 @@ public class StringMapAdjustOrPutBenchmark {
         stopWatch.stop();
         System.out.println("HashMap: " + stopWatch.totalTime() + ", " + stopWatch.totalTime().millisFrac() / ITERATIONS + "ms");
 
-
         stopWatch = new StopWatch().start();
         IdentityHashMap<String, StringEntry> ihMap = new IdentityHashMap<>();
         for (long iter = 0; iter < ITERATIONS; iter++) {
@@ -232,7 +230,6 @@ public class StringMapAdjustOrPutBenchmark {
         stopWatch.stop();
         System.out.println("TIntObjectHashMap: " + stopWatch.totalTime() + ", " + stopWatch.totalTime().millisFrac() / ITERATIONS + "ms");
     }
-
 
     static class StringEntry {
         String key;

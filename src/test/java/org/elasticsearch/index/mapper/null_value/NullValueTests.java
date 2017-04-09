@@ -19,7 +19,6 @@ package org.elasticsearch.index.mapper.null_value;
  * under the License.
  */
 
-
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.mapper.MapperParsingException;
@@ -36,20 +35,10 @@ public class NullValueTests extends ElasticsearchSingleNodeTest {
     @Test
     public void testNullNull_Value() throws Exception {
         IndexService indexService = createIndex("test", ImmutableSettings.settingsBuilder().build());
-        String[] typesToTest = {"integer", "long", "double", "float", "short", "date", "ip", "string", "boolean", "byte"};
+        String[] typesToTest = { "integer", "long", "double", "float", "short", "date", "ip", "string", "boolean", "byte" };
 
         for (String type : typesToTest) {
-            String mapping = XContentFactory.jsonBuilder()
-                    .startObject()
-                        .startObject("type")
-                            .startObject("properties")
-                                .startObject("numeric")
-                                    .field("type", type)
-                                    .field("null_value", (String) null)
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                    .endObject().string();
+            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("numeric").field("type", type).field("null_value", (String) null).endObject().endObject().endObject().endObject().string();
 
             try {
                 indexService.mapperService().documentMapperParser().parse(mapping);
@@ -59,7 +48,6 @@ public class NullValueTests extends ElasticsearchSingleNodeTest {
             }
 
         }
-
 
     }
 }

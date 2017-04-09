@@ -91,12 +91,10 @@ public class CapturingTransport implements Transport {
         adapter.onResponseReceived(requestId).handleException(new RemoteTransportException("remote failure", t));
     }
 
-
     @Override
     public void sendRequest(DiscoveryNode node, long requestId, String action, TransportRequest request, TransportRequestOptions options) throws IOException, TransportException {
         capturedRequests.add(new CapturedRequest(node, requestId, action, request));
     }
-
 
     @Override
     public void transportServiceAdapter(TransportServiceAdapter adapter) {

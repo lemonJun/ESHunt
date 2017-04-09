@@ -27,15 +27,12 @@ import org.junit.Test;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
-
 public class DynamicMappingIntegrationTests extends ElasticsearchIntegrationTest {
 
     // https://github.com/elasticsearch/elasticsearch/issues/8423#issuecomment-64229717
     @Test
     public void testStrictAllMapping() throws Exception {
-        String defaultMapping = jsonBuilder().startObject().startObject("_default_")
-                .field("dynamic", "strict")
-                .endObject().endObject().string();
+        String defaultMapping = jsonBuilder().startObject().startObject("_default_").field("dynamic", "strict").endObject().endObject().string();
         client().admin().indices().prepareCreate("index").addMapping("_default_", defaultMapping).get();
 
         try {
@@ -52,16 +49,9 @@ public class DynamicMappingIntegrationTests extends ElasticsearchIntegrationTest
             }
         });
 
-        String docMapping = jsonBuilder().startObject().startObject("type")
-                .startObject("_all")
-                .field("enabled", false)
-                .endObject()
-                .endObject().endObject().string();
+        String docMapping = jsonBuilder().startObject().startObject("type").startObject("_all").field("enabled", false).endObject().endObject().endObject().string();
         try {
-            client().admin().indices()
-                    .preparePutMapping("index")
-                    .setType("type")
-                    .setSource(docMapping).get();
+            client().admin().indices().preparePutMapping("index").setType("type").setSource(docMapping).get();
             fail();
         } catch (Exception e) {
             // the mapping was created anyway with _all enabled: true, although the index request fails so we expect the update to fail

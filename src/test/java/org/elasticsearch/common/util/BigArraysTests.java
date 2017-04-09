@@ -152,9 +152,8 @@ public class BigArraysTests extends ElasticsearchSingleNodeTest {
     public void testByteArrayFill() {
         final int len = randomIntBetween(1, 100000);
         final int fromIndex = randomIntBetween(0, len - 1);
-        final int toIndex = randomBoolean()
-            ? Math.min(fromIndex + randomInt(100), len) // single page
-            : randomIntBetween(fromIndex, len); // likely multiple pages
+        final int toIndex = randomBoolean() ? Math.min(fromIndex + randomInt(100), len) // single page
+                        : randomIntBetween(fromIndex, len); // likely multiple pages
         final ByteArray array2 = bigArrays.newByteArray(len, randomBoolean());
         final byte[] array1 = new byte[len];
         for (int i = 0; i < len; ++i) {
@@ -173,9 +172,8 @@ public class BigArraysTests extends ElasticsearchSingleNodeTest {
     public void testFloatArrayFill() {
         final int len = randomIntBetween(1, 100000);
         final int fromIndex = randomIntBetween(0, len - 1);
-        final int toIndex = randomBoolean()
-            ? Math.min(fromIndex + randomInt(100), len) // single page
-            : randomIntBetween(fromIndex, len); // likely multiple pages
+        final int toIndex = randomBoolean() ? Math.min(fromIndex + randomInt(100), len) // single page
+                        : randomIntBetween(fromIndex, len); // likely multiple pages
         final FloatArray array2 = bigArrays.newFloatArray(len, randomBoolean());
         final float[] array1 = new float[len];
         for (int i = 0; i < len; ++i) {
@@ -194,9 +192,8 @@ public class BigArraysTests extends ElasticsearchSingleNodeTest {
     public void testDoubleArrayFill() {
         final int len = randomIntBetween(1, 100000);
         final int fromIndex = randomIntBetween(0, len - 1);
-        final int toIndex = randomBoolean()
-            ? Math.min(fromIndex + randomInt(100), len) // single page
-            : randomIntBetween(fromIndex, len); // likely multiple pages
+        final int toIndex = randomBoolean() ? Math.min(fromIndex + randomInt(100), len) // single page
+                        : randomIntBetween(fromIndex, len); // likely multiple pages
         final DoubleArray array2 = bigArrays.newDoubleArray(len, randomBoolean());
         final double[] array1 = new double[len];
         for (int i = 0; i < len; ++i) {
@@ -215,9 +212,8 @@ public class BigArraysTests extends ElasticsearchSingleNodeTest {
     public void testLongArrayFill() {
         final int len = randomIntBetween(1, 100000);
         final int fromIndex = randomIntBetween(0, len - 1);
-        final int toIndex = randomBoolean()
-            ? Math.min(fromIndex + randomInt(100), len) // single page
-            : randomIntBetween(fromIndex, len); // likely multiple pages
+        final int toIndex = randomBoolean() ? Math.min(fromIndex + randomInt(100), len) // single page
+                        : randomIntBetween(fromIndex, len); // likely multiple pages
         final LongArray array2 = bigArrays.newLongArray(len, randomBoolean());
         final long[] array1 = new long[len];
         for (int i = 0; i < len; ++i) {
@@ -254,7 +250,7 @@ public class BigArraysTests extends ElasticsearchSingleNodeTest {
         final byte[] array1 = new byte[randomIntBetween(1, 4000000)];
         getRandom().nextBytes(array1);
         final ByteArray array2 = bigArrays.newByteArray(array1.length, randomBoolean());
-        for (int i = 0; i < array1.length; ) {
+        for (int i = 0; i < array1.length;) {
             final int len = Math.min(array1.length - i, randomBoolean() ? randomInt(10) : randomInt(3 * BigArrays.BYTE_PAGE_SIZE));
             array2.set(i, array1, i, len);
             i += len;
@@ -277,22 +273,22 @@ public class BigArraysTests extends ElasticsearchSingleNodeTest {
         empty2.close();
 
         // not equal: contents differ
-        final ByteArray a1 = byteArrayWithBytes(new byte[]{0});
-        final ByteArray a2 = byteArrayWithBytes(new byte[]{1});
+        final ByteArray a1 = byteArrayWithBytes(new byte[] { 0 });
+        final ByteArray a2 = byteArrayWithBytes(new byte[] { 1 });
         assertFalse(bigArrays.equals(a1, a2));
         a1.close();
         a2.close();
 
         // not equal: contents differ
-        final ByteArray a3 = byteArrayWithBytes(new byte[]{1,2,3});
-        final ByteArray a4 = byteArrayWithBytes(new byte[]{1, 1, 3});
+        final ByteArray a3 = byteArrayWithBytes(new byte[] { 1, 2, 3 });
+        final ByteArray a4 = byteArrayWithBytes(new byte[] { 1, 1, 3 });
         assertFalse(bigArrays.equals(a3, a4));
         a3.close();
         a4.close();
 
         // not equal: contents differ
-        final ByteArray a5 = byteArrayWithBytes(new byte[]{1,2,3});
-        final ByteArray a6 = byteArrayWithBytes(new byte[]{1,2,4});
+        final ByteArray a5 = byteArrayWithBytes(new byte[] { 1, 2, 3 });
+        final ByteArray a6 = byteArrayWithBytes(new byte[] { 1, 2, 4 });
         assertFalse(bigArrays.equals(a5, a6));
         a5.close();
         a6.close();
@@ -334,11 +330,7 @@ public class BigArraysTests extends ElasticsearchSingleNodeTest {
     public void testMaxSizeExceededOnNew() throws Exception {
         final int size = scaledRandomIntBetween(5, 1 << 22);
         for (String type : Arrays.asList("Byte", "Int", "Long", "Float", "Double", "Object")) {
-            HierarchyCircuitBreakerService hcbs = new HierarchyCircuitBreakerService(
-                    ImmutableSettings.builder()
-                            .put(HierarchyCircuitBreakerService.REQUEST_CIRCUIT_BREAKER_LIMIT_SETTING, size - 1)
-                            .build(),
-                    new NodeSettingsService(ImmutableSettings.EMPTY));
+            HierarchyCircuitBreakerService hcbs = new HierarchyCircuitBreakerService(ImmutableSettings.builder().put(HierarchyCircuitBreakerService.REQUEST_CIRCUIT_BREAKER_LIMIT_SETTING, size - 1).build(), new NodeSettingsService(ImmutableSettings.EMPTY));
             BigArrays bigArrays = new BigArrays(null, hcbs).withCircuitBreaking();
             Method create = BigArrays.class.getMethod("new" + type + "Array", long.class);
             try {
@@ -354,11 +346,7 @@ public class BigArraysTests extends ElasticsearchSingleNodeTest {
     public void testMaxSizeExceededOnResize() throws Exception {
         for (String type : Arrays.asList("Byte", "Int", "Long", "Float", "Double", "Object")) {
             final long maxSize = randomIntBetween(1 << 10, 1 << 22);
-            HierarchyCircuitBreakerService hcbs = new HierarchyCircuitBreakerService(
-                    ImmutableSettings.builder()
-                            .put(HierarchyCircuitBreakerService.REQUEST_CIRCUIT_BREAKER_LIMIT_SETTING, maxSize)
-                            .build(),
-                    new NodeSettingsService(ImmutableSettings.EMPTY));
+            HierarchyCircuitBreakerService hcbs = new HierarchyCircuitBreakerService(ImmutableSettings.builder().put(HierarchyCircuitBreakerService.REQUEST_CIRCUIT_BREAKER_LIMIT_SETTING, maxSize).build(), new NodeSettingsService(ImmutableSettings.EMPTY));
             BigArrays bigArrays = new BigArrays(null, hcbs).withCircuitBreaking();
             Method create = BigArrays.class.getMethod("new" + type + "Array", long.class);
             final int size = scaledRandomIntBetween(1, 20);

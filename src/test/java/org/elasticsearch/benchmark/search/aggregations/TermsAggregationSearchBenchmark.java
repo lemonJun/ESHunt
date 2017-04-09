@@ -109,6 +109,7 @@ public class TermsAggregationSearchBenchmark {
             }
         };
         abstract SearchRequestBuilder addTermsAgg(SearchRequestBuilder builder, String name, String field, String executionHint);
+
         abstract SearchRequestBuilder addTermsStatsAgg(SearchRequestBuilder builder, String name, String keyField, String valueField);
     }
 
@@ -116,64 +117,21 @@ public class TermsAggregationSearchBenchmark {
         Bootstrap.initializeNatives(true, false);
         Random random = new Random();
 
-        Settings settings = settingsBuilder()
-                .put("index.refresh_interval", "-1")
-                .put("gateway.type", "local")
-                .put(SETTING_NUMBER_OF_SHARDS, 1)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put("index.refresh_interval", "-1").put("gateway.type", "local").put(SETTING_NUMBER_OF_SHARDS, 1).put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
         String clusterName = TermsAggregationSearchBenchmark.class.getSimpleName();
         nodes = new InternalNode[1];
         for (int i = 0; i < nodes.length; i++) {
-            nodes[i] = (InternalNode) nodeBuilder().clusterName(clusterName)
-                    .settings(settingsBuilder().put(settings).put("name", "node" + i))
-                    .node();
+            nodes[i] = (InternalNode) nodeBuilder().clusterName(clusterName).settings(settingsBuilder().put(settings).put("name", "node" + i)).node();
         }
 
-        Node clientNode = nodeBuilder()
-                .clusterName(clusterName)
-                .settings(settingsBuilder().put(settings).put("name", "client")).client(true).node();
+        Node clientNode = nodeBuilder().clusterName(clusterName).settings(settingsBuilder().put(settings).put("name", "client")).client(true).node();
 
         client = clientNode.client();
 
         Thread.sleep(10000);
         try {
-            client.admin().indices().create(createIndexRequest("test").mapping("type1", jsonBuilder()
-              .startObject()
-                .startObject("type1")
-                  .startObject("properties")
-                    .startObject("s_value_dv")
-                      .field("type", "string")
-                      .field("index", "no")
-                      .startObject("fielddata")
-                        .field("format", "doc_values")
-                      .endObject()
-                    .endObject()
-                    .startObject("sm_value_dv")
-                      .field("type", "string")
-                      .field("index", "no")
-                      .startObject("fielddata")
-                        .field("format", "doc_values")
-                      .endObject()
-                    .endObject()
-                    .startObject("l_value_dv")
-                      .field("type", "long")
-                      .field("index", "no")
-                      .startObject("fielddata")
-                        .field("format", "doc_values")
-                      .endObject()
-                    .endObject()
-                    .startObject("lm_value_dv")
-                      .field("type", "long")
-                      .field("index", "no")
-                      .startObject("fielddata")
-                        .field("format", "doc_values")
-                      .endObject()
-                    .endObject()
-                  .endObject()
-                .endObject()
-              .endObject())).actionGet();
+            client.admin().indices().create(createIndexRequest("test").mapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("s_value_dv").field("type", "string").field("index", "no").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("sm_value_dv").field("type", "string").field("index", "no").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("l_value_dv").field("type", "long").field("index", "no").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("lm_value_dv").field("type", "long").field("index", "no").startObject("fielddata").field("format", "doc_values").endObject().endObject().endObject().endObject().endObject())).actionGet();
 
             ObjectOpenHashSet<String> uniqueTerms = ObjectOpenHashSet.newInstance();
             for (int i = 0; i < NUMBER_OF_TERMS; i++) {
@@ -205,7 +163,7 @@ public class TermsAggregationSearchBenchmark {
                     builder.field("s_value_dv", sValue);
                     builder.field("l_value_dv", lValue);
 
-                    for (String field : new String[] {"sm_value", "sm_value_dv"}) {
+                    for (String field : new String[] { "sm_value", "sm_value_dv" }) {
                         builder.startArray(field);
                         for (int k = 0; k < NUMBER_OF_MULTI_VALUE_TERMS; k++) {
                             builder.value(sValues[ThreadLocalRandom.current().nextInt(sValues.length)]);
@@ -213,7 +171,7 @@ public class TermsAggregationSearchBenchmark {
                         builder.endArray();
                     }
 
-                    for (String field : new String[] {"lm_value", "lm_value_dv"}) {
+                    for (String field : new String[] { "lm_value", "lm_value_dv" }) {
                         builder.startArray(field);
                         for (int k = 0; k < NUMBER_OF_MULTI_VALUE_TERMS; k++) {
                             builder.value(ThreadLocalRandom.current().nextInt(NUMBER_OF_TERMS));
@@ -223,8 +181,7 @@ public class TermsAggregationSearchBenchmark {
 
                     builder.endObject();
 
-                    request.add(Requests.indexRequest("test").type("type1").id(Integer.toString(counter))
-                            .source(builder));
+                    request.add(Requests.indexRequest("test").type("type1").id(Integer.toString(counter)).source(builder));
                 }
                 BulkResponse response = request.execute().actionGet();
                 if (response.hasFailures()) {
@@ -246,7 +203,6 @@ public class TermsAggregationSearchBenchmark {
         client.admin().indices().prepareRefresh().execute().actionGet();
         COUNT = client.prepareCount().setQuery(matchAllQuery()).execute().actionGet().getCount();
         System.out.println("--> Number of docs in index: " + COUNT);
-
 
         List<StatsResult> stats = Lists.newArrayList();
         stats.add(terms("terms_facet_s", Method.FACET, "s_value", null));
@@ -359,10 +315,7 @@ public class TermsAggregationSearchBenchmark {
         System.out.println("--> Warmup (" + name + ")...");
         // run just the child query, warm up first
         for (int j = 0; j < QUERY_WARMUP; j++) {
-            SearchResponse searchResponse = method.addTermsAgg(client.prepareSearch("test")
-                    .setSearchType(SearchType.COUNT)
-                    .setQuery(matchAllQuery()), name, field, executionHint)
-                    .execute().actionGet();
+            SearchResponse searchResponse = method.addTermsAgg(client.prepareSearch("test").setSearchType(SearchType.COUNT).setQuery(matchAllQuery()), name, field, executionHint).execute().actionGet();
             if (j == 0) {
                 System.out.println("--> Loading (" + field + "): took: " + searchResponse.getTook());
             }
@@ -372,14 +325,10 @@ public class TermsAggregationSearchBenchmark {
         }
         System.out.println("--> Warmup (" + name + ") DONE");
 
-
         System.out.println("--> Running (" + name + ")...");
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
-            SearchResponse searchResponse = method.addTermsAgg(client.prepareSearch()
-                    .setSearchType(SearchType.COUNT)
-                    .setQuery(matchAllQuery()), name, field, executionHint)
-                    .execute().actionGet();
+            SearchResponse searchResponse = method.addTermsAgg(client.prepareSearch().setSearchType(SearchType.COUNT).setQuery(matchAllQuery()), name, field, executionHint).execute().actionGet();
             if (searchResponse.getHits().totalHits() != COUNT) {
                 System.err.println("--> mismatch on hits");
             }
@@ -409,10 +358,7 @@ public class TermsAggregationSearchBenchmark {
         System.out.println("--> Warmup (" + name + ")...");
         // run just the child query, warm up first
         for (int j = 0; j < QUERY_WARMUP; j++) {
-            SearchResponse searchResponse = method.addTermsStatsAgg(client.prepareSearch()
-                    .setSearchType(SearchType.COUNT)
-                    .setQuery(matchAllQuery()), name, keyField, valueField)
-                    .execute().actionGet();
+            SearchResponse searchResponse = method.addTermsStatsAgg(client.prepareSearch().setSearchType(SearchType.COUNT).setQuery(matchAllQuery()), name, keyField, valueField).execute().actionGet();
             if (j == 0) {
                 System.out.println("--> Loading (" + name + "): took: " + searchResponse.getTook());
             }
@@ -422,14 +368,10 @@ public class TermsAggregationSearchBenchmark {
         }
         System.out.println("--> Warmup (" + name + ") DONE");
 
-
         System.out.println("--> Running (" + name + ")...");
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
-            SearchResponse searchResponse = method.addTermsStatsAgg(client.prepareSearch()
-                    .setSearchType(SearchType.COUNT)
-                    .setQuery(matchAllQuery()), name, keyField, valueField)
-                    .execute().actionGet();
+            SearchResponse searchResponse = method.addTermsStatsAgg(client.prepareSearch().setSearchType(SearchType.COUNT).setQuery(matchAllQuery()), name, keyField, valueField).execute().actionGet();
             if (searchResponse.getHits().totalHits() != COUNT) {
                 System.err.println("--> mismatch on hits");
             }

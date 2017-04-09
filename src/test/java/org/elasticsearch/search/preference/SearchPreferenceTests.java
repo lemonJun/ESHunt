@@ -42,29 +42,29 @@ import static org.hamcrest.Matchers.*;
 public class SearchPreferenceTests extends ElasticsearchIntegrationTest {
 
     @Test
-    public void testThatAllPreferencesAreParsedToValid(){
+    public void testThatAllPreferencesAreParsedToValid() {
         //list of all enums and their strings as reference
-        assertThat(Preference.parse("_shards"),equalTo(Preference.SHARDS));
-        assertThat(Preference.parse("_prefer_node"),equalTo(Preference.PREFER_NODE));
-        assertThat(Preference.parse("_local"),equalTo(Preference.LOCAL));
-        assertThat(Preference.parse("_primary"),equalTo(Preference.PRIMARY));
-        assertThat(Preference.parse("_primary_first"),equalTo(Preference.PRIMARY_FIRST));
-        assertThat(Preference.parse("_only_local"),equalTo(Preference.ONLY_LOCAL));
-        assertThat(Preference.parse("_only_node"),equalTo(Preference.ONLY_NODE));
+        assertThat(Preference.parse("_shards"), equalTo(Preference.SHARDS));
+        assertThat(Preference.parse("_prefer_node"), equalTo(Preference.PREFER_NODE));
+        assertThat(Preference.parse("_local"), equalTo(Preference.LOCAL));
+        assertThat(Preference.parse("_primary"), equalTo(Preference.PRIMARY));
+        assertThat(Preference.parse("_primary_first"), equalTo(Preference.PRIMARY_FIRST));
+        assertThat(Preference.parse("_only_local"), equalTo(Preference.ONLY_LOCAL));
+        assertThat(Preference.parse("_only_node"), equalTo(Preference.ONLY_NODE));
         assertThat(Preference.parse("_only_nodes"), equalTo(Preference.ONLY_NODES));
     }
 
     @Test // see #2896
     public void testStopOneNodePreferenceWithRedState() throws InterruptedException, IOException {
-        assertAcked(prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_shards", cluster().numDataNodes()+2).put("index.number_of_replicas", 0)));
+        assertAcked(prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_shards", cluster().numDataNodes() + 2).put("index.number_of_replicas", 0)));
         ensureGreen();
         for (int i = 0; i < 10; i++) {
-            client().prepareIndex("test", "type1", ""+i).setSource("field1", "value1").execute().actionGet();
+            client().prepareIndex("test", "type1", "" + i).setSource("field1", "value1").execute().actionGet();
         }
         refresh();
         internalCluster().stopRandomDataNode();
         client().admin().cluster().prepareHealth().setWaitForStatus(ClusterHealthStatus.RED).execute().actionGet();
-        String[] preferences = new String[] {"_primary","_local", "_primary_first", "_prefer_node:somenode", "_prefer_node:server2","_only_nodes:*"};
+        String[] preferences = new String[] { "_primary", "_local", "_primary_first", "_prefer_node:somenode", "_prefer_node:server2", "_only_nodes:*" };
         for (String pref : preferences) {
             logger.info("--> Testing out preference={}", pref);
             SearchResponse searchResponse = client().prepareSearch().setSearchType(SearchType.COUNT).setPreference(pref).execute().actionGet();
@@ -87,11 +87,10 @@ public class SearchPreferenceTests extends ElasticsearchIntegrationTest {
     @Test
     public void noPreferenceRandom() throws Exception {
         assertAcked(prepareCreate("test").setSettings(
-                //this test needs at least a replica to make sure two consecutive searches go to two different copies of the same data
-                settingsBuilder().put(indexSettings()).put(SETTING_NUMBER_OF_REPLICAS, between(1, maximumNumberOfReplicas()))
-        ));
+                        //this test needs at least a replica to make sure two consecutive searches go to two different copies of the same data
+                        settingsBuilder().put(indexSettings()).put(SETTING_NUMBER_OF_REPLICAS, between(1, maximumNumberOfReplicas()))));
         ensureGreen();
-        
+
         client().prepareIndex("test", "type1").setSource("field1", "value1").execute().actionGet();
         refresh();
 
@@ -118,7 +117,7 @@ public class SearchPreferenceTests extends ElasticsearchIntegrationTest {
             shardsRange.append(",").append(i);
         }
 
-        String[] preferences = new String[]{"1234", "_primary", "_local", shardsRange.toString(), "_primary_first","_only_nodes:*"};
+        String[] preferences = new String[] { "1234", "_primary", "_local", shardsRange.toString(), "_primary_first", "_only_nodes:*" };
         for (String pref : preferences) {
             SearchResponse searchResponse = client().prepareSearch("test").setQuery(matchAllQuery()).setPreference(pref).execute().actionGet();
             assertHitCount(searchResponse, 1);
@@ -127,7 +126,7 @@ public class SearchPreferenceTests extends ElasticsearchIntegrationTest {
         }
     }
 
-    @Test (expected = ElasticsearchIllegalArgumentException.class)
+    @Test(expected = ElasticsearchIllegalArgumentException.class)
     public void testThatSpecifyingNonExistingNodesReturnsUsefulError() throws Exception {
         createIndex("test");
         ensureGreen();

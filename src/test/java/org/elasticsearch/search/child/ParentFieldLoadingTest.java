@@ -49,21 +49,14 @@ import static org.hamcrest.Matchers.greaterThan;
  */
 public class ParentFieldLoadingTest extends ElasticsearchIntegrationTest {
 
-    private final Settings indexSettings = ImmutableSettings.builder()
-            .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-            .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)
-            .put(IndexShard.INDEX_REFRESH_INTERVAL, -1)
+    private final Settings indexSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0).put(IndexShard.INDEX_REFRESH_INTERVAL, -1)
                     // We never want merges in this test to ensure we have two segments for the last validation
-            .put(MergePolicyModule.MERGE_POLICY_TYPE_KEY, NoMergePolicyProvider.class)
-            .build();
+                    .put(MergePolicyModule.MERGE_POLICY_TYPE_KEY, NoMergePolicyProvider.class).build();
 
     @Test
     public void testEagerParentFieldLoading() throws Exception {
         logger.info("testing lazy loading...");
-        assertAcked(prepareCreate("test")
-                .setSettings(indexSettings)
-                .addMapping("parent")
-                .addMapping("child", childMapping(FieldMapper.Loading.LAZY)));
+        assertAcked(prepareCreate("test").setSettings(indexSettings).addMapping("parent").addMapping("child", childMapping(FieldMapper.Loading.LAZY)));
         ensureGreen();
 
         client().prepareIndex("test", "parent", "1").setSource("{}").get();
@@ -75,10 +68,7 @@ public class ParentFieldLoadingTest extends ElasticsearchIntegrationTest {
 
         logger.info("testing default loading...");
         assertAcked(client().admin().indices().prepareDelete("test").get());
-        assertAcked(prepareCreate("test")
-                .setSettings(indexSettings)
-                .addMapping("parent")
-                .addMapping("child", "_parent", "type=parent"));
+        assertAcked(prepareCreate("test").setSettings(indexSettings).addMapping("parent").addMapping("child", "_parent", "type=parent"));
         ensureGreen();
 
         client().prepareIndex("test", "parent", "1").setSource("{}").get();
@@ -91,10 +81,7 @@ public class ParentFieldLoadingTest extends ElasticsearchIntegrationTest {
 
         logger.info("testing eager loading...");
         assertAcked(client().admin().indices().prepareDelete("test").get());
-        assertAcked(prepareCreate("test")
-                .setSettings(indexSettings)
-                .addMapping("parent")
-                .addMapping("child", childMapping(FieldMapper.Loading.EAGER)));
+        assertAcked(prepareCreate("test").setSettings(indexSettings).addMapping("parent").addMapping("child", childMapping(FieldMapper.Loading.EAGER)));
         ensureGreen();
 
         client().prepareIndex("test", "parent", "1").setSource("{}").get();
@@ -106,10 +93,7 @@ public class ParentFieldLoadingTest extends ElasticsearchIntegrationTest {
 
         logger.info("testing eager global ordinals loading...");
         assertAcked(client().admin().indices().prepareDelete("test").get());
-        assertAcked(prepareCreate("test")
-                .setSettings(indexSettings)
-                .addMapping("parent")
-                .addMapping("child", childMapping(FieldMapper.Loading.EAGER_GLOBAL_ORDINALS)));
+        assertAcked(prepareCreate("test").setSettings(indexSettings).addMapping("parent").addMapping("child", childMapping(FieldMapper.Loading.EAGER_GLOBAL_ORDINALS)));
         ensureGreen();
 
         // Need to do 2 separate refreshes, otherwise we have 1 segment and then we can't measure if global ordinals
@@ -125,10 +109,7 @@ public class ParentFieldLoadingTest extends ElasticsearchIntegrationTest {
 
     @Test
     public void testChangingEagerParentFieldLoadingAtRuntime() throws Exception {
-        assertAcked(prepareCreate("test")
-                .setSettings(indexSettings)
-                .addMapping("parent")
-                .addMapping("child", "_parent", "type=parent"));
+        assertAcked(prepareCreate("test").setSettings(indexSettings).addMapping("parent").addMapping("child", "_parent", "type=parent"));
         ensureGreen();
 
         client().prepareIndex("test", "parent", "1").setSource("{}").get();
@@ -139,9 +120,7 @@ public class ParentFieldLoadingTest extends ElasticsearchIntegrationTest {
         long idCacheSizeDefault = response.getIndicesStats().getIdCache().getMemorySizeInBytes();
         assertThat(idCacheSizeDefault, greaterThan(0l));
 
-        PutMappingResponse putMappingResponse = client().admin().indices().preparePutMapping("test").setType("child")
-                .setSource(childMapping(FieldMapper.Loading.EAGER_GLOBAL_ORDINALS))
-                .get();
+        PutMappingResponse putMappingResponse = client().admin().indices().preparePutMapping("test").setType("child").setSource(childMapping(FieldMapper.Loading.EAGER_GLOBAL_ORDINALS)).get();
         assertAcked(putMappingResponse);
         assertBusy(new Runnable() {
             @Override
@@ -173,10 +152,7 @@ public class ParentFieldLoadingTest extends ElasticsearchIntegrationTest {
     }
 
     private XContentBuilder childMapping(FieldMapper.Loading loading) throws IOException {
-        return jsonBuilder().startObject().startObject("child").startObject("_parent")
-                .field("type", "parent")
-                .startObject("fielddata").field(FieldMapper.Loading.KEY, loading).endObject()
-                .endObject().endObject().endObject();
+        return jsonBuilder().startObject().startObject("child").startObject("_parent").field("type", "parent").startObject("fielddata").field(FieldMapper.Loading.KEY, loading).endObject().endObject().endObject().endObject();
     }
 
 }

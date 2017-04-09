@@ -46,6 +46,7 @@ public class NaNSortingTests extends ElasticsearchIntegrationTest {
             public MetricsAggregationBuilder<?> builder() {
                 return avg(name).field("numeric_field");
             }
+
             @Override
             public double getValue(Aggregation aggregation) {
                 return ((Avg) aggregation).getValue();
@@ -56,24 +57,28 @@ public class NaNSortingTests extends ElasticsearchIntegrationTest {
             public MetricsAggregationBuilder<?> builder() {
                 return extendedStats(name).field("numeric_field");
             }
+
             @Override
             public String sortKey() {
                 return name + ".variance";
             }
+
             @Override
             public double getValue(Aggregation aggregation) {
                 return ((ExtendedStats) aggregation).getVariance();
             }
         },
-        STD_DEVIATION("std_deviation"){
+        STD_DEVIATION("std_deviation") {
             @Override
             public MetricsAggregationBuilder<?> builder() {
                 return extendedStats(name).field("numeric_field");
             }
+
             @Override
             public String sortKey() {
                 return name + ".std_deviation";
             }
+
             @Override
             public double getValue(Aggregation aggregation) {
                 return ((ExtendedStats) aggregation).getStdDeviation();
@@ -136,9 +141,7 @@ public class NaNSortingTests extends ElasticsearchIntegrationTest {
     public void testTerms(String fieldName) {
         final boolean asc = randomBoolean();
         SubAggregation agg = randomFrom(SubAggregation.values());
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(terms("terms").field(fieldName).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(agg.builder()).order(Terms.Order.aggregation(agg.sortKey(), asc)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(terms("terms").field(fieldName).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(agg.builder()).order(Terms.Order.aggregation(agg.sortKey(), asc))).execute().actionGet();
 
         assertSearchResponse(response);
         final Terms terms = response.getAggregations().get("terms");
@@ -164,10 +167,7 @@ public class NaNSortingTests extends ElasticsearchIntegrationTest {
     public void longHistogram() {
         final boolean asc = randomBoolean();
         SubAggregation agg = randomFrom(SubAggregation.values());
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(histogram("histo")
-                        .field("long_value").interval(randomIntBetween(1, 2)).subAggregation(agg.builder()).order(Histogram.Order.aggregation(agg.sortKey(), asc)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(histogram("histo").field("long_value").interval(randomIntBetween(1, 2)).subAggregation(agg.builder()).order(Histogram.Order.aggregation(agg.sortKey(), asc))).execute().actionGet();
 
         assertSearchResponse(response);
         final Histogram histo = response.getAggregations().get("histo");

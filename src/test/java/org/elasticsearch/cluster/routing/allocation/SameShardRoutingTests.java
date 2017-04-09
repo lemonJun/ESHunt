@@ -52,19 +52,13 @@ public class SameShardRoutingTests extends ElasticsearchAllocationTestCase {
     public void sameHost() {
         AllocationService strategy = createAllocationService(settingsBuilder().put(SameShardAllocationDecider.SAME_HOST_SETTING, true).build());
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(2).numberOfReplicas(1))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(2).numberOfReplicas(1)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
         logger.info("--> adding two nodes with the same host");
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(new DiscoveryNode("node1", "node1", "test1", "test1", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String>of(), Version.CURRENT))
-                .put(new DiscoveryNode("node2", "node2", "test1", "test1", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String>of(), Version.CURRENT))).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(new DiscoveryNode("node1", "node1", "test1", "test1", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of(), Version.CURRENT)).put(new DiscoveryNode("node2", "node2", "test1", "test1", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of(), Version.CURRENT))).build();
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
 
@@ -78,8 +72,7 @@ public class SameShardRoutingTests extends ElasticsearchAllocationTestCase {
         assertThat(numberOfShardsOfType(clusterState.readOnlyRoutingNodes(), ShardRoutingState.INITIALIZING), equalTo(0));
 
         logger.info("--> add another node, with a different host, replicas will be allocating");
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder(clusterState.nodes())
-                .put(new DiscoveryNode("node3", "node3", "test2", "test2", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String>of(), Version.CURRENT))).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder(clusterState.nodes()).put(new DiscoveryNode("node3", "node3", "test2", "test2", DummyTransportAddress.INSTANCE, ImmutableMap.<String, String> of(), Version.CURRENT))).build();
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
 

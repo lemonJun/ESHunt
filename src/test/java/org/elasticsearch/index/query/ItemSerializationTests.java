@@ -53,22 +53,20 @@ public class ItemSerializationTests extends ElasticsearchTestCase {
 
         FetchSourceContext fetchSourceContext;
         switch (randomIntBetween(0, 3)) {
-            case 0 :
+            case 0:
                 fetchSourceContext = new FetchSourceContext(randomBoolean());
                 break;
-            case 1 :
+            case 1:
                 fetchSourceContext = new FetchSourceContext(generateRandomStringArray(arraySize, stringSize, true));
                 break;
-            case 2 :
-                fetchSourceContext = new FetchSourceContext(generateRandomStringArray(arraySize, stringSize, true),
-                        generateRandomStringArray(arraySize, stringSize, true));
+            case 2:
+                fetchSourceContext = new FetchSourceContext(generateRandomStringArray(arraySize, stringSize, true), generateRandomStringArray(arraySize, stringSize, true));
                 break;
             default:
                 fetchSourceContext = null;
                 break;
         }
-        return (Item) new Item(index, type, id).routing(routing).fields(fields).version(version).versionType(versionType)
-                .fetchSourceContext(fetchSourceContext);
+        return (Item) new Item(index, type, id).routing(routing).fields(fields).version(version).versionType(versionType).fetchSourceContext(fetchSourceContext);
     }
 
     private String ItemToJSON(Item item) throws IOException {
@@ -110,17 +108,17 @@ public class ItemSerializationTests extends ElasticsearchTestCase {
             assertThat(item.type(), is("type"));
             FetchSourceContext fetchSource = item.fetchSourceContext();
             switch (item.id()) {
-                case "1" :
+                case "1":
                     assertThat(fetchSource.fetchSource(), is(false));
                     break;
-                case "2" :
+                case "2":
                     assertThat(fetchSource.fetchSource(), is(true));
-                    assertThat(fetchSource.includes(), is(new String[]{"field3", "field4"}));
+                    assertThat(fetchSource.includes(), is(new String[] { "field3", "field4" }));
                     break;
-                case "3" :
+                case "3":
                     assertThat(fetchSource.fetchSource(), is(true));
-                    assertThat(fetchSource.includes(), is(new String[]{"user"}));
-                    assertThat(fetchSource.excludes(), is(new String[]{"user.location"}));
+                    assertThat(fetchSource.includes(), is(new String[] { "user" }));
+                    assertThat(fetchSource.excludes(), is(new String[] { "user.location" }));
                     break;
                 default:
                     fail("item with id: " + item.id() + " is not 1, 2 or 3");
@@ -133,18 +131,14 @@ public class ItemSerializationTests extends ElasticsearchTestCase {
     @Test
     public void testSimpleItemSerializationFromFile() throws Exception {
         // test items from JSON
-        List<MultiGetRequest.Item> itemsFromJSON = testItemsFromJSON(
-                copyToStringFromClasspath("/org/elasticsearch/index/query/items.json"));
+        List<MultiGetRequest.Item> itemsFromJSON = testItemsFromJSON(copyToStringFromClasspath("/org/elasticsearch/index/query/items.json"));
 
         // create builder from items
         XContentBuilder builder = XContentFactory.jsonBuilder();
         builder.startObject();
         builder.startArray("docs");
         for (MultiGetRequest.Item item : itemsFromJSON) {
-            MoreLikeThisQueryBuilder.Item itemForBuilder = (MoreLikeThisQueryBuilder.Item) new MoreLikeThisQueryBuilder.Item(
-                    item.index(), item.type(), item.id())
-                    .fetchSourceContext(item.fetchSourceContext())
-                    .fields(item.fields());
+            MoreLikeThisQueryBuilder.Item itemForBuilder = (MoreLikeThisQueryBuilder.Item) new MoreLikeThisQueryBuilder.Item(item.index(), item.type(), item.id()).fetchSourceContext(item.fetchSourceContext()).fields(item.fields());
             itemForBuilder.toXContent(builder, ToXContent.EMPTY_PARAMS);
         }
         builder.endArray();

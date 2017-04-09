@@ -55,10 +55,7 @@ public class RepositoriesTests extends AbstractSnapshotTests {
         File location = randomRepoPath();
 
         logger.info("-->  creating repository");
-        PutRepositoryResponse putRepositoryResponse = client.admin().cluster().preparePutRepository("test-repo-1")
-                .setType("fs").setSettings(ImmutableSettings.settingsBuilder()
-                                .put("location", location)
-                ).get();
+        PutRepositoryResponse putRepositoryResponse = client.admin().cluster().preparePutRepository("test-repo-1").setType("fs").setSettings(ImmutableSettings.settingsBuilder().put("location", location)).get();
         assertThat(putRepositoryResponse.isAcknowledged(), equalTo(true));
 
         logger.info("--> verify the repository");
@@ -78,10 +75,7 @@ public class RepositoriesTests extends AbstractSnapshotTests {
         assertThat(repositoriesMetaData.repository("test-repo-1").type(), equalTo("fs"));
 
         logger.info("-->  creating another repository");
-        putRepositoryResponse = client.admin().cluster().preparePutRepository("test-repo-2")
-                .setType("fs").setSettings(ImmutableSettings.settingsBuilder()
-                                .put("location", randomRepoPath())
-                ).get();
+        putRepositoryResponse = client.admin().cluster().preparePutRepository("test-repo-2").setType("fs").setSettings(ImmutableSettings.settingsBuilder().put("location", randomRepoPath())).get();
         assertThat(putRepositoryResponse.isAcknowledged(), equalTo(true));
 
         logger.info("--> check that both repositories are in cluster state");
@@ -138,9 +132,7 @@ public class RepositoriesTests extends AbstractSnapshotTests {
         File invalidRepoPath = newTempDir().getAbsoluteFile();
         String location = invalidRepoPath.toString();
         try {
-            client().admin().cluster().preparePutRepository("test-repo")
-                    .setType("fs").setSettings(ImmutableSettings.settingsBuilder().put("location", location))
-                    .get();
+            client().admin().cluster().preparePutRepository("test-repo").setType("fs").setSettings(ImmutableSettings.settingsBuilder().put("location", location)).get();
             fail("Shouldn't be here. Location=" + location);
         } catch (RepositoryException ex) {
             assertThat(ex.getDetailedMessage(), containsString("location [" + location + "] doesn't match any of the locations specified by path.repo"));
@@ -150,9 +142,7 @@ public class RepositoriesTests extends AbstractSnapshotTests {
         String unsupportedUrl = repoUrl.replace("file:/", "netdoc:/");
         logger.info("--> trying creating url repository with unsupported url protocol");
         try {
-            client().admin().cluster().preparePutRepository("test-repo")
-                    .setType("url").setSettings(ImmutableSettings.settingsBuilder().put("url", unsupportedUrl))
-                    .get();
+            client().admin().cluster().preparePutRepository("test-repo").setType("url").setSettings(ImmutableSettings.settingsBuilder().put("url", unsupportedUrl)).get();
             fail("Shouldn't be here");
         } catch (RepositoryException ex) {
             assertThat(ex.getDetailedMessage(), containsString("unsupported url protocol [netdoc]"));
@@ -160,9 +150,7 @@ public class RepositoriesTests extends AbstractSnapshotTests {
 
         logger.info("--> trying creating url repository with location that is not registered in path.repo setting");
         try {
-            client().admin().cluster().preparePutRepository("test-repo")
-                    .setType("url").setSettings(ImmutableSettings.settingsBuilder().put("url", invalidRepoPath.toURI().toURL()))
-                    .get();
+            client().admin().cluster().preparePutRepository("test-repo").setType("url").setSettings(ImmutableSettings.settingsBuilder().put("url", invalidRepoPath.toURI().toURL())).get();
             fail("Shouldn't be here");
         } catch (RepositoryException ex) {
             assertThat(ex.getDetailedMessage(), containsString("doesn't match any of the locations specified by path.repo"));
@@ -172,27 +160,15 @@ public class RepositoriesTests extends AbstractSnapshotTests {
     @Test
     public void repositoryAckTimeoutTest() throws Exception {
         logger.info("-->  creating repository test-repo-1 with 0s timeout - shouldn't ack");
-        PutRepositoryResponse putRepositoryResponse = client().admin().cluster().preparePutRepository("test-repo-1")
-                .setType("fs").setSettings(ImmutableSettings.settingsBuilder()
-                                .put("location", randomRepoPath())
-                                .put("compress", randomBoolean())
-                                .put("chunk_size", randomIntBetween(5, 100))
-                )
-                .setTimeout("0s").get();
+        PutRepositoryResponse putRepositoryResponse = client().admin().cluster().preparePutRepository("test-repo-1").setType("fs").setSettings(ImmutableSettings.settingsBuilder().put("location", randomRepoPath()).put("compress", randomBoolean()).put("chunk_size", randomIntBetween(5, 100))).setTimeout("0s").get();
         assertThat(putRepositoryResponse.isAcknowledged(), equalTo(false));
 
         logger.info("-->  creating repository test-repo-2 with standard timeout - should ack");
-        putRepositoryResponse = client().admin().cluster().preparePutRepository("test-repo-2")
-                .setType("fs").setSettings(ImmutableSettings.settingsBuilder()
-                                .put("location", randomRepoPath())
-                                .put("compress", randomBoolean())
-                                .put("chunk_size", randomIntBetween(5, 100))
-                ).get();
+        putRepositoryResponse = client().admin().cluster().preparePutRepository("test-repo-2").setType("fs").setSettings(ImmutableSettings.settingsBuilder().put("location", randomRepoPath()).put("compress", randomBoolean()).put("chunk_size", randomIntBetween(5, 100))).get();
         assertThat(putRepositoryResponse.isAcknowledged(), equalTo(true));
 
         logger.info("-->  deleting repository test-repo-2 with 0s timeout - shouldn't ack");
-        DeleteRepositoryResponse deleteRepositoryResponse = client().admin().cluster().prepareDeleteRepository("test-repo-2")
-                .setTimeout("0s").get();
+        DeleteRepositoryResponse deleteRepositoryResponse = client().admin().cluster().prepareDeleteRepository("test-repo-2").setTimeout("0s").get();
         assertThat(deleteRepositoryResponse.isAcknowledged(), equalTo(false));
 
         logger.info("-->  deleting repository test-repo-1 with standard timeout - should ack");
@@ -204,17 +180,12 @@ public class RepositoriesTests extends AbstractSnapshotTests {
     public void repositoryVerificationTest() throws Exception {
         Client client = client();
 
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("location", randomRepoPath())
-                .put("random_control_io_exception_rate", 1.0).build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("location", randomRepoPath()).put("random_control_io_exception_rate", 1.0).build();
         logger.info("-->  creating repository that cannot write any files - should fail");
-        assertThrows(client.admin().cluster().preparePutRepository("test-repo-1")
-                        .setType(MockRepositoryModule.class.getCanonicalName()).setSettings(settings),
-                RepositoryVerificationException.class);
+        assertThrows(client.admin().cluster().preparePutRepository("test-repo-1").setType(MockRepositoryModule.class.getCanonicalName()).setSettings(settings), RepositoryVerificationException.class);
 
         logger.info("-->  creating repository that cannot write any files, but suppress verification - should be acked");
-        assertAcked(client.admin().cluster().preparePutRepository("test-repo-1")
-                .setType(MockRepositoryModule.class.getCanonicalName()).setSettings(settings).setVerify(false));
+        assertAcked(client.admin().cluster().preparePutRepository("test-repo-1").setType(MockRepositoryModule.class.getCanonicalName()).setSettings(settings).setVerify(false));
 
         logger.info("-->  verifying repository");
         assertThrows(client.admin().cluster().prepareVerifyRepository("test-repo-1"), RepositoryVerificationException.class);
@@ -223,12 +194,7 @@ public class RepositoriesTests extends AbstractSnapshotTests {
 
         logger.info("-->  creating repository");
         try {
-            client.admin().cluster().preparePutRepository("test-repo-1")
-                    .setType(MockRepositoryModule.class.getCanonicalName())
-                    .setSettings(ImmutableSettings.settingsBuilder()
-                                    .put("location", location)
-                                    .put("localize_location", true)
-                    ).get();
+            client.admin().cluster().preparePutRepository("test-repo-1").setType(MockRepositoryModule.class.getCanonicalName()).setSettings(ImmutableSettings.settingsBuilder().put("location", location).put("localize_location", true)).get();
             fail("RepositoryVerificationException wasn't generated");
         } catch (RepositoryVerificationException ex) {
             assertThat(ex.getMessage(), containsString("is not shared"));
@@ -239,17 +205,12 @@ public class RepositoriesTests extends AbstractSnapshotTests {
     public void repositoryVerificationTimeoutTest() throws Exception {
         Client client = client();
 
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("location", randomRepoPath())
-                .put("random_control_io_exception_rate", 1.0).build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("location", randomRepoPath()).put("random_control_io_exception_rate", 1.0).build();
         logger.info("-->  creating repository that cannot write any files - should fail");
-        assertThrows(client.admin().cluster().preparePutRepository("test-repo-1")
-                        .setType(MockRepositoryModule.class.getCanonicalName()).setSettings(settings),
-                RepositoryVerificationException.class);
+        assertThrows(client.admin().cluster().preparePutRepository("test-repo-1").setType(MockRepositoryModule.class.getCanonicalName()).setSettings(settings), RepositoryVerificationException.class);
 
         logger.info("-->  creating repository that cannot write any files, but suppress verification - should be acked");
-        assertAcked(client.admin().cluster().preparePutRepository("test-repo-1")
-                .setType(MockRepositoryModule.class.getCanonicalName()).setSettings(settings).setVerify(false));
+        assertAcked(client.admin().cluster().preparePutRepository("test-repo-1").setType(MockRepositoryModule.class.getCanonicalName()).setSettings(settings).setVerify(false));
 
         logger.info("-->  verifying repository");
         assertThrows(client.admin().cluster().prepareVerifyRepository("test-repo-1"), RepositoryVerificationException.class);
@@ -258,12 +219,7 @@ public class RepositoriesTests extends AbstractSnapshotTests {
 
         logger.info("-->  creating repository");
         try {
-            client.admin().cluster().preparePutRepository("test-repo-1")
-                    .setType(MockRepositoryModule.class.getCanonicalName())
-                    .setSettings(ImmutableSettings.settingsBuilder()
-                                    .put("location", location)
-                                    .put("localize_location", true)
-                    ).get();
+            client.admin().cluster().preparePutRepository("test-repo-1").setType(MockRepositoryModule.class.getCanonicalName()).setSettings(ImmutableSettings.settingsBuilder().put("location", location).put("localize_location", true)).get();
             fail("RepositoryVerificationException wasn't generated");
         } catch (RepositoryVerificationException ex) {
             assertThat(ex.getMessage(), containsString("is not shared"));

@@ -42,7 +42,8 @@ public class DirectoryUtilsTest extends ElasticsearchLuceneTestCase {
         for (int i = 0; i < iters; i++) {
             {
                 BaseDirectoryWrapper dir = newFSDirectory(file);
-                FSDirectory directory = DirectoryUtils.getLeaf(new FilterDirectory(dir) {}, FSDirectory.class, null);
+                FSDirectory directory = DirectoryUtils.getLeaf(new FilterDirectory(dir) {
+                }, FSDirectory.class, null);
                 assertThat(directory, notNullValue());
                 assertThat(directory, sameInstance(DirectoryUtils.getLeafDirectory(dir, null)));
                 dir.close();
@@ -68,7 +69,8 @@ public class DirectoryUtilsTest extends ElasticsearchLuceneTestCase {
             {
                 Set<String> stringSet = Collections.emptySet();
                 BaseDirectoryWrapper dir = newFSDirectory(file);
-                FSDirectory directory = DirectoryUtils.getLeaf(new FilterDirectory(new FileSwitchDirectory(stringSet, dir, dir, random().nextBoolean())) {}, FSDirectory.class, null);
+                FSDirectory directory = DirectoryUtils.getLeaf(new FilterDirectory(new FileSwitchDirectory(stringSet, dir, dir, random().nextBoolean())) {
+                }, FSDirectory.class, null);
                 assertThat(directory, notNullValue());
                 assertThat(directory, sameInstance(DirectoryUtils.getLeafDirectory(dir, null)));
                 dir.close();
@@ -77,7 +79,8 @@ public class DirectoryUtilsTest extends ElasticsearchLuceneTestCase {
             {
                 Set<String> stringSet = Collections.emptySet();
                 BaseDirectoryWrapper dir = newFSDirectory(file);
-                RAMDirectory directory = DirectoryUtils.getLeaf(new FilterDirectory(new FileSwitchDirectory(stringSet, dir, dir, random().nextBoolean())) {}, RAMDirectory.class, null);
+                RAMDirectory directory = DirectoryUtils.getLeaf(new FilterDirectory(new FileSwitchDirectory(stringSet, dir, dir, random().nextBoolean())) {
+                }, RAMDirectory.class, null);
                 assertThat(directory, nullValue());
                 dir.close();
             }

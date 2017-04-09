@@ -55,36 +55,21 @@ public class FunctionScorePluginTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("plugin.types", CustomDistanceScorePlugin.class.getName())
-                .build();
+        return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("plugin.types", CustomDistanceScorePlugin.class.getName()).build();
     }
 
     @Test
     public void testPlugin() throws Exception {
-        client().admin()
-                .indices()
-                .prepareCreate("test")
-                .addMapping(
-                        "type1",
-                        jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("test")
-                                .field("type", "string").endObject().startObject("num1").field("type", "date").endObject().endObject()
-                                .endObject().endObject()).execute().actionGet();
+        client().admin().indices().prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("test").field("type", "string").endObject().startObject("num1").field("type", "date").endObject().endObject().endObject().endObject()).execute().actionGet();
         client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForYellowStatus().execute().actionGet();
 
-        client().index(
-                indexRequest("test").type("type1").id("1")
-                        .source(jsonBuilder().startObject().field("test", "value").field("num1", "2013-05-26").endObject())).actionGet();
-        client().index(
-                indexRequest("test").type("type1").id("2")
-                        .source(jsonBuilder().startObject().field("test", "value").field("num1", "2013-05-27").endObject())).actionGet();
+        client().index(indexRequest("test").type("type1").id("1").source(jsonBuilder().startObject().field("test", "value").field("num1", "2013-05-26").endObject())).actionGet();
+        client().index(indexRequest("test").type("type1").id("2").source(jsonBuilder().startObject().field("test", "value").field("num1", "2013-05-27").endObject())).actionGet();
 
         client().admin().indices().prepareRefresh().execute().actionGet();
         DecayFunctionBuilder gfb = new CustomDistanceScoreBuilder("num1", "2013-05-28", "+1d");
 
-        ActionFuture<SearchResponse> response = client().search(searchRequest().searchType(SearchType.QUERY_THEN_FETCH).source(
-                searchSource().explain(false).query(functionScoreQuery(termQuery("test", "value")).add(gfb))));
+        ActionFuture<SearchResponse> response = client().search(searchRequest().searchType(SearchType.QUERY_THEN_FETCH).source(searchSource().explain(false).query(functionScoreQuery(termQuery("test", "value")).add(gfb))));
 
         SearchResponse sr = response.actionGet();
         ElasticsearchAssertions.assertNoFailures(sr);
@@ -136,7 +121,7 @@ public class FunctionScorePluginTests extends ElasticsearchIntegrationTest {
 
             @Override
             public double evaluate(double value, double scale) {
-                
+
                 return value;
             }
 

@@ -82,7 +82,7 @@ public class NestedChildrenFilterTest extends ElasticsearchLuceneTestCase {
         int checkedParents = 0;
         for (AtomicReaderContext leaf : reader.leaves()) {
             DocIdSetIterator parents = parentFilter.getDocIdSet(leaf, null).iterator();
-            for (int parentDoc = parents.nextDoc(); parentDoc != DocIdSetIterator.NO_MORE_DOCS ; parentDoc = parents.nextDoc()) {
+            for (int parentDoc = parents.nextDoc(); parentDoc != DocIdSetIterator.NO_MORE_DOCS; parentDoc = parents.nextDoc()) {
                 int expectedChildDocs = leaf.reader().document(parentDoc).getField("num_child_docs").numericValue().intValue();
                 hitContext.reset(null, leaf, parentDoc, reader);
                 NestedChildrenFilter nestedChildrenFilter = new NestedChildrenFilter(parentFilter, childFilter, hitContext);

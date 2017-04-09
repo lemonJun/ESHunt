@@ -39,29 +39,20 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 
 @ClusterScope(scope = Scope.SUITE)
-public class IndexTemplateFilteringTests extends ElasticsearchIntegrationTest{
+public class IndexTemplateFilteringTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("plugin.types", TestPlugin.class.getName())
-                .build();
+        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal)).put("plugin.types", TestPlugin.class.getName()).build();
     }
 
     @Test
     public void testTemplateFiltering() throws Exception {
-        client().admin().indices().preparePutTemplate("template1")
-                .setTemplate("test*")
-                .addMapping("type1", "field1", "type=string").get();
+        client().admin().indices().preparePutTemplate("template1").setTemplate("test*").addMapping("type1", "field1", "type=string").get();
 
-        client().admin().indices().preparePutTemplate("template2")
-                .setTemplate("test*")
-                .addMapping("type2", "field2", "type=string").get();
+        client().admin().indices().preparePutTemplate("template2").setTemplate("test*").addMapping("type2", "field2", "type=string").get();
 
-        client().admin().indices().preparePutTemplate("template3")
-                .setTemplate("no_match")
-                .addMapping("type3", "field3", "type=string").get();
+        client().admin().indices().preparePutTemplate("template3").setTemplate("no_match").addMapping("type3", "field3", "type=string").get();
 
         assertAcked(prepareCreate("test").putHeader("header_test", "header_value"));
 
@@ -71,7 +62,6 @@ public class IndexTemplateFilteringTests extends ElasticsearchIntegrationTest{
         assertThat(metadata.size(), is(1));
         assertThat(metadata.get("type2"), notNullValue());
     }
-
 
     public static class TestFilter implements IndexTemplateFilter {
         @Override

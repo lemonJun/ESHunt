@@ -18,7 +18,6 @@
  */
 package org.elasticsearch.search;
 
-
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.test.ElasticsearchSingleNodeTest;
 

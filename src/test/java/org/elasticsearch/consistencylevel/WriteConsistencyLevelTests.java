@@ -38,7 +38,6 @@ import static org.hamcrest.Matchers.equalTo;
  */
 public class WriteConsistencyLevelTests extends ElasticsearchIntegrationTest {
 
-
     @Test
     public void testWriteConsistencyLevelReplication2() throws Exception {
         prepareCreate("test", 1, ImmutableSettings.settingsBuilder().put("index.number_of_shards", 1).put("index.number_of_replicas", 2)).execute().actionGet();
@@ -51,9 +50,7 @@ public class WriteConsistencyLevelTests extends ElasticsearchIntegrationTest {
         // indexing, by default, will work (ONE consistency level)
         client().prepareIndex("test", "type1", "1").setSource(source("1", "test")).setConsistencyLevel(WriteConsistencyLevel.ONE).execute().actionGet();
         try {
-            client().prepareIndex("test", "type1", "1").setSource(source("1", "test"))
-                    .setConsistencyLevel(WriteConsistencyLevel.QUORUM)
-                    .setTimeout(timeValueMillis(100)).execute().actionGet();
+            client().prepareIndex("test", "type1", "1").setSource(source("1", "test")).setConsistencyLevel(WriteConsistencyLevel.QUORUM).setTimeout(timeValueMillis(100)).execute().actionGet();
             fail("can't index, does not match consistency");
         } catch (UnavailableShardsException e) {
             assertThat(e.status(), equalTo(RestStatus.SERVICE_UNAVAILABLE));
@@ -69,14 +66,10 @@ public class WriteConsistencyLevelTests extends ElasticsearchIntegrationTest {
         assertThat(clusterHealth.getStatus(), equalTo(ClusterHealthStatus.YELLOW));
 
         // this should work, since we now have 
-        client().prepareIndex("test", "type1", "1").setSource(source("1", "test"))
-                .setConsistencyLevel(WriteConsistencyLevel.QUORUM)
-                .setTimeout(timeValueSeconds(1)).execute().actionGet();
+        client().prepareIndex("test", "type1", "1").setSource(source("1", "test")).setConsistencyLevel(WriteConsistencyLevel.QUORUM).setTimeout(timeValueSeconds(1)).execute().actionGet();
 
         try {
-            client().prepareIndex("test", "type1", "1").setSource(source("1", "test"))
-                    .setConsistencyLevel(WriteConsistencyLevel.ALL)
-                    .setTimeout(timeValueMillis(100)).execute().actionGet();
+            client().prepareIndex("test", "type1", "1").setSource(source("1", "test")).setConsistencyLevel(WriteConsistencyLevel.ALL).setTimeout(timeValueMillis(100)).execute().actionGet();
             fail("can't index, does not match consistency");
         } catch (UnavailableShardsException e) {
             assertThat(e.status(), equalTo(RestStatus.SERVICE_UNAVAILABLE));
@@ -91,9 +84,7 @@ public class WriteConsistencyLevelTests extends ElasticsearchIntegrationTest {
         assertThat(clusterHealth.getStatus(), equalTo(ClusterHealthStatus.GREEN));
 
         // this should work, since we now have
-        client().prepareIndex("test", "type1", "1").setSource(source("1", "test"))
-                .setConsistencyLevel(WriteConsistencyLevel.ALL)
-                .setTimeout(timeValueSeconds(1)).execute().actionGet();
+        client().prepareIndex("test", "type1", "1").setSource(source("1", "test")).setConsistencyLevel(WriteConsistencyLevel.ALL).setTimeout(timeValueSeconds(1)).execute().actionGet();
     }
 
     private String source(String id, String nameValue) {

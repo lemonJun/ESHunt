@@ -69,10 +69,7 @@ public class RareClusterStateTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("gateway.type", "local")
-                .build();
+        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal)).put("gateway.type", "local").build();
     }
 
     @TestLogging("gateway:TRACE")
@@ -137,7 +134,6 @@ public class RareClusterStateTests extends ElasticsearchIntegrationTest {
         });
     }
 
-
     @Test
     public void testUnassignedShardAndEmptyNodesInRoutingTable() throws Exception {
         internalCluster().startNode();
@@ -147,25 +143,17 @@ public class RareClusterStateTests extends ElasticsearchIntegrationTest {
         LocalGatewayAllocator allocator = internalCluster().getInstance(LocalGatewayAllocator.class);
 
         AllocationDeciders allocationDeciders = new AllocationDeciders(ImmutableSettings.EMPTY, new AllocationDecider[0]);
-        RoutingNodes routingNodes = new RoutingNodes(
-                ClusterState.builder(current)
-                        .routingTable(RoutingTable.builder(current.routingTable()).remove("a").addAsRecovery(current.metaData().index("a")))
-                        .nodes(DiscoveryNodes.EMPTY_NODES)
-                        .build()
-        );
-        ClusterInfo clusterInfo = new ClusterInfo(ImmutableMap.<String, DiskUsage>of(), ImmutableMap.<String, Long>of());
+        RoutingNodes routingNodes = new RoutingNodes(ClusterState.builder(current).routingTable(RoutingTable.builder(current.routingTable()).remove("a").addAsRecovery(current.metaData().index("a"))).nodes(DiscoveryNodes.EMPTY_NODES).build());
+        ClusterInfo clusterInfo = new ClusterInfo(ImmutableMap.<String, DiskUsage> of(), ImmutableMap.<String, Long> of());
 
         RoutingAllocation routingAllocation = new RoutingAllocation(allocationDeciders, routingNodes, current.nodes(), clusterInfo);
         allocator.allocateUnassigned(routingAllocation);
     }
 
-
     @Test
     @TestLogging(value = "cluster.service:TRACE")
     public void testDeleteCreateInOneBulk() throws Exception {
-        internalCluster().startNodesAsync(2, ImmutableSettings.builder()
-                .put(DiscoveryModule.DISCOVERY_TYPE_KEY, "zen")
-                .build()).get();
+        internalCluster().startNodesAsync(2, ImmutableSettings.builder().put(DiscoveryModule.DISCOVERY_TYPE_KEY, "zen").build()).get();
         assertFalse(client().admin().cluster().prepareHealth().setWaitForNodes("2").get().isTimedOut());
         prepareCreate("test").setSettings(IndexMetaData.SETTING_AUTO_EXPAND_REPLICAS, true).addMapping("type").get();
         ensureGreen("test");
@@ -191,6 +179,5 @@ public class RareClusterStateTests extends ElasticsearchIntegrationTest {
         ensureGreen(TimeValue.timeValueMinutes(30), "test");
         assertHitCount(client().prepareSearch("test").get(), 0);
     }
-
 
 }

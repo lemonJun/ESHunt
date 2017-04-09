@@ -39,86 +39,45 @@ public class ExternalValuesMapperIntegrationTests extends ElasticsearchIntegrati
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("plugin.types", ExternalMapperPlugin.class.getName())
-                .build();
+        return ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("plugin.types", ExternalMapperPlugin.class.getName()).build();
     }
 
     @Test
     public void testExternalValues() throws Exception {
-        prepareCreate("test-idx").addMapping("type",
-                XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject(ExternalRootMapper.CONTENT_TYPE)
-                .endObject()
-                .startObject("properties")
-                    .startObject("field").field("type", RegisterExternalTypes.EXTERNAL).endObject()
-                .endObject()
-            .endObject().endObject()).execute().get();
+        prepareCreate("test-idx").addMapping("type", XContentFactory.jsonBuilder().startObject().startObject("type").startObject(ExternalRootMapper.CONTENT_TYPE).endObject().startObject("properties").startObject("field").field("type", RegisterExternalTypes.EXTERNAL).endObject().endObject().endObject().endObject()).execute().get();
         ensureYellow("test-idx");
 
-        index("test-idx", "type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                    .field("field", "1234")
-                .endObject());
+        index("test-idx", "type", "1", XContentFactory.jsonBuilder().startObject().field("field", "1234").endObject());
         refresh();
 
         SearchResponse response;
 
-        response = client().prepareSearch("test-idx")
-                .setPostFilter(FilterBuilders.termFilter("field.bool", "T"))
-                .execute().actionGet();
+        response = client().prepareSearch("test-idx").setPostFilter(FilterBuilders.termFilter("field.bool", "T")).execute().actionGet();
 
         assertThat(response.getHits().totalHits(), equalTo((long) 1));
 
-        response = client().prepareSearch("test-idx")
-                .setPostFilter(FilterBuilders.geoDistanceRangeFilter("field.point").point(42.0, 51.0).to("1km"))
-                .execute().actionGet();
+        response = client().prepareSearch("test-idx").setPostFilter(FilterBuilders.geoDistanceRangeFilter("field.point").point(42.0, 51.0).to("1km")).execute().actionGet();
 
         assertThat(response.getHits().totalHits(), equalTo((long) 1));
 
-        response = client().prepareSearch("test-idx")
-                .setPostFilter(FilterBuilders.geoShapeFilter("field.shape", ShapeBuilder.newPoint(-100, 45), ShapeRelation.WITHIN))
-                        .execute().actionGet();
+        response = client().prepareSearch("test-idx").setPostFilter(FilterBuilders.geoShapeFilter("field.shape", ShapeBuilder.newPoint(-100, 45), ShapeRelation.WITHIN)).execute().actionGet();
 
         assertThat(response.getHits().totalHits(), equalTo((long) 1));
 
-        response = client().prepareSearch("test-idx")
-                .setPostFilter(FilterBuilders.termFilter("field.field", "foo"))
-                .execute().actionGet();
+        response = client().prepareSearch("test-idx").setPostFilter(FilterBuilders.termFilter("field.field", "foo")).execute().actionGet();
 
         assertThat(response.getHits().totalHits(), equalTo((long) 1));
     }
 
     @Test
     public void testExternalValuesWithMultifield() throws Exception {
-        prepareCreate("test-idx").addMapping("doc",
-                XContentFactory.jsonBuilder().startObject().startObject("doc").startObject("properties")
-                .startObject("f")
-                    .field("type", RegisterExternalTypes.EXTERNAL_UPPER)
-                    .startObject("fields")
-                        .startObject("f")
-                            .field("type", "string")
-                            .field("stored", "yes")
-                            .startObject("fields")
-                                .startObject("raw")
-                                    .field("type", "string")
-                                    .field("index", "not_analyzed")
-                                    .field("stored", "yes")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                .endObject()
-                .endObject().endObject().endObject()).execute().get();
+        prepareCreate("test-idx").addMapping("doc", XContentFactory.jsonBuilder().startObject().startObject("doc").startObject("properties").startObject("f").field("type", RegisterExternalTypes.EXTERNAL_UPPER).startObject("fields").startObject("f").field("type", "string").field("stored", "yes").startObject("fields").startObject("raw").field("type", "string").field("index", "not_analyzed").field("stored", "yes").endObject().endObject().endObject().endObject().endObject().endObject().endObject().endObject()).execute().get();
         ensureYellow("test-idx");
 
         index("test-idx", "doc", "1", "f", "This is my text");
         refresh();
 
-        SearchResponse response = client().prepareSearch("test-idx")
-                .setQuery(QueryBuilders.termQuery("f.f.raw", "FOO BAR"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("test-idx").setQuery(QueryBuilders.termQuery("f.f.raw", "FOO BAR")).execute().actionGet();
 
         assertThat(response.getHits().totalHits(), equalTo((long) 1));
     }

@@ -63,7 +63,6 @@ public class FreqTermsEnumTests extends ElasticsearchLuceneTestCase {
         long totalTermFreq;
     }
 
-
     @Before
     @Override
     public void setUp() throws Exception {
@@ -196,7 +195,7 @@ public class FreqTermsEnumTests extends ElasticsearchLuceneTestCase {
         for (int i = 0; i < cycles; i++) {
             List<String> terms = Lists.newArrayList(Arrays.asList(this.terms));
 
-           Collections.shuffle(terms, getRandom());
+            Collections.shuffle(terms, getRandom());
             for (String term : terms) {
                 if (!termsEnum.seekExact(new BytesRef(term))) {
                     assertThat("term : " + term, reference.get(term).docFreq, is(0));

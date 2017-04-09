@@ -103,9 +103,7 @@ public class ChildrenConstantScoreQueryTests extends AbstractChildTests {
 
         IndexReader indexReader = DirectoryReader.open(indexWriter.w, false);
         IndexSearcher searcher = new IndexSearcher(indexReader);
-        ((TestSearchContext) SearchContext.current()).setSearcher(new ContextIndexSearcher(
-                SearchContext.current(), new Engine.Searcher(ChildrenConstantScoreQueryTests.class.getSimpleName(), searcher)
-        ));
+        ((TestSearchContext) SearchContext.current()).setSearcher(new ContextIndexSearcher(SearchContext.current(), new Engine.Searcher(ChildrenConstantScoreQueryTests.class.getSimpleName(), searcher)));
 
         TermQuery childQuery = new TermQuery(new Term("field1", "value" + (1 + random().nextInt(3))));
         Filter parentFilter = wrap(new TermFilter(new Term(TypeFieldMapper.NAME, "parent")));
@@ -129,10 +127,7 @@ public class ChildrenConstantScoreQueryTests extends AbstractChildTests {
     public void testRandom() throws Exception {
         Directory directory = newDirectory();
         final Random r = random();
-        final IndexWriterConfig iwc = LuceneTestCase.newIndexWriterConfig(r,
-                LuceneTestCase.TEST_VERSION_CURRENT, new MockAnalyzer(r))
-                .setMaxBufferedDocs(IndexWriterConfig.DISABLE_AUTO_FLUSH)
-                .setRAMBufferSizeMB(scaledRandomIntBetween(16, 64)); // we might index a lot - don't go crazy here
+        final IndexWriterConfig iwc = LuceneTestCase.newIndexWriterConfig(r, LuceneTestCase.TEST_VERSION_CURRENT, new MockAnalyzer(r)).setMaxBufferedDocs(IndexWriterConfig.DISABLE_AUTO_FLUSH).setRAMBufferSizeMB(scaledRandomIntBetween(16, 64)); // we might index a lot - don't go crazy here
         RandomIndexWriter indexWriter = new RandomIndexWriter(r, directory, iwc);
         int numUniqueChildValues = scaledRandomIntBetween(100, 2000);
         String[] childValues = new String[numUniqueChildValues];
@@ -196,9 +191,7 @@ public class ChildrenConstantScoreQueryTests extends AbstractChildTests {
         indexWriter.commit();
         IndexReader indexReader = DirectoryReader.open(directory);
         IndexSearcher searcher = new IndexSearcher(indexReader);
-        Engine.Searcher engineSearcher = new Engine.Searcher(
-                ChildrenConstantScoreQueryTests.class.getSimpleName(), searcher
-        );
+        Engine.Searcher engineSearcher = new Engine.Searcher(ChildrenConstantScoreQueryTests.class.getSimpleName(), searcher);
         ((TestSearchContext) SearchContext.current()).setSearcher(new ContextIndexSearcher(SearchContext.current(), engineSearcher));
 
         int max = numUniqueChildValues / 4;
@@ -225,9 +218,7 @@ public class ChildrenConstantScoreQueryTests extends AbstractChildTests {
                 indexReader.close();
                 indexReader = DirectoryReader.open(indexWriter.w, true);
                 searcher = new IndexSearcher(indexReader);
-                engineSearcher = new Engine.Searcher(
-                        ChildrenConstantScoreQueryTests.class.getSimpleName(), searcher
-                );
+                engineSearcher = new Engine.Searcher(ChildrenConstantScoreQueryTests.class.getSimpleName(), searcher);
                 ((TestSearchContext) SearchContext.current()).setSearcher(new ContextIndexSearcher(SearchContext.current(), engineSearcher));
             }
 
@@ -235,13 +226,9 @@ public class ChildrenConstantScoreQueryTests extends AbstractChildTests {
             int shortCircuitParentDocSet = random().nextInt(numParentDocs);
             QueryBuilder queryBuilder;
             if (random().nextBoolean()) {
-                queryBuilder = hasChildQuery("child", termQuery("field1", childValue))
-                        .setShortCircuitCutoff(shortCircuitParentDocSet);
+                queryBuilder = hasChildQuery("child", termQuery("field1", childValue)).setShortCircuitCutoff(shortCircuitParentDocSet);
             } else {
-                queryBuilder = constantScoreQuery(
-                        hasChildFilter("child", termQuery("field1", childValue))
-                                .setShortCircuitCutoff(shortCircuitParentDocSet)
-                );
+                queryBuilder = constantScoreQuery(hasChildFilter("child", termQuery("field1", childValue)).setShortCircuitCutoff(shortCircuitParentDocSet));
             }
             // Using a FQ, will invoke / test the Scorer#advance(..) and also let the Weight#scorer not get live docs as acceptedDocs
             queryBuilder = filteredQuery(queryBuilder, notFilter(termFilter("filter", "me")));

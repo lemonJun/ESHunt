@@ -36,10 +36,7 @@ public class JNANativesTests extends ElasticsearchTestCase {
      * Those properties are set by the JNA Api and if not ignored,
      * lead to tests failure (see AbstractRandomizedTest#IGNORED_INVARIANT_PROPERTIES)
      */
-    private static final String[] JNA_INVARIANT_PROPERTIES = {
-            "jna.platform.library.path",
-            "jnidispatch.path"
-    };
+    private static final String[] JNA_INVARIANT_PROPERTIES = { "jna.platform.library.path", "jnidispatch.path" };
 
     private Map<String, String> properties = new HashMap<>();
 

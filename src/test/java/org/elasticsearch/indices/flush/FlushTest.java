@@ -47,6 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.equalTo;
+
 @ElasticsearchIntegrationTest.ClusterScope(numDataNodes = 0, scope = ElasticsearchIntegrationTest.Scope.SUITE)
 @LuceneTestCase.Slow
 public class FlushTest extends ElasticsearchIntegrationTest {
@@ -127,9 +128,7 @@ public class FlushTest extends ElasticsearchIntegrationTest {
         assertFalse(currentNodeName.equals(newNodeName));
         internalCluster().client().admin().cluster().prepareReroute().add(new MoveAllocationCommand(new ShardId("test", 0), currentNodeName, newNodeName)).get();
 
-        client().admin().cluster().prepareHealth()
-                .setWaitForRelocatingShards(0)
-                .get();
+        client().admin().cluster().prepareHealth().setWaitForRelocatingShards(0).get();
         indexStats = client().admin().indices().prepareStats("test").get().getIndex("test");
         for (ShardStats shardStats : indexStats.getShards()) {
             assertNotNull(shardStats.getCommitStats().getUserData().get(Engine.SYNC_COMMIT_ID));
@@ -155,9 +154,7 @@ public class FlushTest extends ElasticsearchIntegrationTest {
         internalCluster().ensureAtLeastNumDataNodes(3);
         createIndex("test");
 
-        client().admin().indices().prepareUpdateSettings("test").setSettings(
-                ImmutableSettings.builder().put("index.translog.disable_flush", true).put("index.refresh_interval", -1).put("index.number_of_replicas", internalCluster().numDataNodes() - 1))
-                .get();
+        client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.builder().put("index.translog.disable_flush", true).put("index.refresh_interval", -1).put("index.number_of_replicas", internalCluster().numDataNodes() - 1)).get();
         ensureGreen();
         final AtomicBoolean stop = new AtomicBoolean(false);
         final AtomicInteger numDocs = new AtomicInteger(0);

@@ -65,11 +65,7 @@ public class AnalysisModuleTests extends ElasticsearchTestCase {
     public AnalysisService getAnalysisService(Settings settings) {
         Index index = new Index("test");
         Injector parentInjector = new ModulesBuilder().add(new SettingsModule(settings), new EnvironmentModule(new Environment(settings)), new IndicesAnalysisModule()).createInjector();
-        injector = new ModulesBuilder().add(
-                new IndexSettingsModule(index, settings),
-                new IndexNameModule(index),
-                new AnalysisModule(settings, parentInjector.getInstance(IndicesAnalysisService.class)))
-                .createChildInjector(parentInjector);
+        injector = new ModulesBuilder().add(new IndexSettingsModule(index, settings), new IndexNameModule(index), new AnalysisModule(settings, parentInjector.getInstance(IndicesAnalysisService.class))).createChildInjector(parentInjector);
 
         return injector.getInstance(AnalysisService.class);
     }
@@ -100,8 +96,7 @@ public class AnalysisModuleTests extends ElasticsearchTestCase {
 
     @Test
     public void testVersionedAnalyzers() throws Exception {
-        Settings settings2 = settingsBuilder().loadFromClasspath("org/elasticsearch/index/analysis/test1.yml")
-                .put(IndexMetaData.SETTING_VERSION_CREATED, Version.V_0_90_0).build();
+        Settings settings2 = settingsBuilder().loadFromClasspath("org/elasticsearch/index/analysis/test1.yml").put(IndexMetaData.SETTING_VERSION_CREATED, Version.V_0_90_0).build();
         AnalysisService analysisService2 = getAnalysisService(settings2);
 
         // indicesanalysisservice always has the current version
@@ -142,11 +137,11 @@ public class AnalysisModuleTests extends ElasticsearchTestCase {
         assertThat(analyzer, instanceOf(CustomAnalyzer.class));
         CustomAnalyzer custom2 = (CustomAnalyzer) analyzer;
 
-//        HtmlStripCharFilterFactory html = (HtmlStripCharFilterFactory) custom2.charFilters()[0];
-//        assertThat(html.readAheadLimit(), equalTo(HTMLStripCharFilter.DEFAULT_READ_AHEAD));
-//
-//        html = (HtmlStripCharFilterFactory) custom2.charFilters()[1];
-//        assertThat(html.readAheadLimit(), equalTo(1024));
+        //        HtmlStripCharFilterFactory html = (HtmlStripCharFilterFactory) custom2.charFilters()[0];
+        //        assertThat(html.readAheadLimit(), equalTo(HTMLStripCharFilter.DEFAULT_READ_AHEAD));
+        //
+        //        html = (HtmlStripCharFilterFactory) custom2.charFilters()[1];
+        //        assertThat(html.readAheadLimit(), equalTo(1024));
 
         // verify position offset gap
         analyzer = analysisService.analyzer("custom6").analyzer();
@@ -178,38 +173,38 @@ public class AnalysisModuleTests extends ElasticsearchTestCase {
         CustomAnalyzer custom4 = (CustomAnalyzer) analyzer;
         assertThat(custom4.tokenFilters()[0], instanceOf(MyFilterTokenFilterFactory.class));
 
-//        // verify Czech stemmer
-//        analyzer = analysisService.analyzer("czechAnalyzerWithStemmer").analyzer();
-//        assertThat(analyzer, instanceOf(CustomAnalyzer.class));
-//        CustomAnalyzer czechstemmeranalyzer = (CustomAnalyzer) analyzer;
-//        assertThat(czechstemmeranalyzer.tokenizerFactory(), instanceOf(StandardTokenizerFactory.class));
-//        assertThat(czechstemmeranalyzer.tokenFilters().length, equalTo(4));
-//        assertThat(czechstemmeranalyzer.tokenFilters()[3], instanceOf(CzechStemTokenFilterFactory.class));
-//
-//        // check dictionary decompounder
-//        analyzer = analysisService.analyzer("decompoundingAnalyzer").analyzer();
-//        assertThat(analyzer, instanceOf(CustomAnalyzer.class));
-//        CustomAnalyzer dictionaryDecompounderAnalyze = (CustomAnalyzer) analyzer;
-//        assertThat(dictionaryDecompounderAnalyze.tokenizerFactory(), instanceOf(StandardTokenizerFactory.class));
-//        assertThat(dictionaryDecompounderAnalyze.tokenFilters().length, equalTo(1));
-//        assertThat(dictionaryDecompounderAnalyze.tokenFilters()[0], instanceOf(DictionaryCompoundWordTokenFilterFactory.class));
+        //        // verify Czech stemmer
+        //        analyzer = analysisService.analyzer("czechAnalyzerWithStemmer").analyzer();
+        //        assertThat(analyzer, instanceOf(CustomAnalyzer.class));
+        //        CustomAnalyzer czechstemmeranalyzer = (CustomAnalyzer) analyzer;
+        //        assertThat(czechstemmeranalyzer.tokenizerFactory(), instanceOf(StandardTokenizerFactory.class));
+        //        assertThat(czechstemmeranalyzer.tokenFilters().length, equalTo(4));
+        //        assertThat(czechstemmeranalyzer.tokenFilters()[3], instanceOf(CzechStemTokenFilterFactory.class));
+        //
+        //        // check dictionary decompounder
+        //        analyzer = analysisService.analyzer("decompoundingAnalyzer").analyzer();
+        //        assertThat(analyzer, instanceOf(CustomAnalyzer.class));
+        //        CustomAnalyzer dictionaryDecompounderAnalyze = (CustomAnalyzer) analyzer;
+        //        assertThat(dictionaryDecompounderAnalyze.tokenizerFactory(), instanceOf(StandardTokenizerFactory.class));
+        //        assertThat(dictionaryDecompounderAnalyze.tokenFilters().length, equalTo(1));
+        //        assertThat(dictionaryDecompounderAnalyze.tokenFilters()[0], instanceOf(DictionaryCompoundWordTokenFilterFactory.class));
 
         Set<?> wordList = Analysis.getWordSet(null, settings, "index.analysis.filter.dict_dec.word_list", Lucene.VERSION);
         MatcherAssert.assertThat(wordList.size(), equalTo(6));
-//        MatcherAssert.assertThat(wordList, hasItems("donau", "dampf", "schiff", "spargel", "creme", "suppe"));
+        //        MatcherAssert.assertThat(wordList, hasItems("donau", "dampf", "schiff", "spargel", "creme", "suppe"));
     }
 
     @Test
     public void testWordListPath() throws Exception {
         Environment env = new Environment(ImmutableSettings.Builder.EMPTY_SETTINGS);
-        String[] words = new String[]{"donau", "dampf", "schiff", "spargel", "creme", "suppe"};
+        String[] words = new String[] { "donau", "dampf", "schiff", "spargel", "creme", "suppe" };
 
         File wordListFile = generateWordList(words);
         Settings settings = settingsBuilder().loadFromSource("index: \n  word_list_path: " + wordListFile.getAbsolutePath()).build();
 
         Set<?> wordList = Analysis.getWordSet(env, settings, "index.word_list", Lucene.VERSION);
         MatcherAssert.assertThat(wordList.size(), equalTo(6));
-//        MatcherAssert.assertThat(wordList, hasItems(words));
+        //        MatcherAssert.assertThat(wordList, hasItems(words));
     }
 
     private File generateWordList(String[] words) throws Exception {
@@ -233,11 +228,7 @@ public class AnalysisModuleTests extends ElasticsearchTestCase {
 
     @Test
     public void testUnderscoreInAnalyzerName() {
-        Settings settings = ImmutableSettings.builder()
-                .put("index.analysis.analyzer._invalid_name.tokenizer", "keyword")
-                .put("path.home", newTempDir().toString())
-                .put(IndexMetaData.SETTING_VERSION_CREATED, "1")
-                .build();
+        Settings settings = ImmutableSettings.builder().put("index.analysis.analyzer._invalid_name.tokenizer", "keyword").put("path.home", newTempDir().toString()).put(IndexMetaData.SETTING_VERSION_CREATED, "1").build();
         try {
             getAnalysisService(settings);
             fail("This should fail with IllegalArgumentException because the analyzers name starts with _");
@@ -249,12 +240,7 @@ public class AnalysisModuleTests extends ElasticsearchTestCase {
 
     @Test
     public void testUnderscoreInAnalyzerNameAlias() {
-        Settings settings = ImmutableSettings.builder()
-                .put("index.analysis.analyzer.valid_name.tokenizer", "keyword")
-                .put("index.analysis.analyzer.valid_name.alias", "_invalid_name")
-                .put("path.home", newTempDir().toString())
-                .put(IndexMetaData.SETTING_VERSION_CREATED, "1")
-                .build();
+        Settings settings = ImmutableSettings.builder().put("index.analysis.analyzer.valid_name.tokenizer", "keyword").put("index.analysis.analyzer.valid_name.alias", "_invalid_name").put("path.home", newTempDir().toString()).put(IndexMetaData.SETTING_VERSION_CREATED, "1").build();
         try {
             getAnalysisService(settings);
             fail("This should fail with IllegalArgumentException because the analyzers alias starts with _");

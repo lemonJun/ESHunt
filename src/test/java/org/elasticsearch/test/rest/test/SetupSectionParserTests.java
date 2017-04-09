@@ -32,20 +32,7 @@ public class SetupSectionParserTests extends AbstractParserTests {
     @Test
     public void testParseSetupSection() throws Exception {
 
-        parser = YamlXContent.yamlXContent.createParser(
-                "  - do:\n" +
-                "      index1:\n" +
-                "        index:  test_1\n" +
-                "        type:   test\n" +
-                "        id:     1\n" +
-                "        body:   { \"include\": { \"field1\": \"v1\", \"field2\": \"v2\" }, \"count\": 1 }\n" +
-                "  - do:\n" +
-                "      index2:\n" +
-                "        index:  test_1\n" +
-                "        type:   test\n" +
-                "        id:     2\n" +
-                "        body:   { \"include\": { \"field1\": \"v1\", \"field2\": \"v2\" }, \"count\": 1 }\n"
-        );
+        parser = YamlXContent.yamlXContent.createParser("  - do:\n" + "      index1:\n" + "        index:  test_1\n" + "        type:   test\n" + "        id:     1\n" + "        body:   { \"include\": { \"field1\": \"v1\", \"field2\": \"v2\" }, \"count\": 1 }\n" + "  - do:\n" + "      index2:\n" + "        index:  test_1\n" + "        type:   test\n" + "        id:     2\n" + "        body:   { \"include\": { \"field1\": \"v1\", \"field2\": \"v2\" }, \"count\": 1 }\n");
 
         SetupSectionParser setupSectionParser = new SetupSectionParser();
         SetupSection setupSection = setupSectionParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -60,23 +47,7 @@ public class SetupSectionParserTests extends AbstractParserTests {
     @Test
     public void testParseSetupAndSkipSectionNoSkip() throws Exception {
 
-        parser = YamlXContent.yamlXContent.createParser(
-                "  - skip:\n" +
-                        "      version:  \"0.90.0 - 0.90.7\"\n" +
-                        "      reason:   \"Update doesn't return metadata fields, waiting for #3259\"\n" +
-                        "  - do:\n" +
-                        "      index1:\n" +
-                        "        index:  test_1\n" +
-                        "        type:   test\n" +
-                        "        id:     1\n" +
-                        "        body:   { \"include\": { \"field1\": \"v1\", \"field2\": \"v2\" }, \"count\": 1 }\n" +
-                        "  - do:\n" +
-                        "      index2:\n" +
-                        "        index:  test_1\n" +
-                        "        type:   test\n" +
-                        "        id:     2\n" +
-                        "        body:   { \"include\": { \"field1\": \"v1\", \"field2\": \"v2\" }, \"count\": 1 }\n"
-        );
+        parser = YamlXContent.yamlXContent.createParser("  - skip:\n" + "      version:  \"0.90.0 - 0.90.7\"\n" + "      reason:   \"Update doesn't return metadata fields, waiting for #3259\"\n" + "  - do:\n" + "      index1:\n" + "        index:  test_1\n" + "        type:   test\n" + "        id:     1\n" + "        body:   { \"include\": { \"field1\": \"v1\", \"field2\": \"v2\" }, \"count\": 1 }\n" + "  - do:\n" + "      index2:\n" + "        index:  test_1\n" + "        type:   test\n" + "        id:     2\n" + "        body:   { \"include\": { \"field1\": \"v1\", \"field2\": \"v2\" }, \"count\": 1 }\n");
 
         SetupSectionParser setupSectionParser = new SetupSectionParser();
         SetupSection setupSection = setupSectionParser.parse(new RestTestSuiteParseContext("api", "suite", parser));

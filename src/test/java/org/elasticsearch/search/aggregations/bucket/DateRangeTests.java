@@ -53,12 +53,7 @@ import static org.hamcrest.core.IsNull.nullValue;
 public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     private static IndexRequestBuilder indexDoc(int month, int day, int value) throws Exception {
-        return client().prepareIndex("idx", "type").setSource(jsonBuilder()
-                .startObject()
-                .field("value", value)
-                .field("date", date(month, day))
-                .startArray("dates").value(date(month, day)).value(date(month + 1, day + 1)).endArray()
-                .endObject());
+        return client().prepareIndex("idx", "type").setSource(jsonBuilder().startObject().field("value", value).field("date", date(month, day)).startArray("dates").value(date(month, day)).value(date(month + 1, day + 1)).endArray().endObject());
     }
 
     private static DateTime date(int month, int day) {
@@ -66,6 +61,7 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
     }
 
     private static int numDocs;
+
     @Override
     public void setupSuiteScopeCluster() throws Exception {
         createIndex("idx");
@@ -74,13 +70,12 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
         numDocs = randomIntBetween(7, 20);
 
         List<IndexRequestBuilder> docs = new ArrayList<>();
-        docs.addAll(Arrays.asList(
-                indexDoc(1, 2, 1),  // Jan 2
-                indexDoc(2, 2, 2),  // Feb 2
-                indexDoc(2, 15, 3), // Feb 15
-                indexDoc(3, 2, 4),  // Mar 2
-                indexDoc(3, 15, 5), // Mar 15
-                indexDoc(3, 23, 6))); // Mar 23
+        docs.addAll(Arrays.asList(indexDoc(1, 2, 1), // Jan 2
+                        indexDoc(2, 2, 2), // Feb 2
+                        indexDoc(2, 15, 3), // Feb 15
+                        indexDoc(3, 2, 4), // Mar 2
+                        indexDoc(3, 15, 5), // Mar 15
+                        indexDoc(3, 23, 6))); // Mar 23
 
         // dummy docs
         for (int i = docs.size(); i < numDocs; ++i) {
@@ -88,10 +83,7 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
         }
         assertAcked(prepareCreate("empty_bucket_idx").addMapping("type", "value", "type=integer"));
         for (int i = 0; i < 2; i++) {
-            docs.add(client().prepareIndex("empty_bucket_idx", "type", ""+i).setSource(jsonBuilder()
-                    .startObject()
-                    .field("value", i*2)
-                    .endObject()));
+            docs.add(client().prepareIndex("empty_bucket_idx", "type", "" + i).setSource(jsonBuilder().startObject().field("value", i * 2).endObject()));
         }
         indexRandom(true, docs);
         ensureSearchable();
@@ -105,12 +97,7 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
         } else {
             rangeBuilder.script("doc['date'].value");
         }
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(rangeBuilder
-                        .addUnboundedTo("a long time ago", "now-50y")
-                        .addRange("recently", "now-50y", "now-1y")
-                        .addUnboundedFrom("last year", "now-1y"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(rangeBuilder.addUnboundedTo("a long time ago", "now-50y").addRange("recently", "now-50y", "now-1y").addUnboundedFrom("last year", "now-1y")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -137,16 +124,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValueField() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateRange("range")
-                        .field("date")
-                        .addUnboundedTo(date(2, 15))
-                        .addRange(date(2, 15), date(3, 15))
-                        .addUnboundedFrom(date(3, 15)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateRange("range").field("date").addUnboundedTo(date(2, 15)).addRange(date(2, 15), date(3, 15)).addUnboundedFrom(date(3, 15))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -189,16 +169,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValueField_WithStringDates() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateRange("range")
-                        .field("date")
-                        .addUnboundedTo("2012-02-15")
-                        .addRange("2012-02-15", "2012-03-15")
-                        .addUnboundedFrom("2012-03-15"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateRange("range").field("date").addUnboundedTo("2012-02-15").addRange("2012-02-15", "2012-03-15").addUnboundedFrom("2012-03-15")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -241,17 +214,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValueField_WithStringDates_WithCustomFormat() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateRange("range")
-                        .field("date")
-                        .format("yyyy-MM-dd")
-                        .addUnboundedTo("2012-02-15")
-                        .addRange("2012-02-15", "2012-03-15")
-                        .addUnboundedFrom("2012-03-15"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateRange("range").field("date").format("yyyy-MM-dd").addUnboundedTo("2012-02-15").addRange("2012-02-15", "2012-03-15").addUnboundedFrom("2012-03-15")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -294,16 +259,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValueField_WithDateMath() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateRange("range")
-                        .field("date")
-                        .addUnboundedTo("2012-02-15")
-                        .addRange("2012-02-15", "2012-02-15||+1M")
-                        .addUnboundedFrom("2012-02-15||+1M"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateRange("range").field("date").addUnboundedTo("2012-02-15").addRange("2012-02-15", "2012-02-15||+1M").addUnboundedFrom("2012-02-15||+1M")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -346,16 +304,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValueField_WithCustomKey() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateRange("range")
-                        .field("date")
-                        .addUnboundedTo("r1", date(2, 15))
-                        .addRange("r2", date(2, 15), date(3, 15))
-                        .addUnboundedFrom("r3", date(3, 15)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateRange("range").field("date").addUnboundedTo("r1", date(2, 15)).addRange("r2", date(2, 15), date(3, 15)).addUnboundedFrom("r3", date(3, 15))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -407,17 +358,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedField_WithSubAggregation() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateRange("range")
-                        .field("date")
-                        .addUnboundedTo("r1", date(2, 15))
-                        .addRange("r2", date(2, 15), date(3, 15))
-                        .addUnboundedFrom("r3", date(3, 15))
-                        .subAggregation(sum("sum").field("value")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateRange("range").field("date").addUnboundedTo("r1", date(2, 15)).addRange("r2", date(2, 15), date(3, 15)).addUnboundedFrom("r3", date(3, 15)).subAggregation(sum("sum").field("value"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -468,17 +411,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedField_WithSubAggregation_Inherited() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateRange("range")
-                        .field("date")
-                        .addUnboundedTo("r1", date(2, 15))
-                        .addRange("r2", date(2, 15), date(3, 15))
-                        .addUnboundedFrom("r3", date(3, 15))
-                        .subAggregation(min("min")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateRange("range").field("date").addUnboundedTo("r1", date(2, 15)).addRange("r2", date(2, 15), date(3, 15)).addUnboundedFrom("r3", date(3, 15)).subAggregation(min("min"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -539,16 +474,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedField() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateRange("range")
-                        .field("dates")
-                        .addUnboundedTo(date(2, 15))
-                        .addRange(date(2, 15), date(3, 15))
-                        .addUnboundedFrom(date(3, 15)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateRange("range").field("dates").addUnboundedTo(date(2, 15)).addRange(date(2, 15), date(3, 15)).addUnboundedFrom(date(3, 15))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -598,20 +526,11 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
         Apr 23, May 24      6
      */
 
-
     @Test
     public void multiValuedField_WithValueScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateRange("range")
-                        .field("dates")
-                        .script("new DateTime(_value.longValue(), DateTimeZone.UTC).plusMonths(1).getMillis()")
-                        .addUnboundedTo(date(2, 15))
-                        .addRange(date(2, 15), date(3, 15))
-                        .addUnboundedFrom(date(3, 15)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateRange("range").field("dates").script("new DateTime(_value.longValue(), DateTimeZone.UTC).plusMonths(1).getMillis()").addUnboundedTo(date(2, 15)).addRange(date(2, 15), date(3, 15)).addUnboundedFrom(date(3, 15))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -663,18 +582,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedField_WithValueScript_WithInheritedSubAggregator() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateRange("range")
-                        .field("dates")
-                        .script("new DateTime(_value.longValue(), DateTimeZone.UTC).plusMonths(1).getMillis()")
-                        .addUnboundedTo(date(2, 15))
-                        .addRange(date(2, 15), date(3, 15))
-                        .addUnboundedFrom(date(3, 15))
-                        .subAggregation(max("max")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateRange("range").field("dates").script("new DateTime(_value.longValue(), DateTimeZone.UTC).plusMonths(1).getMillis()").addUnboundedTo(date(2, 15)).addRange(date(2, 15), date(3, 15)).addUnboundedFrom(date(3, 15)).subAggregation(max("max"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -725,16 +635,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void script_SingleValue() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateRange("range")
-                        .script("doc['date'].value")
-                        .addUnboundedTo(date(2, 15))
-                        .addRange(date(2, 15), date(3, 15))
-                        .addUnboundedFrom(date(3, 15)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateRange("range").script("doc['date'].value").addUnboundedTo(date(2, 15)).addRange(date(2, 15), date(3, 15)).addUnboundedFrom(date(3, 15))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -777,17 +680,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void script_SingleValue_WithSubAggregator_Inherited() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateRange("range")
-                        .script("doc['date'].value")
-                        .addUnboundedTo(date(2, 15))
-                        .addRange(date(2, 15), date(3, 15))
-                        .addUnboundedFrom(date(3, 15))
-                        .subAggregation(max("max")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateRange("range").script("doc['date'].value").addUnboundedTo(date(2, 15)).addRange(date(2, 15), date(3, 15)).addUnboundedFrom(date(3, 15)).subAggregation(max("max"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -847,16 +742,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void script_MultiValued() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateRange("range")
-                        .script("doc['dates'].values")
-                        .addUnboundedTo(date(2, 15))
-                        .addRange(date(2, 15), date(3, 15))
-                        .addUnboundedFrom(date(3, 15)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateRange("range").script("doc['dates'].values").addUnboundedTo(date(2, 15)).addRange(date(2, 15), date(3, 15)).addUnboundedFrom(date(3, 15))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -899,17 +787,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void script_MultiValued_WithAggregatorInherited() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateRange("range")
-                        .script("doc['dates'].values")
-                        .addUnboundedTo(date(2, 15))
-                        .addRange(date(2, 15), date(3, 15))
-                        .addUnboundedFrom(date(3, 15))
-                        .subAggregation(min("min")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateRange("range").script("doc['dates'].values").addUnboundedTo(date(2, 15)).addRange(date(2, 15), date(3, 15)).addUnboundedFrom(date(3, 15)).subAggregation(min("min"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -963,16 +843,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
     public void unmapped() throws Exception {
         client().admin().cluster().prepareHealth("idx_unmapped").setWaitForYellowStatus().execute().actionGet();
 
-        SearchResponse response = client().prepareSearch("idx_unmapped")
-                .addAggregation(dateRange("range")
-                        .field("date")
-                        .addUnboundedTo(date(2, 15))
-                        .addRange(date(2, 15), date(3, 15))
-                        .addUnboundedFrom(date(3, 15)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx_unmapped").addAggregation(dateRange("range").field("date").addUnboundedTo(date(2, 15)).addRange(date(2, 15), date(3, 15)).addUnboundedFrom(date(3, 15))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -1015,16 +888,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void unmapped_WithStringDates() throws Exception {
-        SearchResponse response = client().prepareSearch("idx_unmapped")
-                .addAggregation(dateRange("range")
-                        .field("date")
-                        .addUnboundedTo("2012-02-15")
-                        .addRange("2012-02-15", "2012-03-15")
-                        .addUnboundedFrom("2012-03-15"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx_unmapped").addAggregation(dateRange("range").field("date").addUnboundedTo("2012-02-15").addRange("2012-02-15", "2012-03-15").addUnboundedFrom("2012-03-15")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -1067,16 +933,9 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void partiallyUnmapped() throws Exception {
-        SearchResponse response = client().prepareSearch("idx", "idx_unmapped")
-                .addAggregation(dateRange("range")
-                        .field("date")
-                        .addUnboundedTo(date(2, 15))
-                        .addRange(date(2, 15), date(3, 15))
-                        .addUnboundedFrom(date(3, 15)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx", "idx_unmapped").addAggregation(dateRange("range").field("date").addUnboundedTo(date(2, 15)).addRange(date(2, 15), date(3, 15)).addUnboundedFrom(date(3, 15))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateRange range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -1119,10 +978,7 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void emptyAggregation() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0).subAggregation(dateRange("date_range").addRange("0-1", 0, 1)))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx").setQuery(matchAllQuery()).addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0).subAggregation(dateRange("date_range").addRange("0-1", 0, 1))).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(2l));
         Histogram histo = searchResponse.getAggregations().get("histo");
@@ -1143,6 +999,5 @@ public class DateRangeTests extends ElasticsearchIntegrationTest {
         assertThat(buckets.get(0).getAggregations().asList().isEmpty(), is(true));
 
     }
-
 
 }

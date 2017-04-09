@@ -37,14 +37,11 @@ public class RandomizingClient extends FilterClient {
     private final SearchType defaultSearchType;
     private final String defaultPreference;
 
-
     public RandomizingClient(Client client, Random random) {
         super(client);
         // we don't use the QUERY_AND_FETCH types that break quite a lot of tests
         // given that they return `size*num_shards` hits instead of `size`
-        defaultSearchType = RandomPicks.randomFrom(random, Arrays.asList(
-                SearchType.DFS_QUERY_THEN_FETCH,
-                SearchType.QUERY_THEN_FETCH));
+        defaultSearchType = RandomPicks.randomFrom(random, Arrays.asList(SearchType.DFS_QUERY_THEN_FETCH, SearchType.QUERY_THEN_FETCH));
         if (random.nextInt(10) == 0) {
             defaultPreference = RandomPicks.randomFrom(random, EnumSet.of(Preference.PRIMARY_FIRST, Preference.LOCAL)).type();
         } else if (random.nextInt(10) == 0) {
@@ -55,7 +52,7 @@ public class RandomizingClient extends FilterClient {
         }
 
     }
-    
+
     @Override
     public SearchRequestBuilder prepareSearch(String... indices) {
         return in.prepareSearch(indices).setSearchType(defaultSearchType).setPreference(defaultPreference);

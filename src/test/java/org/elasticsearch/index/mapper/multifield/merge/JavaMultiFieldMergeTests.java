@@ -57,7 +57,6 @@ public class JavaMultiFieldMergeTests extends ElasticsearchSingleNodeTest {
         f = doc.getField("name.indexed");
         assertThat(f, nullValue());
 
-
         mapping = copyToStringFromClasspath("/org/elasticsearch/index/mapper/multifield/merge/test-mapping2.json");
         DocumentMapper docMapper2 = parser.parse(mapping);
 
@@ -97,10 +96,8 @@ public class JavaMultiFieldMergeTests extends ElasticsearchSingleNodeTest {
         assertThat(docMapper.mappers().fullName("name.not_indexed2").mapper(), notNullValue());
         assertThat(docMapper.mappers().fullName("name.not_indexed3"), nullValue());
 
-
         mapping = copyToStringFromClasspath("/org/elasticsearch/index/mapper/multifield/merge/test-mapping4.json");
         DocumentMapper docMapper4 = parser.parse(mapping);
-
 
         mergeResult = docMapper.merge(docMapper4, mergeFlags().simulate(true));
         assertThat(Arrays.toString(mergeResult.conflicts()), mergeResult.hasConflicts(), equalTo(false));
@@ -132,7 +129,6 @@ public class JavaMultiFieldMergeTests extends ElasticsearchSingleNodeTest {
         assertThat(f, notNullValue());
         f = doc.getField("name.indexed");
         assertThat(f, nullValue());
-
 
         mapping = copyToStringFromClasspath("/org/elasticsearch/index/mapper/multifield/merge/upgrade1.json");
         DocumentMapper docMapper2 = parser.parse(mapping);
@@ -172,7 +168,6 @@ public class JavaMultiFieldMergeTests extends ElasticsearchSingleNodeTest {
         assertThat(docMapper.mappers().fullName("name.not_indexed").mapper(), notNullValue());
         assertThat(docMapper.mappers().fullName("name.not_indexed2").mapper(), notNullValue());
         assertThat(docMapper.mappers().fullName("name.not_indexed3"), nullValue());
-
 
         mapping = copyToStringFromClasspath("/org/elasticsearch/index/mapper/multifield/merge/upgrade3.json");
         DocumentMapper docMapper4 = parser.parse(mapping);

@@ -102,7 +102,7 @@ public class GeoHashUtilsTests extends ElasticsearchTestCase {
         expectedNeighbors.add("gcpu");
         expectedNeighbors.add("u10h");
         Collection<? super String> neighbors = new ArrayList<>();
-        GeoHashUtils.addNeighbors(geohash, neighbors );
+        GeoHashUtils.addNeighbors(geohash, neighbors);
         assertEquals(expectedNeighbors, neighbors);
 
         // Border odd geohash
@@ -117,7 +117,7 @@ public class GeoHashUtilsTests extends ElasticsearchTestCase {
         expectedNeighbors.add("u09w");
         expectedNeighbors.add("u09y");
         neighbors = new ArrayList<>();
-        GeoHashUtils.addNeighbors(geohash, neighbors );
+        GeoHashUtils.addNeighbors(geohash, neighbors);
         assertEquals(expectedNeighbors, neighbors);
 
         // Border even geohash
@@ -132,7 +132,7 @@ public class GeoHashUtilsTests extends ElasticsearchTestCase {
         expectedNeighbors.add("u09tt");
         expectedNeighbors.add("u09tw");
         neighbors = new ArrayList<>();
-        GeoHashUtils.addNeighbors(geohash, neighbors );
+        GeoHashUtils.addNeighbors(geohash, neighbors);
         assertEquals(expectedNeighbors, neighbors);
 
         // Border even and odd geohash
@@ -147,7 +147,7 @@ public class GeoHashUtilsTests extends ElasticsearchTestCase {
         expectedNeighbors.add("ezzzx");
         expectedNeighbors.add("spbp8");
         neighbors = new ArrayList<>();
-        GeoHashUtils.addNeighbors(geohash, neighbors );
+        GeoHashUtils.addNeighbors(geohash, neighbors);
         assertEquals(expectedNeighbors, neighbors);
     }
 }

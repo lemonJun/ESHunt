@@ -53,10 +53,8 @@ public class TribeUnitTests extends ElasticsearchTestCase {
 
     @BeforeClass
     public static void createTribes() {
-        tribe1 = NodeBuilder.nodeBuilder().settings(ImmutableSettings.builder().put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true).put("http.enabled", false)
-                .put("node.mode", NODE_MODE).put("cluster.name", "tribe1").put("node.name", "tribe1_node")).node();
-        tribe2 = NodeBuilder.nodeBuilder().settings(ImmutableSettings.builder().put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true).put("http.enabled", false)
-                .put("node.mode", NODE_MODE).put("cluster.name", "tribe2").put("node.name", "tribe2_node")).node();
+        tribe1 = NodeBuilder.nodeBuilder().settings(ImmutableSettings.builder().put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true).put("http.enabled", false).put("node.mode", NODE_MODE).put("cluster.name", "tribe1").put("node.name", "tribe1_node")).node();
+        tribe2 = NodeBuilder.nodeBuilder().settings(ImmutableSettings.builder().put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true).put("http.enabled", false).put("node.mode", NODE_MODE).put("cluster.name", "tribe2").put("node.name", "tribe2_node")).node();
     }
 
     @AfterClass
@@ -92,8 +90,7 @@ public class TribeUnitTests extends ElasticsearchTestCase {
     private static void assertTribeNodeSuccesfullyCreated(Settings extraSettings) throws Exception {
         //tribe node doesn't need the node.mode setting, as it's forced local internally anyways. The tribe clients do need it to make sure
         //they can find their corresponding tribes using the proper transport
-        Settings settings = ImmutableSettings.builder().put("http.enabled", false).put("node.name", "tribe_node")
-                .put("tribe.t1.node.mode", NODE_MODE).put("tribe.t2.node.mode", NODE_MODE).put(extraSettings).build();
+        Settings settings = ImmutableSettings.builder().put("http.enabled", false).put("node.name", "tribe_node").put("tribe.t1.node.mode", NODE_MODE).put("tribe.t2.node.mode", NODE_MODE).put(extraSettings).build();
 
         try (Node node = NodeBuilder.nodeBuilder().settings(settings).node()) {
             try (Client client = node.client()) {
@@ -104,8 +101,7 @@ public class TribeUnitTests extends ElasticsearchTestCase {
                         assertThat(state.getClusterName().value(), equalTo("tribe_node_cluster"));
                         assertThat(state.getNodes().getSize(), equalTo(5));
                         for (DiscoveryNode discoveryNode : state.getNodes()) {
-                            assertThat(discoveryNode.getName(), either(equalTo("tribe1_node")).or(equalTo("tribe2_node")).or(equalTo("tribe_node"))
-                                    .or(equalTo("tribe_node/t1")).or(equalTo("tribe_node/t2")));
+                            assertThat(discoveryNode.getName(), either(equalTo("tribe1_node")).or(equalTo("tribe2_node")).or(equalTo("tribe_node")).or(equalTo("tribe_node/t1")).or(equalTo("tribe_node/t2")));
                         }
                     }
                 });

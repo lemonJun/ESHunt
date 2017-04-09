@@ -147,7 +147,7 @@ public class RestTestSuiteParseContext {
     public Tuple<String, Object> parseTuple() throws IOException, RestTestParseException {
         parser.nextToken();
         advanceToFieldName();
-        Map<String,Object> map = parser.map();
+        Map<String, Object> map = parser.map();
         assert parser.currentToken() == XContentParser.Token.END_OBJECT;
         parser.nextToken();
 

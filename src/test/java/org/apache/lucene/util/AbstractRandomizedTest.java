@@ -51,21 +51,14 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
-@TestMethodProviders({
-        LuceneJUnit3MethodProvider.class,
-        JUnit4MethodProvider.class
-})
-@Listeners({
-        ReproduceInfoPrinter.class,
-        FailureMarker.class
-})
+@TestMethodProviders({ LuceneJUnit3MethodProvider.class, JUnit4MethodProvider.class })
+@Listeners({ ReproduceInfoPrinter.class, FailureMarker.class })
 @RunWith(value = com.carrotsearch.randomizedtesting.RandomizedRunner.class)
 @SuppressCodecs(value = "Lucene3x")
 
 // NOTE: this class is in o.a.lucene.util since it uses some classes that are related
 // to the test framework that didn't make sense to copy but are package private access
 public abstract class AbstractRandomizedTest extends RandomizedTest {
-
 
     /**
      * The number of concurrent JVMs used to run the tests, Default is <tt>1</tt>
@@ -204,15 +197,12 @@ public abstract class AbstractRandomizedTest extends RandomizedTest {
      * @see #ruleChain
      * @see #classRules
      */
-    private static final String[] IGNORED_INVARIANT_PROPERTIES = {
-            "user.timezone", "java.rmi.server.randomIDs", "sun.nio.ch.bugLevel",
-            "solr.directoryFactory", "solr.solr.home", "solr.data.dir" // these might be set by the LuceneTestCase -- ignore
+    private static final String[] IGNORED_INVARIANT_PROPERTIES = { "user.timezone", "java.rmi.server.randomIDs", "sun.nio.ch.bugLevel", "solr.directoryFactory", "solr.solr.home", "solr.data.dir" // these might be set by the LuceneTestCase -- ignore
     };
 
     // -----------------------------------------------------------------
     // Fields initialized in class or instance rules.
     // -----------------------------------------------------------------
-
 
     // -----------------------------------------------------------------
     // Class level (suite) rules.
@@ -231,8 +221,7 @@ public abstract class AbstractRandomizedTest extends RandomizedTest {
     /**
      * Suite failure marker (any error in the test or suite scope).
      */
-    public final static TestRuleMarkFailure suiteFailureMarker =
-            new TestRuleMarkFailure();
+    public final static TestRuleMarkFailure suiteFailureMarker = new TestRuleMarkFailure();
 
     /**
      * Ignore tests after hitting a designated number of initial failures. This
@@ -257,15 +246,11 @@ public abstract class AbstractRandomizedTest extends RandomizedTest {
             if (maxFailures == Integer.MAX_VALUE) {
                 maxFailures = 1;
             } else {
-                Logger.getLogger(LuceneTestCase.class.getSimpleName()).warning(
-                        "Property '" + SYSPROP_MAXFAILURES + "'=" + maxFailures + ", 'failfast' is" +
-                                " ignored.");
+                Logger.getLogger(LuceneTestCase.class.getSimpleName()).warning("Property '" + SYSPROP_MAXFAILURES + "'=" + maxFailures + ", 'failfast' is" + " ignored.");
             }
         }
 
-        ignoreAfterMaxFailuresDelegate =
-                new AtomicReference<>(
-                        new TestRuleIgnoreAfterMaxFailures(maxFailures));
+        ignoreAfterMaxFailuresDelegate = new AtomicReference<>(new TestRuleIgnoreAfterMaxFailures(maxFailures));
         ignoreAfterMaxFailures = TestRuleDelegate.of(ignoreAfterMaxFailuresDelegate);
     }
 
@@ -287,14 +272,9 @@ public abstract class AbstractRandomizedTest extends RandomizedTest {
     /**
      * By-name list of ignored types like loggers etc.
      */
-    private final static Set<String> STATIC_LEAK_IGNORED_TYPES =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-                    EnumSet.class.getName())));
+    private final static Set<String> STATIC_LEAK_IGNORED_TYPES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(EnumSet.class.getName())));
 
-    private final static Set<Class<?>> TOP_LEVEL_CLASSES =
-            Collections.unmodifiableSet(new HashSet<Class<?>>(Arrays.asList(
-                    AbstractRandomizedTest.class, LuceneTestCase.class,
-                    ElasticsearchIntegrationTest.class, ElasticsearchTestCase.class)));
+    private final static Set<Class<?>> TOP_LEVEL_CLASSES = Collections.unmodifiableSet(new HashSet<Class<?>>(Arrays.asList(AbstractRandomizedTest.class, LuceneTestCase.class, ElasticsearchIntegrationTest.class, ElasticsearchTestCase.class)));
 
     /**
      * This controls how suite-level rules are nested. It is important that _all_ rules declared
@@ -302,37 +282,26 @@ public abstract class AbstractRandomizedTest extends RandomizedTest {
      * other.
      */
     @ClassRule
-    public static TestRule classRules = RuleChain
-            .outerRule(new TestRuleIgnoreTestSuites())
-            .around(ignoreAfterMaxFailures)
-            .around(suiteFailureMarker)
-            .around(new TestRuleAssertionsRequired())
-            .around(new StaticFieldsInvariantRule(STATIC_LEAK_THRESHOLD, true) {
-                @Override
-                protected boolean accept(java.lang.reflect.Field field) {
-                    // Don't count known classes that consume memory once.
-                    if (STATIC_LEAK_IGNORED_TYPES.contains(field.getType().getName())) {
-                        return false;
-                    }
-                    // Don't count references from ourselves, we're top-level.
-                    if (TOP_LEVEL_CLASSES.contains(field.getDeclaringClass())) {
-                        return false;
-                    }
-                    return super.accept(field);
-                }
-            })
-            .around(new NoClassHooksShadowingRule())
-            .around(new NoInstanceHooksOverridesRule() {
-                @Override
-                protected boolean verify(Method key) {
-                    String name = key.getName();
-                    return !(name.equals("setUp") || name.equals("tearDown"));
-                }
-            })
-            .around(new SystemPropertiesInvariantRule(IGNORED_INVARIANT_PROPERTIES))
-            .around(classNameRule = new TestRuleStoreClassName())
-            .around(classEnvRule = new TestRuleSetupAndRestoreClassEnv());
-
+    public static TestRule classRules = RuleChain.outerRule(new TestRuleIgnoreTestSuites()).around(ignoreAfterMaxFailures).around(suiteFailureMarker).around(new TestRuleAssertionsRequired()).around(new StaticFieldsInvariantRule(STATIC_LEAK_THRESHOLD, true) {
+        @Override
+        protected boolean accept(java.lang.reflect.Field field) {
+            // Don't count known classes that consume memory once.
+            if (STATIC_LEAK_IGNORED_TYPES.contains(field.getType().getName())) {
+                return false;
+            }
+            // Don't count references from ourselves, we're top-level.
+            if (TOP_LEVEL_CLASSES.contains(field.getDeclaringClass())) {
+                return false;
+            }
+            return super.accept(field);
+        }
+    }).around(new NoClassHooksShadowingRule()).around(new NoInstanceHooksOverridesRule() {
+        @Override
+        protected boolean verify(Method key) {
+            String name = key.getName();
+            return !(name.equals("setUp") || name.equals("tearDown"));
+        }
+    }).around(new SystemPropertiesInvariantRule(IGNORED_INVARIANT_PROPERTIES)).around(classNameRule = new TestRuleStoreClassName()).around(classEnvRule = new TestRuleSetupAndRestoreClassEnv());
 
     // -----------------------------------------------------------------
     // Test level rules.
@@ -361,15 +330,7 @@ public abstract class AbstractRandomizedTest extends RandomizedTest {
      * if they depend on each other.
      */
     @Rule
-    public final TestRule ruleChain = RuleChain
-            .outerRule(testFailureMarker)
-            .around(ignoreAfterMaxFailures)
-            .around(threadAndTestNameRule)
-            .around(new SystemPropertiesInvariantRule(IGNORED_INVARIANT_PROPERTIES))
-            .around(new TestRuleSetupAndRestoreInstanceEnv())
-            .around(new TestRuleFieldCacheSanity())
-            .around(parentChainCallRule)
-            .around(afterTestRule);
+    public final TestRule ruleChain = RuleChain.outerRule(testFailureMarker).around(ignoreAfterMaxFailures).around(threadAndTestNameRule).around(new SystemPropertiesInvariantRule(IGNORED_INVARIANT_PROPERTIES)).around(new TestRuleSetupAndRestoreInstanceEnv()).around(new TestRuleFieldCacheSanity()).around(parentChainCallRule).around(afterTestRule);
 
     // -----------------------------------------------------------------
     // Suite and test case setup/ cleanup.
@@ -395,7 +356,6 @@ public abstract class AbstractRandomizedTest extends RandomizedTest {
         parentChainCallRule.teardownCalled = true;
         assertFalse("at least one shard failed CheckIndex", checkIndexFailed);
     }
-
 
     // -----------------------------------------------------------------
     // Test facilities and facades for subclasses. 

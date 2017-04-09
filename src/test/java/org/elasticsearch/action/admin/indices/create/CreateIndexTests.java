@@ -39,7 +39,7 @@ import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsNull.notNullValue;
 
 @ClusterScope(scope = Scope.TEST)
-public class CreateIndexTests extends ElasticsearchIntegrationTest{
+public class CreateIndexTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testCreationDate_Given() {
@@ -78,25 +78,19 @@ public class CreateIndexTests extends ElasticsearchIntegrationTest{
     @Test
     public void testDoubleAddMapping() throws Exception {
         try {
-            prepareCreate("test")
-                    .addMapping("type1", "date", "type=date")
-                    .addMapping("type1", "num", "type=integer");
+            prepareCreate("test").addMapping("type1", "date", "type=date").addMapping("type1", "num", "type=integer");
             fail("did not hit expected exception");
         } catch (IllegalStateException ise) {
             // expected
         }
         try {
-            prepareCreate("test")
-                    .addMapping("type1", new HashMap<String,Object>())
-                    .addMapping("type1", new HashMap<String,Object>());
+            prepareCreate("test").addMapping("type1", new HashMap<String, Object>()).addMapping("type1", new HashMap<String, Object>());
             fail("did not hit expected exception");
         } catch (IllegalStateException ise) {
             // expected
         }
         try {
-            prepareCreate("test")
-                    .addMapping("type1", jsonBuilder())
-                    .addMapping("type1", jsonBuilder());
+            prepareCreate("test").addMapping("type1", jsonBuilder()).addMapping("type1", jsonBuilder());
             fail("did not hit expected exception");
         } catch (IllegalStateException ise) {
             // expected
@@ -106,39 +100,25 @@ public class CreateIndexTests extends ElasticsearchIntegrationTest{
     @Test
     public void testInvalidShardCountSettings() throws Exception {
         try {
-            prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, randomIntBetween(-10, 0))
-                .build())
-            .get();
+            prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, randomIntBetween(-10, 0)).build()).get();
             fail("should have thrown an exception about the primary shard count");
         } catch (ElasticsearchIllegalArgumentException e) {
-            assertThat("message contains error about shard count: " + e.getMessage(),
-                    e.getMessage().contains("index must have 1 or more primary shards"), equalTo(true));
+            assertThat("message contains error about shard count: " + e.getMessage(), e.getMessage().contains("index must have 1 or more primary shards"), equalTo(true));
         }
 
         try {
-            prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, randomIntBetween(-10, -1))
-                .build())
-                    .get();
+            prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, randomIntBetween(-10, -1)).build()).get();
             fail("should have thrown an exception about the replica shard count");
         } catch (ElasticsearchIllegalArgumentException e) {
-            assertThat("message contains error about shard count: " + e.getMessage(),
-                    e.getMessage().contains("index must have 0 or more replica shards"), equalTo(true));
+            assertThat("message contains error about shard count: " + e.getMessage(), e.getMessage().contains("index must have 0 or more replica shards"), equalTo(true));
         }
 
         try {
-            prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, randomIntBetween(-10, 0))
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, randomIntBetween(-10, -1))
-                .build())
-                    .get();
+            prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, randomIntBetween(-10, 0)).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, randomIntBetween(-10, -1)).build()).get();
             fail("should have thrown an exception about the shard count");
         } catch (ElasticsearchIllegalArgumentException e) {
-            assertThat("message contains error about shard count: " + e.getMessage(),
-                    e.getMessage().contains("index must have 1 or more primary shards"), equalTo(true));
-            assertThat("message contains error about shard count: " + e.getMessage(),
-                    e.getMessage().contains("index must have 0 or more replica shards"), equalTo(true));
+            assertThat("message contains error about shard count: " + e.getMessage(), e.getMessage().contains("index must have 1 or more primary shards"), equalTo(true));
+            assertThat("message contains error about shard count: " + e.getMessage(), e.getMessage().contains("index must have 0 or more replica shards"), equalTo(true));
         }
     }
 
@@ -155,37 +135,23 @@ public class CreateIndexTests extends ElasticsearchIntegrationTest{
     @Test
     public void testInvalidShardCountSettingsWithoutPrefix() throws Exception {
         try {
-            prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS.substring(IndexMetaData.INDEX_SETTING_PREFIX.length()), randomIntBetween(-10, 0))
-                .build())
-                .get();
+            prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS.substring(IndexMetaData.INDEX_SETTING_PREFIX.length()), randomIntBetween(-10, 0)).build()).get();
             fail("should have thrown an exception about the shard count");
         } catch (ElasticsearchIllegalArgumentException e) {
-            assertThat("message contains error about shard count: " + e.getMessage(),
-                e.getMessage().contains("index must have 1 or more primary shards"), equalTo(true));
+            assertThat("message contains error about shard count: " + e.getMessage(), e.getMessage().contains("index must have 1 or more primary shards"), equalTo(true));
         }
         try {
-            prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS.substring(IndexMetaData.INDEX_SETTING_PREFIX.length()), randomIntBetween(-10, -1))
-                .build())
-                .get();
+            prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS.substring(IndexMetaData.INDEX_SETTING_PREFIX.length()), randomIntBetween(-10, -1)).build()).get();
             fail("should have thrown an exception about the shard count");
         } catch (ElasticsearchIllegalArgumentException e) {
-            assertThat("message contains error about shard count: " + e.getMessage(),
-                e.getMessage().contains("index must have 0 or more replica shards"), equalTo(true));
+            assertThat("message contains error about shard count: " + e.getMessage(), e.getMessage().contains("index must have 0 or more replica shards"), equalTo(true));
         }
         try {
-            prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS.substring(IndexMetaData.INDEX_SETTING_PREFIX.length()), randomIntBetween(-10, 0))
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS.substring(IndexMetaData.INDEX_SETTING_PREFIX.length()), randomIntBetween(-10, -1))
-                .build())
-                .get();
+            prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS.substring(IndexMetaData.INDEX_SETTING_PREFIX.length()), randomIntBetween(-10, 0)).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS.substring(IndexMetaData.INDEX_SETTING_PREFIX.length()), randomIntBetween(-10, -1)).build()).get();
             fail("should have thrown an exception about the shard count");
         } catch (ElasticsearchIllegalArgumentException e) {
-            assertThat("message contains error about shard count: " + e.getMessage(),
-                e.getMessage().contains("index must have 1 or more primary shards"), equalTo(true));
-            assertThat("message contains error about shard count: " + e.getMessage(),
-                e.getMessage().contains("index must have 0 or more replica shards"), equalTo(true));
+            assertThat("message contains error about shard count: " + e.getMessage(), e.getMessage().contains("index must have 1 or more primary shards"), equalTo(true));
+            assertThat("message contains error about shard count: " + e.getMessage(), e.getMessage().contains("index must have 0 or more replica shards"), equalTo(true));
         }
     }
 

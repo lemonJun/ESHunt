@@ -153,7 +153,6 @@ public class BalanceConfigurationTests extends ElasticsearchAllocationTestCase {
 
         RoutingTable routingTable = routingTableBuilder.build();
 
-
         logger.info("start " + numberOfNodes + " nodes");
         DiscoveryNodes.Builder nodes = DiscoveryNodes.builder();
         for (int i = 0; i < numberOfNodes; i++) {
@@ -192,9 +191,7 @@ public class BalanceConfigurationTests extends ElasticsearchAllocationTestCase {
 
     private ClusterState addNode(ClusterState clusterState, AllocationService strategy) {
         logger.info("now, start 1 more node, check that rebalancing will happen because we set it to always");
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder(clusterState.nodes())
-                .put(newNode("node" + numberOfNodes)))
-                .build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder(clusterState.nodes()).put(newNode("node" + numberOfNodes))).build();
 
         RoutingTable routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
@@ -255,7 +252,6 @@ public class BalanceConfigurationTests extends ElasticsearchAllocationTestCase {
         return clusterState;
     }
 
-
     private void assertReplicaBalance(ESLogger logger, RoutingNodes nodes, int numberOfNodes, int numberOfIndices, int numberOfReplicas, int numberOfShards, float treshold) {
         final int numShards = numberOfIndices * numberOfShards * (numberOfReplicas + 1);
         final float avgNumShards = (float) (numShards) / (float) (numberOfNodes);
@@ -263,7 +259,7 @@ public class BalanceConfigurationTests extends ElasticsearchAllocationTestCase {
         final int maxAvgNumberOfShards = Math.round(Math.round(Math.ceil(avgNumShards + treshold)));
 
         for (RoutingNode node : nodes) {
-//            logger.info(node.nodeId() + ": " + node.shardsWithState(INITIALIZING, STARTED).size() + " shards ("+minAvgNumberOfShards+" to "+maxAvgNumberOfShards+")");
+            //            logger.info(node.nodeId() + ": " + node.shardsWithState(INITIALIZING, STARTED).size() + " shards ("+minAvgNumberOfShards+" to "+maxAvgNumberOfShards+")");
             assertThat(node.shardsWithState(STARTED).size(), Matchers.greaterThanOrEqualTo(minAvgNumberOfShards));
             assertThat(node.shardsWithState(STARTED).size(), Matchers.lessThanOrEqualTo(maxAvgNumberOfShards));
         }
@@ -278,7 +274,7 @@ public class BalanceConfigurationTests extends ElasticsearchAllocationTestCase {
 
         for (String index : nodes.getRoutingTable().indicesRouting().keySet()) {
             for (RoutingNode node : nodes) {
-//              logger.info(node.nodeId() +":"+index+ ": " + node.shardsWithState(index, INITIALIZING, STARTED).size() + " shards ("+minAvgNumberOfShards+" to "+maxAvgNumberOfShards+")");
+                //              logger.info(node.nodeId() +":"+index+ ": " + node.shardsWithState(index, INITIALIZING, STARTED).size() + " shards ("+minAvgNumberOfShards+" to "+maxAvgNumberOfShards+")");
                 assertThat(node.shardsWithState(index, STARTED).size(), Matchers.greaterThanOrEqualTo(minAvgNumberOfShards));
                 assertThat(node.shardsWithState(index, STARTED).size(), Matchers.lessThanOrEqualTo(maxAvgNumberOfShards));
             }
@@ -298,7 +294,7 @@ public class BalanceConfigurationTests extends ElasticsearchAllocationTestCase {
                 for (ShardRouting shard : node.shardsWithState(index, STARTED)) {
                     primaries += shard.primary() ? 1 : 0;
                 }
-//                logger.info(node.nodeId() + ": " + primaries + " primaries ("+minAvgNumberOfShards+" to "+maxAvgNumberOfShards+")");
+                //                logger.info(node.nodeId() + ": " + primaries + " primaries ("+minAvgNumberOfShards+" to "+maxAvgNumberOfShards+")");
                 assertThat(primaries, Matchers.greaterThanOrEqualTo(minAvgNumberOfShards));
                 assertThat(primaries, Matchers.lessThanOrEqualTo(maxAvgNumberOfShards));
             }
@@ -351,9 +347,7 @@ public class BalanceConfigurationTests extends ElasticsearchAllocationTestCase {
     @Test
     public void testNoRebalanceOnPrimaryOverload() {
         ImmutableSettings.Builder settings = settingsBuilder();
-        AllocationService strategy = new AllocationService(settings.build(), randomAllocationDeciders(settings.build(),
-                new NodeSettingsService(ImmutableSettings.Builder.EMPTY_SETTINGS), getRandom()), new ShardsAllocators(settings.build(),
-                new NoneGatewayAllocator(), new ShardsAllocator() {
+        AllocationService strategy = new AllocationService(settings.build(), randomAllocationDeciders(settings.build(), new NodeSettingsService(ImmutableSettings.Builder.EMPTY_SETTINGS), getRandom()), new ShardsAllocators(settings.build(), new NoneGatewayAllocator(), new ShardsAllocator() {
 
             @Override
             public boolean rebalance(RoutingAllocation allocation) {
@@ -367,7 +361,6 @@ public class BalanceConfigurationTests extends ElasticsearchAllocationTestCase {
 
             @Override
             public void applyStartedShards(StartedRerouteAllocation allocation) {
-
 
             }
 

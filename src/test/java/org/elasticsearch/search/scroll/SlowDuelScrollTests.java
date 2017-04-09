@@ -33,16 +33,14 @@ import org.elasticsearch.test.ElasticsearchIntegrationTest;
 @ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.SUITE)
 public class SlowDuelScrollTests extends DuelScrollTests {
 
-    private final Version[] versions = new Version[]{
-            Version.CURRENT, ParsedScrollId.SCROLL_SEARCH_AFTER_MINIMUM_VERSION, Version.V_1_1_0, Version.V_1_0_0
-    };
+    private final Version[] versions = new Version[] { Version.CURRENT, ParsedScrollId.SCROLL_SEARCH_AFTER_MINIMUM_VERSION, Version.V_1_1_0, Version.V_1_0_0 };
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
         // If we add a constructor to InternalNode that allows us to define a version, then in the InternalTestCluster
         // we can start nodes with different versions and then we don't need this setting and would also be helpful
         // for other tests
-        Settings settings =  super.nodeSettings(nodeOrdinal);
+        Settings settings = super.nodeSettings(nodeOrdinal);
         Version randomVersion = versions[randomInt(versions.length - 1)];
         return ImmutableSettings.builder().put(settings).put("tests.mock.version", randomVersion.id).build();
     }

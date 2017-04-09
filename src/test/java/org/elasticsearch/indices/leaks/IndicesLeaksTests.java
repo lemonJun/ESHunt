@@ -39,18 +39,15 @@ import static org.hamcrest.Matchers.nullValue;
 
 /**
  */
-@ClusterScope(scope= Scope.TEST, numDataNodes =1)
+@ClusterScope(scope = Scope.TEST, numDataNodes = 1)
 public class IndicesLeaksTests extends ElasticsearchIntegrationTest {
 
-
-    @SuppressWarnings({"ConstantConditions", "unchecked"})
+    @SuppressWarnings({ "ConstantConditions", "unchecked" })
     @Test
     @BadApple(bugUrl = "https://github.com/elasticsearch/elasticsearch/issues/3232")
     public void testIndexShardLifecycleLeak() throws Exception {
 
-        client().admin().indices().prepareCreate("test")
-                .setSettings(ImmutableSettings.builder().put("index.number_of_shards", 1).put("index.number_of_replicas", 0))
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test").setSettings(ImmutableSettings.builder().put("index.number_of_shards", 1).put("index.number_of_replicas", 0)).execute().actionGet();
 
         client().admin().cluster().prepareHealth().setWaitForGreenStatus().execute().actionGet();
 
@@ -79,7 +76,6 @@ public class IndicesLeaksTests extends ElasticsearchIntegrationTest {
         indexReferences.add(new WeakReference(indexService.analysisService()));
         indexReferences.add(new WeakReference(indexService.fieldData()));
         indexReferences.add(new WeakReference(indexService.queryParserService()));
-
 
         // add shard references
         shardReferences.add(new WeakReference(shard));

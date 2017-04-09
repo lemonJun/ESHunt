@@ -72,21 +72,24 @@ public class HppcMapsTests extends ElasticsearchTestCase {
         try {
             toList(HppcMaps.intersection(set1, set2));
             fail();
-        } catch (AssertionError e) {}
+        } catch (AssertionError e) {
+        }
 
         set1 = ObjectOpenHashSet.from();
         set2 = null;
         try {
             toList(HppcMaps.intersection(set1, set2));
             fail();
-        } catch (AssertionError e) {}
+        } catch (AssertionError e) {
+        }
 
         set1 = null;
         set2 = null;
         try {
             toList(HppcMaps.intersection(set1, set2));
             fail();
-        } catch (AssertionError e) {}
+        } catch (AssertionError e) {
+        }
     }
 
     private List<String> toList(Iterable<String> iterable) {
@@ -96,6 +99,5 @@ public class HppcMapsTests extends ElasticsearchTestCase {
         }
         return list;
     }
-
 
 }

@@ -39,15 +39,10 @@ public class FuzzyLikeThisActionTests extends ElasticsearchIntegrationTest {
     @Test
     // See issue https://github.com/elasticsearch/elasticsearch/issues/3252
     public void testNumericField() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type", "int_value", "type=integer"));
+        assertAcked(prepareCreate("test").addMapping("type", "int_value", "type=integer"));
         ensureGreen();
-        client().prepareIndex("test", "type", "1")
-                .setSource(jsonBuilder().startObject().field("string_value", "lucene index").field("int_value", 1).endObject())
-                .execute().actionGet();
-        client().prepareIndex("test", "type", "2")
-                .setSource(jsonBuilder().startObject().field("string_value", "elasticsearch index").field("int_value", 42).endObject())
-                .execute().actionGet();
+        client().prepareIndex("test", "type", "1").setSource(jsonBuilder().startObject().field("string_value", "lucene index").field("int_value", 1).endObject()).execute().actionGet();
+        client().prepareIndex("test", "type", "2").setSource(jsonBuilder().startObject().field("string_value", "elasticsearch index").field("int_value", 42).endObject()).execute().actionGet();
 
         refresh();
 
@@ -66,7 +61,6 @@ public class FuzzyLikeThisActionTests extends ElasticsearchIntegrationTest {
 
         // flt query with at least a numeric field -> fail by command
         assertThrows(client().prepareSearch().setQuery(fuzzyLikeThisQuery("string_value", "int_value").likeText("index").failOnUnsupportedField(true)), SearchPhaseExecutionException.class);
-
 
         // flt query with at least a numeric field but fail_on_unsupported_field set to false
         searchResponse = client().prepareSearch().setQuery(fuzzyLikeThisQuery("string_value", "int_value").likeText("index").failOnUnsupportedField(false)).execute().actionGet();

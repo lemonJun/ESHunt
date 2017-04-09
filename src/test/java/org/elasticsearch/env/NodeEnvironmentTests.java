@@ -53,9 +53,7 @@ public class NodeEnvironmentTests extends ElasticsearchTestCase {
     @Test
     public void testNodeLockSingleEnvironment() throws IOException {
         String[] dataPaths = tmpPaths();
-        Settings settings = ImmutableSettings.builder()
-                .put(nodeEnvSettings(dataPaths))
-                .put("node.max_local_storage_nodes", 1).build();
+        Settings settings = ImmutableSettings.builder().put(nodeEnvSettings(dataPaths)).put("node.max_local_storage_nodes", 1).build();
         NodeEnvironment env = new NodeEnvironment(settings, new Environment(settings));
 
         try {
@@ -160,7 +158,6 @@ public class NodeEnvironmentTests extends ElasticsearchTestCase {
 
         ShardLock fooLock = env.shardLock(new ShardId("foo", 0));
         assertEquals(new ShardId("foo", 0), fooLock.getShardId());
-
 
         for (Path path : env.indexPaths(new Index("foo"))) {
             Files.createDirectories(path.resolve("0"));
@@ -351,37 +348,28 @@ public class NodeEnvironmentTests extends ElasticsearchTestCase {
         assertTrue("settings with path_data should have a custom data path", NodeEnvironment.hasCustomDataPath(s2));
 
         assertThat(env.shardDataPaths(sid, s1), equalTo(env.shardPaths(sid)));
-        assertThat(env.shardDataPaths(sid, s2), equalTo(new Path[] {Paths.get("/tmp/foo/0/myindex/0")}));
+        assertThat(env.shardDataPaths(sid, s2), equalTo(new Path[] { Paths.get("/tmp/foo/0/myindex/0") }));
 
-        assertThat("shard paths with a custom data_path should contain only regular paths",
-                env.shardPaths(sid),
-                equalTo(stringsToPaths(dataPaths, "elasticsearch/nodes/0/indices/myindex/0")));
+        assertThat("shard paths with a custom data_path should contain only regular paths", env.shardPaths(sid), equalTo(stringsToPaths(dataPaths, "elasticsearch/nodes/0/indices/myindex/0")));
 
-        assertThat("index paths uses the regular template",
-                env.indexPaths(i), equalTo(stringsToPaths(dataPaths, "elasticsearch/nodes/0/indices/myindex")));
+        assertThat("index paths uses the regular template", env.indexPaths(i), equalTo(stringsToPaths(dataPaths, "elasticsearch/nodes/0/indices/myindex")));
 
         env.close();
-        NodeEnvironment env2 = newNodeEnvironment(dataPaths,
-                ImmutableSettings.builder().put(NodeEnvironment.ADD_NODE_ID_TO_CUSTOM_PATH, false).build());
+        NodeEnvironment env2 = newNodeEnvironment(dataPaths, ImmutableSettings.builder().put(NodeEnvironment.ADD_NODE_ID_TO_CUSTOM_PATH, false).build());
 
         assertThat(env2.shardDataPaths(sid, s1), equalTo(env2.shardPaths(sid)));
-        assertThat(env2.shardDataPaths(sid, s2), equalTo(new Path[] {Paths.get("/tmp/foo/myindex/0")}));
+        assertThat(env2.shardDataPaths(sid, s2), equalTo(new Path[] { Paths.get("/tmp/foo/myindex/0") }));
 
-        assertThat("shard paths with a custom data_path should contain only regular paths",
-                env2.shardPaths(sid),
-                equalTo(stringsToPaths(dataPaths, "elasticsearch/nodes/0/indices/myindex/0")));
+        assertThat("shard paths with a custom data_path should contain only regular paths", env2.shardPaths(sid), equalTo(stringsToPaths(dataPaths, "elasticsearch/nodes/0/indices/myindex/0")));
 
-        assertThat("index paths uses the regular template",
-                env2.indexPaths(i), equalTo(stringsToPaths(dataPaths, "elasticsearch/nodes/0/indices/myindex")));
+        assertThat("index paths uses the regular template", env2.indexPaths(i), equalTo(stringsToPaths(dataPaths, "elasticsearch/nodes/0/indices/myindex")));
 
         env2.close();
     }
 
-        private Settings nodeEnvSettings(String[] dataPaths) {
-            return ImmutableSettings.builder()
-                    .put("path.home", newTempDir().getAbsolutePath())
-                    .putArray("path.data", dataPaths).build();
-        }
+    private Settings nodeEnvSettings(String[] dataPaths) {
+        return ImmutableSettings.builder().put("path.home", newTempDir().getAbsolutePath()).putArray("path.data", dataPaths).build();
+    }
 
     /** Converts an array of Strings to an array of Paths, adding an additional child if specified */
     private Path[] stringsToPaths(String[] strings, String additional) {
@@ -406,22 +394,12 @@ public class NodeEnvironmentTests extends ElasticsearchTestCase {
     }
 
     public NodeEnvironment newNodeEnvironment(Settings settings) throws IOException {
-        Settings build = ImmutableSettings.builder()
-                .put(settings)
-                .put("path.home", newTempDir().toPath().toAbsolutePath().toString())
-                .put(NodeEnvironment.SETTING_CUSTOM_DATA_PATH_ENABLED, true)
-                .put(ScriptService.DISABLE_DYNAMIC_SCRIPTING_SETTING, false)
-                .putArray("path.data", tmpPaths()).build();
+        Settings build = ImmutableSettings.builder().put(settings).put("path.home", newTempDir().toPath().toAbsolutePath().toString()).put(NodeEnvironment.SETTING_CUSTOM_DATA_PATH_ENABLED, true).put(ScriptService.DISABLE_DYNAMIC_SCRIPTING_SETTING, false).putArray("path.data", tmpPaths()).build();
         return new NodeEnvironment(build, new Environment(build));
     }
 
     public NodeEnvironment newNodeEnvironment(String[] dataPaths, Settings settings) throws IOException {
-        Settings build = ImmutableSettings.builder()
-                .put(settings)
-                .put("path.home", newTempDir().toPath().toAbsolutePath().toString())
-                .put(NodeEnvironment.SETTING_CUSTOM_DATA_PATH_ENABLED, true)
-                .put(ScriptService.DISABLE_DYNAMIC_SCRIPTING_SETTING, false)
-                .putArray("path.data", dataPaths).build();
+        Settings build = ImmutableSettings.builder().put(settings).put("path.home", newTempDir().toPath().toAbsolutePath().toString()).put(NodeEnvironment.SETTING_CUSTOM_DATA_PATH_ENABLED, true).put(ScriptService.DISABLE_DYNAMIC_SCRIPTING_SETTING, false).putArray("path.data", dataPaths).build();
         return new NodeEnvironment(build, new Environment(build));
     }
 }

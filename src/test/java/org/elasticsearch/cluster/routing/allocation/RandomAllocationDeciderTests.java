@@ -57,9 +57,7 @@ public class RandomAllocationDeciderTests extends ElasticsearchAllocationTestCas
     @Test
     public void testRandomDecisions() {
         RandomAllocationDecider randomAllocationDecider = new RandomAllocationDecider(getRandom());
-        AllocationService strategy = new AllocationService(settingsBuilder().build(), new AllocationDeciders(ImmutableSettings.EMPTY,
-                new HashSet<>(Arrays.asList(new SameShardAllocationDecider(ImmutableSettings.EMPTY),
-                        randomAllocationDecider))), new ShardsAllocators(), ClusterInfoService.EMPTY);
+        AllocationService strategy = new AllocationService(settingsBuilder().build(), new AllocationDeciders(ImmutableSettings.EMPTY, new HashSet<>(Arrays.asList(new SameShardAllocationDecider(ImmutableSettings.EMPTY), randomAllocationDecider))), new ShardsAllocators(), ClusterInfoService.EMPTY);
         int indices = scaledRandomIntBetween(1, 20);
         Builder metaBuilder = MetaData.builder();
         int maxNumReplicas = 1;
@@ -89,8 +87,7 @@ public class RandomAllocationDeciderTests extends ElasticsearchAllocationTestCas
             ClusterState.Builder stateBuilder = ClusterState.builder(clusterState);
             DiscoveryNodes.Builder newNodesBuilder = DiscoveryNodes.builder(clusterState.nodes());
 
-            if (clusterState.nodes().size() <= atMostNodes &&
-                    (nodeIdCounter == 0 || (frequentNodes ? frequently() : rarely()))) {
+            if (clusterState.nodes().size() <= atMostNodes && (nodeIdCounter == 0 || (frequentNodes ? frequently() : rarely()))) {
                 int numNodes = scaledRandomIntBetween(1, 3);
                 for (int j = 0; j < numNodes; j++) {
                     logger.info("adding node [{}]", nodeIdCounter);
@@ -109,8 +106,7 @@ public class RandomAllocationDeciderTests extends ElasticsearchAllocationTestCas
             routingTable = strategy.reroute(clusterState).routingTable();
             clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
             if (clusterState.routingNodes().shardsWithState(INITIALIZING).size() > 0) {
-                routingTable = strategy.applyStartedShards(clusterState, clusterState.routingNodes().shardsWithState(INITIALIZING))
-                        .routingTable();
+                routingTable = strategy.applyStartedShards(clusterState, clusterState.routingNodes().shardsWithState(INITIALIZING)).routingTable();
                 clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
             }
         }
@@ -126,7 +122,6 @@ public class RandomAllocationDeciderTests extends ElasticsearchAllocationTestCas
             clusterState = stateBuilder.build();
         }
 
-
         randomAllocationDecider.allwaysSayYes = true;
         logger.info("now say YES to everything");
         int iterations = 0;
@@ -135,13 +130,11 @@ public class RandomAllocationDeciderTests extends ElasticsearchAllocationTestCas
             routingTable = strategy.reroute(clusterState).routingTable();
             clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
             if (clusterState.routingNodes().shardsWithState(INITIALIZING).size() > 0) {
-                routingTable = strategy.applyStartedShards(clusterState, clusterState.routingNodes().shardsWithState(INITIALIZING))
-                        .routingTable();
+                routingTable = strategy.applyStartedShards(clusterState, clusterState.routingNodes().shardsWithState(INITIALIZING)).routingTable();
                 clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
             }
 
-        } while (clusterState.routingNodes().shardsWithState(ShardRoutingState.INITIALIZING).size() != 0 ||
-                clusterState.routingNodes().shardsWithState(ShardRoutingState.UNASSIGNED).size() != 0 && iterations < 200);
+        } while (clusterState.routingNodes().shardsWithState(ShardRoutingState.INITIALIZING).size() != 0 || clusterState.routingNodes().shardsWithState(ShardRoutingState.UNASSIGNED).size() != 0 && iterations < 200);
         logger.info("Done Balancing after [{}] iterations", iterations);
         // we stop after 200 iterations if it didn't stabelize by then something is likely to be wrong
         assertThat("max num iteration exceeded", iterations, Matchers.lessThan(200));
@@ -156,9 +149,7 @@ public class RandomAllocationDeciderTests extends ElasticsearchAllocationTestCas
             if (clusterState.getRoutingNodes().node("NODE_" + i) == null) {
                 continue;
             }
-            assertThat(clusterState.getRoutingNodes().node("NODE_" + i).size(), Matchers.anyOf(
-                    Matchers.anyOf(equalTo((shards / numNodes) + 1), equalTo((shards / numNodes) - 1), equalTo((shards / numNodes))),
-                    Matchers.allOf(Matchers.greaterThanOrEqualTo(lowerBound), Matchers.lessThanOrEqualTo(upperBound))));
+            assertThat(clusterState.getRoutingNodes().node("NODE_" + i).size(), Matchers.anyOf(Matchers.anyOf(equalTo((shards / numNodes) + 1), equalTo((shards / numNodes) - 1), equalTo((shards / numNodes))), Matchers.allOf(Matchers.greaterThanOrEqualTo(lowerBound), Matchers.lessThanOrEqualTo(upperBound))));
         }
     }
 

@@ -57,19 +57,16 @@ public class ScriptsScoreBenchmark extends BasicScriptBenchmark {
         client.admin().cluster().prepareHealth("test").setWaitForGreenStatus().setTimeout("10s").execute().actionGet();
 
         Results results = new Results();
-        results.init(maxTerms - minTerms, "native tfidf script score dense posting list",
-                "Results for native script score with dense posting list:", "black", "--");
+        results.init(maxTerms - minTerms, "native tfidf script score dense posting list", "Results for native script score with dense posting list:", "black", "--");
         // init native script searches
-        List<Entry<String, RequestInfo>> searchRequests = initNativeSearchRequests(minTerms, maxTerms,
-                NativeNaiveTFIDFScoreScript.NATIVE_NAIVE_TFIDF_SCRIPT_SCORE, true);
+        List<Entry<String, RequestInfo>> searchRequests = initNativeSearchRequests(minTerms, maxTerms, NativeNaiveTFIDFScoreScript.NATIVE_NAIVE_TFIDF_SCRIPT_SCORE, true);
         // run actual benchmark
         runBenchmark(client, maxIter, results, searchRequests, minTerms, warmerIter);
         allResults.add(results);
 
         results = new Results();
 
-        results.init(maxTerms - minTerms, "term query dense posting list", "Results for term query with dense posting lists:", "green",
-                "--");
+        results.init(maxTerms - minTerms, "term query dense posting list", "Results for term query with dense posting lists:", "green", "--");
         // init term queries
         searchRequests = initTermQueries(minTerms, maxTerms);
         // run actual benchmark
@@ -79,14 +76,9 @@ public class ScriptsScoreBenchmark extends BasicScriptBenchmark {
         if (runMVEL) {
 
             results = new Results();
-            results.init(maxTerms - minTerms, "mvel tfidf dense posting list", "Results for mvel score with dense posting list:", "red",
-                    "--");
+            results.init(maxTerms - minTerms, "mvel tfidf dense posting list", "Results for mvel score with dense posting list:", "red", "--");
             // init native script searches
-            searchRequests = initNativeSearchRequests(
-                    minTerms,
-                    maxTerms,
-                    "score = 0.0; fi= _terminfo[\"text\"]; for(i=0; i<text.size(); i++){terminfo = fi[text.get(i)]; score = score + terminfo.tf()*fi.getDocCount()/terminfo.df();} return score;",
-                    false);
+            searchRequests = initNativeSearchRequests(minTerms, maxTerms, "score = 0.0; fi= _terminfo[\"text\"]; for(i=0; i<text.size(); i++){terminfo = fi[text.get(i)]; score = score + terminfo.tf()*fi.getDocCount()/terminfo.df();} return score;", false);
             // run actual benchmark
             runBenchmark(client, maxIter, results, searchRequests, minTerms, warmerIter);
             allResults.add(results);
@@ -94,8 +86,7 @@ public class ScriptsScoreBenchmark extends BasicScriptBenchmark {
 
         indexData(10000, client, true);
         results = new Results();
-        results.init(maxTerms - minTerms, "native tfidf script score sparse posting list",
-                "Results for native script scorewith sparse posting list:", "black", "-.");
+        results.init(maxTerms - minTerms, "native tfidf script score sparse posting list", "Results for native script scorewith sparse posting list:", "black", "-.");
         // init native script searches
         searchRequests = initNativeSearchRequests(minTerms, maxTerms, NativeNaiveTFIDFScoreScript.NATIVE_NAIVE_TFIDF_SCRIPT_SCORE, true);
         // run actual benchmark
@@ -104,8 +95,7 @@ public class ScriptsScoreBenchmark extends BasicScriptBenchmark {
 
         results = new Results();
 
-        results.init(maxTerms - minTerms, "term query sparse posting list", "Results for term query with sparse posting lists:", "green",
-                "-.");
+        results.init(maxTerms - minTerms, "term query sparse posting list", "Results for term query with sparse posting lists:", "green", "-.");
         // init term queries
         searchRequests = initTermQueries(minTerms, maxTerms);
         // run actual benchmark
@@ -115,14 +105,9 @@ public class ScriptsScoreBenchmark extends BasicScriptBenchmark {
         if (runMVEL) {
 
             results = new Results();
-            results.init(maxTerms - minTerms, "mvel tfidf sparse posting list", "Results for mvel score with sparse posting list:", "red",
-                    "-.");
+            results.init(maxTerms - minTerms, "mvel tfidf sparse posting list", "Results for mvel score with sparse posting list:", "red", "-.");
             // init native script searches
-            searchRequests = initNativeSearchRequests(
-                    minTerms,
-                    maxTerms,
-                    "score = 0.0; fi= _terminfo[\"text\"]; for(i=0; i<text.size(); i++){terminfo = fi[text.get(i)]; score = score + terminfo.tf()*fi.getDocCount()/terminfo.df();} return score;",
-                    false);
+            searchRequests = initNativeSearchRequests(minTerms, maxTerms, "score = 0.0; fi= _terminfo[\"text\"]; for(i=0; i<text.size(); i++){terminfo = fi[text.get(i)]; score = score + terminfo.tf()*fi.getDocCount()/terminfo.df();} return score;", false);
             // run actual benchmark
             runBenchmark(client, maxIter, results, searchRequests, minTerms, warmerIter);
             allResults.add(results);

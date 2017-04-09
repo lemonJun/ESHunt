@@ -103,7 +103,6 @@ public class IndexAliasesServiceTests extends ElasticsearchSingleNodeTest {
         indexAliasesService.aliasFilter("cats");
     }
 
-
     @Test
     public void testUnknownAliasFilter() throws Exception {
         IndexAliasesService indexAliasesService = newIndexAliasesService();
@@ -117,6 +116,5 @@ public class IndexAliasesServiceTests extends ElasticsearchSingleNodeTest {
             // all is well
         }
     }
-
 
 }

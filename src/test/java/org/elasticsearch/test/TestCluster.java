@@ -170,7 +170,7 @@ public abstract class TestCluster implements Iterable<Client>, Closeable {
         if (size() > 0) {
             // if nothing is provided, delete all
             if (templates.length == 0) {
-                templates = new String[]{"*"};
+                templates = new String[] { "*" };
             }
             for (String template : templates) {
                 try {
@@ -189,7 +189,7 @@ public abstract class TestCluster implements Iterable<Client>, Closeable {
         if (size() > 0) {
             // if nothing is provided, delete all
             if (repositories.length == 0) {
-                repositories = new String[]{"*"};
+                repositories = new String[] { "*" };
             }
             for (String repository : repositories) {
                 try {

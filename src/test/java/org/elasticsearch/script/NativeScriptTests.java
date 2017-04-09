@@ -48,14 +48,8 @@ public class NativeScriptTests extends ElasticsearchTestCase {
 
     @Test
     public void testNativeScript() throws InterruptedException {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("script.native.my.type", MyNativeScriptFactory.class.getName())
-                .put("name", "testNativeScript")
-                .build();
-        Injector injector = new ModulesBuilder().add(
-                new ThreadPoolModule(new ThreadPool(settings)),
-                new SettingsModule(settings),
-                new ScriptModule(settings)).createInjector();
+        Settings settings = ImmutableSettings.settingsBuilder().put("script.native.my.type", MyNativeScriptFactory.class.getName()).put("name", "testNativeScript").build();
+        Injector injector = new ModulesBuilder().add(new ThreadPoolModule(new ThreadPool(settings)), new SettingsModule(settings), new ScriptModule(settings)).createInjector();
 
         ScriptService scriptService = injector.getInstance(ScriptService.class);
 
@@ -79,8 +73,8 @@ public class NativeScriptTests extends ElasticsearchTestCase {
         ResourceWatcherService resourceWatcherService = new ResourceWatcherService(settings, null);
         Map<String, NativeScriptFactory> nativeScriptFactoryMap = new HashMap<>();
         nativeScriptFactoryMap.put("my", new MyNativeScriptFactory());
-        Set<ScriptEngineService> scriptEngineServices = ImmutableSet.<ScriptEngineService>of(new NativeScriptEngineService(settings, nativeScriptFactoryMap));
-        ScriptContextRegistry scriptContextRegistry = new ScriptContextRegistry(Lists.<ScriptContext.Plugin>newArrayList());
+        Set<ScriptEngineService> scriptEngineServices = ImmutableSet.<ScriptEngineService> of(new NativeScriptEngineService(settings, nativeScriptFactoryMap));
+        ScriptContextRegistry scriptContextRegistry = new ScriptContextRegistry(Lists.<ScriptContext.Plugin> newArrayList());
         ScriptService scriptService = new ScriptService(settings, environment, scriptEngineServices, resourceWatcherService, new NodeSettingsService(settings), scriptContextRegistry);
 
         for (ScriptContext scriptContext : scriptContextRegistry.scriptContexts()) {
@@ -95,8 +89,8 @@ public class NativeScriptTests extends ElasticsearchTestCase {
         ResourceWatcherService resourceWatcherService = new ResourceWatcherService(settings, null);
         Map<String, NativeScriptFactory> nativeScriptFactoryMap = new HashMap<>();
         nativeScriptFactoryMap.put("my", new MyNativeScriptFactory());
-        Set<ScriptEngineService> scriptEngineServices = ImmutableSet.<ScriptEngineService>of(new NativeScriptEngineService(settings, nativeScriptFactoryMap));
-        ScriptContextRegistry scriptContextRegistry = new ScriptContextRegistry(Lists.<ScriptContext.Plugin>newArrayList());
+        Set<ScriptEngineService> scriptEngineServices = ImmutableSet.<ScriptEngineService> of(new NativeScriptEngineService(settings, nativeScriptFactoryMap));
+        ScriptContextRegistry scriptContextRegistry = new ScriptContextRegistry(Lists.<ScriptContext.Plugin> newArrayList());
         ScriptService scriptService = new ScriptService(settings, environment, scriptEngineServices, resourceWatcherService, new NodeSettingsService(settings), scriptContextRegistry);
 
         for (ScriptContext scriptContext : scriptContextRegistry.scriptContexts()) {

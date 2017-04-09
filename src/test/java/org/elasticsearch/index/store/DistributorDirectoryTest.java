@@ -67,11 +67,11 @@ public class DistributorDirectoryTest extends BaseDirectoryTestCase {
     }
 
     // #7306: don't invoke the distributor when we are opening an already existing file
-    public void testDoNotCallDistributorOnRead() throws Exception {      
+    public void testDoNotCallDistributorOnRead() throws Exception {
         Directory dir = newDirectory();
         dir.createOutput("one.txt", IOContext.DEFAULT).close();
 
-        final Directory[] dirs = new Directory[] {dir};
+        final Directory[] dirs = new Directory[] { dir };
 
         Distributor distrib = new Distributor() {
 
@@ -89,7 +89,7 @@ public class DistributorDirectoryTest extends BaseDirectoryTestCase {
             public synchronized Directory any() {
                 throw new IllegalStateException("any should not be called");
             }
-            };
+        };
 
         DistributorDirectory dd = new DistributorDirectory(distrib);
         assertEquals(0, dd.fileLength("one.txt"));
@@ -107,8 +107,8 @@ public class DistributorDirectoryTest extends BaseDirectoryTestCase {
         final int iters = 1 + random().nextInt(10);
         for (int i = 0; i < iters; i++) {
             Directory[] dirs = new Directory[1 + random().nextInt(5)];
-            for (int j=0; j < dirs.length; j++) {
-                MockDirectoryWrapper directory  = newMockDirectory();
+            for (int j = 0; j < dirs.length; j++) {
+                MockDirectoryWrapper directory = newMockDirectory();
                 directory.setEnableVirusScanner(false);
                 directory.setCheckIndexOnClose(false);
                 dirs[j] = directory;
@@ -116,7 +116,7 @@ public class DistributorDirectoryTest extends BaseDirectoryTestCase {
 
             DistributorDirectory dd = new DistributorDirectory(dirs);
             String file = RandomPicks.randomFrom(random(), Arrays.asList(Store.CHECKSUMS_PREFIX, IndexFileNames.SEGMENTS_GEN));
-            String tmpFileName =  RandomPicks.randomFrom(random(), Arrays.asList("recovery.", "foobar.", "test.")) + Math.max(0, Math.abs(random().nextLong())) + "." + file;
+            String tmpFileName = RandomPicks.randomFrom(random(), Arrays.asList("recovery.", "foobar.", "test.")) + Math.max(0, Math.abs(random().nextLong())) + "." + file;
             try (IndexOutput out = dd.createOutput(tmpFileName, IOContext.DEFAULT)) {
                 out.writeInt(1);
             }
@@ -153,17 +153,16 @@ public class DistributorDirectoryTest extends BaseDirectoryTestCase {
             dd.renameFile(service, tmpFileName, file);
             try {
                 dd.fileLength(tmpFileName);
-                fail("file ["+tmpFileName + "] was renamed but still exists");
+                fail("file [" + tmpFileName + "] was renamed but still exists");
             } catch (FileNotFoundException | NoSuchFileException ex) {
                 // all is well
             }
             try {
                 theDir.fileLength(tmpFileName);
-                fail("file ["+tmpFileName + "] was renamed but still exists");
+                fail("file [" + tmpFileName + "] was renamed but still exists");
             } catch (FileNotFoundException | NoSuchFileException ex) {
                 // all is well
             }
-
 
             assertEquals(theDir.fileLength(file), 4);
 

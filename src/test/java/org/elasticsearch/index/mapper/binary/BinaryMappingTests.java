@@ -35,13 +35,7 @@ public class BinaryMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testDefaultMapping() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("field")
-                .field("type", "binary")
-                .endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", "binary").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper mapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 

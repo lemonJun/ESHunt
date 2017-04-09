@@ -36,11 +36,7 @@ public class GetSettingsBlocksTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testGetSettingsWithBlocks() throws Exception {
-        assertAcked(prepareCreate("test")
-                .setSettings(ImmutableSettings.settingsBuilder()
-                        .put("index.refresh_interval", -1)
-                        .put("index.merge.policy.expunge_deletes_allowed", "30")
-                        .put("index.mapper.dynamic", false)));
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1).put("index.merge.policy.expunge_deletes_allowed", "30").put("index.mapper.dynamic", false)));
 
         for (String block : Arrays.asList(SETTING_BLOCKS_READ, SETTING_BLOCKS_WRITE, SETTING_READ_ONLY)) {
             try {

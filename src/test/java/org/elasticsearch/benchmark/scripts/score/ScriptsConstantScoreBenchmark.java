@@ -58,11 +58,9 @@ public class ScriptsConstantScoreBenchmark extends BasicScriptBenchmark {
 
         Results results = new Results();
 
-        results.init(maxTerms - minTerms, "native const script score (log(2) 10X)",
-                "Results for native const script score with score = log(2) 10X:", "black", "-.");
+        results.init(maxTerms - minTerms, "native const script score (log(2) 10X)", "Results for native const script score with score = log(2) 10X:", "black", "-.");
         // init script searches
-        List<Entry<String, RequestInfo>> searchRequests = initScriptMatchAllSearchRequests(
-                NativeConstantForLoopScoreScript.NATIVE_CONSTANT_FOR_LOOP_SCRIPT_SCORE, true);
+        List<Entry<String, RequestInfo>> searchRequests = initScriptMatchAllSearchRequests(NativeConstantForLoopScoreScript.NATIVE_CONSTANT_FOR_LOOP_SCRIPT_SCORE, true);
         // run actual benchmark
         runBenchmark(client, maxIter, results, searchRequests, minTerms, warmerIter);
         allResults.add(results);
@@ -70,15 +68,13 @@ public class ScriptsConstantScoreBenchmark extends BasicScriptBenchmark {
         // init native script searches
         results = new Results();
         results.init(maxTerms - minTerms, "mvel const (log(2) 10X)", "Results for mvel const score = log(2) 10X:", "red", "-.");
-        searchRequests = initScriptMatchAllSearchRequests("score = 0; for (int i=0; i<10;i++) {score = score + log(2);} return score",
-                false);
+        searchRequests = initScriptMatchAllSearchRequests("score = 0; for (int i=0; i<10;i++) {score = score + log(2);} return score", false);
         // run actual benchmark
         runBenchmark(client, maxIter, results, searchRequests, minTerms, warmerIter);
         allResults.add(results);
 
         results = new Results();
-        results.init(maxTerms - minTerms, "native const script score (2)", "Results for native const script score with score = 2:",
-                "black", ":");
+        results.init(maxTerms - minTerms, "native const script score (2)", "Results for native const script score with score = 2:", "black", ":");
         // init native script searches
         searchRequests = initScriptMatchAllSearchRequests(NativeConstantScoreScript.NATIVE_CONSTANT_SCRIPT_SCORE, true);
         // run actual benchmark

@@ -32,30 +32,22 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class IndexRequestBuilderTests extends ElasticsearchIntegrationTest {
-    
-    
+
     @Test
     public void testSetSource() throws InterruptedException, ExecutionException {
         createIndex("test");
         ensureYellow();
         Map<String, Object> map = new HashMap<>();
         map.put("test_field", "foobar");
-        IndexRequestBuilder[] builders = new IndexRequestBuilder[] {
-                client().prepareIndex("test", "test").setSource((Object)"test_field", (Object)"foobar"),
-                client().prepareIndex("test", "test").setSource("{\"test_field\" : \"foobar\"}"),
-                client().prepareIndex("test", "test").setSource(new BytesArray("{\"test_field\" : \"foobar\"}")),
-                client().prepareIndex("test", "test").setSource(new BytesArray("{\"test_field\" : \"foobar\"}")),
-                client().prepareIndex("test", "test").setSource(new BytesArray("{\"test_field\" : \"foobar\"}").toBytes()),
-                client().prepareIndex("test", "test").setSource(map)
-        };
+        IndexRequestBuilder[] builders = new IndexRequestBuilder[] { client().prepareIndex("test", "test").setSource((Object) "test_field", (Object) "foobar"), client().prepareIndex("test", "test").setSource("{\"test_field\" : \"foobar\"}"), client().prepareIndex("test", "test").setSource(new BytesArray("{\"test_field\" : \"foobar\"}")), client().prepareIndex("test", "test").setSource(new BytesArray("{\"test_field\" : \"foobar\"}")), client().prepareIndex("test", "test").setSource(new BytesArray("{\"test_field\" : \"foobar\"}").toBytes()), client().prepareIndex("test", "test").setSource(map) };
         indexRandom(true, builders);
         SearchResponse searchResponse = client().prepareSearch("test").setQuery(QueryBuilders.termQuery("test_field", "foobar")).get();
         ElasticsearchAssertions.assertHitCount(searchResponse, builders.length);
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testOddNumberOfSourceObjetc() {
-        client().prepareIndex("test", "test").setSource((Object)"test_field", (Object)"foobar", new Object());
+        client().prepareIndex("test", "test").setSource((Object) "test_field", (Object) "foobar", new Object());
     }
 
 }

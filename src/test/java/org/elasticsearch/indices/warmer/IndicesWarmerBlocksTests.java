@@ -19,7 +19,6 @@
 
 package org.elasticsearch.indices.warmer;
 
-
 import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
 import com.google.common.collect.ImmutableList;
 import org.elasticsearch.action.admin.indices.warmer.get.GetWarmersResponse;
@@ -48,8 +47,7 @@ public class IndicesWarmerBlocksTests extends ElasticsearchIntegrationTest {
         // Index reads are blocked, the warmer can't be registered
         try {
             enableIndexBlock("test-blocks", SETTING_BLOCKS_READ);
-            assertBlocked(client().admin().indices().preparePutWarmer("warmer_blocked")
-                    .setSearchRequest(client().prepareSearch("test-*").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())), INDEX_READ_BLOCK);
+            assertBlocked(client().admin().indices().preparePutWarmer("warmer_blocked").setSearchRequest(client().prepareSearch("test-*").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())), INDEX_READ_BLOCK);
         } finally {
             disableIndexBlock("test-blocks", SETTING_BLOCKS_READ);
         }
@@ -57,8 +55,7 @@ public class IndicesWarmerBlocksTests extends ElasticsearchIntegrationTest {
         // Index writes are blocked, the warmer can be registered
         try {
             enableIndexBlock("test-blocks", SETTING_BLOCKS_WRITE);
-            assertAcked(client().admin().indices().preparePutWarmer("warmer_acked")
-                    .setSearchRequest(client().prepareSearch("test-blocks").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())));
+            assertAcked(client().admin().indices().preparePutWarmer("warmer_acked").setSearchRequest(client().prepareSearch("test-blocks").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())));
         } finally {
             disableIndexBlock("test-blocks", SETTING_BLOCKS_WRITE);
         }
@@ -66,8 +63,7 @@ public class IndicesWarmerBlocksTests extends ElasticsearchIntegrationTest {
         // Index metadata changes are blocked, the warmer can't be registered
         try {
             enableIndexBlock("test-blocks", SETTING_BLOCKS_METADATA);
-            assertBlocked(client().admin().indices().preparePutWarmer("warmer_blocked")
-                    .setSearchRequest(client().prepareSearch("test-*").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())), INDEX_METADATA_BLOCK);
+            assertBlocked(client().admin().indices().preparePutWarmer("warmer_blocked").setSearchRequest(client().prepareSearch("test-*").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())), INDEX_METADATA_BLOCK);
         } finally {
             disableIndexBlock("test-blocks", SETTING_BLOCKS_METADATA);
         }
@@ -75,8 +71,7 @@ public class IndicesWarmerBlocksTests extends ElasticsearchIntegrationTest {
         // Index metadata changes are blocked, the warmer can't be registered
         try {
             enableIndexBlock("test-blocks", SETTING_READ_ONLY);
-            assertBlocked(client().admin().indices().preparePutWarmer("warmer_blocked")
-                    .setSearchRequest(client().prepareSearch("test-*").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())), INDEX_READ_ONLY_BLOCK);
+            assertBlocked(client().admin().indices().preparePutWarmer("warmer_blocked").setSearchRequest(client().prepareSearch("test-*").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())), INDEX_READ_ONLY_BLOCK);
         } finally {
             disableIndexBlock("test-blocks", SETTING_READ_ONLY);
         }
@@ -84,8 +79,7 @@ public class IndicesWarmerBlocksTests extends ElasticsearchIntegrationTest {
         // Adding a new warmer is not possible when the cluster is read-only
         try {
             setClusterReadOnly(true);
-            assertBlocked(client().admin().indices().preparePutWarmer("warmer_blocked")
-                    .setSearchRequest(client().prepareSearch("test-blocks").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())), CLUSTER_READ_ONLY_BLOCK);
+            assertBlocked(client().admin().indices().preparePutWarmer("warmer_blocked").setSearchRequest(client().prepareSearch("test-blocks").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())), CLUSTER_READ_ONLY_BLOCK);
         } finally {
             setClusterReadOnly(false);
         }
@@ -96,8 +90,7 @@ public class IndicesWarmerBlocksTests extends ElasticsearchIntegrationTest {
         createIndex("test-blocks");
         ensureGreen("test-blocks");
 
-        assertAcked(client().admin().indices().preparePutWarmer("warmer_block")
-                .setSearchRequest(client().prepareSearch("test-blocks").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())));
+        assertAcked(client().admin().indices().preparePutWarmer("warmer_block").setSearchRequest(client().prepareSearch("test-blocks").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())));
 
         // Request is not blocked
         for (String blockSetting : Arrays.asList(SETTING_BLOCKS_READ, SETTING_BLOCKS_WRITE, SETTING_READ_ONLY)) {
@@ -132,8 +125,7 @@ public class IndicesWarmerBlocksTests extends ElasticsearchIntegrationTest {
         // Request is not blocked
         for (String blockSetting : Arrays.asList(SETTING_BLOCKS_READ, SETTING_BLOCKS_WRITE)) {
             try {
-                assertAcked(client().admin().indices().preparePutWarmer("warmer_block")
-                        .setSearchRequest(client().prepareSearch("test-blocks").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())));
+                assertAcked(client().admin().indices().preparePutWarmer("warmer_block").setSearchRequest(client().prepareSearch("test-blocks").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())));
 
                 enableIndexBlock("test-blocks", blockSetting);
                 assertAcked(client().admin().indices().prepareDeleteWarmer().setIndices("test-blocks").setNames("warmer_block"));
@@ -145,8 +137,7 @@ public class IndicesWarmerBlocksTests extends ElasticsearchIntegrationTest {
         // Request is blocked
         for (String blockSetting : Arrays.asList(SETTING_READ_ONLY, SETTING_BLOCKS_METADATA)) {
             try {
-                assertAcked(client().admin().indices().preparePutWarmer("warmer_block")
-                        .setSearchRequest(client().prepareSearch("test-blocks").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())));
+                assertAcked(client().admin().indices().preparePutWarmer("warmer_block").setSearchRequest(client().prepareSearch("test-blocks").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())));
 
                 enableIndexBlock("test-blocks", blockSetting);
                 assertBlocked(client().admin().indices().prepareDeleteWarmer().setIndices("test-blocks").setNames("warmer_block"));

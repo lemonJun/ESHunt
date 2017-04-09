@@ -46,11 +46,7 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 public class PercolatorStressBenchmark {
 
     public static void main(String[] args) throws Exception {
-        Settings settings = settingsBuilder()
-                .put("gateway.type", "none")
-                .put(SETTING_NUMBER_OF_SHARDS, 4)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put("gateway.type", "none").put(SETTING_NUMBER_OF_SHARDS, 4).put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
         Node[] nodes = new Node[1];
         for (int i = 0; i < nodes.length; i++) {
@@ -61,9 +57,7 @@ public class PercolatorStressBenchmark {
         Client client = clientNode.client();
 
         client.admin().indices().create(createIndexRequest("test")).actionGet();
-        ClusterHealthResponse healthResponse = client.admin().cluster().prepareHealth("test")
-                .setWaitForGreenStatus()
-                .execute().actionGet();
+        ClusterHealthResponse healthResponse = client.admin().cluster().prepareHealth("test").setWaitForGreenStatus().execute().actionGet();
         if (healthResponse.isTimedOut()) {
             System.err.println("Quiting, because cluster health requested timed out...");
             return;
@@ -82,20 +76,12 @@ public class PercolatorStressBenchmark {
         // register queries
         int i = 0;
         for (; i < TERM_QUERIES; i++) {
-            client.prepareIndex("test", PercolatorService.TYPE_NAME, Integer.toString(i))
-                    .setSource(jsonBuilder().startObject()
-                            .field("query", termQuery("name", "value"))
-                            .endObject())
-                    .execute().actionGet();
+            client.prepareIndex("test", PercolatorService.TYPE_NAME, Integer.toString(i)).setSource(jsonBuilder().startObject().field("query", termQuery("name", "value")).endObject()).execute().actionGet();
         }
 
         int[] numbers = new int[RANGE_QUERIES];
         for (; i < QUERIES; i++) {
-            client.prepareIndex("test", PercolatorService.TYPE_NAME, Integer.toString(i))
-                    .setSource(jsonBuilder().startObject()
-                            .field("query", rangeQuery("numeric1").from(i).to(i))
-                            .endObject())
-                    .execute().actionGet();
+            client.prepareIndex("test", PercolatorService.TYPE_NAME, Integer.toString(i)).setSource(jsonBuilder().startObject().field("query", rangeQuery("numeric1").from(i).to(i)).endObject()).execute().actionGet();
             numbers[i - TERM_QUERIES] = i;
         }
 
@@ -112,10 +98,7 @@ public class PercolatorStressBenchmark {
                 source = source(Integer.toString(i), number);
                 expectedMatches = 1;
             }
-            PercolateResponse percolate = client.preparePercolate()
-                    .setIndices("test").setDocumentType("type1")
-                    .setSource(source)
-                    .execute().actionGet();
+            PercolateResponse percolate = client.preparePercolate().setIndices("test").setDocumentType("type1").setSource(source).execute().actionGet();
             if (percolate.getMatches().length != expectedMatches) {
                 System.err.println("No matching number of queries");
             }
@@ -134,25 +117,10 @@ public class PercolatorStressBenchmark {
     }
 
     private static XContentBuilder source(String id, String nameValue) throws IOException {
-        return jsonBuilder().startObject().startObject("doc")
-                .field("id", id)
-                .field("name", nameValue)
-                .endObject().endObject();
+        return jsonBuilder().startObject().startObject("doc").field("id", id).field("name", nameValue).endObject().endObject();
     }
 
     private static XContentBuilder source(String id, int number) throws IOException {
-        return jsonBuilder().startObject().startObject("doc")
-                .field("id", id)
-                .field("numeric1", number)
-                .field("numeric2", number)
-                .field("numeric3", number)
-                .field("numeric4", number)
-                .field("numeric5", number)
-                .field("numeric6", number)
-                .field("numeric7", number)
-                .field("numeric8", number)
-                .field("numeric9", number)
-                .field("numeric10", number)
-                .endObject().endObject();
+        return jsonBuilder().startObject().startObject("doc").field("id", id).field("numeric1", number).field("numeric2", number).field("numeric3", number).field("numeric4", number).field("numeric5", number).field("numeric6", number).field("numeric7", number).field("numeric8", number).field("numeric9", number).field("numeric10", number).endObject().endObject();
     }
 }

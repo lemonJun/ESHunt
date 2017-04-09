@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.elasticsearch.script;
 
 import org.elasticsearch.ExceptionsHelper;
@@ -58,15 +57,11 @@ public class IndexedScriptTests extends ElasticsearchIntegrationTest {
     }
 
     @Test
-    public void testFieldIndexedScript()  throws ExecutionException, InterruptedException {
+    public void testFieldIndexedScript() throws ExecutionException, InterruptedException {
         List<IndexRequestBuilder> builders = new ArrayList<>();
-        builders.add(client().prepareIndex(ScriptService.SCRIPT_INDEX, "groovy", "script1").setSource("{" +
-                "\"script\":\"2\""+
-        "}").setTimeout(TimeValue.timeValueSeconds(randomIntBetween(2,10))));
+        builders.add(client().prepareIndex(ScriptService.SCRIPT_INDEX, "groovy", "script1").setSource("{" + "\"script\":\"2\"" + "}").setTimeout(TimeValue.timeValueSeconds(randomIntBetween(2, 10))));
 
-        builders.add(client().prepareIndex(ScriptService.SCRIPT_INDEX, "groovy", "script2").setSource("{" +
-                "\"script\":\"factor*2\""+
-                "}"));
+        builders.add(client().prepareIndex(ScriptService.SCRIPT_INDEX, "groovy", "script2").setSource("{" + "\"script\":\"factor*2\"" + "}"));
 
         indexRandom(true, builders);
 
@@ -84,8 +79,8 @@ public class IndexedScriptTests extends ElasticsearchIntegrationTest {
         assertHitCount(searchResponse, 5);
         assertTrue(searchResponse.getHits().hits().length == 1);
         SearchHit sh = searchResponse.getHits().getAt(0);
-        assertThat((Integer)sh.field("test1").getValue(), equalTo(2));
-        assertThat((Integer)sh.field("test2").getValue(), equalTo(6));
+        assertThat((Integer) sh.field("test1").getValue(), equalTo(2));
+        assertThat((Integer) sh.field("test2").getValue(), equalTo(6));
     }
 
     @Test
@@ -99,7 +94,7 @@ public class IndexedScriptTests extends ElasticsearchIntegrationTest {
         try {
             client().prepareUpdate("test", "scriptTest", "1").setScript("script1", ScriptService.ScriptType.INDEXED).setScriptLang(GroovyScriptEngineService.NAME).get();
             fail("update script should have been rejected");
-        } catch(Exception e) {
+        } catch (Exception e) {
             assertThat(e.getMessage(), containsString("failed to execute script"));
             assertThat(ExceptionsHelper.detailedMessage(e), containsString("scripts of type [indexed], operation [update] and lang [groovy] are disabled"));
         }
@@ -132,7 +127,7 @@ public class IndexedScriptTests extends ElasticsearchIntegrationTest {
         try {
             client().prepareUpdate("test", "scriptTest", "1").setScript("script1", ScriptService.ScriptType.INDEXED).setScriptLang(ExpressionScriptEngineService.NAME).get();
             fail("update script should have been rejected");
-        } catch(Exception e) {
+        } catch (Exception e) {
             assertThat(e.getMessage(), containsString("failed to execute script"));
             assertThat(ExceptionsHelper.detailedMessage(e), containsString("scripts of type [indexed], operation [update] and lang [expression] are disabled"));
         }
@@ -140,13 +135,13 @@ public class IndexedScriptTests extends ElasticsearchIntegrationTest {
             String query = "{ \"script_fields\" : { \"test1\" : { \"script_id\" : \"script1\", \"lang\":\"expression\" }}}";
             client().prepareSearch().setSource(query).setIndices("test").setTypes("scriptTest").get();
             fail("search script should have been rejected");
-        } catch(Exception e) {
+        } catch (Exception e) {
             assertThat(e.getMessage(), containsString("scripts of type [indexed], operation [search] and lang [expression] are disabled"));
         }
         try {
             String source = "{\"aggs\": {\"test\": { \"terms\" : { \"script_id\":\"script1\", \"script_lang\":\"expression\" } } } }";
             client().prepareSearch("test").setSource(source).get();
-        } catch(Exception e) {
+        } catch (Exception e) {
             assertThat(e.getMessage(), containsString("scripts of type [indexed], operation [aggs] and lang [expression] are disabled"));
         }
     }
@@ -161,17 +156,14 @@ public class IndexedScriptTests extends ElasticsearchIntegrationTest {
 
         int iterations = randomIntBetween(2, 11);
         for (int i = 1; i < iterations; i++) {
-            PutIndexedScriptResponse response = 
-                    client().preparePutIndexedScript(GroovyScriptEngineService.NAME, "script1", "{\"script\":\"" + i + "\"}").get();
+            PutIndexedScriptResponse response = client().preparePutIndexedScript(GroovyScriptEngineService.NAME, "script1", "{\"script\":\"" + i + "\"}").get();
             assertEquals(i, response.getVersion());
-            
-            String query = "{"
-                    + " \"query\" : { \"match_all\": {}}, "
-                    + " \"script_fields\" : { \"test_field\" : { \"script_id\" : \"script1\", \"lang\":\"groovy\" } } }";    
+
+            String query = "{" + " \"query\" : { \"match_all\": {}}, " + " \"script_fields\" : { \"test_field\" : { \"script_id\" : \"script1\", \"lang\":\"groovy\" } } }";
             SearchResponse searchResponse = client().prepareSearch().setSource(query).setIndices("test_index").setTypes("test_type").get();
             assertHitCount(searchResponse, 1);
             SearchHit sh = searchResponse.getHits().getAt(0);
-            assertThat((Integer)sh.field("test_field").getValue(), equalTo(i));
+            assertThat((Integer) sh.field("test_field").getValue(), equalTo(i));
         }
     }
 

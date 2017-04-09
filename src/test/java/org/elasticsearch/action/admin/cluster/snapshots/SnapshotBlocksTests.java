@@ -67,21 +67,15 @@ public class SnapshotBlocksTests extends ElasticsearchIntegrationTest {
             client().prepareIndex(OTHER_INDEX_NAME, "type").setSource("test", "init").execute().actionGet();
         }
 
-
         logger.info("--> register a repository");
-        assertAcked(client().admin().cluster().preparePutRepository(REPOSITORY_NAME)
-                .setType("fs")
-                .setSettings(ImmutableSettings.settingsBuilder().put("location", newTempDir())));
+        assertAcked(client().admin().cluster().preparePutRepository(REPOSITORY_NAME).setType("fs").setSettings(ImmutableSettings.settingsBuilder().put("location", newTempDir())));
 
         logger.info("--> verify the repository");
         VerifyRepositoryResponse verifyResponse = client().admin().cluster().prepareVerifyRepository(REPOSITORY_NAME).get();
         assertThat(verifyResponse.getNodes().length, equalTo(cluster().numDataAndMasterNodes()));
 
         logger.info("--> create a snapshot");
-        CreateSnapshotResponse snapshotResponse = client().admin().cluster().prepareCreateSnapshot(REPOSITORY_NAME, SNAPSHOT_NAME)
-                                                                            .setIncludeGlobalState(true)
-                                                                            .setWaitForCompletion(true)
-                                                                            .execute().actionGet();
+        CreateSnapshotResponse snapshotResponse = client().admin().cluster().prepareCreateSnapshot(REPOSITORY_NAME, SNAPSHOT_NAME).setIncludeGlobalState(true).setWaitForCompletion(true).execute().actionGet();
         assertThat(snapshotResponse.status(), equalTo(RestStatus.OK));
         ensureSearchable();
     }
@@ -97,9 +91,7 @@ public class SnapshotBlocksTests extends ElasticsearchIntegrationTest {
         }
 
         logger.info("-->  creating a snapshot is allowed when the cluster is not read only");
-        CreateSnapshotResponse response = client().admin().cluster().prepareCreateSnapshot(REPOSITORY_NAME, "snapshot-1")
-                .setWaitForCompletion(true)
-                .execute().actionGet();
+        CreateSnapshotResponse response = client().admin().cluster().prepareCreateSnapshot(REPOSITORY_NAME, "snapshot-1").setWaitForCompletion(true).execute().actionGet();
         assertThat(response.status(), equalTo(RestStatus.OK));
     }
 
@@ -153,9 +145,7 @@ public class SnapshotBlocksTests extends ElasticsearchIntegrationTest {
         }
 
         logger.info("-->  creating a snapshot is allowed when the cluster is not read only");
-        RestoreSnapshotResponse response = client().admin().cluster().prepareRestoreSnapshot(REPOSITORY_NAME, SNAPSHOT_NAME)
-                .setWaitForCompletion(true)
-                .execute().actionGet();
+        RestoreSnapshotResponse response = client().admin().cluster().prepareRestoreSnapshot(REPOSITORY_NAME, SNAPSHOT_NAME).setWaitForCompletion(true).execute().actionGet();
         assertThat(response.status(), equalTo(RestStatus.OK));
         assertTrue(client().admin().indices().prepareExists(INDEX_NAME).get().isExists());
         assertTrue(client().admin().indices().prepareExists(OTHER_INDEX_NAME).get().isExists());
@@ -179,9 +169,7 @@ public class SnapshotBlocksTests extends ElasticsearchIntegrationTest {
         // This test checks that the Snapshot Status operation is never blocked, even if the cluster is read only.
         try {
             setClusterReadOnly(true);
-            SnapshotsStatusResponse response = client().admin().cluster().prepareSnapshotStatus(REPOSITORY_NAME)
-                    .setSnapshots(SNAPSHOT_NAME)
-                    .execute().actionGet();
+            SnapshotsStatusResponse response = client().admin().cluster().prepareSnapshotStatus(REPOSITORY_NAME).setSnapshots(SNAPSHOT_NAME).execute().actionGet();
             assertThat(response.getSnapshots(), hasSize(1));
             assertThat(response.getSnapshots().get(0).getState().completed(), equalTo(true));
         } finally {

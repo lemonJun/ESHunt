@@ -30,7 +30,7 @@ public class RestApiParser {
     public RestApi parse(XContentParser parser) throws IOException {
 
         try {
-            while ( parser.nextToken() != XContentParser.Token.FIELD_NAME ) {
+            while (parser.nextToken() != XContentParser.Token.FIELD_NAME) {
                 //move to first field name
             }
 
@@ -50,7 +50,7 @@ public class RestApiParser {
                     if ("url".equals(parser.currentName())) {
                         String currentFieldName = "url";
                         int innerLevel = -1;
-                        while(parser.nextToken() != XContentParser.Token.END_OBJECT || innerLevel >= 0) {
+                        while (parser.nextToken() != XContentParser.Token.END_OBJECT || innerLevel >= 0) {
                             if (parser.currentToken() == XContentParser.Token.FIELD_NAME) {
                                 currentFieldName = parser.currentName();
                             }
@@ -96,7 +96,7 @@ public class RestApiParser {
                         parser.nextToken();
                         if (parser.currentToken() != XContentParser.Token.VALUE_NULL) {
                             boolean requiredFound = false;
-                            while(parser.nextToken() != XContentParser.Token.END_OBJECT) {
+                            while (parser.nextToken() != XContentParser.Token.END_OBJECT) {
                                 if (parser.currentToken() == XContentParser.Token.FIELD_NAME) {
                                     if ("required".equals(parser.currentName())) {
                                         requiredFound = true;
@@ -126,7 +126,7 @@ public class RestApiParser {
             }
 
             parser.nextToken();
-            assert parser.currentToken() == XContentParser.Token.END_OBJECT : "Expected [END_OBJECT] but was ["  + parser.currentToken() +"]";
+            assert parser.currentToken() == XContentParser.Token.END_OBJECT : "Expected [END_OBJECT] but was [" + parser.currentToken() + "]";
             parser.nextToken();
 
             return restApi;

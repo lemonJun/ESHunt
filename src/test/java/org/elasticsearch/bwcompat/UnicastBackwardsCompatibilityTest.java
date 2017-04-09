@@ -33,30 +33,21 @@ import java.util.concurrent.ExecutionException;
 
 import static org.hamcrest.Matchers.equalTo;
 
-
 @ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.TEST, minNumDataNodes = 0, maxNumDataNodes = 0)
 public class UnicastBackwardsCompatibilityTest extends ElasticsearchBackwardsCompatIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("transport.tcp.port", "9380-9390")
-                .put("discovery.zen.ping.multicast.enabled", false)
+        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal)).put("transport.tcp.port", "9380-9390").put("discovery.zen.ping.multicast.enabled", false)
                         // we need to accommodate for the client node
-                .put("discovery.zen.ping.unicast.hosts", "localhost:9381,localhost:9382,localhost:9383")
-                .build();
+                        .put("discovery.zen.ping.unicast.hosts", "localhost:9381,localhost:9382,localhost:9383").build();
     }
 
     @Override
     protected Settings externalNodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.settingsBuilder()
-                .put(super.externalNodeSettings(nodeOrdinal))
-                .put("transport.tcp.port", "9380-9390")
-                .put("discovery.zen.ping.multicast.enabled", false)
+        return ImmutableSettings.settingsBuilder().put(super.externalNodeSettings(nodeOrdinal)).put("transport.tcp.port", "9380-9390").put("discovery.zen.ping.multicast.enabled", false)
                         // we need to accommodate for the client node
-                .put("discovery.zen.ping.unicast.hosts", "localhost:9381,localhost:9382,localhost:9383")
-                .build();
+                        .put("discovery.zen.ping.unicast.hosts", "localhost:9381,localhost:9382,localhost:9383").build();
     }
 
     protected int minExternalNodes() {
@@ -67,15 +58,11 @@ public class UnicastBackwardsCompatibilityTest extends ElasticsearchBackwardsCom
         return 0;
     }
 
-
     @Test
     public void testUnicastDiscovery() throws ExecutionException, InterruptedException, IOException {
         // the backwards comparability infra will *sometimes* start one client node which will grab the first port
         // to make sure this always happens and gives us port stability start the node here.
-        backwardsCluster().internalCluster().startNode(ImmutableSettings.builder()
-                .put("node.client", "true")
-                .put(DiscoveryService.SETTING_INITIAL_STATE_TIMEOUT, "10ms")); // don't wait there is nothing out there.
-
+        backwardsCluster().internalCluster().startNode(ImmutableSettings.builder().put("node.client", "true").put(DiscoveryService.SETTING_INITIAL_STATE_TIMEOUT, "10ms")); // don't wait there is nothing out there.
 
         // start cluster in a random order, making sure there is at least 1 external node
         final int numOfDataNodes = randomIntBetween(1, 4);
@@ -104,7 +91,6 @@ public class UnicastBackwardsCompatibilityTest extends ElasticsearchBackwardsCom
         logger.info("waiting for nodes to join");
         ClusterHealthResponse healthResponse = client().admin().cluster().prepareHealth().setWaitForNodes("" + totalNumberOfNodes).get();
         assertThat(healthResponse.getNumberOfDataNodes(), equalTo(numOfDataNodes));
-
 
         boolean upgraded;
         do {

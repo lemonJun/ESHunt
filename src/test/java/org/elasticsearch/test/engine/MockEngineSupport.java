@@ -88,10 +88,8 @@ public final class MockEngineSupport {
     }
 
     enum CloseAction {
-        FLUSH_AND_CLOSE,
-        CLOSE;
+        FLUSH_AND_CLOSE, CLOSE;
     }
-
 
     /**
      * Returns the CloseAction to execute on the actual engine. Note this method changes the state on
@@ -112,8 +110,7 @@ public final class MockEngineSupport {
             if (logger.isTraceEnabled()) {
                 // log debug if we have pending searchers
                 for (Map.Entry<AssertingSearcher, RuntimeException> entry : INFLIGHT_ENGINE_SEARCHERS.entrySet()) {
-                    logger.trace("Unreleased Searchers instance for shard [{}]",
-                            entry.getValue(), entry.getKey().shardId());
+                    logger.trace("Unreleased Searchers instance for shard [{}]", entry.getValue(), entry.getKey().shardId());
                 }
             }
         }

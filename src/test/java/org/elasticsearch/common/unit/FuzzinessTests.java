@@ -34,7 +34,7 @@ public class FuzzinessTests extends ElasticsearchTestCase {
 
     @Test
     public void testNumerics() {
-        String[] options = new String[]{"1.0", "1", "1.000000"};
+        String[] options = new String[] { "1.0", "1", "1.000000" };
         assertThat(Fuzziness.build(randomFrom(options)).asByte(), equalTo((byte) 1));
         assertThat(Fuzziness.build(randomFrom(options)).asInt(), equalTo(1));
         assertThat(Fuzziness.build(randomFrom(options)).asFloat(), equalTo(1f));
@@ -50,9 +50,7 @@ public class FuzzinessTests extends ElasticsearchTestCase {
             {
                 XContent xcontent = XContentType.JSON.xContent();
                 float floatValue = randomFloat();
-                String json = jsonBuilder().startObject()
-                        .field(Fuzziness.X_FIELD_NAME, floatValue)
-                        .endObject().string();
+                String json = jsonBuilder().startObject().field(Fuzziness.X_FIELD_NAME, floatValue).endObject().string();
                 XContentParser parser = xcontent.createParser(json);
                 assertThat(parser.nextToken(), equalTo(XContentParser.Token.START_OBJECT));
                 assertThat(parser.nextToken(), equalTo(XContentParser.Token.FIELD_NAME));
@@ -70,9 +68,7 @@ public class FuzzinessTests extends ElasticsearchTestCase {
                 if (randomBoolean()) {
                     value = new Float(floatRep += intValue);
                 }
-                String json = jsonBuilder().startObject()
-                        .field(Fuzziness.X_FIELD_NAME, randomBoolean() ? value.toString() : value)
-                        .endObject().string();
+                String json = jsonBuilder().startObject().field(Fuzziness.X_FIELD_NAME, randomBoolean() ? value.toString() : value).endObject().string();
                 XContentParser parser = xcontent.createParser(json);
                 assertThat(parser.nextToken(), equalTo(XContentParser.Token.START_OBJECT));
                 assertThat(parser.nextToken(), equalTo(XContentParser.Token.FIELD_NAME));
@@ -104,9 +100,7 @@ public class FuzzinessTests extends ElasticsearchTestCase {
             }
             {
                 XContent xcontent = XContentType.JSON.xContent();
-                String json = jsonBuilder().startObject()
-                        .field(Fuzziness.X_FIELD_NAME, randomBoolean() ? "AUTO" : "auto")
-                        .endObject().string();
+                String json = jsonBuilder().startObject().field(Fuzziness.X_FIELD_NAME, randomBoolean() ? "AUTO" : "auto").endObject().string();
                 if (randomBoolean()) {
                     json = Fuzziness.AUTO.toXContent(jsonBuilder().startObject(), null).endObject().string();
                 }
@@ -120,12 +114,10 @@ public class FuzzinessTests extends ElasticsearchTestCase {
             }
 
             {
-                String[] values = new String[]{"d", "H", "ms", "s", "S", "w"};
+                String[] values = new String[] { "d", "H", "ms", "s", "S", "w" };
                 String actual = randomIntBetween(1, 3) + randomFrom(values);
                 XContent xcontent = XContentType.JSON.xContent();
-                String json = jsonBuilder().startObject()
-                        .field(Fuzziness.X_FIELD_NAME, actual)
-                        .endObject().string();
+                String json = jsonBuilder().startObject().field(Fuzziness.X_FIELD_NAME, actual).endObject().string();
                 XContentParser parser = xcontent.createParser(json);
                 assertThat(parser.nextToken(), equalTo(XContentParser.Token.START_OBJECT));
                 assertThat(parser.nextToken(), equalTo(XContentParser.Token.FIELD_NAME));

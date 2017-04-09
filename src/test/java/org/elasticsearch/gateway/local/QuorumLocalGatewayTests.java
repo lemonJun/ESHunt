@@ -45,7 +45,7 @@ import static org.hamcrest.Matchers.*;
 /**
  *
  */
-@ClusterScope(numDataNodes =0, scope= Scope.TEST)
+@ClusterScope(numDataNodes = 0, scope = Scope.TEST)
 public class QuorumLocalGatewayTests extends ElasticsearchIntegrationTest {
 
     @Override
@@ -74,15 +74,15 @@ public class QuorumLocalGatewayTests extends ElasticsearchIntegrationTest {
         for (int i = 0; i < 10; i++) {
             assertHitCount(client().prepareCount().setQuery(matchAllQuery()).get(), 2l);
         }
-        
-        final String nodeToRemove = nodes[between(0,2)];
+
+        final String nodeToRemove = nodes[between(0, 2)];
         logger.info("--> restarting 1 nodes -- kill 2");
         internalCluster().fullRestart(new RestartCallback() {
             @Override
             public Settings onNodeStopped(String nodeName) throws Exception {
                 return settingsBuilder().put("gateway.type", "local").build();
             }
-            
+
             @Override
             public boolean doRestart(String nodeName) {
                 return nodeToRemove.equals(nodeName);
@@ -93,13 +93,14 @@ public class QuorumLocalGatewayTests extends ElasticsearchIntegrationTest {
         }
         ClusterHealthResponse clusterHealth = client().admin().cluster().health(clusterHealthRequest().waitForNodes("1")).actionGet();
         assertThat(clusterHealth.isTimedOut(), equalTo(false));
-        assertThat(clusterHealth.getStatus(), equalTo(ClusterHealthStatus.RED));  // nothing allocated yet
+        assertThat(clusterHealth.getStatus(), equalTo(ClusterHealthStatus.RED)); // nothing allocated yet
         assertThat(awaitBusy(new Predicate<Object>() {
             @Override
             public boolean apply(Object input) {
                 ClusterStateResponse clusterStateResponse = internalCluster().smartClient().admin().cluster().prepareState().setMasterNodeTimeout("500ms").get();
                 return clusterStateResponse.getState() != null && clusterStateResponse.getState().routingTable().index("test") != null;
-            }}), equalTo(true)); // wait until we get a cluster state - could be null if we quick enough.
+            }
+        }), equalTo(true)); // wait until we get a cluster state - could be null if we quick enough.
         final ClusterStateResponse clusterStateResponse = internalCluster().smartClient().admin().cluster().prepareState().setMasterNodeTimeout("500ms").get();
         assertThat(clusterStateResponse.getState(), notNullValue());
         assertThat(clusterStateResponse.getState().routingTable().index("test"), notNullValue());
@@ -169,7 +170,7 @@ public class QuorumLocalGatewayTests extends ElasticsearchIntegrationTest {
                     }
                 }
             }
-            
+
         });
         logger.info("--> all nodes are started back, verifying we got the latest version");
         logger.info("--> running cluster_health (wait for the shards to startup)");

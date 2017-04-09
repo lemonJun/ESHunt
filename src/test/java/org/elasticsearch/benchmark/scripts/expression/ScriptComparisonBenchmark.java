@@ -43,35 +43,10 @@ public class ScriptComparisonBenchmark {
     static final String clusterName = ScriptComparisonBenchmark.class.getSimpleName();
     static final String indexName = "test";
 
-    static String[] langs = {
-        "expression",
-        "native",
-        "groovy"
-    };
+    static String[] langs = { "expression", "native", "groovy" };
     static String[][] scripts = {
-        // the first value is the "reference" version (pure math)
-        {
-            "x",
-            "doc['x'].value",
-            NativeScript1.NATIVE_SCRIPT_1,
-            "doc['x'].value"
-        }, {
-            "x + y",
-            "doc['x'].value + doc['y'].value",
-            NativeScript2.NATIVE_SCRIPT_2,
-            "doc['x'].value + doc['y'].value",
-        }, {
-            "1.2 * x / y",
-            "1.2 * doc['x'].value / doc['y'].value",
-            NativeScript3.NATIVE_SCRIPT_3,
-            "1.2 * doc['x'].value / doc['y'].value",
-        }, {
-            "sqrt(abs(z)) + ln(abs(x * y))",
-            "sqrt(abs(doc['z'].value)) + ln(abs(doc['x'].value * doc['y'].value))",
-            NativeScript4.NATIVE_SCRIPT_4,
-            "sqrt(abs(doc['z'].value)) + log(abs(doc['x'].value * doc['y'].value))"
-        }
-    };
+            // the first value is the "reference" version (pure math)
+            { "x", "doc['x'].value", NativeScript1.NATIVE_SCRIPT_1, "doc['x'].value" }, { "x + y", "doc['x'].value + doc['y'].value", NativeScript2.NATIVE_SCRIPT_2, "doc['x'].value + doc['y'].value", }, { "1.2 * x / y", "1.2 * doc['x'].value / doc['y'].value", NativeScript3.NATIVE_SCRIPT_3, "1.2 * doc['x'].value / doc['y'].value", }, { "sqrt(abs(z)) + ln(abs(x * y))", "sqrt(abs(doc['z'].value)) + ln(abs(doc['x'].value * doc['y'].value))", NativeScript4.NATIVE_SCRIPT_4, "sqrt(abs(doc['z'].value)) + log(abs(doc['x'].value * doc['y'].value))" } };
 
     public static void main(String[] args) throws Exception {
         int numDocs = 1000000;
@@ -100,9 +75,7 @@ public class ScriptComparisonBenchmark {
 
     static Client setupIndex() throws Exception {
         // create cluster
-        Settings settings = settingsBuilder().put("plugin.types", NativeScriptPlugin.class.getName())
-                                             .put("name", "node1")
-                                             .build();
+        Settings settings = settingsBuilder().put("plugin.types", NativeScriptPlugin.class.getName()).put("name", "node1").build();
         Node node1 = nodeBuilder().clusterName(clusterName).settings(settings).node();
         Client client = node1.client();
         client.admin().cluster().prepareHealth(indexName).setWaitForGreenStatus().setTimeout("10s").execute().actionGet();
@@ -127,8 +100,7 @@ public class ScriptComparisonBenchmark {
         BulkRequestBuilder bulkRequest = client.prepareBulk();
         Random r = new Random(1);
         for (int i = 0; i < numDocs; i++) {
-            bulkRequest.add(client.prepareIndex("test", "doc", Integer.toString(i))
-                            .setSource("x", r.nextInt(), "y", r.nextDouble(), "z", r.nextDouble()));
+            bulkRequest.add(client.prepareIndex("test", "doc", Integer.toString(i)).setSource("x", r.nextInt(), "y", r.nextDouble(), "z", r.nextDouble()));
 
             if (i % 1000 == 0) {
                 bulkRequest.execute().actionGet();
@@ -143,9 +115,7 @@ public class ScriptComparisonBenchmark {
 
     static TimeValue timeQueries(Client client, String lang, String script, int numQueries) {
         ScriptSortBuilder sort = SortBuilders.scriptSort(script, "number").lang(lang);
-        SearchRequestBuilder req = client.prepareSearch(indexName)
-                .setQuery(QueryBuilders.matchAllQuery())
-                .addSort(sort);
+        SearchRequestBuilder req = client.prepareSearch(indexName).setQuery(QueryBuilders.matchAllQuery()).addSort(sort);
 
         StopWatch timer = new StopWatch();
         timer.start();

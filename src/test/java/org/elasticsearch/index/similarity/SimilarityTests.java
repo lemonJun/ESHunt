@@ -45,16 +45,9 @@ public class SimilarityTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testResolveSimilaritiesFromMapping_default() throws IOException {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("field1").field("type", "string").field("similarity", "my_similarity").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "string").field("similarity", "my_similarity").endObject().endObject().endObject().endObject().string();
 
-        Settings indexSettings = ImmutableSettings.settingsBuilder()
-                .put("index.similarity.my_similarity.type", "default")
-                .put("index.similarity.my_similarity.discount_overlaps", false)
-                .build();
+        Settings indexSettings = ImmutableSettings.settingsBuilder().put("index.similarity.my_similarity.type", "default").put("index.similarity.my_similarity.discount_overlaps", false).build();
         SimilarityService similarityService = createIndex("foo", indexSettings).similarityService();
         DocumentMapper documentMapper = similarityService.mapperService().documentMapperParser().parse(mapping);
         assertThat(documentMapper.mappers().name("field1").mapper().similarity(), instanceOf(DefaultSimilarityProvider.class));
@@ -65,18 +58,9 @@ public class SimilarityTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testResolveSimilaritiesFromMapping_bm25() throws IOException {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("field1").field("type", "string").field("similarity", "my_similarity").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "string").field("similarity", "my_similarity").endObject().endObject().endObject().endObject().string();
 
-        Settings indexSettings = ImmutableSettings.settingsBuilder()
-                .put("index.similarity.my_similarity.type", "BM25")
-                .put("index.similarity.my_similarity.k1", 2.0f)
-                .put("index.similarity.my_similarity.b", 1.5f)
-                .put("index.similarity.my_similarity.discount_overlaps", false)
-                .build();
+        Settings indexSettings = ImmutableSettings.settingsBuilder().put("index.similarity.my_similarity.type", "BM25").put("index.similarity.my_similarity.k1", 2.0f).put("index.similarity.my_similarity.b", 1.5f).put("index.similarity.my_similarity.discount_overlaps", false).build();
         SimilarityService similarityService = createIndex("foo", indexSettings).similarityService();
         DocumentMapper documentMapper = similarityService.mapperService().documentMapperParser().parse(mapping);
         assertThat(documentMapper.mappers().name("field1").mapper().similarity(), instanceOf(BM25SimilarityProvider.class));
@@ -89,19 +73,9 @@ public class SimilarityTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testResolveSimilaritiesFromMapping_DFR() throws IOException {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("field1").field("type", "string").field("similarity", "my_similarity").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "string").field("similarity", "my_similarity").endObject().endObject().endObject().endObject().string();
 
-        Settings indexSettings = ImmutableSettings.settingsBuilder()
-                .put("index.similarity.my_similarity.type", "DFR")
-                .put("index.similarity.my_similarity.basic_model", "g")
-                .put("index.similarity.my_similarity.after_effect", "l")
-                .put("index.similarity.my_similarity.normalization", "h2")
-                .put("index.similarity.my_similarity.normalization.h2.c", 3f)
-                .build();
+        Settings indexSettings = ImmutableSettings.settingsBuilder().put("index.similarity.my_similarity.type", "DFR").put("index.similarity.my_similarity.basic_model", "g").put("index.similarity.my_similarity.after_effect", "l").put("index.similarity.my_similarity.normalization", "h2").put("index.similarity.my_similarity.normalization.h2.c", 3f).build();
         SimilarityService similarityService = createIndex("foo", indexSettings).similarityService();
         DocumentMapper documentMapper = similarityService.mapperService().documentMapperParser().parse(mapping);
         assertThat(documentMapper.mappers().name("field1").mapper().similarity(), instanceOf(DFRSimilarityProvider.class));
@@ -115,19 +89,9 @@ public class SimilarityTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testResolveSimilaritiesFromMapping_IB() throws IOException {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("field1").field("type", "string").field("similarity", "my_similarity").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "string").field("similarity", "my_similarity").endObject().endObject().endObject().endObject().string();
 
-        Settings indexSettings = ImmutableSettings.settingsBuilder()
-                .put("index.similarity.my_similarity.type", "IB")
-                .put("index.similarity.my_similarity.distribution", "spl")
-                .put("index.similarity.my_similarity.lambda", "ttf")
-                .put("index.similarity.my_similarity.normalization", "h2")
-                .put("index.similarity.my_similarity.normalization.h2.c", 3f)
-                .build();
+        Settings indexSettings = ImmutableSettings.settingsBuilder().put("index.similarity.my_similarity.type", "IB").put("index.similarity.my_similarity.distribution", "spl").put("index.similarity.my_similarity.lambda", "ttf").put("index.similarity.my_similarity.normalization", "h2").put("index.similarity.my_similarity.normalization.h2.c", 3f).build();
         SimilarityService similarityService = createIndex("foo", indexSettings).similarityService();
         DocumentMapper documentMapper = similarityService.mapperService().documentMapperParser().parse(mapping);
         assertThat(documentMapper.mappers().name("field1").mapper().similarity(), instanceOf(IBSimilarityProvider.class));
@@ -141,16 +105,9 @@ public class SimilarityTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testResolveSimilaritiesFromMapping_LMDirichlet() throws IOException {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("field1").field("type", "string").field("similarity", "my_similarity").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "string").field("similarity", "my_similarity").endObject().endObject().endObject().endObject().string();
 
-        Settings indexSettings = ImmutableSettings.settingsBuilder()
-                .put("index.similarity.my_similarity.type", "LMDirichlet")
-                .put("index.similarity.my_similarity.mu", 3000f)
-                .build();
+        Settings indexSettings = ImmutableSettings.settingsBuilder().put("index.similarity.my_similarity.type", "LMDirichlet").put("index.similarity.my_similarity.mu", 3000f).build();
         SimilarityService similarityService = createIndex("foo", indexSettings).similarityService();
         DocumentMapper documentMapper = similarityService.mapperService().documentMapperParser().parse(mapping);
         assertThat(documentMapper.mappers().name("field1").mapper().similarity(), instanceOf(LMDirichletSimilarityProvider.class));
@@ -161,16 +118,9 @@ public class SimilarityTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testResolveSimilaritiesFromMapping_LMJelinekMercer() throws IOException {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("field1").field("type", "string").field("similarity", "my_similarity").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "string").field("similarity", "my_similarity").endObject().endObject().endObject().endObject().string();
 
-        Settings indexSettings = ImmutableSettings.settingsBuilder()
-                .put("index.similarity.my_similarity.type", "LMJelinekMercer")
-                .put("index.similarity.my_similarity.lambda", 0.7f)
-                .build();
+        Settings indexSettings = ImmutableSettings.settingsBuilder().put("index.similarity.my_similarity.type", "LMJelinekMercer").put("index.similarity.my_similarity.lambda", 0.7f).build();
         SimilarityService similarityService = createIndex("foo", indexSettings).similarityService();
         DocumentMapper documentMapper = similarityService.mapperService().documentMapperParser().parse(mapping);
         assertThat(documentMapper.mappers().name("field1").mapper().similarity(), instanceOf(LMJelinekMercerSimilarityProvider.class));

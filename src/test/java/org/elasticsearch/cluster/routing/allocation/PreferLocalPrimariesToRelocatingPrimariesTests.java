@@ -43,29 +43,18 @@ public class PreferLocalPrimariesToRelocatingPrimariesTests extends Elasticsearc
         int totalNumberOfShards = numberOfShards * 2;
 
         logger.info("create an allocation with [{}] initial primary recoveries and [{}] concurrent recoveries", primaryRecoveries, concurrentRecoveries);
-        AllocationService strategy = createAllocationService(settingsBuilder()
-                .put("cluster.routing.allocation.node_concurrent_recoveries", concurrentRecoveries)
-                .put("cluster.routing.allocation.node_initial_primaries_recoveries", primaryRecoveries)
-                .build());
+        AllocationService strategy = createAllocationService(settingsBuilder().put("cluster.routing.allocation.node_concurrent_recoveries", concurrentRecoveries).put("cluster.routing.allocation.node_initial_primaries_recoveries", primaryRecoveries).build());
 
         logger.info("create 2 indices with [{}] no replicas, and wait till all are allocated", numberOfShards);
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test1").numberOfShards(numberOfShards).numberOfReplicas(0))
-                .put(IndexMetaData.builder("test2").numberOfShards(numberOfShards).numberOfReplicas(0))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test1").numberOfShards(numberOfShards).numberOfReplicas(0)).put(IndexMetaData.builder("test2").numberOfShards(numberOfShards).numberOfReplicas(0)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test1"))
-                .addAsNew(metaData.index("test2"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test1")).addAsNew(metaData.index("test2")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
         logger.info("adding two nodes and performing rerouting till all are allocated");
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(newNode("node1", ImmutableMap.of("tag1", "value1")))
-                .put(newNode("node2", ImmutableMap.of("tag1", "value2")))).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1", ImmutableMap.of("tag1", "value1"))).put(newNode("node2", ImmutableMap.of("tag1", "value2")))).build();
 
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
@@ -77,18 +66,7 @@ public class PreferLocalPrimariesToRelocatingPrimariesTests extends Elasticsearc
 
         logger.info("remove one of the nodes and apply filter to move everything from another node");
 
-        metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test1").settings(settingsBuilder()
-                        .put("index.number_of_shards", numberOfShards)
-                        .put("index.number_of_replicas", 0)
-                        .put("index.routing.allocation.exclude.tag1", "value2")
-                        .build()))
-                .put(IndexMetaData.builder("test2").settings(settingsBuilder()
-                        .put("index.number_of_shards", numberOfShards)
-                        .put("index.number_of_replicas", 0)
-                        .put("index.routing.allocation.exclude.tag1", "value2")
-                        .build()))
-                .build();
+        metaData = MetaData.builder().put(IndexMetaData.builder("test1").settings(settingsBuilder().put("index.number_of_shards", numberOfShards).put("index.number_of_replicas", 0).put("index.routing.allocation.exclude.tag1", "value2").build())).put(IndexMetaData.builder("test2").settings(settingsBuilder().put("index.number_of_shards", numberOfShards).put("index.number_of_replicas", 0).put("index.routing.allocation.exclude.tag1", "value2").build())).build();
         clusterState = ClusterState.builder(clusterState).metaData(metaData).nodes(DiscoveryNodes.builder(clusterState.nodes()).remove("node1")).build();
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
@@ -99,8 +77,7 @@ public class PreferLocalPrimariesToRelocatingPrimariesTests extends Elasticsearc
         assertThat(clusterState.routingTable().shardsWithState(UNASSIGNED).size(), equalTo(numberOfShards));
 
         logger.info("start node back up");
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder(clusterState.nodes())
-                .put(newNode("node1", ImmutableMap.of("tag1", "value1")))).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder(clusterState.nodes()).put(newNode("node1", ImmutableMap.of("tag1", "value1")))).build();
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
 

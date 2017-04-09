@@ -56,9 +56,7 @@ public class ParentChildFilteredTermsEnumTests extends ElasticsearchLuceneTestCa
         }
 
         IndexReader indexReader = DirectoryReader.open(indexWriter.w, false);
-        TermsEnum[] compoundTermsEnums = new TermsEnum[]{
-                new ParentChildIntersectTermsEnum(SlowCompositeReaderWrapper.wrap(indexReader), "field1", "field2")
-        };
+        TermsEnum[] compoundTermsEnums = new TermsEnum[] { new ParentChildIntersectTermsEnum(SlowCompositeReaderWrapper.wrap(indexReader), "field1", "field2") };
         for (TermsEnum termsEnum : compoundTermsEnums) {
             int expected = 0;
             for (BytesRef term = termsEnum.next(); term != null; term = termsEnum.next()) {
@@ -95,9 +93,7 @@ public class ParentChildFilteredTermsEnumTests extends ElasticsearchLuceneTestCa
         }
 
         IndexReader indexReader = DirectoryReader.open(indexWriter.w, false);
-        TermsEnum[] compoundTermsEnums = new TermsEnum[]{
-                new ParentChildIntersectTermsEnum(SlowCompositeReaderWrapper.wrap(indexReader), "field1", "field2")
-        };
+        TermsEnum[] compoundTermsEnums = new TermsEnum[] { new ParentChildIntersectTermsEnum(SlowCompositeReaderWrapper.wrap(indexReader), "field1", "field2") };
         for (TermsEnum termsEnum : compoundTermsEnums) {
             int expected = 0;
             for (BytesRef term = termsEnum.next(); term != null; term = termsEnum.next()) {
@@ -112,7 +108,6 @@ public class ParentChildFilteredTermsEnumTests extends ElasticsearchLuceneTestCa
                 assertThat(numDocs, equalTo(11));
             }
         }
-
 
         indexWriter.close();
         indexReader.close();

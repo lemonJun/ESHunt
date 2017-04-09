@@ -35,9 +35,7 @@ public class YamlSettingsLoaderTests extends ElasticsearchTestCase {
 
     @Test
     public void testSimpleYamlSettings() throws Exception {
-        Settings settings = settingsBuilder()
-                .loadFromClasspath("org/elasticsearch/common/settings/loader/test-settings.yml")
-                .build();
+        Settings settings = settingsBuilder().loadFromClasspath("org/elasticsearch/common/settings/loader/test-settings.yml").build();
 
         assertThat(settings.get("test1.value1"), equalTo("value1"));
         assertThat(settings.get("test1.test2.value2"), equalTo("value2"));
@@ -53,15 +51,11 @@ public class YamlSettingsLoaderTests extends ElasticsearchTestCase {
 
     @Test(expected = SettingsException.class)
     public void testIndentation() {
-        settingsBuilder()
-                .loadFromClasspath("org/elasticsearch/common/settings/loader/indentation-settings.yml")
-                .build();
+        settingsBuilder().loadFromClasspath("org/elasticsearch/common/settings/loader/indentation-settings.yml").build();
     }
 
     @Test(expected = SettingsException.class)
     public void testIndentationWithExplicitDocumentStart() {
-        settingsBuilder()
-                .loadFromClasspath("org/elasticsearch/common/settings/loader/indentation-with-explicit-document-start-settings.yml")
-                .build();
+        settingsBuilder().loadFromClasspath("org/elasticsearch/common/settings/loader/indentation-with-explicit-document-start-settings.yml").build();
     }
 }

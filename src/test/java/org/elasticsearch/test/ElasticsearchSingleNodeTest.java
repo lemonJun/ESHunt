@@ -85,10 +85,8 @@ public abstract class ElasticsearchSingleNodeTest extends ElasticsearchTestCase 
             reset(false);
         }
         MetaData metaData = client().admin().cluster().prepareState().get().getState().getMetaData();
-        assertThat("test leaves persistent cluster metadata behind: " + metaData.persistentSettings().getAsMap(),
-                metaData.persistentSettings().getAsMap().size(), equalTo(0));
-        assertThat("test leaves transient cluster metadata behind: " + metaData.transientSettings().getAsMap(),
-            metaData.transientSettings().getAsMap().size(), equalTo(0));
+        assertThat("test leaves persistent cluster metadata behind: " + metaData.persistentSettings().getAsMap(), metaData.persistentSettings().getAsMap().size(), equalTo(0));
+        assertThat("test leaves transient cluster metadata behind: " + metaData.transientSettings().getAsMap(), metaData.transientSettings().getAsMap().size(), equalTo(0));
     }
 
     @After
@@ -127,18 +125,8 @@ public abstract class ElasticsearchSingleNodeTest extends ElasticsearchTestCase 
     }
 
     private static Node newNode(boolean localGateway) {
-        Node build = NodeBuilder.nodeBuilder().local(true).data(true).settings(ImmutableSettings.builder()
-                .put(ClusterName.SETTING, clusterName())
-            .put("node.name", nodeName())
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)
-                .put("script.inline", "on")
-                .put("script.indexed", "on")
-                .put(EsExecutors.PROCESSORS, 1) // limit the number of threads created
-            .put("http.enabled", false)
-                .put("index.store.type", localGateway ? "fs" : "ram")
-            .put("gateway.type", localGateway ? "local" : "none")
-            .put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true) // make sure we get what we set :)
+        Node build = NodeBuilder.nodeBuilder().local(true).data(true).settings(ImmutableSettings.builder().put(ClusterName.SETTING, clusterName()).put("node.name", nodeName()).put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0).put("script.inline", "on").put("script.indexed", "on").put(EsExecutors.PROCESSORS, 1) // limit the number of threads created
+                        .put("http.enabled", false).put("index.store.type", localGateway ? "fs" : "ram").put("gateway.type", localGateway ? "local" : "none").put(InternalSettingsPreparer.IGNORE_SYSTEM_PROPERTIES_SETTING, true) // make sure we get what we set :)
         ).build();
         build.start();
         assertThat(DiscoveryNode.localNode(build.settings()), is(true));
@@ -220,8 +208,7 @@ public abstract class ElasticsearchSingleNodeTest extends ElasticsearchTestCase 
         assertAcked(createIndexRequestBuilder.get());
         // Wait for the index to be allocated so that cluster state updates don't override
         // changes that would have been done locally
-        ClusterHealthResponse health = client().admin().cluster()
-                .health(Requests.clusterHealthRequest(index).waitForYellowStatus().waitForEvents(Priority.LANGUID).waitForRelocatingShards(0)).actionGet();
+        ClusterHealthResponse health = client().admin().cluster().health(Requests.clusterHealthRequest(index).waitForYellowStatus().waitForEvents(Priority.LANGUID).waitForRelocatingShards(0)).actionGet();
         assertThat(health.getStatus(), lessThanOrEqualTo(ClusterHealthStatus.YELLOW));
         assertThat("Cluster must be a single node cluster", health.getNumberOfDataNodes(), equalTo(1));
         IndicesService instanceFromNode = getInstanceFromNode(IndicesService.class);
@@ -252,7 +239,6 @@ public abstract class ElasticsearchSingleNodeTest extends ElasticsearchTestCase 
         return ensureGreen(TimeValue.timeValueSeconds(30), indices);
     }
 
-
     /**
      * Ensures the cluster has a green state via the cluster health API. This method will also wait for relocations.
      * It is useful to ensure that all action on the cluster have finished and all shards that were currently relocating
@@ -261,8 +247,7 @@ public abstract class ElasticsearchSingleNodeTest extends ElasticsearchTestCase 
      * @param timeout time out value to set on {@link org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest}
      */
     public ClusterHealthStatus ensureGreen(TimeValue timeout, String... indices) {
-        ClusterHealthResponse actionGet = client().admin().cluster()
-                .health(Requests.clusterHealthRequest(indices).timeout(timeout).waitForGreenStatus().waitForEvents(Priority.LANGUID).waitForRelocatingShards(0)).actionGet();
+        ClusterHealthResponse actionGet = client().admin().cluster().health(Requests.clusterHealthRequest(indices).timeout(timeout).waitForGreenStatus().waitForEvents(Priority.LANGUID).waitForRelocatingShards(0)).actionGet();
         if (actionGet.isTimedOut()) {
             logger.info("ensureGreen timed out, cluster state:\n{}\n{}", client().admin().cluster().prepareState().get().getState().prettyPrint(), client().admin().cluster().preparePendingClusterTasks().get().prettyPrint());
             assertThat("timed out waiting for green state", actionGet.isTimedOut(), equalTo(false));
@@ -271,6 +256,5 @@ public abstract class ElasticsearchSingleNodeTest extends ElasticsearchTestCase 
         logger.debug("indices {} are green", indices.length == 0 ? "[_all]" : indices);
         return actionGet.getStatus();
     }
-
 
 }

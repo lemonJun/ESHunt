@@ -58,12 +58,7 @@ public class NettyTransportMultiPortTests extends ElasticsearchTestCase {
     public void testThatNettyCanBindToMultiplePorts() throws Exception {
         int[] ports = getRandomPorts(3);
 
-        Settings settings = settingsBuilder()
-                .put("network.host", "127.0.0.1")
-                .put("transport.tcp.port", ports[0])
-                .put("transport.profiles.default.port", ports[1])
-                .put("transport.profiles.client1.port", ports[2])
-                .build();
+        Settings settings = settingsBuilder().put("network.host", "127.0.0.1").put("transport.tcp.port", ports[0]).put("transport.profiles.default.port", ports[1]).put("transport.profiles.client1.port", ports[2]).build();
 
         ThreadPool threadPool = new ThreadPool("tst");
         try (NettyTransport ignored = startNettyTransport(settings, threadPool)) {
@@ -79,11 +74,7 @@ public class NettyTransportMultiPortTests extends ElasticsearchTestCase {
     public void testThatDefaultProfileInheritsFromStandardSettings() throws Exception {
         int[] ports = getRandomPorts(2);
 
-        Settings settings = settingsBuilder()
-                .put("network.host", "127.0.0.1")
-                .put("transport.tcp.port", ports[0])
-                .put("transport.profiles.client1.port", ports[1])
-                .build();
+        Settings settings = settingsBuilder().put("network.host", "127.0.0.1").put("transport.tcp.port", ports[0]).put("transport.profiles.client1.port", ports[1]).build();
 
         ThreadPool threadPool = new ThreadPool("tst");
         try (NettyTransport ignored = startNettyTransport(settings, threadPool)) {
@@ -98,11 +89,7 @@ public class NettyTransportMultiPortTests extends ElasticsearchTestCase {
     public void testThatProfileWithoutPortSettingsFails() throws Exception {
         int[] ports = getRandomPorts(1);
 
-        Settings settings = settingsBuilder()
-                .put("network.host", "127.0.0.1")
-                .put("transport.tcp.port", ports[0])
-                .put("transport.profiles.client1.whatever", "foo")
-                .build();
+        Settings settings = settingsBuilder().put("network.host", "127.0.0.1").put("transport.tcp.port", ports[0]).put("transport.profiles.client1.whatever", "foo").build();
 
         ThreadPool threadPool = new ThreadPool("tst");
         try (NettyTransport ignored = startNettyTransport(settings, threadPool)) {
@@ -116,12 +103,7 @@ public class NettyTransportMultiPortTests extends ElasticsearchTestCase {
     public void testThatDefaultProfilePortOverridesGeneralConfiguration() throws Exception {
         int[] ports = getRandomPorts(3);
 
-        Settings settings = settingsBuilder()
-                .put("network.host", "127.0.0.1")
-                .put("transport.tcp.port", ports[0])
-                .put("transport.netty.port", ports[1])
-                .put("transport.profiles.default.port", ports[2])
-                .build();
+        Settings settings = settingsBuilder().put("network.host", "127.0.0.1").put("transport.tcp.port", ports[0]).put("transport.netty.port", ports[1]).put("transport.profiles.default.port", ports[2]).build();
 
         ThreadPool threadPool = new ThreadPool("tst");
         try (NettyTransport ignored = startNettyTransport(settings, threadPool)) {
@@ -138,13 +120,7 @@ public class NettyTransportMultiPortTests extends ElasticsearchTestCase {
         int[] ports = getRandomPorts(2);
         InetAddress firstNonLoopbackAddress = NetworkUtils.getFirstNonLoopbackAddress(NetworkUtils.StackType.IPv4);
         assumeTrue("No IP-v4 non-loopback address available - are you on a plane?", firstNonLoopbackAddress != null);
-        Settings settings = settingsBuilder()
-                .put("network.host", "127.0.0.1")
-                .put("transport.tcp.port", ports[0])
-                .put("transport.profiles.default.bind_host", "127.0.0.1")
-                .put("transport.profiles.client1.bind_host", firstNonLoopbackAddress.getHostAddress())
-                .put("transport.profiles.client1.port", ports[1])
-                .build();
+        Settings settings = settingsBuilder().put("network.host", "127.0.0.1").put("transport.tcp.port", ports[0]).put("transport.profiles.default.bind_host", "127.0.0.1").put("transport.profiles.client1.bind_host", firstNonLoopbackAddress.getHostAddress()).put("transport.profiles.client1.port", ports[1]).build();
 
         ThreadPool threadPool = new ThreadPool("tst");
         try (NettyTransport ignored = startNettyTransport(settings, threadPool)) {

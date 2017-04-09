@@ -67,23 +67,18 @@ public class PercolatorFacetsAndAggregationsTests extends ElasticsearchIntegrati
             String value = values[i % numUniqueQueries];
             expectedCount[i % numUniqueQueries]++;
             QueryBuilder queryBuilder = matchQuery("field1", value);
-            client().prepareIndex("test", PercolatorService.TYPE_NAME, Integer.toString(i))
-                    .setSource(jsonBuilder().startObject().field("query", queryBuilder).field("field2", "b").endObject())
-                    .execute().actionGet();
+            client().prepareIndex("test", PercolatorService.TYPE_NAME, Integer.toString(i)).setSource(jsonBuilder().startObject().field("query", queryBuilder).field("field2", "b").endObject()).execute().actionGet();
         }
         client().admin().indices().prepareRefresh("test").execute().actionGet();
 
         for (int i = 0; i < numQueries; i++) {
             String value = values[i % numUniqueQueries];
-            PercolateRequestBuilder percolateRequestBuilder = client().preparePercolate()
-                    .setIndices("test").setDocumentType("type")
-                    .setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field1", value).endObject()));
+            PercolateRequestBuilder percolateRequestBuilder = client().preparePercolate().setIndices("test").setDocumentType("type").setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field1", value).endObject()));
 
             boolean useAggs = randomBoolean();
             if (useAggs) {
                 SubAggCollectionMode aggCollectionMode = randomFrom(SubAggCollectionMode.values());
-                percolateRequestBuilder.addAggregation(AggregationBuilders.terms("a").field("field2")
-                        .collectMode(aggCollectionMode ));
+                percolateRequestBuilder.addAggregation(AggregationBuilders.terms("a").field("field2").collectMode(aggCollectionMode));
             } else {
                 percolateRequestBuilder.addFacet(FacetBuilders.termsFacet("a").field("field2"));
 
@@ -131,10 +126,7 @@ public class PercolatorFacetsAndAggregationsTests extends ElasticsearchIntegrati
     public void testSignificantAggs() throws Exception {
         client().admin().indices().prepareCreate("test").execute().actionGet();
         ensureGreen();
-        PercolateRequestBuilder percolateRequestBuilder = client().preparePercolate()
-                .setIndices("test").setDocumentType("type")
-                .setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field1", "value").endObject()))
-                .addAggregation(AggregationBuilders.significantTerms("a").field("field2"));
+        PercolateRequestBuilder percolateRequestBuilder = client().preparePercolate().setIndices("test").setDocumentType("type").setPercolateDoc(docBuilder().setDoc(jsonBuilder().startObject().field("field1", "value").endObject())).addAggregation(AggregationBuilders.significantTerms("a").field("field2"));
         PercolateResponse response = percolateRequestBuilder.get();
         assertNoFailures(response);
     }

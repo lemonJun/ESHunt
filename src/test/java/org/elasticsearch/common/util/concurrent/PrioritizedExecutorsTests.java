@@ -210,22 +210,21 @@ public class PrioritizedExecutorsTests extends ElasticsearchTestCase {
         final AtomicBoolean executeCalled = new AtomicBoolean();
         final CountDownLatch timedOut = new CountDownLatch(1);
         executor.execute(new Runnable() {
-                             @Override
-                             public void run() {
-                                 executeCalled.set(true);
-                             }
+            @Override
+            public void run() {
+                executeCalled.set(true);
+            }
 
-                             @Override
-                             public String toString() {
-                                 return "the waiting";
-                             }
-                         }, timer, TimeValue.timeValueMillis(100) /* enough timeout to catch them in the pending list... */, new Runnable() {
-                    @Override
-                    public void run() {
-                        timedOut.countDown();
-                    }
-                }
-        );
+            @Override
+            public String toString() {
+                return "the waiting";
+            }
+        }, timer, TimeValue.timeValueMillis(100) /* enough timeout to catch them in the pending list... */, new Runnable() {
+            @Override
+            public void run() {
+                timedOut.countDown();
+            }
+        });
 
         pending = executor.getPending();
         assertThat(pending.length, equalTo(2));
@@ -249,18 +248,17 @@ public class PrioritizedExecutorsTests extends ElasticsearchTestCase {
         PrioritizedEsThreadPoolExecutor executor = EsExecutors.newSinglePrioritizing(EsExecutors.daemonThreadFactory(getTestName()));
         final CountDownLatch invoked = new CountDownLatch(1);
         executor.execute(new Runnable() {
-                             @Override
-                             public void run() {
-                                 invoked.countDown();
-                             }
-                         }, timer, TimeValue.timeValueHours(1), new Runnable() {
-                    @Override
-                    public void run() {
-                        // We should never get here
-                        timeoutCalled.set(true);
-                    }
-                }
-        );
+            @Override
+            public void run() {
+                invoked.countDown();
+            }
+        }, timer, TimeValue.timeValueHours(1), new Runnable() {
+            @Override
+            public void run() {
+                // We should never get here
+                timeoutCalled.set(true);
+            }
+        });
         invoked.await();
 
         // the timeout handler is added post execution (and quickly cancelled). We have allow for this

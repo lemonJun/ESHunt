@@ -69,10 +69,7 @@ public class TestClusterService implements ClusterService {
 
     public TestClusterService(ClusterState state, @Nullable ThreadPool threadPool) {
         if (state.getNodes().size() == 0) {
-            state = ClusterState.builder(state).nodes(
-                    DiscoveryNodes.builder()
-                            .put(new DiscoveryNode("test_id", DummyTransportAddress.INSTANCE, Version.CURRENT))
-                            .localNodeId("test_id")).build();
+            state = ClusterState.builder(state).nodes(DiscoveryNodes.builder().put(new DiscoveryNode("test_id", DummyTransportAddress.INSTANCE, Version.CURRENT)).localNodeId("test_id")).build();
         }
 
         assert state.getNodes().localNode() != null;
@@ -80,7 +77,6 @@ public class TestClusterService implements ClusterService {
         this.threadPool = threadPool;
 
     }
-
 
     /** set the current state and trigger any registered listeners about the change */
     public void setState(ClusterState state) {
@@ -153,7 +149,7 @@ public class TestClusterService implements ClusterService {
     @Override
     public void remove(ClusterStateListener listener) {
         listeners.remove(listener);
-        for (Iterator<NotifyTimeout> it = onGoingTimeouts.iterator(); it.hasNext(); ) {
+        for (Iterator<NotifyTimeout> it = onGoingTimeouts.iterator(); it.hasNext();) {
             NotifyTimeout timeout = it.next();
             if (timeout.listener.equals(listener)) {
                 timeout.cancel();

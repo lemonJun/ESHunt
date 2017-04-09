@@ -81,7 +81,6 @@ public class RollingRestartStressTest {
     private AtomicLong indexCounter = new AtomicLong();
     private AtomicLong idCounter = new AtomicLong();
 
-
     public RollingRestartStressTest numberOfNodes(int numberOfNodes) {
         this.numberOfNodes = numberOfNodes;
         return this;
@@ -146,10 +145,7 @@ public class RollingRestartStressTest {
         }
         client = NodeBuilder.nodeBuilder().settings(settings).client(true).node();
 
-        client.client().admin().indices().prepareCreate("test").setSettings(settingsBuilder()
-                .put("index.number_of_shards", numberOfShards)
-                .put("index.number_of_replicas", numberOfReplicas)
-        ).execute().actionGet();
+        client.client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_shards", numberOfShards).put("index.number_of_replicas", numberOfReplicas)).execute().actionGet();
 
         logger.info("********** [START] INDEXING INITIAL DOCS");
         for (long i = 0; i < initialNumberOfDocs; i++) {
@@ -177,11 +173,7 @@ public class RollingRestartStressTest {
             }
 
             try {
-                ClusterHealthResponse clusterHealth = client.client().admin().cluster().prepareHealth()
-                        .setWaitForGreenStatus()
-                        .setWaitForNodes(Integer.toString(numberOfNodes + 0 /* client node*/))
-                        .setWaitForRelocatingShards(0)
-                        .setTimeout("10m").execute().actionGet();
+                ClusterHealthResponse clusterHealth = client.client().admin().cluster().prepareHealth().setWaitForGreenStatus().setWaitForNodes(Integer.toString(numberOfNodes + 0 /* client node*/)).setWaitForRelocatingShards(0).setTimeout("10m").execute().actionGet();
                 if (clusterHealth.isTimedOut()) {
                     logger.warn("timed out waiting for green status....");
                 }
@@ -194,11 +186,7 @@ public class RollingRestartStressTest {
             Thread.sleep(1000);
 
             try {
-                ClusterHealthResponse clusterHealth = client.client().admin().cluster().prepareHealth()
-                        .setWaitForGreenStatus()
-                        .setWaitForNodes(Integer.toString(numberOfNodes + 1 /* client node*/))
-                        .setWaitForRelocatingShards(0)
-                        .setTimeout("10m").execute().actionGet();
+                ClusterHealthResponse clusterHealth = client.client().admin().cluster().prepareHealth().setWaitForGreenStatus().setWaitForNodes(Integer.toString(numberOfNodes + 1 /* client node*/)).setWaitForRelocatingShards(0).setTimeout("10m").execute().actionGet();
                 if (clusterHealth.isTimedOut()) {
                     logger.warn("timed out waiting for green status....");
                 }
@@ -252,12 +240,7 @@ public class RollingRestartStressTest {
         }
 
         // scan all the docs, verify all have the same version based on the number of replicas
-        SearchResponse searchResponse = client.client().prepareSearch()
-                .setSearchType(SearchType.SCAN)
-                .setQuery(matchAllQuery())
-                .setSize(50)
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .execute().actionGet();
+        SearchResponse searchResponse = client.client().prepareSearch().setSearchType(SearchType.SCAN).setQuery(matchAllQuery()).setSize(50).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
         logger.info("Verifying versions for {} hits...", searchResponse.getHits().totalHits());
 
         while (true) {
@@ -316,8 +299,7 @@ public class RollingRestartStressTest {
 
     private void indexDoc(Random random) throws Exception {
         StringBuilder sb = new StringBuilder();
-        XContentBuilder json = XContentFactory.jsonBuilder().startObject()
-                .field("field", "value" + ThreadLocalRandom.current().nextInt());
+        XContentBuilder json = XContentFactory.jsonBuilder().startObject().field("field", "value" + ThreadLocalRandom.current().nextInt());
 
         int fields = Math.abs(ThreadLocalRandom.current().nextInt()) % numberOfFields;
         for (int i = 0; i < fields; i++) {
@@ -333,34 +315,16 @@ public class RollingRestartStressTest {
         json.endObject();
 
         String id = Long.toString(idCounter.incrementAndGet());
-        client.client().prepareIndex("test", "type1", id)
-                .setCreate(true)
-                .setSource(json)
-                .execute().actionGet();
+        client.client().prepareIndex("test", "type1", id).setCreate(true).setSource(json).execute().actionGet();
         indexCounter.incrementAndGet();
     }
 
     public static void main(String[] args) throws Exception {
         System.setProperty("es.logger.prefix", "");
 
-        Settings settings = settingsBuilder()
-                .put("index.shard.check_on_startup", true)
-                .put("gateway.type", "none")
-                .put("path.data", "data/data1,data/data2")
-                .build();
+        Settings settings = settingsBuilder().put("index.shard.check_on_startup", true).put("gateway.type", "none").put("path.data", "data/data1,data/data2").build();
 
-        RollingRestartStressTest test = new RollingRestartStressTest()
-                .settings(settings)
-                .numberOfNodes(4)
-                .numberOfShards(5)
-                .numberOfReplicas(1)
-                .initialNumberOfDocs(1000)
-                .textTokens(150)
-                .numberOfFields(10)
-                .cleanNodeData(false)
-                .indexers(5)
-                .indexerThrottle(TimeValue.timeValueMillis(50))
-                .period(TimeValue.timeValueMinutes(3));
+        RollingRestartStressTest test = new RollingRestartStressTest().settings(settings).numberOfNodes(4).numberOfShards(5).numberOfReplicas(1).initialNumberOfDocs(1000).textTokens(150).numberOfFields(10).cleanNodeData(false).indexers(5).indexerThrottle(TimeValue.timeValueMillis(50)).period(TimeValue.timeValueMinutes(3));
 
         test.run();
     }

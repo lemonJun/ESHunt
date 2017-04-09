@@ -58,7 +58,7 @@ public class NettyPipeliningDisabledIntegrationTest extends ElasticsearchIntegra
         InetSocketTransportAddress inetSocketTransportAddress = (InetSocketTransportAddress) httpServerTransport.boundAddress().boundAddress();
 
         try (NettyHttpClient nettyHttpClient = new NettyHttpClient()) {
-            Collection<HttpResponse> responses = nettyHttpClient.sendRequests(inetSocketTransportAddress.address(), requests.toArray(new String[]{}));
+            Collection<HttpResponse> responses = nettyHttpClient.sendRequests(inetSocketTransportAddress.address(), requests.toArray(new String[] {}));
             assertThat(responses, hasSize(requests.size()));
 
             List<String> opaqueIds = Lists.newArrayList(returnOpaqueIds(responses));

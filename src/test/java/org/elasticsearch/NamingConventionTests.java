@@ -43,21 +43,21 @@ import java.util.Set;
 public class NamingConventionTests extends ElasticsearchTestCase {
 
     // see https://github.com/elasticsearch/elasticsearch/issues/9945
-    public void testNamingConventions()
-            throws ClassNotFoundException, IOException, URISyntaxException {
+    public void testNamingConventions() throws ClassNotFoundException, IOException, URISyntaxException {
         final Set<Class> notImplementing = new HashSet<>();
         final Set<Class> pureUnitTest = new HashSet<>();
         final Set<Class> missingSuffix = new HashSet<>();
-        String[] packages = {"org.elasticsearch", "org.apache.lucene"};
+        String[] packages = { "org.elasticsearch", "org.apache.lucene" };
         for (final String packageName : packages) {
             final String path = "/" + packageName.replace('.', '/');
             final Path startPath = Paths.get(NamingConventionTests.class.getResource(path).toURI());
             final Set<Path> ignore = Sets.newHashSet(Paths.get("/org/elasticsearch/stresstest"), Paths.get("/org/elasticsearch/benchmark/stress"));
             Files.walkFileTree(startPath, new FileVisitor<Path>() {
                 private Path pkgPrefix = Paths.get(path).getParent();
+
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    Path next =  pkgPrefix.resolve(dir.getFileName());
+                    Path next = pkgPrefix.resolve(dir.getFileName());
                     if (ignore.contains(next)) {
                         return FileVisitResult.SKIP_SUBTREE;
                     }
@@ -133,18 +133,10 @@ public class NamingConventionTests extends ElasticsearchTestCase {
         assertTrue(pureUnitTest.remove(PlainUnit.class));
         assertTrue(pureUnitTest.remove(PlainUnitTheSecond.class));
 
-        String classesToSubclass = Joiner.on(',').join(
-                ElasticsearchTestCase.class.getSimpleName(),
-                ElasticsearchLuceneTestCase.class.getSimpleName(),
-                ElasticsearchTokenStreamTestCase.class.getSimpleName(),
-                LuceneTestCase.class.getSimpleName());
-        assertTrue("Not all subclasses of " + ElasticsearchTestCase.class.getSimpleName() +
-                        " match the naming convention. Concrete classes must end with [Test|Tests]: " + missingSuffix.toString(),
-                missingSuffix.isEmpty());
-        assertTrue("Pure Unit-Test found must subclass one of [" + classesToSubclass +"] " + pureUnitTest.toString(),
-                pureUnitTest.isEmpty());
-        assertTrue("Classes ending with Test|Tests] must subclass [" + classesToSubclass +"] " + notImplementing.toString(),
-                notImplementing.isEmpty());
+        String classesToSubclass = Joiner.on(',').join(ElasticsearchTestCase.class.getSimpleName(), ElasticsearchLuceneTestCase.class.getSimpleName(), ElasticsearchTokenStreamTestCase.class.getSimpleName(), LuceneTestCase.class.getSimpleName());
+        assertTrue("Not all subclasses of " + ElasticsearchTestCase.class.getSimpleName() + " match the naming convention. Concrete classes must end with [Test|Tests]: " + missingSuffix.toString(), missingSuffix.isEmpty());
+        assertTrue("Pure Unit-Test found must subclass one of [" + classesToSubclass + "] " + pureUnitTest.toString(), pureUnitTest.isEmpty());
+        assertTrue("Classes ending with Test|Tests] must subclass [" + classesToSubclass + "] " + notImplementing.toString(), notImplementing.isEmpty());
     }
 
     /*
@@ -152,15 +144,21 @@ public class NamingConventionTests extends ElasticsearchTestCase {
      */
 
     @Ignore
-    public static final class NotImplementingTests {}
+    public static final class NotImplementingTests {
+    }
+
     @Ignore
-    public static final class NotImplementingTest {}
+    public static final class NotImplementingTest {
+    }
 
-    public static final class WrongName extends ElasticsearchTestCase {}
+    public static final class WrongName extends ElasticsearchTestCase {
+    }
 
-    public static final class WrongNameTheSecond extends ElasticsearchLuceneTestCase {}
+    public static final class WrongNameTheSecond extends ElasticsearchLuceneTestCase {
+    }
 
-    public static final class PlainUnit extends TestCase {}
+    public static final class PlainUnit extends TestCase {
+    }
 
     public static final class PlainUnitTheSecond {
         @Test

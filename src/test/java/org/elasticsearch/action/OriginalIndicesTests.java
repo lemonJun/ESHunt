@@ -33,9 +33,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 
 public class OriginalIndicesTests extends ElasticsearchTestCase {
 
-    private static final IndicesOptions[] indicesOptionsValues = new IndicesOptions[]{
-            IndicesOptions.lenientExpandOpen() , IndicesOptions.strictExpand(), IndicesOptions.strictExpandOpen(),
-            IndicesOptions.strictExpandOpenAndForbidClosed(), IndicesOptions.strictSingleIndexNoExpandForbidClosed()};
+    private static final IndicesOptions[] indicesOptionsValues = new IndicesOptions[] { IndicesOptions.lenientExpandOpen(), IndicesOptions.strictExpand(), IndicesOptions.strictExpandOpen(), IndicesOptions.strictExpandOpenAndForbidClosed(), IndicesOptions.strictSingleIndexNoExpandForbidClosed() };
 
     @Test
     public void testOriginalIndicesSerialization() throws IOException {

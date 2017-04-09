@@ -38,13 +38,7 @@ public class ParseDocumentTypeLevelsTests extends ElasticsearchSingleNodeTest {
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(defaultMapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("test1", "value1")
-                .field("test2", "value2")
-                .startObject("inner").field("inner_field", "inner_value").endObject()
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("test1", "value1").field("test2", "value2").startObject("inner").field("inner_field", "inner_value").endObject().endObject().bytes());
 
         assertThat(doc.rootDoc().get("test1"), equalTo("value1"));
         assertThat(doc.rootDoc().get("test2"), equalTo("value2"));
@@ -57,13 +51,7 @@ public class ParseDocumentTypeLevelsTests extends ElasticsearchSingleNodeTest {
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(defaultMapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject().startObject("type")
-                .field("test1", "value1")
-                .field("test2", "value2")
-                .startObject("inner").field("inner_field", "inner_value").endObject()
-                .endObject().endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().startObject("type").field("test1", "value1").field("test2", "value2").startObject("inner").field("inner_field", "inner_value").endObject().endObject().endObject().bytes());
 
         assertThat(doc.rootDoc().get("type.test1"), equalTo("value1"));
         assertThat(doc.rootDoc().get("type.test2"), equalTo("value2"));
@@ -76,14 +64,7 @@ public class ParseDocumentTypeLevelsTests extends ElasticsearchSingleNodeTest {
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(defaultMapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("type", "value_type")
-                .field("test1", "value1")
-                .field("test2", "value2")
-                .startObject("inner").field("inner_field", "inner_value").endObject()
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("type", "value_type").field("test1", "value1").field("test2", "value2").startObject("inner").field("inner_field", "inner_value").endObject().endObject().bytes());
 
         assertThat(doc.rootDoc().get("type"), equalTo("value_type"));
         assertThat(doc.rootDoc().get("test1"), equalTo("value1"));
@@ -97,14 +78,7 @@ public class ParseDocumentTypeLevelsTests extends ElasticsearchSingleNodeTest {
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(defaultMapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject().startObject("type")
-                .field("type", "value_type")
-                .field("test1", "value1")
-                .field("test2", "value2")
-                .startObject("inner").field("inner_field", "inner_value").endObject()
-                .endObject().endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().startObject("type").field("type", "value_type").field("test1", "value1").field("test2", "value2").startObject("inner").field("inner_field", "inner_value").endObject().endObject().endObject().bytes());
 
         assertThat(doc.rootDoc().get("type.type"), equalTo("value_type"));
         assertThat(doc.rootDoc().get("type.test1"), equalTo("value1"));
@@ -118,14 +92,7 @@ public class ParseDocumentTypeLevelsTests extends ElasticsearchSingleNodeTest {
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(defaultMapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .startObject("type").field("type_field", "type_value").endObject()
-                .field("test1", "value1")
-                .field("test2", "value2")
-                .startObject("inner").field("inner_field", "inner_value").endObject()
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().startObject("type").field("type_field", "type_value").endObject().field("test1", "value1").field("test2", "value2").startObject("inner").field("inner_field", "inner_value").endObject().endObject().bytes());
 
         // in this case, we analyze the type object as the actual document, and ignore the other same level fields
         assertThat(doc.rootDoc().get("type.type_field"), equalTo("type_value"));
@@ -139,14 +106,7 @@ public class ParseDocumentTypeLevelsTests extends ElasticsearchSingleNodeTest {
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(defaultMapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject().startObject("type")
-                .startObject("type").field("type_field", "type_value").endObject()
-                .field("test1", "value1")
-                .field("test2", "value2")
-                .startObject("inner").field("inner_field", "inner_value").endObject()
-                .endObject().endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().startObject("type").startObject("type").field("type_field", "type_value").endObject().field("test1", "value1").field("test2", "value2").startObject("inner").field("inner_field", "inner_value").endObject().endObject().endObject().bytes());
 
         assertThat(doc.rootDoc().get("type.type.type_field"), equalTo("type_value"));
         assertThat(doc.rootDoc().get("type.test1"), equalTo("value1"));
@@ -160,14 +120,7 @@ public class ParseDocumentTypeLevelsTests extends ElasticsearchSingleNodeTest {
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(defaultMapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject().startObject("type")
-                .field("test1", "value1")
-                .field("test2", "value2")
-                .field("type", "value_type")
-                .startObject("inner").field("inner_field", "inner_value").endObject()
-                .endObject().endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().startObject("type").field("test1", "value1").field("test2", "value2").field("type", "value_type").startObject("inner").field("inner_field", "inner_value").endObject().endObject().endObject().bytes());
 
         assertThat(doc.rootDoc().get("type.type"), equalTo("value_type"));
         assertThat(doc.rootDoc().get("type.test1"), equalTo("value1"));
@@ -181,14 +134,7 @@ public class ParseDocumentTypeLevelsTests extends ElasticsearchSingleNodeTest {
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(defaultMapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject().startObject("type")
-                .field("test1", "value1")
-                .field("type", "value_type")
-                .field("test2", "value2")
-                .startObject("inner").field("inner_field", "inner_value").endObject()
-                .endObject().endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().startObject("type").field("test1", "value1").field("type", "value_type").field("test2", "value2").startObject("inner").field("inner_field", "inner_value").endObject().endObject().endObject().bytes());
 
         assertThat(doc.rootDoc().get("type.type"), equalTo("value_type"));
         assertThat(doc.rootDoc().get("type.test1"), equalTo("value1"));
@@ -202,14 +148,7 @@ public class ParseDocumentTypeLevelsTests extends ElasticsearchSingleNodeTest {
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(defaultMapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("test1", "value1")
-                .startObject("type").field("type_field", "type_value").endObject()
-                .field("test2", "value2")
-                .startObject("inner").field("inner_field", "inner_value").endObject()
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("test1", "value1").startObject("type").field("type_field", "type_value").endObject().field("test2", "value2").startObject("inner").field("inner_field", "inner_value").endObject().endObject().bytes());
 
         // when the type is not the first one, we don't confuse it...
         assertThat(doc.rootDoc().get("type.type_field"), equalTo("type_value"));
@@ -224,14 +163,7 @@ public class ParseDocumentTypeLevelsTests extends ElasticsearchSingleNodeTest {
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(defaultMapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject().startObject("type")
-                .field("test1", "value1")
-                .startObject("type").field("type_field", "type_value").endObject()
-                .field("test2", "value2")
-                .startObject("inner").field("inner_field", "inner_value").endObject()
-                .endObject().endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().startObject("type").field("test1", "value1").startObject("type").field("type_field", "type_value").endObject().field("test2", "value2").startObject("inner").field("inner_field", "inner_value").endObject().endObject().endObject().bytes());
 
         assertThat(doc.rootDoc().get("type.type.type_field"), equalTo("type_value"));
         assertThat(doc.rootDoc().get("type.test1"), equalTo("value1"));

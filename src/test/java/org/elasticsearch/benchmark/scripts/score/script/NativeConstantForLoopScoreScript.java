@@ -29,7 +29,7 @@ import java.util.Map;
 public class NativeConstantForLoopScoreScript extends AbstractSearchScript {
 
     public static final String NATIVE_CONSTANT_FOR_LOOP_SCRIPT_SCORE = "native_constant_for_loop_script_score";
-    
+
     public static class Factory implements NativeScriptFactory {
 
         @Override

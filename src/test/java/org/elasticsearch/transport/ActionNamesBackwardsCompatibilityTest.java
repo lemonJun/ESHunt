@@ -113,7 +113,8 @@ public class ActionNamesBackwardsCompatibilityTest extends ElasticsearchBackward
         }
         assertThat(selectedNode, notNullValue());
 
-        final TransportRequest transportRequest = new TransportRequest() {};
+        final TransportRequest transportRequest = new TransportRequest() {
+        };
 
         for (String action : requestHandlers.keySet()) {
 
@@ -122,7 +123,8 @@ public class ActionNamesBackwardsCompatibilityTest extends ElasticsearchBackward
             transportService.sendRequest(selectedNode, action, transportRequest, new TransportResponseHandler<TransportResponse>() {
                 @Override
                 public TransportResponse newInstance() {
-                    return new TransportResponse() {};
+                    return new TransportResponse() {
+                    };
                 }
 
                 @Override
@@ -149,7 +151,7 @@ public class ActionNamesBackwardsCompatibilityTest extends ElasticsearchBackward
                     assertThat(cause, instanceOf(ActionNotFoundTransportException.class));
                 } else {
                     assertThat(cause, not(instanceOf(ActionNotFoundTransportException.class)));
-                    if (! (cause instanceof IndexOutOfBoundsException)) {
+                    if (!(cause instanceof IndexOutOfBoundsException)) {
                         cause.printStackTrace();
                     }
                 }

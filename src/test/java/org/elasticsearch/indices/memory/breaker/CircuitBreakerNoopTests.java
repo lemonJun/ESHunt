@@ -38,19 +38,16 @@ import static org.elasticsearch.search.aggregations.AggregationBuilders.cardinal
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertAcked;
 
 /** Tests for the noop breakers, which are non-dynamic settings */
-@ElasticsearchIntegrationTest.ClusterScope(scope=ElasticsearchIntegrationTest.Scope.SUITE, numDataNodes=0)
+@ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.SUITE, numDataNodes = 0)
 public class CircuitBreakerNoopTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-                .put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_TYPE_SETTING, "noop")
-                // This is set low, because if the "noop" is not a noop, it will break
-                .put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_LIMIT_SETTING, "10b")
-                .put(HierarchyCircuitBreakerService.REQUEST_CIRCUIT_BREAKER_TYPE_SETTING, "noop")
-                // This is set low, because if the "noop" is not a noop, it will break
-                .put(HierarchyCircuitBreakerService.REQUEST_CIRCUIT_BREAKER_LIMIT_SETTING, "10b")
-                .build();
+        return ImmutableSettings.builder().put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_TYPE_SETTING, "noop")
+                        // This is set low, because if the "noop" is not a noop, it will break
+                        .put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_LIMIT_SETTING, "10b").put(HierarchyCircuitBreakerService.REQUEST_CIRCUIT_BREAKER_TYPE_SETTING, "noop")
+                        // This is set low, because if the "noop" is not a noop, it will break
+                        .put(HierarchyCircuitBreakerService.REQUEST_CIRCUIT_BREAKER_LIMIT_SETTING, "10b").build();
     }
 
     @Test

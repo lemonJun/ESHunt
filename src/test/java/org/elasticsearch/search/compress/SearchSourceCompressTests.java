@@ -37,8 +37,8 @@ import static org.hamcrest.Matchers.equalTo;
 /**
  *
  */
-public class SearchSourceCompressTests  extends ElasticsearchIntegrationTest {
-    
+public class SearchSourceCompressTests extends ElasticsearchIntegrationTest {
+
     @Test
     public void testSourceCompressionLZF() throws IOException {
         CompressorFactory.setDefaultCompressor(new LZFCompressor());
@@ -56,9 +56,7 @@ public class SearchSourceCompressTests  extends ElasticsearchIntegrationTest {
         createIndex("test");
         client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().execute().actionGet();
 
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("_source").field("compress", compress).endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_source").field("compress", compress).endObject().endObject().endObject().string();
 
         client().admin().indices().preparePutMapping().setType("type1").setSource(mapping).execute().actionGet();
 

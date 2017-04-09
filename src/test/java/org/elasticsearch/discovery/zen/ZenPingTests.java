@@ -85,6 +85,5 @@ public class ZenPingTests extends ElasticsearchTestCase {
             assertTrue("node " + i + " had pings but it was not found in collection", maxIdPerNode[i] <= 0);
         }
 
-
     }
 }

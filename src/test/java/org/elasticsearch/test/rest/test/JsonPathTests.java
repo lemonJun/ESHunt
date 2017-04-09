@@ -37,7 +37,7 @@ public class JsonPathTests extends ElasticsearchTestCase {
         JsonPath jsonPath = new JsonPath(json);
         Object object = jsonPath.evaluate("field1.field2\\.field3");
         assertThat(object, instanceOf(String.class));
-        assertThat((String)object, equalTo("value2"));
+        assertThat((String) object, equalTo("value2"));
     }
 
     @Test
@@ -46,7 +46,7 @@ public class JsonPathTests extends ElasticsearchTestCase {
         JsonPath jsonPath = new JsonPath(json);
         Object object = jsonPath.evaluate("field1..field2");
         assertThat(object, instanceOf(String.class));
-        assertThat((String)object, equalTo("value2"));
+        assertThat((String) object, equalTo("value2"));
     }
 
     @Test
@@ -55,7 +55,7 @@ public class JsonPathTests extends ElasticsearchTestCase {
         JsonPath jsonPath = new JsonPath(json);
         Object object = jsonPath.evaluate("field1.field2.");
         assertThat(object, instanceOf(String.class));
-        assertThat((String)object, equalTo("value2"));
+        assertThat((String) object, equalTo("value2"));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class JsonPathTests extends ElasticsearchTestCase {
         JsonPath jsonPath = new JsonPath(json);
         Object object = jsonPath.evaluate("field1.field2");
         assertThat(object, instanceOf(String.class));
-        assertThat((String)object, equalTo("value2"));
+        assertThat((String) object, equalTo("value2"));
     }
 
     @Test
@@ -73,7 +73,7 @@ public class JsonPathTests extends ElasticsearchTestCase {
         JsonPath jsonPath = new JsonPath(json);
         Object object = jsonPath.evaluate("field1.field2");
         assertThat(object, instanceOf(Integer.class));
-        assertThat((Integer)object, equalTo(333));
+        assertThat((Integer) object, equalTo(333));
     }
 
     @Test
@@ -82,7 +82,7 @@ public class JsonPathTests extends ElasticsearchTestCase {
         JsonPath jsonPath = new JsonPath(json);
         Object object = jsonPath.evaluate("field1.field2");
         assertThat(object, instanceOf(Double.class));
-        assertThat((Double)object, equalTo(3.55));
+        assertThat((Double) object, equalTo(3.55));
     }
 
     @Test
@@ -94,9 +94,9 @@ public class JsonPathTests extends ElasticsearchTestCase {
         List list = (List) object;
         assertThat(list.size(), equalTo(2));
         assertThat(list.get(0), instanceOf(String.class));
-        assertThat((String)list.get(0), equalTo("value1"));
+        assertThat((String) list.get(0), equalTo("value1"));
         assertThat(list.get(1), instanceOf(String.class));
-        assertThat((String)list.get(1), equalTo("value2"));
+        assertThat((String) list.get(1), equalTo("value2"));
     }
 
     @Test
@@ -105,7 +105,7 @@ public class JsonPathTests extends ElasticsearchTestCase {
         JsonPath jsonPath = new JsonPath(json);
         Object object = jsonPath.evaluate("field1.array1.1");
         assertThat(object, instanceOf(String.class));
-        assertThat((String)object, equalTo("value2"));
+        assertThat((String) object, equalTo("value2"));
     }
 
     @Test
@@ -114,7 +114,7 @@ public class JsonPathTests extends ElasticsearchTestCase {
         JsonPath jsonPath = new JsonPath(json);
         Object object = jsonPath.evaluate("field1.array1.1.element");
         assertThat(object, instanceOf(String.class));
-        assertThat((String)object, equalTo("value2"));
+        assertThat((String) object, equalTo("value2"));
     }
 
     @Test
@@ -132,7 +132,7 @@ public class JsonPathTests extends ElasticsearchTestCase {
         JsonPath jsonPath = new JsonPath(json);
         Object object = jsonPath.evaluate("metadata.templates");
         assertThat(object, instanceOf(Map.class));
-        Map<String, Object> map = (Map<String, Object>)object;
+        Map<String, Object> map = (Map<String, Object>) object;
         assertThat(map.size(), equalTo(2));
         Set<String> strings = map.keySet();
         assertThat(strings, contains("template_1", "template_2"));
@@ -146,7 +146,7 @@ public class JsonPathTests extends ElasticsearchTestCase {
         Object object = jsonPath.evaluate("");
         assertThat(object, notNullValue());
         assertThat(object, instanceOf(Map.class));
-        assertThat(((Map<String, Object>)object).containsKey("field1"), equalTo(true));
+        assertThat(((Map<String, Object>) object).containsKey("field1"), equalTo(true));
     }
 
     @Test
@@ -156,7 +156,7 @@ public class JsonPathTests extends ElasticsearchTestCase {
         try {
             jsonPath.evaluate("field1.$placeholder.element1");
             fail("evaluate should have failed due to unresolved placeholder");
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("stashed value not found for key [$placeholder]"));
         }
 

@@ -103,6 +103,6 @@ public class UUIDTests extends ElasticsearchTestCase {
         for (UUIDGenRunner runner : runners) {
             globalSet.addAll(runner.uuidSet);
         }
-        assertEquals(count*uuids, globalSet.size());
+        assertEquals(count * uuids, globalSet.size());
     }
 }

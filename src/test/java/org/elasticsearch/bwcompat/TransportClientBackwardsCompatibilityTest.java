@@ -43,14 +43,12 @@ public class TransportClientBackwardsCompatibilityTest extends ElasticsearchBack
     @Test
     public void testSniffMode() throws ExecutionException, InterruptedException {
 
-        Settings settings = ImmutableSettings.builder().put(requiredSettings()).put("client.transport.nodes_sampler_interval", "1s")
-                .put("name", "transport_client_sniff_mode").put(ClusterName.SETTING, cluster().getClusterName())
-                .put("client.transport.sniff", true).build();
+        Settings settings = ImmutableSettings.builder().put(requiredSettings()).put("client.transport.nodes_sampler_interval", "1s").put("name", "transport_client_sniff_mode").put(ClusterName.SETTING, cluster().getClusterName()).put("client.transport.sniff", true).build();
 
         CompositeTestCluster compositeTestCluster = backwardsCluster();
         TransportAddress transportAddress = compositeTestCluster.externalTransportAddress();
 
-        try(TransportClient client = new TransportClient(settings)) {
+        try (TransportClient client = new TransportClient(settings)) {
             client.addTransportAddress(transportAddress);
 
             assertAcked(client.admin().indices().prepareCreate("test"));
@@ -64,16 +62,16 @@ public class TransportClientBackwardsCompatibilityTest extends ElasticsearchBack
             }
             indexRandom(false, indexRequestBuilders);
 
-            String randomId = "id" + randomInt(numDocs-1);
+            String randomId = "id" + randomInt(numDocs - 1);
             GetResponse getResponse = client.prepareGet("test", "test", randomId).get();
             assertThat(getResponse.isExists(), equalTo(true));
 
             refresh();
 
             SearchResponse searchResponse = client.prepareSearch("test").get();
-            assertThat(searchResponse.getHits().totalHits(), equalTo((long)numDocs));
+            assertThat(searchResponse.getHits().totalHits(), equalTo((long) numDocs));
 
-            int randomDocId = randomInt(numDocs-1);
+            int randomDocId = randomInt(numDocs - 1);
             String fieldValue = "value" + randomDocId;
             String id = "id" + randomDocId;
             searchResponse = client.prepareSearch("test").setQuery(QueryBuilders.termQuery("field", fieldValue)).get();

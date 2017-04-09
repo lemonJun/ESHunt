@@ -95,8 +95,7 @@ public class AddIncrementallyTests extends ElasticsearchAllocationTestCase {
     @Test
     public void testMinimalRelocations() {
         ImmutableSettings.Builder settings = settingsBuilder();
-        settings.put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, ClusterRebalanceAllocationDecider.ClusterRebalanceType.ALWAYS.toString())
-                .put("cluster.routing.allocation.node_concurrent_recoveries", 2);
+        settings.put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, ClusterRebalanceAllocationDecider.ClusterRebalanceType.ALWAYS.toString()).put("cluster.routing.allocation.node_concurrent_recoveries", 2);
         AllocationService service = createAllocationService(settings.build());
 
         ClusterState clusterState = initCluster(service, 1, 3, 3, 1);
@@ -165,9 +164,7 @@ public class AddIncrementallyTests extends ElasticsearchAllocationTestCase {
     @Test
     public void testMinimalRelocationsNoLimit() {
         ImmutableSettings.Builder settings = settingsBuilder();
-        settings.put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, ClusterRebalanceAllocationDecider.ClusterRebalanceType.ALWAYS.toString())
-                .put("cluster.routing.allocation.node_concurrent_recoveries", 100)
-                .put("cluster.routing.allocation.node_initial_primaries_recoveries", 100);
+        settings.put(ClusterRebalanceAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ALLOW_REBALANCE, ClusterRebalanceAllocationDecider.ClusterRebalanceType.ALWAYS.toString()).put("cluster.routing.allocation.node_concurrent_recoveries", 100).put("cluster.routing.allocation.node_initial_primaries_recoveries", 100);
         AllocationService service = createAllocationService(settings.build());
 
         ClusterState clusterState = initCluster(service, 1, 3, 3, 1);
@@ -233,7 +230,6 @@ public class AddIncrementallyTests extends ElasticsearchAllocationTestCase {
         logger.debug("ClusterState: {}", clusterState.getRoutingNodes().prettyPrint());
     }
 
-
     private void assertNumIndexShardsPerNode(ClusterState state, Matcher<Integer> matcher) {
         for (String index : state.routingTable().indicesRouting().keySet()) {
             assertNumIndexShardsPerNode(state, index, matcher);
@@ -245,7 +241,6 @@ public class AddIncrementallyTests extends ElasticsearchAllocationTestCase {
             assertThat(node.shardsWithState(index, STARTED).size(), matcher);
         }
     }
-
 
     private void assertAtLeastOneIndexShardPerNode(ClusterState state) {
         for (String index : state.routingTable().indicesRouting().keySet()) {
@@ -286,14 +281,12 @@ public class AddIncrementallyTests extends ElasticsearchAllocationTestCase {
         return clusterState;
     }
 
-    private ClusterState initCluster(AllocationService service, int numberOfNodes, int numberOfIndices, int numberOfShards,
-                                     int numberOfReplicas) {
+    private ClusterState initCluster(AllocationService service, int numberOfNodes, int numberOfIndices, int numberOfShards, int numberOfReplicas) {
         MetaData.Builder metaDataBuilder = MetaData.builder();
         RoutingTable.Builder routingTableBuilder = RoutingTable.builder();
 
         for (int i = 0; i < numberOfIndices; i++) {
-            IndexMetaData.Builder index = IndexMetaData.builder("test" + i).numberOfShards(numberOfShards).numberOfReplicas(
-                    numberOfReplicas);
+            IndexMetaData.Builder index = IndexMetaData.builder("test" + i).numberOfShards(numberOfShards).numberOfReplicas(numberOfReplicas);
             metaDataBuilder = metaDataBuilder.put(index);
         }
 
@@ -342,13 +335,11 @@ public class AddIncrementallyTests extends ElasticsearchAllocationTestCase {
         return clusterState;
     }
 
-    private ClusterState addIndex(ClusterState clusterState, AllocationService service, int indexOrdinal, int numberOfShards,
-                                  int numberOfReplicas) {
+    private ClusterState addIndex(ClusterState clusterState, AllocationService service, int indexOrdinal, int numberOfShards, int numberOfReplicas) {
         MetaData.Builder metaDataBuilder = MetaData.builder(clusterState.getMetaData());
         RoutingTable.Builder routingTableBuilder = RoutingTable.builder(clusterState.routingTable());
 
-        IndexMetaData.Builder index = IndexMetaData.builder("test" + indexOrdinal).numberOfShards(numberOfShards).numberOfReplicas(
-                numberOfReplicas);
+        IndexMetaData.Builder index = IndexMetaData.builder("test" + indexOrdinal).numberOfShards(numberOfShards).numberOfReplicas(numberOfReplicas);
         IndexMetaData imd = index.build();
         metaDataBuilder = metaDataBuilder.put(imd, true);
         routingTableBuilder.addAsNew(imd);

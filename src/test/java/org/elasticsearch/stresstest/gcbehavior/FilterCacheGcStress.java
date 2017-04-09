@@ -35,9 +35,7 @@ public class FilterCacheGcStress {
 
     public static void main(String[] args) {
 
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("gateway.type", "none")
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("gateway.type", "none").build();
 
         Node node = NodeBuilder.nodeBuilder().settings(settings).node();
         final Client client = node.client();
@@ -61,9 +59,7 @@ public class FilterCacheGcStress {
             @Override
             public void run() {
                 while (!stop.get()) {
-                    client.prepareSearch()
-                            .setQuery(filteredQuery(matchAllQuery(), rangeFilter("field").from(System.currentTimeMillis() - 1000000)))
-                            .execute().actionGet();
+                    client.prepareSearch().setQuery(filteredQuery(matchAllQuery(), rangeFilter("field").from(System.currentTimeMillis() - 1000000))).execute().actionGet();
                 }
             }
         };

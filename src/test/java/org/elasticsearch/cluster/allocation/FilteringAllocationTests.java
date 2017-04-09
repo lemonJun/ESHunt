@@ -37,7 +37,7 @@ import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilde
 import static org.elasticsearch.test.ElasticsearchIntegrationTest.*;
 import static org.hamcrest.Matchers.equalTo;
 
-@ClusterScope(scope= Scope.TEST, numDataNodes =0)
+@ClusterScope(scope = Scope.TEST, numDataNodes = 0)
 public class FilteringAllocationTests extends ElasticsearchIntegrationTest {
 
     private final ESLogger logger = Loggers.getLogger(FilteringAllocationTests.class);
@@ -49,11 +49,9 @@ public class FilteringAllocationTests extends ElasticsearchIntegrationTest {
         final String node_0 = nodesIds.get(0);
         final String node_1 = nodesIds.get(1);
         assertThat(cluster().size(), equalTo(2));
-        
+
         logger.info("--> creating an index with no replicas");
-        client().admin().indices().prepareCreate("test")
-                .setSettings(settingsBuilder().put("index.number_of_replicas", 0))
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_replicas", 0)).execute().actionGet();
         ensureGreen();
         logger.info("--> index some data");
         for (int i = 0; i < 100; i++) {
@@ -63,9 +61,7 @@ public class FilteringAllocationTests extends ElasticsearchIntegrationTest {
         assertThat(client().prepareCount().setQuery(QueryBuilders.matchAllQuery()).execute().actionGet().getCount(), equalTo(100l));
 
         logger.info("--> decommission the second node");
-        client().admin().cluster().prepareUpdateSettings()
-                .setTransientSettings(settingsBuilder().put("cluster.routing.allocation.exclude._name", node_1))
-                .execute().actionGet();
+        client().admin().cluster().prepareUpdateSettings().setTransientSettings(settingsBuilder().put("cluster.routing.allocation.exclude._name", node_1)).execute().actionGet();
         waitForRelocation();
 
         logger.info("--> verify all are allocated on node1 now");
@@ -91,9 +87,7 @@ public class FilteringAllocationTests extends ElasticsearchIntegrationTest {
         assertThat(cluster().size(), equalTo(2));
 
         logger.info("--> creating an index with no replicas");
-        client().admin().indices().prepareCreate("test")
-                .setSettings(settingsBuilder().put("index.number_of_replicas", 0))
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_replicas", 0)).execute().actionGet();
 
         ensureGreen();
 
@@ -115,15 +109,12 @@ public class FilteringAllocationTests extends ElasticsearchIntegrationTest {
         }
 
         if (numShardsOnNode1 > ThrottlingAllocationDecider.DEFAULT_CLUSTER_ROUTING_ALLOCATION_NODE_CONCURRENT_RECOVERIES) {
-            client().admin().cluster().prepareUpdateSettings()
-            .setTransientSettings(settingsBuilder().put("cluster.routing.allocation.node_concurrent_recoveries", numShardsOnNode1)).execute().actionGet();
+            client().admin().cluster().prepareUpdateSettings().setTransientSettings(settingsBuilder().put("cluster.routing.allocation.node_concurrent_recoveries", numShardsOnNode1)).execute().actionGet();
             // make sure we can recover all the nodes at once otherwise we might run into a state where one of the shards has not yet started relocating
             // but we already fired up the request to wait for 0 relocating shards. 
         }
         logger.info("--> remove index from the first node");
-        client().admin().indices().prepareUpdateSettings("test")
-                .setSettings(settingsBuilder().put("index.routing.allocation.exclude._name", node_0))
-                .execute().actionGet();
+        client().admin().indices().prepareUpdateSettings("test").setSettings(settingsBuilder().put("index.routing.allocation.exclude._name", node_0)).execute().actionGet();
         client().admin().cluster().prepareReroute().get();
         ensureGreen();
 
@@ -137,9 +128,7 @@ public class FilteringAllocationTests extends ElasticsearchIntegrationTest {
         }
 
         logger.info("--> disable allocation filtering ");
-        client().admin().indices().prepareUpdateSettings("test")
-                .setSettings(settingsBuilder().put("index.routing.allocation.exclude._name", ""))
-                .execute().actionGet();
+        client().admin().indices().prepareUpdateSettings("test").setSettings(settingsBuilder().put("index.routing.allocation.exclude._name", "")).execute().actionGet();
         client().admin().cluster().prepareReroute().get();
         ensureGreen();
 
@@ -148,4 +137,3 @@ public class FilteringAllocationTests extends ElasticsearchIntegrationTest {
         assertThat(clusterState.routingTable().index("test").numberOfNodesShardsAreAllocatedOn(), equalTo(2));
     }
 }
-

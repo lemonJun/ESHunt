@@ -90,7 +90,7 @@ public class MockRepository extends FsRepository {
 
     @Override
     public void initializeSnapshot(SnapshotId snapshotId, ImmutableList<String> indices, MetaData metaData) {
-        if (blockOnInitialization ) {
+        if (blockOnInitialization) {
             blockExecution();
         }
         super.initializeSnapshot(snapshotId, indices, metaData);
@@ -98,9 +98,7 @@ public class MockRepository extends FsRepository {
 
     private static RepositorySettings overrideSettings(RepositorySettings repositorySettings, ClusterService clusterService) {
         if (repositorySettings.settings().getAsBoolean("localize_location", false)) {
-            return new RepositorySettings(
-                    repositorySettings.globalSettings(),
-                    localizeLocation(repositorySettings.settings(), clusterService));
+            return new RepositorySettings(repositorySettings.globalSettings(), localizeLocation(repositorySettings.settings(), clusterService));
         } else {
             return repositorySettings;
         }
@@ -212,8 +210,7 @@ public class MockRepository extends FsRepository {
                     digest = MessageDigest.getInstance("MD5");
                     byte[] bytes = digest.digest(path.getBytes("UTF-8"));
                     int i = 0;
-                    return ((bytes[i++] & 0xFF) << 24) | ((bytes[i++] & 0xFF) << 16)
-                            | ((bytes[i++] & 0xFF) << 8) | (bytes[i++] & 0xFF);
+                    return ((bytes[i++] & 0xFF) << 24) | ((bytes[i++] & 0xFF) << 16) | ((bytes[i++] & 0xFF) << 8) | (bytes[i++] & 0xFF);
                 } catch (NoSuchAlgorithmException ex) {
                     throw new ElasticsearchException("cannot calculate hashcode", ex);
                 } catch (UnsupportedEncodingException ex) {
@@ -258,7 +255,6 @@ public class MockRepository extends FsRepository {
                     }
                 }
             }
-
 
             public MockBlobContainer(BlobContainer delegate) {
                 super(delegate);

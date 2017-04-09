@@ -62,9 +62,7 @@ public class UpdateNumberOfReplicasTests extends ElasticsearchIntegrationTest {
         assertThat(clusterHealth.getIndices().get("test").getActiveShards(), equalTo(numShards.totalNumShards));
 
         for (int i = 0; i < 10; i++) {
-            client().prepareIndex("test", "type1", Integer.toString(i)).setSource(jsonBuilder().startObject()
-                    .field("value", "test" + i)
-                    .endObject()).get();
+            client().prepareIndex("test", "type1", Integer.toString(i)).setSource(jsonBuilder().startObject().field("value", "test" + i).endObject()).get();
         }
 
         refresh();
@@ -271,15 +269,10 @@ public class UpdateNumberOfReplicasTests extends ElasticsearchIntegrationTest {
     public void testUpdateWithInvalidNumberOfReplicas() {
         createIndex("test");
         try {
-            client().admin().indices().prepareUpdateSettings("test")
-                .setSettings(ImmutableSettings.settingsBuilder()
-                        .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, randomIntBetween(-10, -1))
-                )
-                .execute().actionGet();
+            client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.settingsBuilder().put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, randomIntBetween(-10, -1))).execute().actionGet();
             fail("should have thrown an exception about the replica shard count");
         } catch (ElasticsearchIllegalArgumentException e) {
-            assertThat("message contains error about shard count: " + e.getMessage(),
-                e.getMessage().contains("the value of the setting index.number_of_replicas must be a non negative integer"), equalTo(true));
+            assertThat("message contains error about shard count: " + e.getMessage(), e.getMessage().contains("the value of the setting index.number_of_replicas must be a non negative integer"), equalTo(true));
         }
     }
 }

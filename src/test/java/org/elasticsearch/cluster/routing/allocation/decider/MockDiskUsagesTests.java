@@ -55,13 +55,11 @@ public class MockDiskUsagesTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-                .put(super.nodeSettings(nodeOrdinal))
+        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal))
                         // Use the mock internal cluster info service, which has fake-able disk usages
-                .put(ClusterModule.CLUSTER_SERVICE_IMPL, MockInternalClusterInfoService.class.getName())
+                        .put(ClusterModule.CLUSTER_SERVICE_IMPL, MockInternalClusterInfoService.class.getName())
                         // Update more frequently
-                .put(InternalClusterInfoService.INTERNAL_CLUSTER_INFO_UPDATE_INTERVAL, "2s")
-                .build();
+                        .put(InternalClusterInfoService.INTERNAL_CLUSTER_INFO_UPDATE_INTERVAL, "2s").build();
     }
 
     @Test
@@ -79,22 +77,15 @@ public class MockDiskUsagesTests extends ElasticsearchIntegrationTest {
         });
 
         // Start with all nodes at 50% usage
-        final MockInternalClusterInfoService cis = (MockInternalClusterInfoService)
-                internalCluster().getInstance(ClusterInfoService.class, internalCluster().getMasterName());
+        final MockInternalClusterInfoService cis = (MockInternalClusterInfoService) internalCluster().getInstance(ClusterInfoService.class, internalCluster().getMasterName());
         cis.setN1Usage(nodes.get(0), new DiskUsage(nodes.get(0), "n1", 100, 50));
         cis.setN2Usage(nodes.get(1), new DiskUsage(nodes.get(1), "n2", 100, 50));
         cis.setN3Usage(nodes.get(2), new DiskUsage(nodes.get(2), "n3", 100, 50));
 
-        client().admin().cluster().prepareUpdateSettings().setTransientSettings(settingsBuilder()
-                .put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_LOW_DISK_WATERMARK, randomFrom("20b", "80%"))
-                .put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_HIGH_DISK_WATERMARK, randomFrom("10b", "90%"))
-                .put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_REROUTE_INTERVAL, "1s")).get();
+        client().admin().cluster().prepareUpdateSettings().setTransientSettings(settingsBuilder().put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_LOW_DISK_WATERMARK, randomFrom("20b", "80%")).put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_HIGH_DISK_WATERMARK, randomFrom("10b", "90%")).put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_REROUTE_INTERVAL, "1s")).get();
 
         // Create an index with 10 shards so we can check allocation for it
-        prepareCreate("test").setSettings(settingsBuilder()
-                .put("number_of_shards", 10)
-                .put("number_of_replicas", 0)
-                .put("index.routing.allocation.exclude._name", "")).get();
+        prepareCreate("test").setSettings(settingsBuilder().put("number_of_shards", 10).put("number_of_replicas", 0).put("index.routing.allocation.exclude._name", "")).get();
         ensureGreen("test");
 
         // Block until the "fake" cluster info is retrieved at least once
@@ -113,8 +104,7 @@ public class MockDiskUsagesTests extends ElasticsearchIntegrationTest {
         while (iter.hasNext()) {
             RoutingNode node = iter.next();
             realNodeNames.add(node.nodeId());
-            logger.info("--> node {} has {} shards",
-                    node.nodeId(), resp.getState().getRoutingNodes().node(node.nodeId()).numberOfOwningShards());
+            logger.info("--> node {} has {} shards", node.nodeId(), resp.getState().getRoutingNodes().node(node.nodeId()).numberOfOwningShards());
         }
 
         // Update the disk usages so one node has now passed the high watermark
@@ -131,8 +121,7 @@ public class MockDiskUsagesTests extends ElasticsearchIntegrationTest {
         Map<String, Integer> nodesToShardCount = newHashMap();
         while (iter.hasNext()) {
             RoutingNode node = iter.next();
-            logger.info("--> node {} has {} shards",
-                    node.nodeId(), resp.getState().getRoutingNodes().node(node.nodeId()).numberOfOwningShards());
+            logger.info("--> node {} has {} shards", node.nodeId(), resp.getState().getRoutingNodes().node(node.nodeId()).numberOfOwningShards());
             nodesToShardCount.put(node.nodeId(), resp.getState().getRoutingNodes().node(node.nodeId()).numberOfOwningShards());
         }
         assertThat("node1 has 5 shards", nodesToShardCount.get(realNodeNames.get(0)), equalTo(5));
@@ -143,15 +132,10 @@ public class MockDiskUsagesTests extends ElasticsearchIntegrationTest {
     /** Create a fake NodeStats for the given node and usage */
     public static NodeStats makeStats(String nodeName, DiskUsage usage) {
         FsStats.Info[] infos = new FsStats.Info[1];
-        FsStats.Info info = new FsStats.Info("/path.data", null, null,
-                usage.getTotalBytes(), usage.getFreeBytes(), usage.getFreeBytes(), -1, -1, -1, -1, -1, -1);
+        FsStats.Info info = new FsStats.Info("/path.data", null, null, usage.getTotalBytes(), usage.getFreeBytes(), usage.getFreeBytes(), -1, -1, -1, -1, -1, -1);
         infos[0] = info;
         FsStats fsStats = new FsStats(System.currentTimeMillis(), infos);
-        return new NodeStats(new DiscoveryNode(nodeName, null, Version.V_1_5_0),
-                System.currentTimeMillis(),
-                null, null, null, null, null, null,
-                fsStats,
-                null, null, null);
+        return new NodeStats(new DiscoveryNode(nodeName, null, Version.V_1_5_0), System.currentTimeMillis(), null, null, null, null, null, null, fsStats, null, null, null);
     }
 
     /**
@@ -164,10 +148,7 @@ public class MockDiskUsagesTests extends ElasticsearchIntegrationTest {
         private volatile NodeStats[] stats = new NodeStats[3];
 
         @Inject
-        public MockInternalClusterInfoService(Settings settings, NodeSettingsService nodeSettingsService,
-                                              TransportNodesStatsAction transportNodesStatsAction,
-                                              TransportIndicesStatsAction transportIndicesStatsAction,
-                                              ClusterService clusterService, ThreadPool threadPool) {
+        public MockInternalClusterInfoService(Settings settings, NodeSettingsService nodeSettingsService, TransportNodesStatsAction transportNodesStatsAction, TransportIndicesStatsAction transportIndicesStatsAction, ClusterService clusterService, ThreadPool threadPool) {
             super(settings, nodeSettingsService, transportNodesStatsAction, transportIndicesStatsAction, clusterService, threadPool);
             this.clusterName = ClusterName.clusterNameFromSettings(settings);
             stats[0] = makeStats("node_t1", new DiskUsage("node_t1", "n1", 100, 100));

@@ -60,22 +60,12 @@ public class SynonymsAnalysisTest extends ElasticsearchTestCase {
     @Test
     public void testSynonymsAnalysis() throws IOException {
 
-        Settings settings = settingsBuilder().
-                loadFromClasspath("org/elasticsearch/index/analysis/synonyms/synonyms.json")
-                .put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).build();
+        Settings settings = settingsBuilder().loadFromClasspath("org/elasticsearch/index/analysis/synonyms/synonyms.json").put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).build();
 
         Index index = new Index("test");
 
-        Injector parentInjector = new ModulesBuilder().add(
-                new SettingsModule(settings),
-                new EnvironmentModule(new Environment(settings)),
-                new IndicesAnalysisModule())
-                .createInjector();
-        Injector injector = new ModulesBuilder().add(
-                new IndexSettingsModule(index, settings),
-                new IndexNameModule(index),
-                new AnalysisModule(settings, parentInjector.getInstance(IndicesAnalysisService.class)))
-                .createChildInjector(parentInjector);
+        Injector parentInjector = new ModulesBuilder().add(new SettingsModule(settings), new EnvironmentModule(new Environment(settings)), new IndicesAnalysisModule()).createInjector();
+        Injector injector = new ModulesBuilder().add(new IndexSettingsModule(index, settings), new IndexNameModule(index), new AnalysisModule(settings, parentInjector.getInstance(IndicesAnalysisService.class))).createChildInjector(parentInjector);
 
         analysisService = injector.getInstance(AnalysisService.class);
 

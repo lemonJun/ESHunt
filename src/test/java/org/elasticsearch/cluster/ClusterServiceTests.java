@@ -63,9 +63,7 @@ public class ClusterServiceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testTimeoutUpdateTask() throws Exception {
-        Settings settings = settingsBuilder()
-                .put("discovery.type", "local")
-                .build();
+        Settings settings = settingsBuilder().put("discovery.type", "local").build();
         internalCluster().startNode(settings);
         ClusterService clusterService1 = internalCluster().getInstance(ClusterService.class);
         final CountDownLatch block = new CountDownLatch(1);
@@ -118,9 +116,7 @@ public class ClusterServiceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testAckedUpdateTask() throws Exception {
-        Settings settings = settingsBuilder()
-                .put("discovery.type", "local")
-                .build();
+        Settings settings = settingsBuilder().put("discovery.type", "local").build();
         internalCluster().startNode(settings);
         ClusterService clusterService = internalCluster().getInstance(ClusterService.class);
 
@@ -195,9 +191,7 @@ public class ClusterServiceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testAckedUpdateTaskSameClusterState() throws Exception {
-        Settings settings = settingsBuilder()
-                .put("discovery.type", "local")
-                .build();
+        Settings settings = settingsBuilder().put("discovery.type", "local").build();
         internalCluster().startNode(settings);
         ClusterService clusterService = internalCluster().getInstance(ClusterService.class);
 
@@ -267,9 +261,7 @@ public class ClusterServiceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testMasterAwareExecution() throws Exception {
-        Settings settings = settingsBuilder()
-                .put("discovery.type", "local")
-                .build();
+        Settings settings = settingsBuilder().put("discovery.type", "local").build();
 
         ListenableFuture<String> master = internalCluster().startNodeAsync(settings);
         ListenableFuture<String> nonMaster = internalCluster().startNodeAsync(settingsBuilder().put(settings).put("node.master", false).build());
@@ -278,7 +270,7 @@ public class ClusterServiceTests extends ElasticsearchIntegrationTest {
 
         ClusterService clusterService = internalCluster().getInstance(ClusterService.class, nonMaster.get());
 
-        final boolean[] taskFailed = {false};
+        final boolean[] taskFailed = { false };
         final CountDownLatch latch1 = new CountDownLatch(1);
         clusterService.submitStateUpdateTask("test", new ClusterStateUpdateTask() {
             @Override
@@ -319,9 +311,7 @@ public class ClusterServiceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testAckedUpdateTaskNoAckExpected() throws Exception {
-        Settings settings = settingsBuilder()
-                .put("discovery.type", "local")
-                .build();
+        Settings settings = settingsBuilder().put("discovery.type", "local").build();
         internalCluster().startNode(settings);
         ClusterService clusterService = internalCluster().getInstance(ClusterService.class);
 
@@ -392,9 +382,7 @@ public class ClusterServiceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testAckedUpdateTaskTimeoutZero() throws Exception {
-        Settings settings = settingsBuilder()
-                .put("discovery.type", "local")
-                .build();
+        Settings settings = settingsBuilder().put("discovery.type", "local").build();
         internalCluster().startNode(settings);
         ClusterService clusterService = internalCluster().getInstance(ClusterService.class);
 
@@ -469,9 +457,7 @@ public class ClusterServiceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testPendingUpdateTask() throws Exception {
-        Settings settings = settingsBuilder()
-                .put("discovery.type", "local")
-                .build();
+        Settings settings = settingsBuilder().put("discovery.type", "local").build();
         String node_0 = internalCluster().startNode(settings);
         internalCluster().startNodeClient(settings);
 
@@ -610,13 +596,7 @@ public class ClusterServiceTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testLocalNodeMasterListenerCallbacks() throws Exception {
-        Settings settings = settingsBuilder()
-                .put("discovery.type", "zen")
-                .put("discovery.zen.minimum_master_nodes", 1)
-                .put("discovery.zen.ping_timeout", "400ms")
-                .put("discovery.initial_state_timeout", "500ms")
-                .put("plugin.types", TestPlugin.class.getName())
-                .build();
+        Settings settings = settingsBuilder().put("discovery.type", "zen").put("discovery.zen.minimum_master_nodes", 1).put("discovery.zen.ping_timeout", "400ms").put("discovery.initial_state_timeout", "500ms").put("plugin.types", TestPlugin.class.getName()).build();
 
         String node_0 = internalCluster().startNode(settings);
         ClusterService clusterService = internalCluster().getInstance(ClusterService.class);
@@ -653,9 +633,7 @@ public class ClusterServiceTests extends ElasticsearchIntegrationTest {
         internalCluster().startNode(ImmutableSettings.builder().put(settings));
         assertFalse(client().admin().cluster().prepareHealth().setWaitForNodes("2").get().isTimedOut());
 
-        Settings transientSettings = settingsBuilder()
-                .put("discovery.zen.minimum_master_nodes", 2)
-                .build();
+        Settings transientSettings = settingsBuilder().put("discovery.zen.minimum_master_nodes", 2).build();
         client().admin().cluster().prepareUpdateSettings().setTransientSettings(transientSettings).get();
 
         // and shutdown the second node
@@ -694,9 +672,7 @@ public class ClusterServiceTests extends ElasticsearchIntegrationTest {
      */
     @Test
     public void testPrioritizedTasks() throws Exception {
-        Settings settings = settingsBuilder()
-                .put("discovery.type", "local")
-                .build();
+        Settings settings = settingsBuilder().put("discovery.type", "local").build();
         internalCluster().startNode(settings);
         ClusterService clusterService = internalCluster().getInstance(ClusterService.class);
         BlockingTask block = new BlockingTask();
@@ -728,9 +704,7 @@ public class ClusterServiceTests extends ElasticsearchIntegrationTest {
     @Test
     @TestLogging("cluster:TRACE") // To ensure that we log cluster state events on TRACE level
     public void testClusterStateUpdateLogging() throws Exception {
-        Settings settings = settingsBuilder()
-                .put("discovery.type", "local")
-                .build();
+        Settings settings = settingsBuilder().put("discovery.type", "local").build();
         internalCluster().startNode(settings);
         ClusterService clusterService1 = internalCluster().getInstance(ClusterService.class);
         MockLogAppender mockAppender = new MockLogAppender();
@@ -818,10 +792,7 @@ public class ClusterServiceTests extends ElasticsearchIntegrationTest {
     @Test
     @TestLogging("cluster:WARN") // To ensure that we log cluster state events on WARN level
     public void testLongClusterStateUpdateLogging() throws Exception {
-        Settings settings = settingsBuilder()
-                .put("discovery.type", "local")
-                .put(InternalClusterService.SETTING_CLUSTER_SERVICE_SLOW_TASK_LOGGING_THRESHOLD, "10s")
-                .build();
+        Settings settings = settingsBuilder().put("discovery.type", "local").put(InternalClusterService.SETTING_CLUSTER_SERVICE_SLOW_TASK_LOGGING_THRESHOLD, "10s").build();
         internalCluster().startNode(settings);
         ClusterService clusterService1 = internalCluster().getInstance(ClusterService.class);
         MockLogAppender mockAppender = new MockLogAppender();
@@ -855,8 +826,7 @@ public class ClusterServiceTests extends ElasticsearchIntegrationTest {
             });
 
             processedFirstTask.await(1, TimeUnit.SECONDS);
-            assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(settingsBuilder()
-                    .put(InternalClusterService.SETTING_CLUSTER_SERVICE_SLOW_TASK_LOGGING_THRESHOLD, "10ms")));
+            assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(settingsBuilder().put(InternalClusterService.SETTING_CLUSTER_SERVICE_SLOW_TASK_LOGGING_THRESHOLD, "10ms")));
 
             clusterService1.submitStateUpdateTask("test2", new ProcessedClusterStateUpdateTask() {
                 @Override

@@ -149,8 +149,7 @@ public class TimeZoneRoundingTests extends ElasticsearchTestCase {
 
         // Two timestamps in same year and different timezone offset ("Double buckets" issue - #9491)
         tzRounding = TimeZoneRounding.builder(DateTimeUnit.YEAR_OF_CENTURY).preZone(DateTimeZone.forID("Asia/Jerusalem")).preZoneAdjustLargeInterval(true).build();
-        assertThat(tzRounding.round(time("2014-11-11T17:00:00", DateTimeZone.forID("Asia/Jerusalem"))),
-                equalTo(tzRounding.round(time("2014-08-11T17:00:00", DateTimeZone.forID("Asia/Jerusalem")))));
+        assertThat(tzRounding.round(time("2014-11-11T17:00:00", DateTimeZone.forID("Asia/Jerusalem"))), equalTo(tzRounding.round(time("2014-08-11T17:00:00", DateTimeZone.forID("Asia/Jerusalem")))));
     }
 
     @Test
@@ -164,8 +163,7 @@ public class TimeZoneRoundingTests extends ElasticsearchTestCase {
 
     @Test
     public void testNextRoundingValueCornerCase8209() {
-        Rounding tzRounding = TimeZoneRounding.builder(DateTimeUnit.MONTH_OF_YEAR).preZone(DateTimeZone.forID("+01:00")).
-                preZoneAdjustLargeInterval(true).build();
+        Rounding tzRounding = TimeZoneRounding.builder(DateTimeUnit.MONTH_OF_YEAR).preZone(DateTimeZone.forID("+01:00")).preZoneAdjustLargeInterval(true).build();
         long roundedValue = tzRounding.round(time("2014-01-01T00:00:00Z", DateTimeZone.UTC));
         assertThat(roundedValue, equalTo(time("2013-12-31T23:00:00.000Z", DateTimeZone.UTC)));
         roundedValue = tzRounding.nextRoundingValue(roundedValue);
@@ -187,10 +185,8 @@ public class TimeZoneRoundingTests extends ElasticsearchTestCase {
         DateTimeZone tz = DateTimeZone.forID("America/Sao_Paulo");
         long start = time("2014-10-18T20:50:00.000", tz);
         long end = time("2014-10-19T01:00:00.000", tz);
-        Rounding tzRounding = new TimeZoneRounding.TimeTimeZoneRoundingFloor(DateTimeUnit.MINUTES_OF_HOUR, tz,
-                DateTimeZone.UTC);
-        Rounding dayTzRounding = new TimeZoneRounding.DayTimeZoneRoundingFloor(DateTimeUnit.MINUTES_OF_HOUR, tz,
-                DateTimeZone.UTC);
+        Rounding tzRounding = new TimeZoneRounding.TimeTimeZoneRoundingFloor(DateTimeUnit.MINUTES_OF_HOUR, tz, DateTimeZone.UTC);
+        Rounding dayTzRounding = new TimeZoneRounding.DayTimeZoneRoundingFloor(DateTimeUnit.MINUTES_OF_HOUR, tz, DateTimeZone.UTC);
         for (long time = start; time < end; time = time + 60000) {
             tzRounding.nextRoundingValue(time);
             dayTzRounding.nextRoundingValue(time);

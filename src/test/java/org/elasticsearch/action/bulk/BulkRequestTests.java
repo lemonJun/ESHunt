@@ -126,8 +126,7 @@ public class BulkRequestTests extends ElasticsearchTestCase {
             bulkRequest.add(bulkAction.getBytes(Charsets.UTF_8), 0, bulkAction.length(), null, null);
             fail("should have thrown an exception about the wrong format of line 1");
         } catch (IllegalArgumentException e) {
-            assertThat("message contains error about the wrong format of line 1: " + e.getMessage(),
-                    e.getMessage().contains("Malformed action/metadata line [1], expected a simple value for field [_source] but found [START_OBJECT]"), equalTo(true));
+            assertThat("message contains error about the wrong format of line 1: " + e.getMessage(), e.getMessage().contains("Malformed action/metadata line [1], expected a simple value for field [_source] but found [START_OBJECT]"), equalTo(true));
         }
     }
 
@@ -139,8 +138,7 @@ public class BulkRequestTests extends ElasticsearchTestCase {
             bulkRequest.add(bulkAction.getBytes(Charsets.UTF_8), 0, bulkAction.length(), null, null);
             fail("should have thrown an exception about the wrong format of line 5");
         } catch (IllegalArgumentException e) {
-            assertThat("message contains error about the wrong format of line 5: " + e.getMessage(),
-                    e.getMessage().contains("Malformed action/metadata line [5], expected a simple value for field [_unkown] but found [START_ARRAY]"), equalTo(true));
+            assertThat("message contains error about the wrong format of line 5: " + e.getMessage(), e.getMessage().contains("Malformed action/metadata line [5], expected a simple value for field [_unkown] but found [START_ARRAY]"), equalTo(true));
         }
     }
 
@@ -152,8 +150,7 @@ public class BulkRequestTests extends ElasticsearchTestCase {
             bulkRequest.add(bulkAction.getBytes(Charsets.UTF_8), 0, bulkAction.length(), null, null);
             fail("should have thrown an exception about the unknown paramater _foo");
         } catch (IllegalArgumentException e) {
-            assertThat("message contains error about the unknown paramater _foo: " + e.getMessage(),
-                    e.getMessage().contains("Action/metadata line [3] contains an unknown parameter [_foo]"), equalTo(true));
+            assertThat("message contains error about the unknown paramater _foo: " + e.getMessage(), e.getMessage().contains("Action/metadata line [3] contains an unknown parameter [_foo]"), equalTo(true));
         }
     }
 
@@ -165,8 +162,7 @@ public class BulkRequestTests extends ElasticsearchTestCase {
             bulkRequest.add(bulkAction.getBytes(Charsets.UTF_8), 0, bulkAction.length(), null, null);
             fail("should have thrown an exception about the wrong format of line 3");
         } catch (IllegalArgumentException e) {
-            assertThat("message contains error about the wrong format of line 3: " + e.getMessage(),
-                    e.getMessage().contains("Malformed action/metadata line [3], expected START_OBJECT or END_OBJECT but found [START_ARRAY]"), equalTo(true));
+            assertThat("message contains error about the wrong format of line 3: " + e.getMessage(), e.getMessage().contains("Malformed action/metadata line [3], expected START_OBJECT or END_OBJECT but found [START_ARRAY]"), equalTo(true));
         }
     }
 

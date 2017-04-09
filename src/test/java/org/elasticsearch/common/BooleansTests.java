@@ -33,8 +33,8 @@ public class BooleansTests extends ElasticsearchTestCase {
 
     @Test
     public void testIsBoolean() {
-        String[] booleans = new String[]{"true", "false", "on", "off", "yes", "no", "0", "1"};
-        String[] notBooleans = new String[]{"11", "00", "sdfsdfsf", "F", "T"};
+        String[] booleans = new String[] { "true", "false", "on", "off", "yes", "no", "0", "1" };
+        String[] notBooleans = new String[] { "11", "00", "sdfsdfsf", "F", "T" };
         assertThat(Booleans.isBoolean(null, 0, 1), is(false));
 
         for (String b : booleans) {
@@ -47,6 +47,7 @@ public class BooleansTests extends ElasticsearchTestCase {
             assertThat("recognized [" + nb + "] as boolean", Booleans.isBoolean(t.toCharArray(), "prefix".length(), nb.length()), Matchers.equalTo(false));
         }
     }
+
     @Test
     public void parseBoolean() {
         assertThat(Booleans.parseBoolean(randomFrom("true", "on", "yes", "1"), randomBoolean()), is(true));
@@ -57,7 +58,7 @@ public class BooleansTests extends ElasticsearchTestCase {
 
         assertThat(Booleans.parseBoolean(randomFrom("true", "on", "yes", "1"), randomFrom(null, Boolean.TRUE, Boolean.FALSE)), is(true));
         assertThat(Booleans.parseBoolean(randomFrom("false", "off", "no", "0"), randomFrom(null, Boolean.TRUE, Boolean.FALSE)), is(false));
-        assertThat(Booleans.parseBoolean(randomFrom("true", "on", "yes").toUpperCase(Locale.ROOT),randomFrom(null, Boolean.TRUE, Boolean.FALSE)), is(true));
+        assertThat(Booleans.parseBoolean(randomFrom("true", "on", "yes").toUpperCase(Locale.ROOT), randomFrom(null, Boolean.TRUE, Boolean.FALSE)), is(true));
         assertThat(Booleans.parseBoolean(null, Boolean.FALSE), is(false));
         assertThat(Booleans.parseBoolean(null, Boolean.TRUE), is(true));
         assertThat(Booleans.parseBoolean(null, null), nullValue());
@@ -65,9 +66,9 @@ public class BooleansTests extends ElasticsearchTestCase {
         char[] chars = randomFrom("true", "on", "yes", "1").toCharArray();
         assertThat(Booleans.parseBoolean(chars, 0, chars.length, randomBoolean()), is(true));
         chars = randomFrom("false", "off", "no", "0").toCharArray();
-        assertThat(Booleans.parseBoolean(chars,0, chars.length, randomBoolean()), is(false));
+        assertThat(Booleans.parseBoolean(chars, 0, chars.length, randomBoolean()), is(false));
         chars = randomFrom("true", "on", "yes").toUpperCase(Locale.ROOT).toCharArray();
-        assertThat(Booleans.parseBoolean(chars,0, chars.length, randomBoolean()), is(true));
+        assertThat(Booleans.parseBoolean(chars, 0, chars.length, randomBoolean()), is(true));
     }
 
     @Test

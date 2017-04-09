@@ -19,7 +19,6 @@
 
 package org.elasticsearch.index.search.geo;
 
-
 import org.elasticsearch.ElasticsearchParseException;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.elasticsearch.common.geo.GeoPoint;
@@ -35,8 +34,7 @@ import java.io.IOException;
 
 import static org.hamcrest.Matchers.closeTo;
 
-
-public class GeoPointParsingTests  extends ElasticsearchTestCase {
+public class GeoPointParsingTests extends ElasticsearchTestCase {
 
     // mind geohash precision and error
     private static final double ERROR = 0.00001d;
@@ -60,15 +58,15 @@ public class GeoPointParsingTests  extends ElasticsearchTestCase {
         assertCloseTo(point.resetFromString(Double.toString(lat) + ", " + Double.toHexString(lon)), lat, lon);
         assertCloseTo(point.reset(0, 0), 0, 0);
     }
-    
+
     @Test
     public void testGeoPointParsing() throws IOException {
         double lat = randomDouble() * 180 - 90;
         double lon = randomDouble() * 360 - 180;
-        
+
         GeoPoint point = GeoUtils.parseGeoPoint(objectLatLon(lat, lon));
         assertCloseTo(point, lat, lon);
-        
+
         GeoUtils.parseGeoPoint(arrayLatLon(lat, lon), point);
         assertCloseTo(point, lat, lon);
 
@@ -167,7 +165,7 @@ public class GeoPointParsingTests  extends ElasticsearchTestCase {
         parser.nextToken();
         return parser;
     }
-    
+
     public static void assertCloseTo(GeoPoint point, double lat, double lon) {
         assertThat(point.lat(), closeTo(lat, ERROR));
         assertThat(point.lon(), closeTo(lon, ERROR));

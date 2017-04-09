@@ -132,11 +132,7 @@ public class FileWatcherTest extends ElasticsearchTestCase {
         FileWatcher fileWatcher = new FileWatcher(testDir);
         fileWatcher.addListener(changes);
         fileWatcher.init();
-        assertThat(changes.notifications(), contains(
-                equalTo("onDirectoryInit: test-dir/"),
-                equalTo("onFileInit: test-dir/test.txt"),
-                equalTo("onFileInit: test-dir/test0.txt")
-        ));
+        assertThat(changes.notifications(), contains(equalTo("onDirectoryInit: test-dir/"), equalTo("onFileInit: test-dir/test.txt"), equalTo("onFileInit: test-dir/test0.txt")));
 
         changes.notifications().clear();
         fileWatcher.checkAndNotify();
@@ -149,12 +145,7 @@ public class FileWatcherTest extends ElasticsearchTestCase {
         append("Test", new File(testDir, "test0.txt"), Charset.defaultCharset());
 
         fileWatcher.checkAndNotify();
-        assertThat(changes.notifications(), contains(
-                equalTo("onFileChanged: test-dir/test0.txt"),
-                equalTo("onFileCreated: test-dir/test1.txt"),
-                equalTo("onFileCreated: test-dir/test2.txt"),
-                equalTo("onFileCreated: test-dir/test3.txt")
-        ));
+        assertThat(changes.notifications(), contains(equalTo("onFileChanged: test-dir/test0.txt"), equalTo("onFileCreated: test-dir/test1.txt"), equalTo("onFileCreated: test-dir/test2.txt"), equalTo("onFileCreated: test-dir/test3.txt")));
 
         changes.notifications().clear();
         fileWatcher.checkAndNotify();
@@ -164,10 +155,7 @@ public class FileWatcherTest extends ElasticsearchTestCase {
         new File(testDir, "test2.txt").delete();
 
         fileWatcher.checkAndNotify();
-        assertThat(changes.notifications(), contains(
-                equalTo("onFileDeleted: test-dir/test1.txt"),
-                equalTo("onFileDeleted: test-dir/test2.txt")
-        ));
+        assertThat(changes.notifications(), contains(equalTo("onFileDeleted: test-dir/test1.txt"), equalTo("onFileDeleted: test-dir/test2.txt")));
 
         changes.notifications().clear();
         fileWatcher.checkAndNotify();
@@ -178,33 +166,20 @@ public class FileWatcherTest extends ElasticsearchTestCase {
         touch(new File(testDir, "test4.txt"));
         fileWatcher.checkAndNotify();
 
-        assertThat(changes.notifications(), contains(
-                equalTo("onFileDeleted: test-dir/test0.txt"),
-                equalTo("onFileCreated: test-dir/test2.txt"),
-                equalTo("onFileCreated: test-dir/test4.txt")
-        ));
-
+        assertThat(changes.notifications(), contains(equalTo("onFileDeleted: test-dir/test0.txt"), equalTo("onFileCreated: test-dir/test2.txt"), equalTo("onFileCreated: test-dir/test4.txt")));
 
         changes.notifications().clear();
 
         new File(testDir, "test3.txt").delete();
         new File(testDir, "test4.txt").delete();
         fileWatcher.checkAndNotify();
-        assertThat(changes.notifications(), contains(
-                equalTo("onFileDeleted: test-dir/test3.txt"),
-                equalTo("onFileDeleted: test-dir/test4.txt")
-        ));
-
+        assertThat(changes.notifications(), contains(equalTo("onFileDeleted: test-dir/test3.txt"), equalTo("onFileDeleted: test-dir/test4.txt")));
 
         changes.notifications().clear();
         deleteRecursively(testDir);
         fileWatcher.checkAndNotify();
 
-        assertThat(changes.notifications(), contains(
-                equalTo("onFileDeleted: test-dir/test.txt"),
-                equalTo("onFileDeleted: test-dir/test2.txt"),
-                equalTo("onDirectoryDeleted: test-dir")
-        ));
+        assertThat(changes.notifications(), contains(equalTo("onFileDeleted: test-dir/test.txt"), equalTo("onFileDeleted: test-dir/test2.txt"), equalTo("onDirectoryDeleted: test-dir")));
 
     }
 
@@ -221,12 +196,7 @@ public class FileWatcherTest extends ElasticsearchTestCase {
         FileWatcher fileWatcher = new FileWatcher(testDir);
         fileWatcher.addListener(changes);
         fileWatcher.init();
-        assertThat(changes.notifications(), contains(
-                equalTo("onDirectoryInit: test-dir/"),
-                equalTo("onDirectoryInit: test-dir/sub-dir/"),
-                equalTo("onFileInit: test-dir/sub-dir/test0.txt"),
-                equalTo("onFileInit: test-dir/test.txt")
-        ));
+        assertThat(changes.notifications(), contains(equalTo("onDirectoryInit: test-dir/"), equalTo("onDirectoryInit: test-dir/sub-dir/"), equalTo("onFileInit: test-dir/sub-dir/test0.txt"), equalTo("onFileInit: test-dir/test.txt")));
 
         changes.notifications().clear();
         fileWatcher.checkAndNotify();
@@ -235,9 +205,7 @@ public class FileWatcherTest extends ElasticsearchTestCase {
         // Create new file in subdirectory
         touch(new File(testDir, "sub-dir/test1.txt"));
         fileWatcher.checkAndNotify();
-        assertThat(changes.notifications(), contains(
-                equalTo("onFileCreated: test-dir/sub-dir/test1.txt")
-        ));
+        assertThat(changes.notifications(), contains(equalTo("onFileCreated: test-dir/sub-dir/test1.txt")));
 
         changes.notifications().clear();
         fileWatcher.checkAndNotify();
@@ -249,12 +217,7 @@ public class FileWatcherTest extends ElasticsearchTestCase {
         new File(testDir, "first-level/second-level").mkdir();
         touch(new File(testDir, "first-level/second-level/file2.txt"));
         fileWatcher.checkAndNotify();
-        assertThat(changes.notifications(), contains(
-                equalTo("onDirectoryCreated: test-dir/first-level/"),
-                equalTo("onFileCreated: test-dir/first-level/file1.txt"),
-                equalTo("onDirectoryCreated: test-dir/first-level/second-level/"),
-                equalTo("onFileCreated: test-dir/first-level/second-level/file2.txt")
-        ));
+        assertThat(changes.notifications(), contains(equalTo("onDirectoryCreated: test-dir/first-level/"), equalTo("onFileCreated: test-dir/first-level/file1.txt"), equalTo("onDirectoryCreated: test-dir/first-level/second-level/"), equalTo("onFileCreated: test-dir/first-level/second-level/file2.txt")));
 
         changes.notifications().clear();
         fileWatcher.checkAndNotify();
@@ -263,12 +226,7 @@ public class FileWatcherTest extends ElasticsearchTestCase {
         // Delete a directory, check notifications for
         deleteRecursively(new File(testDir, "first-level"));
         fileWatcher.checkAndNotify();
-        assertThat(changes.notifications(), contains(
-                equalTo("onFileDeleted: test-dir/first-level/file1.txt"),
-                equalTo("onFileDeleted: test-dir/first-level/second-level/file2.txt"),
-                equalTo("onDirectoryDeleted: test-dir/first-level/second-level"),
-                equalTo("onDirectoryDeleted: test-dir/first-level")
-        ));
+        assertThat(changes.notifications(), contains(equalTo("onFileDeleted: test-dir/first-level/file1.txt"), equalTo("onFileDeleted: test-dir/first-level/second-level/file2.txt"), equalTo("onDirectoryDeleted: test-dir/first-level/second-level"), equalTo("onDirectoryDeleted: test-dir/first-level")));
     }
 
     @Test
@@ -285,24 +243,14 @@ public class FileWatcherTest extends ElasticsearchTestCase {
         FileWatcher fileWatcher = new FileWatcher(testDir);
         fileWatcher.addListener(changes);
         fileWatcher.init();
-        assertThat(changes.notifications(), contains(
-                equalTo("onDirectoryInit: test-dir/"),
-                equalTo("onDirectoryInit: test-dir/sub-dir/"),
-                equalTo("onFileInit: test-dir/sub-dir/test0.txt"),
-                equalTo("onFileInit: test-dir/sub-dir/test1.txt")
-        ));
+        assertThat(changes.notifications(), contains(equalTo("onDirectoryInit: test-dir/"), equalTo("onDirectoryInit: test-dir/sub-dir/"), equalTo("onFileInit: test-dir/sub-dir/test0.txt"), equalTo("onFileInit: test-dir/sub-dir/test1.txt")));
 
         changes.notifications().clear();
 
         deleteRecursively(subDir);
         touch(subDir);
         fileWatcher.checkAndNotify();
-        assertThat(changes.notifications(), contains(
-                equalTo("onFileDeleted: test-dir/sub-dir/test0.txt"),
-                equalTo("onFileDeleted: test-dir/sub-dir/test1.txt"),
-                equalTo("onDirectoryDeleted: test-dir/sub-dir"),
-                equalTo("onFileCreated: test-dir/sub-dir")
-        ));
+        assertThat(changes.notifications(), contains(equalTo("onFileDeleted: test-dir/sub-dir/test0.txt"), equalTo("onFileDeleted: test-dir/sub-dir/test1.txt"), equalTo("onDirectoryDeleted: test-dir/sub-dir"), equalTo("onFileCreated: test-dir/sub-dir")));
 
         changes.notifications().clear();
 
@@ -310,10 +258,7 @@ public class FileWatcherTest extends ElasticsearchTestCase {
         subDir.mkdir();
 
         fileWatcher.checkAndNotify();
-        assertThat(changes.notifications(), contains(
-                equalTo("onFileDeleted: test-dir/sub-dir/"),
-                equalTo("onDirectoryCreated: test-dir/sub-dir/")
-        ));
+        assertThat(changes.notifications(), contains(equalTo("onFileDeleted: test-dir/sub-dir/"), equalTo("onDirectoryCreated: test-dir/sub-dir/")));
     }
 
     @Test
@@ -333,10 +278,7 @@ public class FileWatcherTest extends ElasticsearchTestCase {
         new File(testDir, "test0.txt").delete();
         new File(testDir, "test1.txt").delete();
         fileWatcher.checkAndNotify();
-        assertThat(changes.notifications(), contains(
-                equalTo("onFileDeleted: test-dir/test0.txt"),
-                equalTo("onFileDeleted: test-dir/test1.txt")
-        ));
+        assertThat(changes.notifications(), contains(equalTo("onFileDeleted: test-dir/test0.txt"), equalTo("onFileDeleted: test-dir/test1.txt")));
     }
 
     @Test
@@ -356,11 +298,7 @@ public class FileWatcherTest extends ElasticsearchTestCase {
         touch(new File(testDir, "test1.txt"));
 
         fileWatcher.checkAndNotify();
-        assertThat(changes.notifications(), contains(
-                equalTo("onDirectoryCreated: test-dir/"),
-                equalTo("onFileCreated: test-dir/test0.txt"),
-                equalTo("onFileCreated: test-dir/test1.txt")
-        ));
+        assertThat(changes.notifications(), contains(equalTo("onDirectoryCreated: test-dir/"), equalTo("onFileCreated: test-dir/test0.txt"), equalTo("onFileCreated: test-dir/test1.txt")));
     }
 
     @Test
@@ -378,9 +316,7 @@ public class FileWatcherTest extends ElasticsearchTestCase {
         touch(testFile);
 
         fileWatcher.checkAndNotify();
-        assertThat(changes.notifications(), contains(
-                equalTo("onFileCreated: testfile.txt")
-        ));
+        assertThat(changes.notifications(), contains(equalTo("onFileCreated: testfile.txt")));
     }
 
 }

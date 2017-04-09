@@ -34,35 +34,11 @@ import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertAcke
 public class GeoMappingTests extends ElasticsearchIntegrationTest {
 
     public void testUpdatePrecision() throws Exception {
-        assertAcked(prepareCreate("test").addMapping("type1", XContentFactory.jsonBuilder().startObject()
-                .startObject("type1")
-                    .startObject("properties")
-                        .startObject("pin")
-                            .field("type", "geo_point")
-                            .startObject("fielddata")
-                                .field("format", "compressed")
-                                .field("precision", "2mm")
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                .endObject()
-                .endObject()).get());
+        assertAcked(prepareCreate("test").addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("pin").field("type", "geo_point").startObject("fielddata").field("format", "compressed").field("precision", "2mm").endObject().endObject().endObject().endObject().endObject()).get());
         ensureYellow();
         assertPrecision(new Distance(2, DistanceUnit.MILLIMETERS));
 
-        assertAcked(client().admin().indices().preparePutMapping("test").setType("type1").setSource(XContentFactory.jsonBuilder().startObject()
-                .startObject("type1")
-                .startObject("properties")
-                    .startObject("pin")
-                        .field("type", "geo_point")
-                            .startObject("fielddata")
-                                .field("format", "compressed")
-                                .field("precision", "11m")
-                            .endObject()
-                    .endObject()
-                .endObject()
-            .endObject()
-            .endObject()).get());
+        assertAcked(client().admin().indices().preparePutMapping("test").setType("type1").setSource(XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("pin").field("type", "geo_point").startObject("fielddata").field("format", "compressed").field("precision", "11m").endObject().endObject().endObject().endObject().endObject()).get());
 
         assertPrecision(new Distance(11, DistanceUnit.METERS));
     }

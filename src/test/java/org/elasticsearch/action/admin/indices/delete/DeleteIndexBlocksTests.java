@@ -26,7 +26,7 @@ import org.junit.Test;
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertBlocked;
 
 @ClusterScope(scope = ElasticsearchIntegrationTest.Scope.TEST)
-public class DeleteIndexBlocksTests extends ElasticsearchIntegrationTest{
+public class DeleteIndexBlocksTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testDeleteIndexWithBlocks() {

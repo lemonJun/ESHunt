@@ -50,12 +50,8 @@ public class BlendedTermQueryTest extends ElasticsearchLuceneTestCase {
     public void testBooleanQuery() throws IOException {
         Directory dir = newDirectory();
         IndexWriter w = new IndexWriter(dir, newIndexWriterConfig(new MockAnalyzer(random())));
-        String[] firstNames = new String[]{
-                "simon", "paul"
-        };
-        String[] surNames = new String[]{
-                "willnauer", "simon"
-        };
+        String[] firstNames = new String[] { "simon", "paul" };
+        String[] surNames = new String[] { "willnauer", "simon" };
         for (int i = 0; i < surNames.length; i++) {
             Document d = new Document();
             d.add(new TextField("id", Integer.toString(i), Field.Store.YES));
@@ -67,8 +63,7 @@ public class BlendedTermQueryTest extends ElasticsearchLuceneTestCase {
         for (int j = 0; j < iters; j++) {
             Document d = new Document();
             d.add(new TextField("id", Integer.toString(firstNames.length + j), Field.Store.YES));
-            d.add(new TextField("firstname", rarely() ? "some_other_name" :
-                    "simon the sorcerer", Field.Store.NO)); // make sure length-norm is the tie-breaker
+            d.add(new TextField("firstname", rarely() ? "some_other_name" : "simon the sorcerer", Field.Store.NO)); // make sure length-norm is the tie-breaker
             d.add(new TextField("surname", "bogus", Field.Store.NO));
             w.addDocument(d);
         }
@@ -77,7 +72,7 @@ public class BlendedTermQueryTest extends ElasticsearchLuceneTestCase {
         IndexSearcher searcher = setSimilarity(newSearcher(reader));
 
         {
-            Term[] terms = new Term[]{new Term("firstname", "simon"), new Term("surname", "simon")};
+            Term[] terms = new Term[] { new Term("firstname", "simon"), new Term("surname", "simon") };
             BlendedTermQuery query = BlendedTermQuery.booleanBlendedQuery(terms, true);
             TopDocs search = searcher.search(query, 3);
             ScoreDoc[] scoreDocs = search.scoreDocs;
@@ -103,11 +98,8 @@ public class BlendedTermQueryTest extends ElasticsearchLuceneTestCase {
     public void testDismaxQuery() throws IOException {
         Directory dir = newDirectory();
         IndexWriter w = new IndexWriter(dir, newIndexWriterConfig(new MockAnalyzer(random())));
-        String[] username = new String[]{
-                "foo fighters", "some cool fan", "cover band"};
-        String[] song = new String[]{
-                "generator", "foo fighers - generator", "foo fighters generator"
-        };
+        String[] username = new String[] { "foo fighters", "some cool fan", "cover band" };
+        String[] song = new String[] { "generator", "foo fighers - generator", "foo fighters generator" };
         final boolean omitNorms = random().nextBoolean();
         FieldType ft = new FieldType(TextField.TYPE_NOT_STORED);
         ft.setIndexOptions(random().nextBoolean() ? FieldInfo.IndexOptions.DOCS_ONLY : FieldInfo.IndexOptions.DOCS_AND_FREQS);
@@ -137,7 +129,7 @@ public class BlendedTermQueryTest extends ElasticsearchLuceneTestCase {
         DirectoryReader reader = DirectoryReader.open(w, true);
         IndexSearcher searcher = setSimilarity(newSearcher(reader));
         {
-            String[] fields = new String[]{"username", "song"};
+            String[] fields = new String[] { "username", "song" };
             BooleanQuery query = new BooleanQuery(false);
             query.add(BlendedTermQuery.dismaxBlendedQuery(toTerms(fields, "foo"), 0.1f), BooleanClause.Occur.SHOULD);
             query.add(BlendedTermQuery.dismaxBlendedQuery(toTerms(fields, "fighters"), 0.1f), BooleanClause.Occur.SHOULD);
@@ -217,8 +209,7 @@ public class BlendedTermQueryTest extends ElasticsearchLuceneTestCase {
             terms.add(new Term(TestUtil.randomRealisticUnicodeString(random(), 1, 10), TestUtil.randomRealisticUnicodeString(random(), 1, 10)));
         }
 
-        BlendedTermQuery blendedTermQuery = random().nextBoolean() ? BlendedTermQuery.dismaxBlendedQuery(terms.toArray(new Term[0]), random().nextFloat()) :
-                BlendedTermQuery.booleanBlendedQuery(terms.toArray(new Term[0]), random().nextBoolean());
+        BlendedTermQuery blendedTermQuery = random().nextBoolean() ? BlendedTermQuery.dismaxBlendedQuery(terms.toArray(new Term[0]), random().nextFloat()) : BlendedTermQuery.booleanBlendedQuery(terms.toArray(new Term[0]), random().nextBoolean());
         Set<Term> extracted = new HashSet<>();
         blendedTermQuery.extractTerms(extracted);
         assertThat(extracted.size(), equalTo(terms.size()));

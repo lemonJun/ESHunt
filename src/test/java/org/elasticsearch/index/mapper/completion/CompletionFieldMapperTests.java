@@ -37,11 +37,7 @@ public class CompletionFieldMapperTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testDefaultConfiguration() throws IOException {
-        String mapping = jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("completion")
-                .field("type", "completion")
-                .endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("completion").field("type", "completion").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
@@ -54,18 +50,9 @@ public class CompletionFieldMapperTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testThatSerializationIncludesAllElements() throws Exception {
-        String mapping = jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("completion")
-                .field("type", "completion")
-                .field("index_analyzer", "simple")
-                .field("search_analyzer", "standard")
-                .field("payloads", true)
-                .field("preserve_separators", false)
-                .field("preserve_position_increments", true)
-                .field("max_input_length", 14)
+        String mapping = jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("completion").field("type", "completion").field("index_analyzer", "simple").field("search_analyzer", "standard").field("payloads", true).field("preserve_separators", false).field("preserve_position_increments", true).field("max_input_length", 14)
 
-                .endObject().endObject()
-                .endObject().endObject().string();
+                        .endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
@@ -88,13 +75,7 @@ public class CompletionFieldMapperTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testThatSerializationCombinesToOneAnalyzerFieldIfBothAreEqual() throws Exception {
-        String mapping = jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("completion")
-                .field("type", "completion")
-                .field("index_analyzer", "simple")
-                .field("search_analyzer", "simple")
-                .endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("completion").field("type", "completion").field("index_analyzer", "simple").field("search_analyzer", "simple").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 

@@ -55,34 +55,23 @@ public class SearchScrollWithFailingNodesTests extends ElasticsearchIntegrationT
     public void testScanScrollWithShardExceptions() throws Exception {
         internalCluster().startNode();
         internalCluster().startNode();
-        assertAcked(
-                prepareCreate("test")
+        assertAcked(prepareCreate("test")
                         // Enforces that only one shard can only be allocated to a single node
-                        .setSettings(ImmutableSettings.builder().put(indexSettings()).put(ShardsLimitAllocationDecider.INDEX_TOTAL_SHARDS_PER_NODE, 1))
-        );
+                        .setSettings(ImmutableSettings.builder().put(indexSettings()).put(ShardsLimitAllocationDecider.INDEX_TOTAL_SHARDS_PER_NODE, 1)));
 
         List<IndexRequestBuilder> writes = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
-            writes.add(
-                    client().prepareIndex("test", "type1")
-                            .setSource(jsonBuilder().startObject().field("field", i).endObject())
-            );
+            writes.add(client().prepareIndex("test", "type1").setSource(jsonBuilder().startObject().field("field", i).endObject()));
         }
         indexRandom(false, writes);
         refresh();
 
-        SearchResponse searchResponse = client().prepareSearch()
-                .setQuery(matchAllQuery())
-                .setSize(10)
-                .setScroll(TimeValue.timeValueMinutes(1))
-                .get();
+        SearchResponse searchResponse = client().prepareSearch().setQuery(matchAllQuery()).setSize(10).setScroll(TimeValue.timeValueMinutes(1)).get();
         assertAllSuccessful(searchResponse);
         long numHits = 0;
         do {
             numHits += searchResponse.getHits().hits().length;
-            searchResponse = client()
-                    .prepareSearchScroll(searchResponse.getScrollId()).setScroll(TimeValue.timeValueMinutes(1))
-                    .get();
+            searchResponse = client().prepareSearchScroll(searchResponse.getScrollId()).setScroll(TimeValue.timeValueMinutes(1)).get();
             assertAllSuccessful(searchResponse);
         } while (searchResponse.getHits().hits().length > 0);
         assertThat(numHits, equalTo(100l));
@@ -90,19 +79,13 @@ public class SearchScrollWithFailingNodesTests extends ElasticsearchIntegrationT
 
         internalCluster().stopRandomNonMasterNode();
 
-        searchResponse = client().prepareSearch()
-                .setQuery(matchAllQuery())
-                .setSize(10)
-                .setScroll(TimeValue.timeValueMinutes(1))
-                .get();
+        searchResponse = client().prepareSearch().setQuery(matchAllQuery()).setSize(10).setScroll(TimeValue.timeValueMinutes(1)).get();
         assertThat(searchResponse.getSuccessfulShards(), lessThan(searchResponse.getTotalShards()));
         numHits = 0;
         int numberOfSuccessfulShards = searchResponse.getSuccessfulShards();
         do {
             numHits += searchResponse.getHits().hits().length;
-            searchResponse = client()
-                    .prepareSearchScroll(searchResponse.getScrollId()).setScroll(TimeValue.timeValueMinutes(1))
-                    .get();
+            searchResponse = client().prepareSearchScroll(searchResponse.getScrollId()).setScroll(TimeValue.timeValueMinutes(1)).get();
             assertThat(searchResponse.getSuccessfulShards(), equalTo(numberOfSuccessfulShards));
         } while (searchResponse.getHits().hits().length > 0);
         assertThat(numHits, greaterThan(0l));

@@ -19,7 +19,6 @@
 
 package org.elasticsearch.script;
 
-
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.xcontent.ToXContent.MapParams;
 import org.elasticsearch.common.xcontent.XContentHelper;
@@ -175,7 +174,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         assertThat(paramParser.lang(), nullValue());
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testTokenSingleParameterDelcaredTwiceInlineFile() throws IOException {
         XContentParser parser = XContentHelper.createParser(new BytesArray("{ \"foo\" : \"scriptValue\", \"foo_file\" : \"scriptValue\" }"));
         Token token = parser.nextToken();
@@ -195,7 +194,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.token(parser.currentName(), parser.currentToken(), parser);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testTokenSingleParameterDelcaredTwiceInlineIndexed() throws IOException {
         XContentParser parser = XContentHelper.createParser(new BytesArray("{ \"foo\" : \"scriptValue\", \"foo_id\" : \"scriptValue\" }"));
         Token token = parser.nextToken();
@@ -215,7 +214,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.token(parser.currentName(), parser.currentToken(), parser);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testTokenSingleParameterDelcaredTwiceFileInline() throws IOException {
         XContentParser parser = XContentHelper.createParser(new BytesArray("{ \"foo_file\" : \"scriptValue\", \"foo\" : \"scriptValue\" }"));
         Token token = parser.nextToken();
@@ -235,7 +234,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.token(parser.currentName(), parser.currentToken(), parser);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testTokenSingleParameterDelcaredTwiceFileIndexed() throws IOException {
         XContentParser parser = XContentHelper.createParser(new BytesArray("{ \"foo_file\" : \"scriptValue\", \"foo_id\" : \"scriptValue\" }"));
         Token token = parser.nextToken();
@@ -255,7 +254,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.token(parser.currentName(), parser.currentToken(), parser);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testTokenSingleParameterDelcaredTwiceIndexedInline() throws IOException {
         XContentParser parser = XContentHelper.createParser(new BytesArray("{ \"foo_id\" : \"scriptValue\", \"foo\" : \"scriptValue\" }"));
         Token token = parser.nextToken();
@@ -275,7 +274,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.token(parser.currentName(), parser.currentToken(), parser);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testTokenSingleParameterDelcaredTwiceIndexedFile() throws IOException {
         XContentParser parser = XContentHelper.createParser(new BytesArray("{ \"foo_id\" : \"scriptValue\", \"foo_file\" : \"scriptValue\" }"));
         Token token = parser.nextToken();
@@ -512,10 +511,10 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         assertThat(paramParser.lang(), nullValue());
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testReservedParameters() {
         Set<String> parameterNames = Collections.singleton("lang");
-        new ScriptParameterParser(parameterNames );
+        new ScriptParameterParser(parameterNames);
     }
 
     @Test
@@ -662,7 +661,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         assertThat(config.isEmpty(), equalTo(true));
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testConfigSingleParameterDelcaredTwiceInlineFile() throws IOException {
         Map<String, Object> config = new LinkedHashMap<>();
         config.put("foo", "scriptValue");
@@ -673,7 +672,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.parseConfig(config, true);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testConfigSingleParameterDelcaredTwiceInlineIndexed() throws IOException {
         Map<String, Object> config = new LinkedHashMap<>();
         config.put("foo", "scriptValue");
@@ -684,7 +683,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.parseConfig(config, true);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testConfigSingleParameterDelcaredTwiceFileInline() throws IOException {
         Map<String, Object> config = new LinkedHashMap<>();
         config.put("foo_file", "scriptValue");
@@ -695,7 +694,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.parseConfig(config, true);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testConfigSingleParameterDelcaredTwiceFileIndexed() throws IOException {
         Map<String, Object> config = new LinkedHashMap<>();
         config.put("foo_file", "scriptValue");
@@ -706,7 +705,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.parseConfig(config, true);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testConfigSingleParameterDelcaredTwiceIndexedInline() throws IOException {
         Map<String, Object> config = new LinkedHashMap<>();
         config.put("foo_id", "scriptValue");
@@ -717,7 +716,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.parseConfig(config, true);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testConfigSingleParameterDelcaredTwiceIndexedFile() throws IOException {
         Map<String, Object> config = new LinkedHashMap<>();
         config.put("foo_id", "scriptValue");
@@ -874,7 +873,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         assertThat((String) config.get("other_file"), equalTo("barScriptValue"));
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testConfigMultipleParametersInlineWrongType() throws IOException {
         Map<String, Object> config = new HashMap<>();
         config.put("foo", 1l);
@@ -895,7 +894,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.parseConfig(config, true);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testConfigMultipleParametersFileWrongType() throws IOException {
         Map<String, Object> config = new HashMap<>();
         config.put("foo", "fooScriptValue");
@@ -916,7 +915,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.parseConfig(config, true);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testConfigMultipleParametersIndexedWrongType() throws IOException {
         Map<String, Object> config = new HashMap<>();
         config.put("foo", "fooScriptValue");
@@ -937,7 +936,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.parseConfig(config, true);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testConfigMultipleParametersLangWrongType() throws IOException {
         Map<String, Object> config = new HashMap<>();
         config.put("foo", "fooScriptValue");
@@ -967,7 +966,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.parseParams(params);
         assertDefaultParameterValue(paramParser, "scriptValue", ScriptType.INLINE);
         assertThat(paramParser.lang(), nullValue());
-        
+
         paramParser = new ScriptParameterParser(null);
         paramParser.parseParams(params);
         assertDefaultParameterValue(paramParser, "scriptValue", ScriptType.INLINE);
@@ -1052,7 +1051,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         assertThat(paramParser.lang(), nullValue());
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testParamsSingleParameterDelcaredTwiceInlineFile() throws IOException {
         Map<String, String> config = new LinkedHashMap<>();
         config.put("foo", "scriptValue");
@@ -1064,7 +1063,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.parseParams(params);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testParamsSingleParameterDelcaredTwiceInlineIndexed() throws IOException {
         Map<String, String> config = new LinkedHashMap<>();
         config.put("foo", "scriptValue");
@@ -1076,7 +1075,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.parseParams(params);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testParamsSingleParameterDelcaredTwiceFileInline() throws IOException {
         Map<String, String> config = new LinkedHashMap<>();
         config.put("foo_file", "scriptValue");
@@ -1088,7 +1087,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.parseParams(params);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testParamsSingleParameterDelcaredTwiceFileIndexed() throws IOException {
         Map<String, String> config = new LinkedHashMap<>();
         config.put("foo_file", "scriptValue");
@@ -1100,7 +1099,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.parseParams(params);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testParamsSingleParameterDelcaredTwiceIndexedInline() throws IOException {
         Map<String, String> config = new LinkedHashMap<>();
         config.put("foo_id", "scriptValue");
@@ -1112,7 +1111,7 @@ public class ScriptParameterParserTest extends ElasticsearchTestCase {
         paramParser.parseParams(params);
     }
 
-    @Test(expected=ScriptParameterParseException.class)
+    @Test(expected = ScriptParameterParseException.class)
     public void testParamsSingleParameterDelcaredTwiceIndexedFile() throws IOException {
         Map<String, String> config = new LinkedHashMap<>();
         config.put("foo_id", "scriptValue");

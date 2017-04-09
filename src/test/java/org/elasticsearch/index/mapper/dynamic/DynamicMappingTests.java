@@ -41,20 +41,11 @@ public class DynamicMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testDynamicTrue() throws IOException {
-        String mapping = jsonBuilder().startObject().startObject("type")
-                .field("dynamic", "true")
-                .startObject("properties")
-                .startObject("field1").field("type", "string").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = jsonBuilder().startObject().startObject("type").field("dynamic", "true").startObject("properties").startObject("field1").field("type", "string").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", jsonBuilder()
-                .startObject()
-                .field("field1", "value1")
-                .field("field2", "value2")
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", jsonBuilder().startObject().field("field1", "value1").field("field2", "value2").bytes());
 
         assertThat(doc.rootDoc().get("field1"), equalTo("value1"));
         assertThat(doc.rootDoc().get("field2"), equalTo("value2"));
@@ -62,54 +53,31 @@ public class DynamicMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testDynamicFalse() throws IOException {
-        String mapping = jsonBuilder().startObject().startObject("type")
-                .field("dynamic", "false")
-                .startObject("properties")
-                .startObject("field1").field("type", "string").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = jsonBuilder().startObject().startObject("type").field("dynamic", "false").startObject("properties").startObject("field1").field("type", "string").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", jsonBuilder()
-                .startObject()
-                .field("field1", "value1")
-                .field("field2", "value2")
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", jsonBuilder().startObject().field("field1", "value1").field("field2", "value2").bytes());
 
         assertThat(doc.rootDoc().get("field1"), equalTo("value1"));
         assertThat(doc.rootDoc().get("field2"), nullValue());
     }
 
-
     @Test
     public void testDynamicStrict() throws IOException {
-        String mapping = jsonBuilder().startObject().startObject("type")
-                .field("dynamic", "strict")
-                .startObject("properties")
-                .startObject("field1").field("type", "string").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = jsonBuilder().startObject().startObject("type").field("dynamic", "strict").startObject("properties").startObject("field1").field("type", "string").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
         try {
-            defaultMapper.parse("type", "1", jsonBuilder()
-                    .startObject()
-                    .field("field1", "value1")
-                    .field("field2", "value2")
-                    .bytes());
+            defaultMapper.parse("type", "1", jsonBuilder().startObject().field("field1", "value1").field("field2", "value2").bytes());
             fail();
         } catch (StrictDynamicMappingException e) {
             // all is well
         }
 
         try {
-            defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                    .startObject()
-                    .field("field1", "value1")
-                    .field("field2", (String) null)
-                    .bytes());
+            defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field1", "value1").field("field2", (String) null).bytes());
             fail();
         } catch (StrictDynamicMappingException e) {
             // all is well
@@ -118,23 +86,11 @@ public class DynamicMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testDynamicFalseWithInnerObjectButDynamicSetOnRoot() throws IOException {
-        String mapping = jsonBuilder().startObject().startObject("type")
-                .field("dynamic", "false")
-                .startObject("properties")
-                .startObject("obj1").startObject("properties")
-                .startObject("field1").field("type", "string").endObject()
-                .endObject().endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = jsonBuilder().startObject().startObject("type").field("dynamic", "false").startObject("properties").startObject("obj1").startObject("properties").startObject("field1").field("type", "string").endObject().endObject().endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", jsonBuilder()
-                .startObject().startObject("obj1")
-                .field("field1", "value1")
-                .field("field2", "value2")
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", jsonBuilder().startObject().startObject("obj1").field("field1", "value1").field("field2", "value2").endObject().bytes());
 
         assertThat(doc.rootDoc().get("obj1.field1"), equalTo("value1"));
         assertThat(doc.rootDoc().get("obj1.field2"), nullValue());
@@ -142,24 +98,12 @@ public class DynamicMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testDynamicStrictWithInnerObjectButDynamicSetOnRoot() throws IOException {
-        String mapping = jsonBuilder().startObject().startObject("type")
-                .field("dynamic", "strict")
-                .startObject("properties")
-                .startObject("obj1").startObject("properties")
-                .startObject("field1").field("type", "string").endObject()
-                .endObject().endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = jsonBuilder().startObject().startObject("type").field("dynamic", "strict").startObject("properties").startObject("obj1").startObject("properties").startObject("field1").field("type", "string").endObject().endObject().endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
         try {
-            defaultMapper.parse("type", "1", jsonBuilder()
-                    .startObject().startObject("obj1")
-                    .field("field1", "value1")
-                    .field("field2", "value2")
-                    .endObject()
-                    .bytes());
+            defaultMapper.parse("type", "1", jsonBuilder().startObject().startObject("obj1").field("field1", "value1").field("field2", "value2").endObject().bytes());
             fail();
         } catch (StrictDynamicMappingException e) {
             // all is well
@@ -175,9 +119,7 @@ public class DynamicMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testIndexingFailureDoesStillCreateType() throws IOException, InterruptedException {
-        XContentBuilder mapping = jsonBuilder().startObject().startObject("_default_")
-                .field("dynamic", "strict")
-                .endObject().endObject();
+        XContentBuilder mapping = jsonBuilder().startObject().startObject("_default_").field("dynamic", "strict").endObject().endObject();
 
         IndexService indexService = createIndex("test", ImmutableSettings.EMPTY, "_default_", mapping);
 
@@ -204,14 +146,7 @@ public class DynamicMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testTypeCreatedProperly() throws IOException, InterruptedException {
-        XContentBuilder mapping = jsonBuilder().startObject().startObject("_default_")
-                .field("dynamic", "strict")
-                .startObject("properties")
-                .startObject("test_string")
-                .field("type", "string")
-                .endObject()
-                .endObject()
-                .endObject().endObject();
+        XContentBuilder mapping = jsonBuilder().startObject().startObject("_default_").field("dynamic", "strict").startObject("properties").startObject("test_string").field("type", "string").endObject().endObject().endObject().endObject();
 
         IndexService indexService = createIndex("test", ImmutableSettings.EMPTY, "_default_", mapping);
 
@@ -245,13 +180,7 @@ public class DynamicMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testFieldsCreatedWithPartialParsing() throws IOException, InterruptedException {
-        XContentBuilder mapping = jsonBuilder().startObject().startObject("doc")
-                .startObject("properties")
-                .startObject("z")
-                .field("type", "long")
-                .endObject()
-                .endObject()
-                .endObject().endObject();
+        XContentBuilder mapping = jsonBuilder().startObject().startObject("doc").startObject("properties").startObject("z").field("type", "long").endObject().endObject().endObject().endObject();
 
         IndexService indexService = createIndex("test", ImmutableSettings.EMPTY, "doc", mapping);
         boolean create = randomBoolean();

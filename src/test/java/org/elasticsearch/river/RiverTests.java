@@ -51,7 +51,7 @@ public class RiverTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testMultipleRiversStart() throws Exception {
-        int nbRivers = between(2,10);
+        int nbRivers = between(2, 10);
         logger.info("-->  testing with {} rivers...", nbRivers);
         Thread[] riverCreators = new Thread[nbRivers];
         final CountDownLatch latch = new CountDownLatch(nbRivers);
@@ -97,13 +97,7 @@ public class RiverTests extends ElasticsearchIntegrationTest {
     @Test
     public void startDummyRiverWithDefaultTemplate() throws Exception {
         logger.info("--> create empty template");
-        client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("*")
-                .setOrder(0)
-                .addMapping(MapperService.DEFAULT_MAPPING,
-                        JsonXContent.contentBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING)
-                                .endObject().endObject())
-                .get();
+        client().admin().indices().preparePutTemplate("template_1").setTemplate("*").setOrder(0).addMapping(MapperService.DEFAULT_MAPPING, JsonXContent.contentBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING).endObject().endObject()).get();
 
         startAndCheckRiverIsStarted("dummy-river-default-template-test");
     }
@@ -115,20 +109,8 @@ public class RiverTests extends ElasticsearchIntegrationTest {
     @Test
     public void startDummyRiverWithSomeTemplates() throws Exception {
         logger.info("--> create some templates");
-        client().admin().indices().preparePutTemplate("template_1")
-                .setTemplate("*")
-                .setOrder(0)
-                .addMapping(MapperService.DEFAULT_MAPPING,
-                        JsonXContent.contentBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING)
-                                .endObject().endObject())
-                .get();
-        client().admin().indices().preparePutTemplate("template_2")
-                .setTemplate("*")
-                .setOrder(0)
-                .addMapping("atype",
-                        JsonXContent.contentBuilder().startObject().startObject("atype")
-                                .endObject().endObject())
-                .get();
+        client().admin().indices().preparePutTemplate("template_1").setTemplate("*").setOrder(0).addMapping(MapperService.DEFAULT_MAPPING, JsonXContent.contentBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING).endObject().endObject()).get();
+        client().admin().indices().preparePutTemplate("template_2").setTemplate("*").setOrder(0).addMapping("atype", JsonXContent.contentBuilder().startObject().startObject("atype").endObject().endObject()).get();
 
         startAndCheckRiverIsStarted("dummy-river-template-test");
     }
@@ -144,8 +126,7 @@ public class RiverTests extends ElasticsearchIntegrationTest {
 
     private void startRiver(final String riverName) {
         logger.info("-->  starting river [{}]", riverName);
-        IndexResponse indexResponse = client().prepareIndex(RiverIndexName.Conf.DEFAULT_INDEX_NAME, riverName, "_meta")
-                .setSource("type", DummyRiverModule.class.getCanonicalName()).get();
+        IndexResponse indexResponse = client().prepareIndex(RiverIndexName.Conf.DEFAULT_INDEX_NAME, riverName, "_meta").setSource("type", DummyRiverModule.class.getCanonicalName()).get();
         assertTrue(indexResponse.isCreated());
         ensureGreen();
     }

@@ -53,13 +53,9 @@ public class SnapshotBackwardsCompatibilityTest extends ElasticsearchBackwardsCo
     @Test
     public void testSnapshotAndRestore() throws ExecutionException, InterruptedException, IOException {
         logger.info("-->  creating repository");
-        assertAcked(client().admin().cluster().preparePutRepository("test-repo")
-                .setType("fs").setSettings(ImmutableSettings.settingsBuilder()
-                        .put("location", randomRepoPath().getAbsolutePath())
-                        .put("compress", randomBoolean())
-                        .put("chunk_size", randomIntBetween(100, 1000))));
-        String[] indicesBefore = new String[randomIntBetween(2,5)];
-        String[] indicesAfter = new String[randomIntBetween(2,5)];
+        assertAcked(client().admin().cluster().preparePutRepository("test-repo").setType("fs").setSettings(ImmutableSettings.settingsBuilder().put("location", randomRepoPath().getAbsolutePath()).put("compress", randomBoolean()).put("chunk_size", randomIntBetween(100, 1000))));
+        String[] indicesBefore = new String[randomIntBetween(2, 5)];
+        String[] indicesAfter = new String[randomIntBetween(2, 5)];
         for (int i = 0; i < indicesBefore.length; i++) {
             indicesBefore[i] = "index_before_" + i;
             createIndex(indicesBefore[i]);
@@ -107,7 +103,6 @@ public class SnapshotBackwardsCompatibilityTest extends ElasticsearchBackwardsCo
         refresh();
         final long numDocs = client().prepareCount(indices).get().getCount();
         assertThat(client().prepareCount(indices).get().getCount(), lessThan((long) (buildersBefore.length + buildersAfter.length)));
-
 
         client().admin().indices().prepareUpdateSettings(indices).setSettings(ImmutableSettings.builder().put(EnableAllocationDecider.INDEX_ROUTING_ALLOCATION_ENABLE, "none")).get();
         backwardsCluster().allowOnAllNodes(indices);
@@ -163,17 +158,10 @@ public class SnapshotBackwardsCompatibilityTest extends ElasticsearchBackwardsCo
         Client client = client();
         final File tempDir = randomRepoPath().getAbsoluteFile();
         logger.info("-->  creating repository");
-        assertAcked(client.admin().cluster().preparePutRepository("test-repo")
-                .setType("fs").setSettings(ImmutableSettings.settingsBuilder()
-                        .put("location", tempDir)
-                        .put("compress", randomBoolean())
-                        .put("chunk_size", randomIntBetween(100, 1000))));
+        assertAcked(client.admin().cluster().preparePutRepository("test-repo").setType("fs").setSettings(ImmutableSettings.settingsBuilder().put("location", tempDir).put("compress", randomBoolean()).put("chunk_size", randomIntBetween(100, 1000))));
 
         // only one shard
-        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)
-        ));
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)));
         ensureYellow();
         logger.info("-->  indexing");
 

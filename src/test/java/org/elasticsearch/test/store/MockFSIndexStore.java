@@ -32,8 +32,7 @@ import org.elasticsearch.indices.store.IndicesStore;
 public class MockFSIndexStore extends FsIndexStore {
 
     @Inject
-    public MockFSIndexStore(Index index, @IndexSettings Settings indexSettings, IndexService indexService,
-                            IndicesStore indicesStore, NodeEnvironment nodeEnv) {
+    public MockFSIndexStore(Index index, @IndexSettings Settings indexSettings, IndexService indexService, IndicesStore indicesStore, NodeEnvironment nodeEnv) {
         super(index, indexSettings, indexService, indicesStore, nodeEnv);
     }
 

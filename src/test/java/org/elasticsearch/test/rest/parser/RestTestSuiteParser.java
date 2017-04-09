@@ -51,7 +51,7 @@ public class RestTestSuiteParser implements RestTestFragmentParser<RestTestSuite
         RandomAccessFile randomAccessFile = null;
         try {
             randomAccessFile = new RandomAccessFile(file, "r");
-            randomAccessFile.skipBytes((int)randomAccessFile.length() - 1);
+            randomAccessFile.skipBytes((int) randomAccessFile.length() - 1);
             if (randomAccessFile.read() != 10) {
                 throw new RestTestParseException("test suite [" + api + "/" + filename + "] doesn't end with line feed (\\n)");
             }
@@ -63,7 +63,7 @@ public class RestTestSuiteParser implements RestTestFragmentParser<RestTestSuite
         try {
             RestTestSuiteParseContext testParseContext = new RestTestSuiteParseContext(api, filename, parser);
             return parse(testParseContext);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RestTestParseException("Error parsing " + api + "/" + filename, e);
         } finally {
             parser.close();
@@ -81,11 +81,11 @@ public class RestTestSuiteParser implements RestTestFragmentParser<RestTestSuite
 
         restTestSuite.setSetupSection(parseContext.parseSetupSection());
 
-        while(true) {
+        while (true) {
             //the "---" section separator is not understood by the yaml parser. null is returned, same as when the parser is closed
             //we need to somehow distinguish between a null in the middle of a test ("---")
             // and a null at the end of the file (at least two consecutive null tokens)
-            if(parser.currentToken() == null) {
+            if (parser.currentToken() == null) {
                 if (parser.nextToken() == null) {
                     break;
                 }

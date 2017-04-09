@@ -39,14 +39,9 @@ import static org.hamcrest.Matchers.containsString;
 public class ClusterStateToStringTests extends ElasticsearchAllocationTestCase {
     @Test
     public void testClusterStateSerialization() throws Exception {
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test_idx").numberOfShards(10).numberOfReplicas(1))
-                .put(IndexTemplateMetaData.builder("test_template").build())
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test_idx").numberOfShards(10).numberOfReplicas(1)).put(IndexTemplateMetaData.builder("test_template").build()).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test_idx"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test_idx")).build();
 
         DiscoveryNodes nodes = DiscoveryNodes.builder().put(new DiscoveryNode("node_foo", DummyTransportAddress.INSTANCE, Version.CURRENT)).localNodeId("node_foo").masterNodeId("node_foo").build();
 

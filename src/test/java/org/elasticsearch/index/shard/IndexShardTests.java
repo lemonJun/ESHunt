@@ -112,8 +112,7 @@ public class IndexShardTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testMarkAsInactiveTriggersSyncedFlush() throws Exception {
-        assertAcked(client().admin().indices().prepareCreate("test")
-                .setSettings(SETTING_NUMBER_OF_SHARDS, 1, SETTING_NUMBER_OF_REPLICAS, 0));
+        assertAcked(client().admin().indices().prepareCreate("test").setSettings(SETTING_NUMBER_OF_SHARDS, 1, SETTING_NUMBER_OF_REPLICAS, 0));
         client().prepareIndex("test", "test").setSource("{}").get();
         ensureGreen("test");
         IndicesService indicesService = getInstanceFromNode(IndicesService.class);
@@ -131,8 +130,7 @@ public class IndexShardTests extends ElasticsearchSingleNodeTest {
 
     public void testDeleteByQueryBWC() {
         Version version = randomVersion();
-        assertAcked(client().admin().indices().prepareCreate("test")
-                .setSettings(SETTING_NUMBER_OF_SHARDS, 1, SETTING_NUMBER_OF_REPLICAS, 0, IndexMetaData.SETTING_VERSION_CREATED, version.id));
+        assertAcked(client().admin().indices().prepareCreate("test").setSettings(SETTING_NUMBER_OF_SHARDS, 1, SETTING_NUMBER_OF_REPLICAS, 0, IndexMetaData.SETTING_VERSION_CREATED, version.id));
         ensureGreen("test");
         client().prepareIndex("test", "person").setSource("{ \"user\" : \"kimchy\" }").get();
 
@@ -156,11 +154,10 @@ public class IndexShardTests extends ElasticsearchSingleNodeTest {
             assertEquals(numDocs, searcher.reader().numDocs());
         }
     }
-    
+
     public void testMinimumCompatVersion() {
         Version versionCreated = randomVersion();
-        assertAcked(client().admin().indices().prepareCreate("test")
-                .setSettings(SETTING_NUMBER_OF_SHARDS, 1, SETTING_NUMBER_OF_REPLICAS, 0, SETTING_VERSION_CREATED, versionCreated.id));
+        assertAcked(client().admin().indices().prepareCreate("test").setSettings(SETTING_NUMBER_OF_SHARDS, 1, SETTING_NUMBER_OF_REPLICAS, 0, SETTING_VERSION_CREATED, versionCreated.id));
         client().prepareIndex("test", "test").setSource("{}").get();
         ensureGreen("test");
         IndicesService indicesService = getInstanceFromNode(IndicesService.class);
@@ -203,8 +200,7 @@ public class IndexShardTests extends ElasticsearchSingleNodeTest {
     }
 
     public void testUpdatePriority() {
-        assertAcked(client().admin().indices().prepareCreate("test")
-                .setSettings(IndexMetaData.SETTING_PRIORITY, 200));
+        assertAcked(client().admin().indices().prepareCreate("test").setSettings(IndexMetaData.SETTING_PRIORITY, 200));
         IndexSettingsService indexSettingsService = getInstanceFromNode(IndicesService.class).indexService("test").settingsService();
         assertEquals(200, indexSettingsService.getSettings().getAsInt(IndexMetaData.SETTING_PRIORITY, 0).intValue());
         client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_PRIORITY, 400).build()).get();

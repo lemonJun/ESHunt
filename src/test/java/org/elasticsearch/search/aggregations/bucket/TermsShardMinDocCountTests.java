@@ -46,6 +46,7 @@ import static org.hamcrest.Matchers.equalTo;
 public class TermsShardMinDocCountTests extends ElasticsearchIntegrationTest {
     private static final String index = "someindex";
     private static final String type = "testtype";
+
     public String randomExecutionHint() {
         return randomBoolean() ? null : randomFrom(SignificantTermsAggregatorFactory.ExecutionMode.values()).toString();
     }
@@ -72,26 +73,13 @@ public class TermsShardMinDocCountTests extends ElasticsearchIntegrationTest {
         indexRandom(true, false, indexBuilders);
 
         // first, check that indeed when not setting the shardMinDocCount parameter 0 terms are returned
-        SearchResponse response = client().prepareSearch(index)
-                .addAggregation(
-                        (new FilterAggregationBuilder("inclass").filter(FilterBuilders.termFilter("class", true)))
-                                .subAggregation(new SignificantTermsBuilder("mySignificantTerms").field("text").minDocCount(2).size(2).executionHint(randomExecutionHint()))
-                )
-                .execute()
-                .actionGet();
+        SearchResponse response = client().prepareSearch(index).addAggregation((new FilterAggregationBuilder("inclass").filter(FilterBuilders.termFilter("class", true))).subAggregation(new SignificantTermsBuilder("mySignificantTerms").field("text").minDocCount(2).size(2).executionHint(randomExecutionHint()))).execute().actionGet();
         assertSearchResponse(response);
         InternalFilter filteredBucket = response.getAggregations().get("inclass");
         SignificantTerms sigterms = filteredBucket.getAggregations().get("mySignificantTerms");
         assertThat(sigterms.getBuckets().size(), equalTo(0));
 
-
-        response = client().prepareSearch(index)
-                .addAggregation(
-                        (new FilterAggregationBuilder("inclass").filter(FilterBuilders.termFilter("class", true)))
-                                .subAggregation(new SignificantTermsBuilder("mySignificantTerms").field("text").minDocCount(2).shardMinDocCount(2).size(2).executionHint(randomExecutionHint()))
-                )
-                .execute()
-                .actionGet();
+        response = client().prepareSearch(index).addAggregation((new FilterAggregationBuilder("inclass").filter(FilterBuilders.termFilter("class", true))).subAggregation(new SignificantTermsBuilder("mySignificantTerms").field("text").minDocCount(2).shardMinDocCount(2).size(2).executionHint(randomExecutionHint()))).execute().actionGet();
         assertSearchResponse(response);
         filteredBucket = response.getAggregations().get("inclass");
         sigterms = filteredBucket.getAggregations().get("mySignificantTerms");
@@ -113,7 +101,7 @@ public class TermsShardMinDocCountTests extends ElasticsearchIntegrationTest {
     // see https://github.com/elasticsearch/elasticsearch/issues/5998
     @Test
     public void shardMinDocCountTermsTest() throws Exception {
-        final String [] termTypes = {"string", "long", "integer", "float", "double"};
+        final String[] termTypes = { "string", "long", "integer", "float", "double" };
         String termtype = termTypes[randomInt(termTypes.length - 1)];
 
         assertAcked(prepareCreate(index).setSettings(SETTING_NUMBER_OF_SHARDS, 1, SETTING_NUMBER_OF_REPLICAS, 0).addMapping(type, "{\"properties\":{\"text\": {\"type\": \"" + termtype + "\"}}}"));
@@ -129,23 +117,12 @@ public class TermsShardMinDocCountTests extends ElasticsearchIntegrationTest {
         indexRandom(true, false, indexBuilders);
 
         // first, check that indeed when not setting the shardMinDocCount parameter 0 terms are returned
-        SearchResponse response = client().prepareSearch(index)
-                .addAggregation(
-                        new TermsBuilder("myTerms").field("text").minDocCount(2).size(2).executionHint(randomExecutionHint()).order(Terms.Order.term(true))
-                )
-                .execute()
-                .actionGet();
+        SearchResponse response = client().prepareSearch(index).addAggregation(new TermsBuilder("myTerms").field("text").minDocCount(2).size(2).executionHint(randomExecutionHint()).order(Terms.Order.term(true))).execute().actionGet();
         assertSearchResponse(response);
         Terms sigterms = response.getAggregations().get("myTerms");
         assertThat(sigterms.getBuckets().size(), equalTo(0));
 
-
-        response = client().prepareSearch(index)
-                .addAggregation(
-                        new TermsBuilder("myTerms").field("text").minDocCount(2).shardMinDocCount(2).size(2).executionHint(randomExecutionHint()).order(Terms.Order.term(true))
-                )
-                .execute()
-                .actionGet();
+        response = client().prepareSearch(index).addAggregation(new TermsBuilder("myTerms").field("text").minDocCount(2).shardMinDocCount(2).size(2).executionHint(randomExecutionHint()).order(Terms.Order.term(true))).execute().actionGet();
         assertSearchResponse(response);
         sigterms = response.getAggregations().get("myTerms");
         assertThat(sigterms.getBuckets().size(), equalTo(2));

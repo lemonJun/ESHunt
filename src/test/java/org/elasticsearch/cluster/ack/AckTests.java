@@ -65,16 +65,14 @@ public class AckTests extends ElasticsearchIntegrationTest {
     protected Settings nodeSettings(int nodeOrdinal) {
         //to test that the acknowledgement mechanism is working we better disable the wait for publish
         //otherwise the operation is most likely acknowledged even if it doesn't support ack
-        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal))
-                .put(DiscoverySettings.PUBLISH_TIMEOUT, 0).build();
+        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal)).put(DiscoverySettings.PUBLISH_TIMEOUT, 0).build();
     }
 
     @Test
     public void testUpdateSettingsAcknowledgement() {
         createIndex("test");
 
-        assertAcked(client().admin().indices().prepareUpdateSettings("test")
-                .setSettings(ImmutableSettings.builder().put("refresh_interval", 9999)));
+        assertAcked(client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.builder().put("refresh_interval", 9999)));
 
         for (Client client : clients()) {
             String refreshInterval = getLocalClusterState(client).metaData().index("test").settings().get("index.refresh_interval");
@@ -85,8 +83,7 @@ public class AckTests extends ElasticsearchIntegrationTest {
     @Test
     public void testUpdateSettingsNoAcknowledgement() {
         createIndex("test");
-        UpdateSettingsResponse updateSettingsResponse = client().admin().indices().prepareUpdateSettings("test").setTimeout("0s")
-                .setSettings(ImmutableSettings.builder().put("refresh_interval", 9999)).get();
+        UpdateSettingsResponse updateSettingsResponse = client().admin().indices().prepareUpdateSettings("test").setTimeout("0s").setSettings(ImmutableSettings.builder().put("refresh_interval", 9999)).get();
         assertThat(updateSettingsResponse.isAcknowledged(), equalTo(false));
     }
 
@@ -96,8 +93,7 @@ public class AckTests extends ElasticsearchIntegrationTest {
         // make sure one shard is started so the search during put warmer will not fail
         index("test", "type", "1", "f", 1);
 
-        assertAcked(client().admin().indices().preparePutWarmer("custom_warmer")
-                .setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery())));
+        assertAcked(client().admin().indices().preparePutWarmer("custom_warmer").setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery())));
 
         for (Client client : clients()) {
             GetWarmersResponse getWarmersResponse = client.admin().indices().prepareGetWarmers().setLocal(true).get();
@@ -115,9 +111,7 @@ public class AckTests extends ElasticsearchIntegrationTest {
         // make sure one shard is started so the search during put warmer will not fail
         index("test", "type", "1", "f", 1);
 
-        PutWarmerResponse putWarmerResponse = client().admin().indices().preparePutWarmer("custom_warmer").setTimeout("0s")
-                .setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery()))
-                .get();
+        PutWarmerResponse putWarmerResponse = client().admin().indices().preparePutWarmer("custom_warmer").setTimeout("0s").setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery())).get();
         assertThat(putWarmerResponse.isAcknowledged(), equalTo(false));
         /* Since we don't wait for the ack here we have to wait until the search request has been executed from the master
          * otherwise the test infra might have already deleted the index and the search request fails on all shards causing
@@ -142,8 +136,7 @@ public class AckTests extends ElasticsearchIntegrationTest {
         createIndex("test");
         index("test", "type", "1", "f", 1);
 
-        assertAcked(client().admin().indices().preparePutWarmer("custom_warmer")
-                .setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery())));
+        assertAcked(client().admin().indices().preparePutWarmer("custom_warmer").setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery())));
 
         assertAcked(client().admin().indices().prepareDeleteWarmer().setIndices("test").setNames("custom_warmer"));
 
@@ -158,8 +151,7 @@ public class AckTests extends ElasticsearchIntegrationTest {
         createIndex("test");
         index("test", "type", "1", "f", 1);
 
-        assertAcked(client().admin().indices().preparePutWarmer("custom_warmer")
-                .setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery())));
+        assertAcked(client().admin().indices().preparePutWarmer("custom_warmer").setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery())));
 
         DeleteWarmerResponse deleteWarmerResponse = client().admin().indices().prepareDeleteWarmer().setIndices("test").setNames("custom_warmer").setTimeout("0s").get();
         assertFalse(deleteWarmerResponse.isAcknowledged());
@@ -179,8 +171,7 @@ public class AckTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testDeleteMappingAcknowledgement() {
-        client().admin().indices().prepareCreate("test")
-                .addMapping("type1", "field1", "type=string").get();
+        client().admin().indices().prepareCreate("test").addMapping("type1", "field1", "type=string").get();
         ensureGreen();
 
         client().prepareIndex("test", "type1").setSource("field1", "value1");
@@ -198,8 +189,7 @@ public class AckTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testDeleteMappingNoAcknowledgement() {
-        client().admin().indices().prepareCreate("test")
-                .addMapping("type1", "field1", "type=string").get();
+        client().admin().indices().prepareCreate("test").addMapping("type1", "field1", "type=string").get();
         ensureGreen();
 
         client().prepareIndex("test", "type1").setSource("field1", "value1");
@@ -210,11 +200,7 @@ public class AckTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testClusterRerouteAcknowledgement() throws InterruptedException {
-        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put(indexSettings())
-                .put(SETTING_NUMBER_OF_SHARDS, between(cluster().numDataNodes(), DEFAULT_MAX_NUM_SHARDS))
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-        ));
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder().put(indexSettings()).put(SETTING_NUMBER_OF_SHARDS, between(cluster().numDataNodes(), DEFAULT_MAX_NUM_SHARDS)).put(SETTING_NUMBER_OF_REPLICAS, 0)));
         ensureGreen();
 
         MoveAllocationCommand moveAllocationCommand = getAllocationCommand();
@@ -245,10 +231,7 @@ public class AckTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testClusterRerouteNoAcknowledgement() throws InterruptedException {
-        client().admin().indices().prepareCreate("test")
-                .setSettings(settingsBuilder()
-                        .put(SETTING_NUMBER_OF_SHARDS, between(cluster().numDataNodes(), DEFAULT_MAX_NUM_SHARDS))
-                        .put(SETTING_NUMBER_OF_REPLICAS, 0)).get();
+        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put(SETTING_NUMBER_OF_SHARDS, between(cluster().numDataNodes(), DEFAULT_MAX_NUM_SHARDS)).put(SETTING_NUMBER_OF_REPLICAS, 0)).get();
         ensureGreen();
 
         MoveAllocationCommand moveAllocationCommand = getAllocationCommand();
@@ -259,10 +242,7 @@ public class AckTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testClusterRerouteAcknowledgementDryRun() throws InterruptedException {
-        client().admin().indices().prepareCreate("test")
-                .setSettings(settingsBuilder()
-                        .put(SETTING_NUMBER_OF_SHARDS, between(cluster().numDataNodes(), DEFAULT_MAX_NUM_SHARDS))
-                        .put(SETTING_NUMBER_OF_REPLICAS, 0)).get();
+        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put(SETTING_NUMBER_OF_SHARDS, between(cluster().numDataNodes(), DEFAULT_MAX_NUM_SHARDS)).put(SETTING_NUMBER_OF_REPLICAS, 0)).get();
         ensureGreen();
 
         MoveAllocationCommand moveAllocationCommand = getAllocationCommand();
@@ -292,10 +272,7 @@ public class AckTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testClusterRerouteNoAcknowledgementDryRun() throws InterruptedException {
-        client().admin().indices().prepareCreate("test")
-                .setSettings(settingsBuilder()
-                        .put(SETTING_NUMBER_OF_SHARDS, between(cluster().numDataNodes(), DEFAULT_MAX_NUM_SHARDS))
-                        .put(SETTING_NUMBER_OF_REPLICAS, 0)).get();
+        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put(SETTING_NUMBER_OF_SHARDS, between(cluster().numDataNodes(), DEFAULT_MAX_NUM_SHARDS)).put(SETTING_NUMBER_OF_REPLICAS, 0)).get();
         ensureGreen();
 
         MoveAllocationCommand moveAllocationCommand = getAllocationCommand();

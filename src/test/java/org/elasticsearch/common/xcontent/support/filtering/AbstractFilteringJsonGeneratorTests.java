@@ -89,77 +89,7 @@ public abstract class AbstractFilteringJsonGeneratorTests extends ElasticsearchT
      */
     private XContentBuilder sample(XContentBuilder builder) throws IOException {
         assertNotNull(builder);
-        builder.startObject()
-                .field("title", "My awesome book")
-                .field("pages", 456)
-                .field("price", 27.99)
-                .field("timestamp", 1428582942867L)
-                .nullField("default")
-                .startArray("tags")
-                    .value("elasticsearch")
-                    .value("java")
-                .endArray()
-                .startArray("authors")
-                    .startObject()
-                        .field("name", "John Doe")
-                        .field("lastname", "John")
-                        .field("firstname", "Doe")
-                    .endObject()
-                    .startObject()
-                        .field("name", "William Smith")
-                        .field("lastname", "William")
-                        .field("firstname", "Smith")
-                    .endObject()
-                .endArray()
-                .startObject("properties")
-                    .field("weight", 0.8d)
-                    .startObject("language")
-                        .startObject("en")
-                            .field("lang", "English")
-                            .field("available", true)
-                            .startArray("distributors")
-                                .startObject()
-                                    .field("name", "The Book Shop")
-                                    .startArray("addresses")
-                                        .startObject()
-                                            .field("name", "address #1")
-                                            .field("street", "Hampton St")
-                                            .field("city", "London")
-                                        .endObject()
-                                        .startObject()
-                                            .field("name", "address #2")
-                                            .field("street", "Queen St")
-                                            .field("city", "Stornoway")
-                                        .endObject()
-                                    .endArray()
-                                .endObject()
-                                .startObject()
-                                    .field("name", "Sussex Books House")
-                                .endObject()
-                            .endArray()
-                        .endObject()
-                        .startObject("fr")
-                            .field("lang", "French")
-                            .field("available", false)
-                            .startArray("distributors")
-                                .startObject()
-                                    .field("name", "La Maison du Livre")
-                                    .startArray("addresses")
-                                        .startObject()
-                                            .field("name", "address #1")
-                                            .field("street", "Rue Mouffetard")
-                                            .field("city", "Paris")
-                                        .endObject()
-                                    .endArray()
-                                .endObject()
-                                .startObject()
-                                    .field("name", "Thetra")
-                                .endObject()
-                            .endArray()
-                        .endObject()
-                    .endObject()
-                .endObject()
-            .endObject();
+        builder.startObject().field("title", "My awesome book").field("pages", 456).field("price", 27.99).field("timestamp", 1428582942867L).nullField("default").startArray("tags").value("elasticsearch").value("java").endArray().startArray("authors").startObject().field("name", "John Doe").field("lastname", "John").field("firstname", "Doe").endObject().startObject().field("name", "William Smith").field("lastname", "William").field("firstname", "Smith").endObject().endArray().startObject("properties").field("weight", 0.8d).startObject("language").startObject("en").field("lang", "English").field("available", true).startArray("distributors").startObject().field("name", "The Book Shop").startArray("addresses").startObject().field("name", "address #1").field("street", "Hampton St").field("city", "London").endObject().startObject().field("name", "address #2").field("street", "Queen St").field("city", "Stornoway").endObject().endArray().endObject().startObject().field("name", "Sussex Books House").endObject().endArray().endObject().startObject("fr").field("lang", "French").field("available", false).startArray("distributors").startObject().field("name", "La Maison du Livre").startArray("addresses").startObject().field("name", "address #1").field("street", "Rue Mouffetard").field("city", "Paris").endObject().endArray().endObject().startObject().field("name", "Thetra").endObject().endArray().endObject().endObject().endObject().endObject();
         return builder;
     }
 
@@ -188,108 +118,35 @@ public abstract class AbstractFilteringJsonGeneratorTests extends ElasticsearchT
 
     @Test
     public void testSimpleField() throws Exception {
-        XContentBuilder expected = newXContentBuilder().startObject()
-                                                            .field("title", "My awesome book")
-                                                        .endObject();
+        XContentBuilder expected = newXContentBuilder().startObject().field("title", "My awesome book").endObject();
 
         assertXContentBuilder(expected, sample("title"));
     }
 
     @Test
     public void testSimpleFieldWithWildcard() throws Exception {
-        XContentBuilder expected = newXContentBuilder().startObject()
-                                                            .field("price", 27.99)
-                                                            .startObject("properties")
-                                                                .field("weight", 0.8d)
-                                                                .startObject("language")
-                                                                    .startObject("en")
-                                                                        .field("lang", "English")
-                                                                        .field("available", true)
-                                                                        .startArray("distributors")
-                                                                            .startObject()
-                                                                                .field("name", "The Book Shop")
-                                                                                .startArray("addresses")
-                                                                                    .startObject()
-                                                                                        .field("name", "address #1")
-                                                                                        .field("street", "Hampton St")
-                                                                                        .field("city", "London")
-                                                                                    .endObject()
-                                                                                    .startObject()
-                                                                                        .field("name", "address #2")
-                                                                                        .field("street", "Queen St")
-                                                                                        .field("city", "Stornoway")
-                                                                                    .endObject()
-                                                                                .endArray()
-                                                                            .endObject()
-                                                                            .startObject()
-                                                                                .field("name", "Sussex Books House")
-                                                                            .endObject()
-                                                                        .endArray()
-                                                                    .endObject()
-                                                                    .startObject("fr")
-                                                                        .field("lang", "French")
-                                                                        .field("available", false)
-                                                                        .startArray("distributors")
-                                                                            .startObject()
-                                                                                .field("name", "La Maison du Livre")
-                                                                                .startArray("addresses")
-                                                                                    .startObject()
-                                                                                        .field("name", "address #1")
-                                                                                        .field("street", "Rue Mouffetard")
-                                                                                        .field("city", "Paris")
-                                                                                    .endObject()
-                                                                                .endArray()
-                                                                            .endObject()
-                                                                            .startObject()
-                                                                                .field("name", "Thetra")
-                                                                            .endObject()
-                                                                        .endArray()
-                                                                    .endObject()
-                                                                .endObject()
-                                                            .endObject()
-                                                        .endObject();
+        XContentBuilder expected = newXContentBuilder().startObject().field("price", 27.99).startObject("properties").field("weight", 0.8d).startObject("language").startObject("en").field("lang", "English").field("available", true).startArray("distributors").startObject().field("name", "The Book Shop").startArray("addresses").startObject().field("name", "address #1").field("street", "Hampton St").field("city", "London").endObject().startObject().field("name", "address #2").field("street", "Queen St").field("city", "Stornoway").endObject().endArray().endObject().startObject().field("name", "Sussex Books House").endObject().endArray().endObject().startObject("fr").field("lang", "French").field("available", false).startArray("distributors").startObject().field("name", "La Maison du Livre").startArray("addresses").startObject().field("name", "address #1").field("street", "Rue Mouffetard").field("city", "Paris").endObject().endArray().endObject().startObject().field("name", "Thetra").endObject().endArray().endObject().endObject().endObject().endObject();
 
         assertXContentBuilder(expected, sample("pr*"));
     }
 
     @Test
     public void testMultipleFields() throws Exception {
-        XContentBuilder expected = newXContentBuilder().startObject()
-                                                            .field("title", "My awesome book")
-                                                            .field("pages", 456)
-                                                        .endObject();
+        XContentBuilder expected = newXContentBuilder().startObject().field("title", "My awesome book").field("pages", 456).endObject();
 
         assertXContentBuilder(expected, sample("title", "pages"));
     }
 
     @Test
     public void testSimpleArray() throws Exception {
-        XContentBuilder expected = newXContentBuilder().startObject()
-                                                        .startArray("tags")
-                                                            .value("elasticsearch")
-                                                            .value("java")
-                                                        .endArray()
-                                                    .endObject();
+        XContentBuilder expected = newXContentBuilder().startObject().startArray("tags").value("elasticsearch").value("java").endArray().endObject();
 
         assertXContentBuilder(expected, sample("tags"));
     }
 
     @Test
     public void testSimpleArrayOfObjects() throws Exception {
-        XContentBuilder expected = newXContentBuilder().startObject()
-                                                        .startArray("authors")
-                                                            .startObject()
-                                                                .field("name", "John Doe")
-                                                                .field("lastname", "John")
-                                                                .field("firstname", "Doe")
-                                                            .endObject()
-                                                            .startObject()
-                                                                .field("name", "William Smith")
-                                                                .field("lastname", "William")
-                                                                .field("firstname", "Smith")
-                                                            .endObject()
-                                                        .endArray()
-                                                    .endObject();
+        XContentBuilder expected = newXContentBuilder().startObject().startArray("authors").startObject().field("name", "John Doe").field("lastname", "John").field("firstname", "Doe").endObject().startObject().field("name", "William Smith").field("lastname", "William").field("firstname", "Smith").endObject().endArray().endObject();
 
         assertXContentBuilder(expected, sample("authors"));
         assertXContentBuilder(expected, sample("authors.*"));
@@ -298,16 +155,7 @@ public abstract class AbstractFilteringJsonGeneratorTests extends ElasticsearchT
 
     @Test
     public void testSimpleArrayOfObjectsProperty() throws Exception {
-        XContentBuilder expected = newXContentBuilder().startObject()
-                                                            .startArray("authors")
-                                                                .startObject()
-                                                                    .field("lastname", "John")
-                                                                .endObject()
-                                                                .startObject()
-                                                                    .field("lastname", "William")
-                                                                .endObject()
-                                                            .endArray()
-                                                        .endObject();
+        XContentBuilder expected = newXContentBuilder().startObject().startArray("authors").startObject().field("lastname", "John").endObject().startObject().field("lastname", "William").endObject().endArray().endObject();
 
         assertXContentBuilder(expected, sample("authors.lastname"));
         assertXContentBuilder(expected, sample("authors.l*"));
@@ -315,160 +163,28 @@ public abstract class AbstractFilteringJsonGeneratorTests extends ElasticsearchT
 
     @Test
     public void testRecurseField1() throws Exception {
-        XContentBuilder expected = newXContentBuilder().startObject()
-                                                            .startArray("authors")
-                                                                .startObject()
-                                                                    .field("name", "John Doe")
-                                                                .endObject()
-                                                                .startObject()
-                                                                    .field("name", "William Smith")
-                                                            .   endObject()
-                                                            .endArray()
-                                                            .startObject("properties")
-                                                                .startObject("language")
-                                                                    .startObject("en")
-                                                                        .startArray("distributors")
-                                                                            .startObject()
-                                                                                .field("name", "The Book Shop")
-                                                                                .startArray("addresses")
-                                                                                    .startObject()
-                                                                                        .field("name", "address #1")
-                                                                                    .endObject()
-                                                                                    .startObject()
-                                                                                        .field("name", "address #2")
-                                                                                    .endObject()
-                                                                                .endArray()
-                                                                            .endObject()
-                                                                            .startObject()
-                                                                                .field("name", "Sussex Books House")
-                                                                            .endObject()
-                                                                        .endArray()
-                                                                    .endObject()
-                                                                    .startObject("fr")
-                                                                        .startArray("distributors")
-                                                                            .startObject()
-                                                                                .field("name", "La Maison du Livre")
-                                                                                .startArray("addresses")
-                                                                                    .startObject()
-                                                                                        .field("name", "address #1")
-                                                                                    .endObject()
-                                                                                .endArray()
-                                                                            .endObject()
-                                                                            .startObject()
-                                                                                .field("name", "Thetra")
-                                                                            .endObject()
-                                                                        .endArray()
-                                                                    .endObject()
-                                                                .endObject()
-                                                            .endObject()
-                                                        .endObject();
+        XContentBuilder expected = newXContentBuilder().startObject().startArray("authors").startObject().field("name", "John Doe").endObject().startObject().field("name", "William Smith").endObject().endArray().startObject("properties").startObject("language").startObject("en").startArray("distributors").startObject().field("name", "The Book Shop").startArray("addresses").startObject().field("name", "address #1").endObject().startObject().field("name", "address #2").endObject().endArray().endObject().startObject().field("name", "Sussex Books House").endObject().endArray().endObject().startObject("fr").startArray("distributors").startObject().field("name", "La Maison du Livre").startArray("addresses").startObject().field("name", "address #1").endObject().endArray().endObject().startObject().field("name", "Thetra").endObject().endArray().endObject().endObject().endObject().endObject();
 
         assertXContentBuilder(expected, sample("**.name"));
     }
 
     @Test
     public void testRecurseField2() throws Exception {
-        XContentBuilder expected = newXContentBuilder().startObject()
-                                                            .startObject("properties")
-                                                                .startObject("language")
-                                                                    .startObject("en")
-                                                                        .startArray("distributors")
-                                                                            .startObject()
-                                                                                .field("name", "The Book Shop")
-                                                                                .startArray("addresses")
-                                                                                    .startObject()
-                                                                                        .field("name", "address #1")
-                                                                                    .endObject()
-                                                                                    .startObject()
-                                                                                        .field("name", "address #2")
-                                                                                    .endObject()
-                                                                                .endArray()
-                                                                            .endObject()
-                                                                            .startObject()
-                                                                                .field("name", "Sussex Books House")
-                                                                            .endObject()
-                                                                        .endArray()
-                                                                    .endObject()
-                                                                    .startObject("fr")
-                                                                        .startArray("distributors")
-                                                                            .startObject()
-                                                                                .field("name", "La Maison du Livre")
-                                                                                .startArray("addresses")
-                                                                                    .startObject()
-                                                                                        .field("name", "address #1")
-                                                                                    .endObject()
-                                                                                .endArray()
-                                                                            .endObject()
-                                                                            .startObject()
-                                                                                .field("name", "Thetra")
-                                                                            .endObject()
-                                                                        .endArray()
-                                                                    .endObject()
-                                                                .endObject()
-                                                            .endObject()
-                                                        .endObject();
+        XContentBuilder expected = newXContentBuilder().startObject().startObject("properties").startObject("language").startObject("en").startArray("distributors").startObject().field("name", "The Book Shop").startArray("addresses").startObject().field("name", "address #1").endObject().startObject().field("name", "address #2").endObject().endArray().endObject().startObject().field("name", "Sussex Books House").endObject().endArray().endObject().startObject("fr").startArray("distributors").startObject().field("name", "La Maison du Livre").startArray("addresses").startObject().field("name", "address #1").endObject().endArray().endObject().startObject().field("name", "Thetra").endObject().endArray().endObject().endObject().endObject().endObject();
 
         assertXContentBuilder(expected, sample("properties.**.name"));
     }
 
     @Test
     public void testRecurseField3() throws Exception {
-        XContentBuilder expected = newXContentBuilder().startObject()
-                                                        .startObject("properties")
-                                                            .startObject("language")
-                                                                .startObject("en")
-                                                                    .startArray("distributors")
-                                                                        .startObject()
-                                                                            .field("name", "The Book Shop")
-                                                                            .startArray("addresses")
-                                                                                .startObject()
-                                                                                    .field("name", "address #1")
-                                                                                .endObject()
-                                                                                .startObject()
-                                                                                    .field("name", "address #2")
-                                                                                .endObject()
-                                                                            .endArray()
-                                                                        .endObject()
-                                                                        .startObject()
-                                                                            .field("name", "Sussex Books House")
-                                                                        .endObject()
-                                                                    .endArray()
-                                                                .endObject()
-                                                            .endObject()
-                                                        .endObject()
-                                                    .endObject();
+        XContentBuilder expected = newXContentBuilder().startObject().startObject("properties").startObject("language").startObject("en").startArray("distributors").startObject().field("name", "The Book Shop").startArray("addresses").startObject().field("name", "address #1").endObject().startObject().field("name", "address #2").endObject().endArray().endObject().startObject().field("name", "Sussex Books House").endObject().endArray().endObject().endObject().endObject().endObject();
 
         assertXContentBuilder(expected, sample("properties.*.en.**.name"));
     }
 
     @Test
     public void testRecurseField4() throws Exception {
-        XContentBuilder expected = newXContentBuilder().startObject()
-                                                            .startObject("properties")
-                                                                .startObject("language")
-                                                                    .startObject("en")
-                                                                        .startArray("distributors")
-                                                                            .startObject()
-                                                                                .field("name", "The Book Shop")
-                                                                            .endObject()
-                                                                            .startObject()
-                                                                                .field("name", "Sussex Books House")
-                                                                            .endObject()
-                                                                        .endArray()
-                                                                    .endObject()
-                                                                    .startObject("fr")
-                                                                        .startArray("distributors")
-                                                                            .startObject()
-                                                                                .field("name", "La Maison du Livre")
-                                                                            .endObject()
-                                                                            .startObject()
-                                                                                .field("name", "Thetra")
-                                                                            .endObject()
-                                                                        .endArray()
-                                                                    .endObject()
-                                                                .endObject()
-                                                            .endObject()
-                                                        .endObject();
+        XContentBuilder expected = newXContentBuilder().startObject().startObject("properties").startObject("language").startObject("en").startArray("distributors").startObject().field("name", "The Book Shop").endObject().startObject().field("name", "Sussex Books House").endObject().endArray().endObject().startObject("fr").startArray("distributors").startObject().field("name", "La Maison du Livre").endObject().startObject().field("name", "Thetra").endObject().endArray().endObject().endObject().endObject().endObject();
 
         assertXContentBuilder(expected, sample("properties.**.distributors.name"));
     }
@@ -478,7 +194,7 @@ public abstract class AbstractFilteringJsonGeneratorTests extends ElasticsearchT
 
         XContentBuilder expectedRawField = newXContentBuilder().startObject().field("foo", 0).startObject("raw").field("content", "hello world!").endObject().endObject();
         XContentBuilder expectedRawFieldFiltered = newXContentBuilder().startObject().field("foo", 0).endObject();
-        XContentBuilder expectedRawFieldNotFiltered =newXContentBuilder().startObject().startObject("raw").field("content", "hello world!").endObject().endObject();
+        XContentBuilder expectedRawFieldNotFiltered = newXContentBuilder().startObject().startObject("raw").field("content", "hello world!").endObject().endObject();
 
         BytesReference raw = newXContentBuilder().startObject().field("content", "hello world!").endObject().bytes();
 

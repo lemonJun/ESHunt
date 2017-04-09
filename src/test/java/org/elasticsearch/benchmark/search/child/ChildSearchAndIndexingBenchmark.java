@@ -58,25 +58,16 @@ public class ChildSearchAndIndexingBenchmark {
     static Random random = new Random();
 
     public static void main(String[] args) throws Exception {
-        Settings settings = settingsBuilder()
-                .put("refresh_interval", "-1")
-                .put("gateway.type", "local")
-                .put(SETTING_NUMBER_OF_SHARDS, 1)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put("refresh_interval", "-1").put("gateway.type", "local").put(SETTING_NUMBER_OF_SHARDS, 1).put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
         String clusterName = ChildSearchAndIndexingBenchmark.class.getSimpleName();
-        Node node1 = nodeBuilder().settings(settingsBuilder().put(settings).put("name", "node1"))
-                .clusterName(clusterName)
-                .node();
+        Node node1 = nodeBuilder().settings(settingsBuilder().put(settings).put("name", "node1")).clusterName(clusterName).node();
         Client client = node1.client();
 
         client.admin().cluster().prepareHealth(indexName).setWaitForGreenStatus().setTimeout("10s").execute().actionGet();
         try {
             client.admin().indices().create(createIndexRequest(indexName)).actionGet();
-            client.admin().indices().preparePutMapping(indexName).setType("child").setSource(XContentFactory.jsonBuilder().startObject().startObject("child")
-                    .startObject("_parent").field("type", "parent").endObject()
-                    .endObject().endObject()).execute().actionGet();
+            client.admin().indices().preparePutMapping(indexName).setType("child").setSource(XContentFactory.jsonBuilder().startObject().startObject("child").startObject("_parent").field("type", "parent").endObject().endObject().endObject()).execute().actionGet();
             Thread.sleep(5000);
 
             StopWatch stopWatch = new StopWatch().start();
@@ -89,12 +80,9 @@ public class ChildSearchAndIndexingBenchmark {
                 BulkRequestBuilder request = client.prepareBulk();
                 for (int j = 0; j < BATCH; j++) {
                     counter++;
-                    request.add(Requests.indexRequest(indexName).type("parent").id(Integer.toString(counter))
-                            .source(parentSource(Integer.toString(counter), "test" + counter)));
+                    request.add(Requests.indexRequest(indexName).type("parent").id(Integer.toString(counter)).source(parentSource(Integer.toString(counter), "test" + counter)));
                     for (int k = 0; k < CHILD_COUNT; k++) {
-                        request.add(Requests.indexRequest(indexName).type("child").id(Integer.toString(counter) + "_" + k)
-                                .parent(Integer.toString(counter))
-                                .source(childSource(Integer.toString(counter), "tag" + k)));
+                        request.add(Requests.indexRequest(indexName).type("child").id(Integer.toString(counter) + "_" + k).parent(Integer.toString(counter)).source(childSource(Integer.toString(counter), "tag" + k)));
                     }
                 }
                 BulkResponse response = request.execute().actionGet();
@@ -152,18 +140,14 @@ public class ChildSearchAndIndexingBenchmark {
             while (run) {
                 for (int i = 1; run && i < COUNT; i++) {
                     try {
-                        client.prepareIndex(indexName, "parent", Integer.toString(i))
-                                .setSource(parentSource(Integer.toString(i), "test" + i)).execute().actionGet();
+                        client.prepareIndex(indexName, "parent", Integer.toString(i)).setSource(parentSource(Integer.toString(i), "test" + i)).execute().actionGet();
                         for (int j = 0; j < CHILD_COUNT; j++) {
-                            client.prepareIndex(indexName, "child", Integer.toString(i) + "_" + j)
-                                    .setParent(Integer.toString(i))
-                                    .setSource(childSource(Integer.toString(j), "tag" + j)).execute().actionGet();
+                            client.prepareIndex(indexName, "child", Integer.toString(i) + "_" + j).setParent(Integer.toString(i)).setSource(childSource(Integer.toString(j), "tag" + j)).execute().actionGet();
                         }
                         client.admin().indices().prepareRefresh(indexName).execute().actionGet();
                         Thread.sleep(100);
                         if (i % 500 == 0) {
-                            NodesStatsResponse statsResponse = client.admin().cluster().prepareNodesStats()
-                                    .clear().setIndices(true).execute().actionGet();
+                            NodesStatsResponse statsResponse = client.admin().cluster().prepareNodesStats().clear().setIndices(true).execute().actionGet();
                             System.out.println("Deleted docs: " + statsResponse.getAt(0).getIndices().getDocs().getDeleted());
                         }
                     } catch (Throwable e) {
@@ -194,19 +178,12 @@ public class ChildSearchAndIndexingBenchmark {
                 try {
                     long totalQueryTime = 0;
                     for (int j = 0; j < QUERY_COUNT; j++) {
-                        SearchResponse searchResponse = client.prepareSearch(indexName)
-                                .setQuery(
-                                        filteredQuery(
-                                                matchAllQuery(),
-                                                hasChildFilter("child", termQuery("tag", "tag" + random.nextInt(CHILD_COUNT)))
-                                        )
-                                )
-                                .execute().actionGet();
+                        SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(filteredQuery(matchAllQuery(), hasChildFilter("child", termQuery("tag", "tag" + random.nextInt(CHILD_COUNT))))).execute().actionGet();
                         if (searchResponse.getFailedShards() > 0) {
                             System.err.println("Search Failures " + Arrays.toString(searchResponse.getShardFailures()));
                         }
                         if (searchResponse.getHits().totalHits() != COUNT) {
-//                            System.err.println("--> mismatch on hits [" + j + "], got [" + searchResponse.getHits().totalHits() + "], expected [" + COUNT + "]");
+                            //                            System.err.println("--> mismatch on hits [" + j + "], got [" + searchResponse.getHits().totalHits() + "], expected [" + COUNT + "]");
                         }
                         totalQueryTime += searchResponse.getTookInMillis();
                     }
@@ -214,27 +191,19 @@ public class ChildSearchAndIndexingBenchmark {
 
                     totalQueryTime = 0;
                     for (int j = 1; j <= QUERY_COUNT; j++) {
-                        SearchResponse searchResponse = client.prepareSearch(indexName)
-                                .setQuery(
-                                        filteredQuery(
-                                                matchAllQuery(),
-                                                hasChildFilter("child", matchAllQuery())
-                                        )
-                                )
-                                .execute().actionGet();
+                        SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(filteredQuery(matchAllQuery(), hasChildFilter("child", matchAllQuery()))).execute().actionGet();
                         if (searchResponse.getFailedShards() > 0) {
                             System.err.println("Search Failures " + Arrays.toString(searchResponse.getShardFailures()));
                         }
                         long expected = (COUNT / BATCH) * BATCH;
                         if (searchResponse.getHits().totalHits() != expected) {
-//                            System.err.println("--> mismatch on hits [" + j + "], got [" + searchResponse.getHits().totalHits() + "], expected [" + expected + "]");
+                            //                            System.err.println("--> mismatch on hits [" + j + "], got [" + searchResponse.getHits().totalHits() + "], expected [" + expected + "]");
                         }
                         totalQueryTime += searchResponse.getTookInMillis();
                     }
                     System.out.println("--> has_child filter with match_all child query, Query Avg: " + (totalQueryTime / QUERY_COUNT) + "ms");
 
-                    NodesStatsResponse statsResponse = client.admin().cluster().prepareNodesStats()
-                            .setJvm(true).execute().actionGet();
+                    NodesStatsResponse statsResponse = client.admin().cluster().prepareNodesStats().setJvm(true).execute().actionGet();
                     System.out.println("--> Committed heap size: " + statsResponse.getNodes()[0].getJvm().getMem().getHeapCommitted());
                     System.out.println("--> Used heap size: " + statsResponse.getNodes()[0].getJvm().getMem().getHeapUsed());
                     Thread.sleep(1000);

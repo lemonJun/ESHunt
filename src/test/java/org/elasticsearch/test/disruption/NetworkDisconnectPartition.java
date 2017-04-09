@@ -27,7 +27,6 @@ import java.util.Set;
 
 public class NetworkDisconnectPartition extends NetworkPartition {
 
-
     public NetworkDisconnectPartition(Random random) {
         super(random);
     }
@@ -46,8 +45,7 @@ public class NetworkDisconnectPartition extends NetworkPartition {
     }
 
     @Override
-    void applyDisruption(DiscoveryNode node1, MockTransportService transportService1,
-                         DiscoveryNode node2, MockTransportService transportService2) {
+    void applyDisruption(DiscoveryNode node1, MockTransportService transportService1, DiscoveryNode node2, MockTransportService transportService2) {
         transportService1.addFailToSendNoConnectRule(node2);
         transportService2.addFailToSendNoConnectRule(node1);
     }

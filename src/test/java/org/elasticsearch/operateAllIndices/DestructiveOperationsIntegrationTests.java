@@ -39,9 +39,7 @@ public class DestructiveOperationsIntegrationTests extends ElasticsearchIntegrat
     // One test for test performance, since cluster scope is test
     // The cluster scope is test b/c we can't clear cluster settings.
     public void testDestructiveOperations() throws Exception {
-        Settings settings = ImmutableSettings.builder()
-                .put(DestructiveOperations.REQUIRES_NAME, true)
-                .build();
+        Settings settings = ImmutableSettings.builder().put(DestructiveOperations.REQUIRES_NAME, true).build();
         assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(settings));
 
         assertAcked(client().admin().indices().prepareCreate("index1").get());
@@ -54,16 +52,16 @@ public class DestructiveOperationsIntegrationTests extends ElasticsearchIntegrat
             // should fail since index1 is the only index.
             client().admin().indices().prepareDelete("i*").get();
             fail();
-        } catch (ElasticsearchIllegalArgumentException e) {}
+        } catch (ElasticsearchIllegalArgumentException e) {
+        }
 
         try {
             client().admin().indices().prepareDelete("_all").get();
             fail();
-        } catch (ElasticsearchIllegalArgumentException e) {}
+        } catch (ElasticsearchIllegalArgumentException e) {
+        }
 
-        settings = ImmutableSettings.builder()
-                .put(DestructiveOperations.REQUIRES_NAME, false)
-                .build();
+        settings = ImmutableSettings.builder().put(DestructiveOperations.REQUIRES_NAME, false).build();
         assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(settings));
 
         assertAcked(client().admin().indices().prepareDelete("_all").get());
@@ -71,9 +69,7 @@ public class DestructiveOperationsIntegrationTests extends ElasticsearchIntegrat
 
         // end delete index:
         // close index:
-        settings = ImmutableSettings.builder()
-                .put(DestructiveOperations.REQUIRES_NAME, true)
-                .build();
+        settings = ImmutableSettings.builder().put(DestructiveOperations.REQUIRES_NAME, true).build();
         assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(settings));
 
         assertAcked(client().admin().indices().prepareCreate("index1").get());
@@ -85,7 +81,8 @@ public class DestructiveOperationsIntegrationTests extends ElasticsearchIntegrat
         try {
             client().admin().indices().prepareClose("_all").get();
             fail();
-        } catch (ElasticsearchIllegalArgumentException e) {}
+        } catch (ElasticsearchIllegalArgumentException e) {
+        }
         try {
             assertAcked(client().admin().indices().prepareOpen("_all").get());
             fail();
@@ -94,16 +91,15 @@ public class DestructiveOperationsIntegrationTests extends ElasticsearchIntegrat
         try {
             client().admin().indices().prepareClose("*").get();
             fail();
-        } catch (ElasticsearchIllegalArgumentException e) {}
+        } catch (ElasticsearchIllegalArgumentException e) {
+        }
         try {
             assertAcked(client().admin().indices().prepareOpen("*").get());
             fail();
         } catch (ElasticsearchIllegalArgumentException e) {
         }
 
-        settings = ImmutableSettings.builder()
-                .put(DestructiveOperations.REQUIRES_NAME, false)
-                .build();
+        settings = ImmutableSettings.builder().put(DestructiveOperations.REQUIRES_NAME, false).build();
         assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(settings));
         assertAcked(client().admin().indices().prepareClose("_all").get());
         assertAcked(client().admin().indices().prepareOpen("_all").get());
@@ -111,9 +107,7 @@ public class DestructiveOperationsIntegrationTests extends ElasticsearchIntegrat
         // end close index:
         client().admin().indices().prepareDelete("_all").get();
         // delete_by_query:
-        settings = ImmutableSettings.builder()
-                .put(DestructiveOperations.REQUIRES_NAME, true)
-                .build();
+        settings = ImmutableSettings.builder().put(DestructiveOperations.REQUIRES_NAME, true).build();
         assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(settings));
 
         assertAcked(client().admin().indices().prepareCreate("index1").get());
@@ -125,16 +119,16 @@ public class DestructiveOperationsIntegrationTests extends ElasticsearchIntegrat
         try {
             client().prepareDeleteByQuery("_all").setQuery(QueryBuilders.matchAllQuery()).get();
             fail();
-        } catch (ElasticsearchIllegalArgumentException e) {}
+        } catch (ElasticsearchIllegalArgumentException e) {
+        }
 
         try {
             client().prepareDeleteByQuery().setQuery(QueryBuilders.matchAllQuery()).get();
             fail();
-        } catch (ElasticsearchIllegalArgumentException e) {}
+        } catch (ElasticsearchIllegalArgumentException e) {
+        }
 
-        settings = ImmutableSettings.builder()
-                .put(DestructiveOperations.REQUIRES_NAME, false)
-                .build();
+        settings = ImmutableSettings.builder().put(DestructiveOperations.REQUIRES_NAME, false).build();
         assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(settings));
 
         client().prepareDeleteByQuery().setQuery(QueryBuilders.matchAllQuery()).get();
@@ -145,12 +139,9 @@ public class DestructiveOperationsIntegrationTests extends ElasticsearchIntegrat
         // end delete_by_query:
         client().admin().indices().prepareDelete("_all").get();
         // delete mapping:
-        settings = ImmutableSettings.builder()
-                .put(DestructiveOperations.REQUIRES_NAME, true)
-                .build();
+        settings = ImmutableSettings.builder().put(DestructiveOperations.REQUIRES_NAME, true).build();
         assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(settings));
-        
-        
+
         assertAcked(client().admin().indices().prepareCreate("index1").addMapping("1", "field1", "type=string").get());
         assertAcked(client().admin().indices().prepareCreate("1index").addMapping("1", "field1", "type=string").get());
 

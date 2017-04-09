@@ -57,17 +57,10 @@ public class QueryFilterAggregationSearchBenchmark {
     static Client client;
 
     public static void main(String[] args) throws Exception {
-        Settings settings = settingsBuilder()
-                .put("index.refresh_interval", "-1")
-                .put("gateway.type", "local")
-                .put(SETTING_NUMBER_OF_SHARDS, 2)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put("index.refresh_interval", "-1").put("gateway.type", "local").put(SETTING_NUMBER_OF_SHARDS, 2).put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
         String clusterName = QueryFilterAggregationSearchBenchmark.class.getSimpleName();
-        Node node1 = nodeBuilder()
-                .clusterName(clusterName)
-                .settings(settingsBuilder().put(settings).put("name", "node1")).node();
+        Node node1 = nodeBuilder().clusterName(clusterName).settings(settingsBuilder().put(settings).put("name", "node1")).node();
         client = node1.client();
 
         long[] lValues = new long[NUMBER_OF_TERMS];
@@ -96,8 +89,7 @@ public class QueryFilterAggregationSearchBenchmark {
 
                     builder.endObject();
 
-                    request.add(Requests.indexRequest("test").type("type1").id(Integer.toString(counter))
-                            .source(builder));
+                    request.add(Requests.indexRequest("test").type("type1").id(Integer.toString(counter)).source(builder));
                 }
                 BulkResponse response = request.execute().actionGet();
                 if (response.hasFailures()) {
@@ -123,59 +115,40 @@ public class QueryFilterAggregationSearchBenchmark {
         System.out.println("--> Number of docs in index: " + COUNT);
 
         final long anyValue = ((Number) client.prepareSearch().execute().actionGet().getHits().hits()[0].sourceAsMap().get("l_value")).longValue();
-        
+
         long totalQueryTime = 0;
 
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
-            SearchResponse searchResponse = client.prepareSearch()
-                    .setSearchType(SearchType.COUNT)
-                    .setQuery(termQuery("l_value", anyValue))
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch().setSearchType(SearchType.COUNT).setQuery(termQuery("l_value", anyValue)).execute().actionGet();
             totalQueryTime += searchResponse.getTookInMillis();
         }
         System.out.println("-->  Simple Query on first l_value " + totalQueryTime + "ms");
 
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
-            SearchResponse searchResponse = client.prepareSearch()
-                    .setSearchType(SearchType.COUNT)
-                    .setQuery(termQuery("l_value", anyValue))
-                    .addFacet(FacetBuilders.queryFacet("query").query(termQuery("l_value", anyValue)))
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch().setSearchType(SearchType.COUNT).setQuery(termQuery("l_value", anyValue)).addFacet(FacetBuilders.queryFacet("query").query(termQuery("l_value", anyValue))).execute().actionGet();
             totalQueryTime += searchResponse.getTookInMillis();
         }
         System.out.println("-->  Query facet first l_value " + totalQueryTime + "ms");
 
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
-            SearchResponse searchResponse = client.prepareSearch()
-                    .setSearchType(SearchType.COUNT)
-                    .setQuery(termQuery("l_value", anyValue))
-                    .addAggregation(AggregationBuilders.filter("filter").filter(FilterBuilders.termFilter("l_value", anyValue)))
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch().setSearchType(SearchType.COUNT).setQuery(termQuery("l_value", anyValue)).addAggregation(AggregationBuilders.filter("filter").filter(FilterBuilders.termFilter("l_value", anyValue))).execute().actionGet();
             totalQueryTime += searchResponse.getTookInMillis();
         }
         System.out.println("-->  Filter agg first l_value " + totalQueryTime + "ms");
 
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
-            SearchResponse searchResponse = client.prepareSearch()
-                    .setSearchType(SearchType.COUNT)
-                    .setQuery(termQuery("l_value", anyValue))
-                    .addFacet(FacetBuilders.queryFacet("query").query(termQuery("l_value", anyValue)).global(true).mode(FacetBuilder.Mode.COLLECTOR))
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch().setSearchType(SearchType.COUNT).setQuery(termQuery("l_value", anyValue)).addFacet(FacetBuilders.queryFacet("query").query(termQuery("l_value", anyValue)).global(true).mode(FacetBuilder.Mode.COLLECTOR)).execute().actionGet();
             totalQueryTime += searchResponse.getTookInMillis();
         }
         System.out.println("-->  Query facet first l_value (global) (mode/collector) " + totalQueryTime + "ms");
 
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
-            SearchResponse searchResponse = client.prepareSearch()
-                    .setSearchType(SearchType.COUNT)
-                    .setQuery(termQuery("l_value", anyValue))
-                    .addFacet(FacetBuilders.queryFacet("query").query(termQuery("l_value", anyValue)).global(true).mode(FacetBuilder.Mode.POST))
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch().setSearchType(SearchType.COUNT).setQuery(termQuery("l_value", anyValue)).addFacet(FacetBuilders.queryFacet("query").query(termQuery("l_value", anyValue)).global(true).mode(FacetBuilder.Mode.POST)).execute().actionGet();
             totalQueryTime += searchResponse.getTookInMillis();
         }
         System.out.println("-->  Query facet first l_value (global) (mode/post) " + totalQueryTime + "ms");

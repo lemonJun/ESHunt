@@ -66,7 +66,7 @@ abstract class FailAndRetryMockTransport<Response extends TransportResponse> imp
         if (connectMode) {
             TransportResponseHandler transportResponseHandler = transportServiceAdapter.onResponseReceived(requestId);
             NodeInfo nodeInfo = new NodeInfo(Version.CURRENT, Build.CURRENT, node, null, null, null, null, null, null, null, null, null, null);
-            NodesInfoResponse nodesInfoResponse = new NodesInfoResponse(ClusterName.DEFAULT, new NodeInfo[]{nodeInfo});
+            NodesInfoResponse nodesInfoResponse = new NodesInfoResponse(ClusterName.DEFAULT, new NodeInfo[] { nodeInfo });
             transportResponseHandler.handleResponse(nodesInfoResponse);
             return;
         }

@@ -52,7 +52,6 @@ public class CancellableThreadsTest extends ElasticsearchTestCase {
         }
     }
 
-
     @Test
     public void testCancellableThreads() throws InterruptedException {
         Thread[] threads = new Thread[randomIntBetween(3, 10)];
@@ -126,10 +125,7 @@ public class CancellableThreadsTest extends ElasticsearchTestCase {
                 // in all other cases, we expect a cancellation exception.
                 assertThat(throwables[i], Matchers.instanceOf(CancellableThreads.ExecutionCancelledException.class));
                 if (plan.exceptAfterCancel) {
-                    assertThat(throwables[i].getSuppressed(),
-                            Matchers.arrayContaining(
-                                    Matchers.instanceOf(CustomException.class)
-                            ));
+                    assertThat(throwables[i].getSuppressed(), Matchers.arrayContaining(Matchers.instanceOf(CustomException.class)));
                 } else {
                     assertThat(throwables[i].getSuppressed(), Matchers.emptyArray());
                 }

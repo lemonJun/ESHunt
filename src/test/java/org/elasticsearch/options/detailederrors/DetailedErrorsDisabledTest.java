@@ -44,21 +44,13 @@ public class DetailedErrorsDisabledTest extends ElasticsearchIntegrationTest {
     // Build our cluster settings
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put(InternalNode.HTTP_ENABLED, true)
-                .put(NettyHttpServerTransport.SETTING_HTTP_DETAILED_ERRORS_ENABLED, false)
-                .build();
+        return ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put(InternalNode.HTTP_ENABLED, true).put(NettyHttpServerTransport.SETTING_HTTP_DETAILED_ERRORS_ENABLED, false).build();
     }
 
     @Test
     public void testThatErrorTraceParamReturns400() throws Exception {
         // Make the HTTP request
-        HttpResponse response = new HttpRequestBuilder(HttpClients.createDefault())
-                .httpTransport(internalCluster().getDataNodeInstance(HttpServerTransport.class))
-                .addParam("error_trace", "true")
-                .method(HttpDeleteWithEntity.METHOD_NAME)
-                .execute();
+        HttpResponse response = new HttpRequestBuilder(HttpClients.createDefault()).httpTransport(internalCluster().getDataNodeInstance(HttpServerTransport.class)).addParam("error_trace", "true").method(HttpDeleteWithEntity.METHOD_NAME).execute();
 
         assertThat(response.getHeaders().get("Content-Type"), is("application/json"));
         assertThat(response.getBody(), is("{\"error\":\"error traces in responses are disabled.\"}"));

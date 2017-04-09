@@ -61,12 +61,7 @@ public class IndexFieldDataServiceTests extends ElasticsearchSingleNodeTest {
                 assertTrue(fd instanceof PagedBytesIndexFieldData);
             }
 
-            for (FieldMapper<?> mapper : Arrays.asList(
-                    new ByteFieldMapper.Builder("int").fieldDataSettings(docValues ? DOC_VALUES_SETTINGS : ImmutableSettings.EMPTY).build(ctx),
-                    new ShortFieldMapper.Builder("int").fieldDataSettings(docValues ? DOC_VALUES_SETTINGS : ImmutableSettings.EMPTY).build(ctx),
-                    new IntegerFieldMapper.Builder("int").fieldDataSettings(docValues ? DOC_VALUES_SETTINGS : ImmutableSettings.EMPTY).build(ctx),
-                    new LongFieldMapper.Builder("long").fieldDataSettings(docValues ? DOC_VALUES_SETTINGS : ImmutableSettings.EMPTY).build(ctx)
-                    )) {
+            for (FieldMapper<?> mapper : Arrays.asList(new ByteFieldMapper.Builder("int").fieldDataSettings(docValues ? DOC_VALUES_SETTINGS : ImmutableSettings.EMPTY).build(ctx), new ShortFieldMapper.Builder("int").fieldDataSettings(docValues ? DOC_VALUES_SETTINGS : ImmutableSettings.EMPTY).build(ctx), new IntegerFieldMapper.Builder("int").fieldDataSettings(docValues ? DOC_VALUES_SETTINGS : ImmutableSettings.EMPTY).build(ctx), new LongFieldMapper.Builder("long").fieldDataSettings(docValues ? DOC_VALUES_SETTINGS : ImmutableSettings.EMPTY).build(ctx))) {
                 ifdService.clear();
                 fd = ifdService.getForField(mapper);
                 if (docValues) {
@@ -107,12 +102,7 @@ public class IndexFieldDataServiceTests extends ElasticsearchSingleNodeTest {
         assertTrue(fd instanceof FSTBytesIndexFieldData);
 
         final Settings fdSettings = ImmutableSettings.builder().put("format", "array").build();
-        for (FieldMapper<?> mapper : Arrays.asList(
-                new ByteFieldMapper.Builder("int").fieldDataSettings(DOC_VALUES_SETTINGS).fieldDataSettings(fdSettings).build(ctx),
-                new ShortFieldMapper.Builder("int").fieldDataSettings(DOC_VALUES_SETTINGS).fieldDataSettings(fdSettings).build(ctx),
-                new IntegerFieldMapper.Builder("int").fieldDataSettings(DOC_VALUES_SETTINGS).fieldDataSettings(fdSettings).build(ctx),
-                new LongFieldMapper.Builder("long").fieldDataSettings(DOC_VALUES_SETTINGS).fieldDataSettings(fdSettings).build(ctx)
-                )) {
+        for (FieldMapper<?> mapper : Arrays.asList(new ByteFieldMapper.Builder("int").fieldDataSettings(DOC_VALUES_SETTINGS).fieldDataSettings(fdSettings).build(ctx), new ShortFieldMapper.Builder("int").fieldDataSettings(DOC_VALUES_SETTINGS).fieldDataSettings(fdSettings).build(ctx), new IntegerFieldMapper.Builder("int").fieldDataSettings(DOC_VALUES_SETTINGS).fieldDataSettings(fdSettings).build(ctx), new LongFieldMapper.Builder("long").fieldDataSettings(DOC_VALUES_SETTINGS).fieldDataSettings(fdSettings).build(ctx))) {
             ifdService.clear();
             fd = ifdService.getForField(mapper);
             assertTrue(fd instanceof PackedArrayIndexFieldData);

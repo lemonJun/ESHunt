@@ -34,14 +34,7 @@ public class IndexQueryParserModuleTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testCustomInjection() {
-        Settings settings = settingsBuilder()
-                .put("index.queryparser.query.my.type", MyJsonQueryParser.class)
-                .put("index.queryparser.query.my.param1", "value1")
-                .put("index.queryparser.filter.my.type", MyJsonFilterParser.class)
-                .put("index.queryparser.filter.my.param2", "value2")
-                .put("index.cache.filter.type", "none")
-                .put("name", "IndexQueryParserModuleTests")
-                .build();
+        Settings settings = settingsBuilder().put("index.queryparser.query.my.type", MyJsonQueryParser.class).put("index.queryparser.query.my.param1", "value1").put("index.queryparser.filter.my.type", MyJsonFilterParser.class).put("index.queryparser.filter.my.param2", "value2").put("index.cache.filter.type", "none").put("name", "IndexQueryParserModuleTests").build();
 
         IndexQueryParserService indexQueryParserService = createIndex("test", settings).queryParserService();
 

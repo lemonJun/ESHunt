@@ -50,17 +50,10 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 public class ChildSearchShortCircuitBenchmark {
 
     public static void main(String[] args) throws Exception {
-        Settings settings = settingsBuilder()
-                .put("index.refresh_interval", "-1")
-                .put("gateway.type", "local")
-                .put(SETTING_NUMBER_OF_SHARDS, 1)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put("index.refresh_interval", "-1").put("gateway.type", "local").put(SETTING_NUMBER_OF_SHARDS, 1).put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
         String clusterName = ChildSearchShortCircuitBenchmark.class.getSimpleName();
-        Node node1 = nodeBuilder().clusterName(clusterName)
-                .settings(settingsBuilder().put(settings).put("name", "node1"))
-                .node();
+        Node node1 = nodeBuilder().clusterName(clusterName).settings(settingsBuilder().put(settings).put("name", "node1")).node();
         Client client = node1.client();
 
         long PARENT_COUNT = SizeValue.parseSizeValue("10M").singles();
@@ -72,9 +65,7 @@ public class ChildSearchShortCircuitBenchmark {
         client.admin().cluster().prepareHealth(indexName).setWaitForGreenStatus().setTimeout("10s").execute().actionGet();
         try {
             client.admin().indices().create(createIndexRequest(indexName)).actionGet();
-            client.admin().indices().preparePutMapping(indexName).setType("child").setSource(XContentFactory.jsonBuilder().startObject().startObject("child")
-                    .startObject("_parent").field("type", "parent").endObject()
-                    .endObject().endObject()).execute().actionGet();
+            client.admin().indices().preparePutMapping(indexName).setType("child").setSource(XContentFactory.jsonBuilder().startObject().startObject("child").startObject("_parent").field("type", "parent").endObject().endObject().endObject()).execute().actionGet();
             Thread.sleep(5000);
 
             StopWatch stopWatch = new StopWatch().start();
@@ -87,8 +78,7 @@ public class ChildSearchShortCircuitBenchmark {
                 BulkRequestBuilder request = client.prepareBulk();
                 for (int j = 0; j < BATCH; j++) {
                     counter++;
-                    request.add(Requests.indexRequest(indexName).type("parent").id(Integer.toString(counter))
-                            .source(parentSource(counter)));
+                    request.add(Requests.indexRequest(indexName).type("parent").id(Integer.toString(counter)).source(parentSource(counter)));
 
                 }
                 BulkResponse response = request.execute().actionGet();
@@ -105,10 +95,7 @@ public class ChildSearchShortCircuitBenchmark {
             for (i = 1; i <= PARENT_COUNT; i *= 2) {
                 int parentId = 1;
                 for (int j = 0; j < i; j++) {
-                    client.prepareIndex(indexName, "child", Integer.toString(id++))
-                            .setParent(Integer.toString(parentId++))
-                            .setSource(childSource(i))
-                            .execute().actionGet();
+                    client.prepareIndex(indexName, "child", Integer.toString(id++)).setParent(Integer.toString(parentId++)).setSource(childSource(i)).execute().actionGet();
                 }
             }
 
@@ -127,24 +114,19 @@ public class ChildSearchShortCircuitBenchmark {
         // run just the child query, warm up first
         for (int i = 1; i <= 10000; i *= 2) {
             SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(matchQuery("child.field2", i)).execute().actionGet();
-            System.out.println("--> Warmup took["+ i +"]: " + searchResponse.getTook());
+            System.out.println("--> Warmup took[" + i + "]: " + searchResponse.getTook());
             if (searchResponse.getHits().totalHits() != i) {
                 System.err.println("--> mismatch on hits");
             }
         }
 
-        NodesStatsResponse statsResponse = client.admin().cluster().prepareNodesStats()
-                .setJvm(true).execute().actionGet();
+        NodesStatsResponse statsResponse = client.admin().cluster().prepareNodesStats().setJvm(true).execute().actionGet();
         System.out.println("--> Committed heap size: " + statsResponse.getNodes()[0].getJvm().getMem().getHeapCommitted());
         System.out.println("--> Used heap size: " + statsResponse.getNodes()[0].getJvm().getMem().getHeapUsed());
 
         // run parent child constant query
         for (int j = 1; j < QUERY_WARMUP; j *= 2) {
-            SearchResponse searchResponse = client.prepareSearch(indexName)
-                    .setQuery(
-                            hasChildQuery("child", matchQuery("field2", j))
-                    )
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(hasChildQuery("child", matchQuery("field2", j))).execute().actionGet();
             if (searchResponse.getFailedShards() > 0) {
                 System.err.println("Search Failures " + Arrays.toString(searchResponse.getShardFailures()));
             }
@@ -156,19 +138,16 @@ public class ChildSearchShortCircuitBenchmark {
         long totalQueryTime = 0;
         for (int i = 1; i < PARENT_COUNT; i *= 2) {
             for (int j = 0; j < QUERY_COUNT; j++) {
-                SearchResponse searchResponse = client.prepareSearch(indexName)
-                        .setQuery(filteredQuery(matchAllQuery(), hasChildFilter("child", matchQuery("field2", i))))
-                        .execute().actionGet();
+                SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(filteredQuery(matchAllQuery(), hasChildFilter("child", matchQuery("field2", i)))).execute().actionGet();
                 if (searchResponse.getHits().totalHits() != i) {
                     System.err.println("--> mismatch on hits");
                 }
                 totalQueryTime += searchResponse.getTookInMillis();
             }
-            System.out.println("--> has_child filter " + i +" Avg: " + (totalQueryTime / QUERY_COUNT) + "ms");
+            System.out.println("--> has_child filter " + i + " Avg: " + (totalQueryTime / QUERY_COUNT) + "ms");
         }
 
-        statsResponse = client.admin().cluster().prepareNodesStats()
-                .setJvm(true).setIndices(true).execute().actionGet();
+        statsResponse = client.admin().cluster().prepareNodesStats().setJvm(true).setIndices(true).execute().actionGet();
 
         System.out.println("--> Id cache size: " + statsResponse.getNodes()[0].getIndices().getIdCache().getMemorySize());
         System.out.println("--> Used heap size: " + statsResponse.getNodes()[0].getJvm().getMem().getHeapUsed());
@@ -176,20 +155,17 @@ public class ChildSearchShortCircuitBenchmark {
         totalQueryTime = 0;
         for (int i = 1; i < PARENT_COUNT; i *= 2) {
             for (int j = 0; j < QUERY_COUNT; j++) {
-                SearchResponse searchResponse = client.prepareSearch(indexName)
-                        .setQuery(hasChildQuery("child", matchQuery("field2", i)).scoreType("max"))
-                        .execute().actionGet();
+                SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(hasChildQuery("child", matchQuery("field2", i)).scoreType("max")).execute().actionGet();
                 if (searchResponse.getHits().totalHits() != i) {
                     System.err.println("--> mismatch on hits");
                 }
                 totalQueryTime += searchResponse.getTookInMillis();
             }
-            System.out.println("--> has_child query " + i +" Avg: " + (totalQueryTime / QUERY_COUNT) + "ms");
+            System.out.println("--> has_child query " + i + " Avg: " + (totalQueryTime / QUERY_COUNT) + "ms");
         }
 
         System.gc();
-        statsResponse = client.admin().cluster().prepareNodesStats()
-                .setJvm(true).setIndices(true).execute().actionGet();
+        statsResponse = client.admin().cluster().prepareNodesStats().setJvm(true).setIndices(true).execute().actionGet();
 
         System.out.println("--> Id cache size: " + statsResponse.getNodes()[0].getIndices().getIdCache().getMemorySize());
         System.out.println("--> Used heap size: " + statsResponse.getNodes()[0].getJvm().getMem().getHeapUsed());

@@ -31,9 +31,9 @@ public class ParseFieldTests extends ElasticsearchTestCase {
 
     @Test
     public void testParse() {
-        String[] values = new String[]{"foo_bar", "fooBar"};
+        String[] values = new String[] { "foo_bar", "fooBar" };
         ParseField field = new ParseField(randomFrom(values));
-        String[] deprecated = new String[]{"barFoo", "bar_foo"};
+        String[] deprecated = new String[] { "barFoo", "bar_foo" };
         ParseField withDeprecations = field.withDeprecation("Foobar", randomFrom(deprecated));
         assertThat(field, not(sameInstance(withDeprecations)));
         assertThat(field.match(randomFrom(values), ParseField.EMPTY_FLAGS), is(true));
@@ -72,10 +72,10 @@ public class ParseFieldTests extends ElasticsearchTestCase {
 
     @Test
     public void testAllDeprecated() {
-        String[] values = new String[]{"like_text", "likeText"};
+        String[] values = new String[] { "like_text", "likeText" };
 
         boolean withDeprecatedNames = randomBoolean();
-        String[] deprecated = new String[]{"text", "same_as_text"};
+        String[] deprecated = new String[] { "text", "same_as_text" };
         String[] allValues = values;
         if (withDeprecatedNames) {
             allValues = ArrayUtils.addAll(values, deprecated);

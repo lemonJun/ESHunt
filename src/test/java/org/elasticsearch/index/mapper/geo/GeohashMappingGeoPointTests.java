@@ -37,17 +37,11 @@ public class GeohashMappingGeoPointTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testLatLonValues() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("point").field("type", "geo_point").field("lat_lon", false).endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("point").field("type", "geo_point").field("lat_lon", false).endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .startObject("point").field("lat", 1.2).field("lon", 1.3).endObject()
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().startObject("point").field("lat", 1.2).field("lon", 1.3).endObject().endObject().bytes());
 
         MatcherAssert.assertThat(doc.rootDoc().getField("point.lat"), nullValue());
         MatcherAssert.assertThat(doc.rootDoc().getField("point.lon"), nullValue());
@@ -56,17 +50,11 @@ public class GeohashMappingGeoPointTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testLatLonInOneValue() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("point").field("type", "geo_point").field("lat_lon", false).endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("point").field("type", "geo_point").field("lat_lon", false).endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("point", "1.2,1.3")
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("point", "1.2,1.3").endObject().bytes());
 
         MatcherAssert.assertThat(doc.rootDoc().getField("point.lat"), nullValue());
         MatcherAssert.assertThat(doc.rootDoc().getField("point.lon"), nullValue());
@@ -75,17 +63,11 @@ public class GeohashMappingGeoPointTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testGeoHashValue() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("point").field("type", "geo_point").field("geohash", true).endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("point").field("type", "geo_point").field("geohash", true).endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("point", GeoHashUtils.encode(1.2, 1.3))
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("point", GeoHashUtils.encode(1.2, 1.3)).endObject().bytes());
 
         MatcherAssert.assertThat(doc.rootDoc().getField("point.lat"), nullValue());
         MatcherAssert.assertThat(doc.rootDoc().getField("point.lon"), nullValue());
@@ -95,9 +77,7 @@ public class GeohashMappingGeoPointTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testGeoHashPrecisionAsInteger() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("point").field("type", "geo_point").field("geohash_precision", 10).endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("point").field("type", "geo_point").field("geohash_precision", 10).endObject().endObject().endObject().endObject().string();
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
         FieldMapper mapper = defaultMapper.mappers().smartName("point").mapper();
         assertThat(mapper, instanceOf(GeoPointFieldMapper.class));
@@ -107,9 +87,7 @@ public class GeohashMappingGeoPointTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testGeoHashPrecisionAsLength() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("point").field("type", "geo_point").field("geohash_precision", "5m").endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("point").field("type", "geo_point").field("geohash_precision", "5m").endObject().endObject().endObject().endObject().string();
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
         FieldMapper mapper = defaultMapper.mappers().smartName("point").mapper();
         assertThat(mapper, instanceOf(GeoPointFieldMapper.class));
@@ -119,17 +97,11 @@ public class GeohashMappingGeoPointTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testNullValue() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("point").field("type", "geo_point").endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("point").field("type", "geo_point").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("point", (Object) null)
-                .endObject()
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("point", (Object) null).endObject().bytes());
 
         assertThat(doc.rootDoc().get("point"), nullValue());
     }

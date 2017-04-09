@@ -59,8 +59,8 @@ public class NettyScheduledPingTests extends ElasticsearchTestCase {
         MockTransportService serviceB = new MockTransportService(settings, nettyB, threadPool);
         serviceB.start();
 
-        DiscoveryNode nodeA = new DiscoveryNode("TS_A", "TS_A", serviceA.boundAddress().publishAddress(), ImmutableMap.<String, String>of(), Version.CURRENT);
-        DiscoveryNode nodeB = new DiscoveryNode("TS_B", "TS_B", serviceB.boundAddress().publishAddress(), ImmutableMap.<String, String>of(), Version.CURRENT);
+        DiscoveryNode nodeA = new DiscoveryNode("TS_A", "TS_A", serviceA.boundAddress().publishAddress(), ImmutableMap.<String, String> of(), Version.CURRENT);
+        DiscoveryNode nodeB = new DiscoveryNode("TS_B", "TS_B", serviceB.boundAddress().publishAddress(), ImmutableMap.<String, String> of(), Version.CURRENT);
 
         serviceA.connectToNode(nodeB);
         serviceB.connectToNode(nodeA);
@@ -100,28 +100,27 @@ public class NettyScheduledPingTests extends ElasticsearchTestCase {
         // send some messages while ping requests are going around
         int rounds = scaledRandomIntBetween(100, 5000);
         for (int i = 0; i < rounds; i++) {
-            serviceB.submitRequest(nodeA, "sayHello",
-                    TransportRequest.Empty.INSTANCE, TransportRequestOptions.options().withCompress(randomBoolean()), new BaseTransportResponseHandler<TransportResponse.Empty>() {
-                        @Override
-                        public TransportResponse.Empty newInstance() {
-                            return TransportResponse.Empty.INSTANCE;
-                        }
+            serviceB.submitRequest(nodeA, "sayHello", TransportRequest.Empty.INSTANCE, TransportRequestOptions.options().withCompress(randomBoolean()), new BaseTransportResponseHandler<TransportResponse.Empty>() {
+                @Override
+                public TransportResponse.Empty newInstance() {
+                    return TransportResponse.Empty.INSTANCE;
+                }
 
-                        @Override
-                        public String executor() {
-                            return ThreadPool.Names.GENERIC;
-                        }
+                @Override
+                public String executor() {
+                    return ThreadPool.Names.GENERIC;
+                }
 
-                        @Override
-                        public void handleResponse(TransportResponse.Empty response) {
-                        }
+                @Override
+                public void handleResponse(TransportResponse.Empty response) {
+                }
 
-                        @Override
-                        public void handleException(TransportException exp) {
-                            exp.printStackTrace();
-                            assertThat("got exception instead of a response: " + exp.getMessage(), false, equalTo(true));
-                        }
-                    }).txGet();
+                @Override
+                public void handleException(TransportException exp) {
+                    exp.printStackTrace();
+                    assertThat("got exception instead of a response: " + exp.getMessage(), false, equalTo(true));
+                }
+            }).txGet();
         }
 
         assertBusy(new Runnable() {

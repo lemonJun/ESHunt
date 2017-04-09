@@ -32,26 +32,26 @@ public class IndicesStatusBlocksTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testIndicesStatusWithBlocks() {
-            createIndex("ro");
-            ensureGreen("ro");
+        createIndex("ro");
+        ensureGreen("ro");
 
-            // Request is not blocked
-            for (String blockSetting : Arrays.asList(SETTING_BLOCKS_READ, SETTING_BLOCKS_WRITE, SETTING_READ_ONLY)) {
-                try {
-                    enableIndexBlock("ro", blockSetting);
-                    IndicesStatusResponse indicesStatusResponse = client().admin().indices().prepareStatus("ro").execute().actionGet();
-                    assertNotNull(indicesStatusResponse.getIndex("ro"));
-                } finally {
-                    disableIndexBlock("ro", blockSetting);
-                }
-            }
-
-            // Request is blocked
+        // Request is not blocked
+        for (String blockSetting : Arrays.asList(SETTING_BLOCKS_READ, SETTING_BLOCKS_WRITE, SETTING_READ_ONLY)) {
             try {
-                enableIndexBlock("ro", IndexMetaData.SETTING_BLOCKS_METADATA);
-                assertBlocked(client().admin().indices().prepareStatus("ro"), INDEX_METADATA_BLOCK);
+                enableIndexBlock("ro", blockSetting);
+                IndicesStatusResponse indicesStatusResponse = client().admin().indices().prepareStatus("ro").execute().actionGet();
+                assertNotNull(indicesStatusResponse.getIndex("ro"));
             } finally {
-                disableIndexBlock("ro", IndexMetaData.SETTING_BLOCKS_METADATA);
+                disableIndexBlock("ro", blockSetting);
             }
         }
+
+        // Request is blocked
+        try {
+            enableIndexBlock("ro", IndexMetaData.SETTING_BLOCKS_METADATA);
+            assertBlocked(client().admin().indices().prepareStatus("ro"), INDEX_METADATA_BLOCK);
+        } finally {
+            disableIndexBlock("ro", IndexMetaData.SETTING_BLOCKS_METADATA);
+        }
+    }
 }

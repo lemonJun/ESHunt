@@ -59,8 +59,7 @@ public class ScriptsScorePayloadSumBenchmark extends BasicScriptBenchmark {
         Results results = new Results();
         // init script searches
         results.init(maxTerms - minTerms, "native payload sum script score", "Results for native script score:", "green", ":");
-        List<Entry<String, RequestInfo>> searchRequests = initNativeSearchRequests(minTerms, maxTerms,
-                NativePayloadSumScoreScript.NATIVE_PAYLOAD_SUM_SCRIPT_SCORE, true);
+        List<Entry<String, RequestInfo>> searchRequests = initNativeSearchRequests(minTerms, maxTerms, NativePayloadSumScoreScript.NATIVE_PAYLOAD_SUM_SCRIPT_SCORE, true);
         // run actual benchmark
         runBenchmark(client, maxIter, results, searchRequests, minTerms, warmerIter);
         allResults.add(results);
@@ -68,8 +67,7 @@ public class ScriptsScorePayloadSumBenchmark extends BasicScriptBenchmark {
         results = new Results();
         // init script searches
         results.init(maxTerms - minTerms, "native payload sum script score no record", "Results for native script score:", "black", ":");
-        searchRequests = initNativeSearchRequests(minTerms, maxTerms,
-                NativePayloadSumNoRecordScoreScript.NATIVE_PAYLOAD_SUM_NO_RECORD_SCRIPT_SCORE, true);
+        searchRequests = initNativeSearchRequests(minTerms, maxTerms, NativePayloadSumNoRecordScoreScript.NATIVE_PAYLOAD_SUM_NO_RECORD_SCRIPT_SCORE, true);
         // run actual benchmark
         runBenchmark(client, maxIter, results, searchRequests, minTerms, warmerIter);
         allResults.add(results);

@@ -57,19 +57,17 @@ public class ConcurrentSearchSerializationTests {
         final String data = RandomStrings.randomAsciiOfLength(ThreadLocalRandom.current(), 100);
         final CountDownLatch latch1 = new CountDownLatch(100);
         for (int i = 0; i < 100; i++) {
-            client.prepareIndex("test", "type", Integer.toString(i))
-                    .setSource("field", data)
-                    .execute(new ActionListener<IndexResponse>() {
-                        @Override
-                        public void onResponse(IndexResponse indexResponse) {
-                            latch1.countDown();
-                        }
+            client.prepareIndex("test", "type", Integer.toString(i)).setSource("field", data).execute(new ActionListener<IndexResponse>() {
+                @Override
+                public void onResponse(IndexResponse indexResponse) {
+                    latch1.countDown();
+                }
 
-                        @Override
-                        public void onFailure(Throwable e) {
-                            latch1.countDown();
-                        }
-                    });
+                @Override
+                public void onFailure(Throwable e) {
+                    latch1.countDown();
+                }
+            });
         }
         latch1.await();
         System.out.println("Indexed");
@@ -82,10 +80,7 @@ public class ConcurrentSearchSerializationTests {
                 @Override
                 public void run() {
                     for (int i = 0; i < 1000; i++) {
-                        SearchResponse searchResponse = client.prepareSearch("test")
-                                .setQuery(QueryBuilders.matchAllQuery())
-                                .setSize(i % 100)
-                                .execute().actionGet();
+                        SearchResponse searchResponse = client.prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).setSize(i % 100).execute().actionGet();
                         for (SearchHit hit : searchResponse.getHits()) {
                             try {
                                 if (!hit.sourceAsMap().get("field").equals(data)) {

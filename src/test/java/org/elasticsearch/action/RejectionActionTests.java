@@ -46,17 +46,8 @@ public class RejectionActionTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("threadpool.search.size", 1)
-                .put("threadpool.search.queue_size", 1)
-                .put("threadpool.index.size", 1)
-                .put("threadpool.index.queue_size", 1)
-                .put("threadpool.get.size", 1)
-                .put("threadpool.get.queue_size", 1)
-                .build();
+        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal)).put("threadpool.search.size", 1).put("threadpool.search.queue_size", 1).put("threadpool.index.size", 1).put("threadpool.index.queue_size", 1).put("threadpool.get.size", 1).put("threadpool.get.queue_size", 1).build();
     }
-
 
     @Test
     public void simulateSearchRejectionLoad() throws Throwable {
@@ -68,22 +59,19 @@ public class RejectionActionTests extends ElasticsearchIntegrationTest {
         final CountDownLatch latch = new CountDownLatch(numberOfAsyncOps);
         final CopyOnWriteArrayList<Object> responses = Lists.newCopyOnWriteArrayList();
         for (int i = 0; i < numberOfAsyncOps; i++) {
-            client().prepareSearch("test")
-                    .setSearchType(SearchType.QUERY_THEN_FETCH)
-                    .setQuery(QueryBuilders.matchQuery("field", "1"))
-                    .execute(new ActionListener<SearchResponse>() {
-                        @Override
-                        public void onResponse(SearchResponse searchResponse) {
-                            responses.add(searchResponse);
-                            latch.countDown();
-                        }
+            client().prepareSearch("test").setSearchType(SearchType.QUERY_THEN_FETCH).setQuery(QueryBuilders.matchQuery("field", "1")).execute(new ActionListener<SearchResponse>() {
+                @Override
+                public void onResponse(SearchResponse searchResponse) {
+                    responses.add(searchResponse);
+                    latch.countDown();
+                }
 
-                        @Override
-                        public void onFailure(Throwable e) {
-                            responses.add(e);
-                            latch.countDown();
-                        }
-                    });
+                @Override
+                public void onFailure(Throwable e) {
+                    responses.add(e);
+                    latch.countDown();
+                }
+            });
         }
         latch.await();
         assertThat(responses.size(), equalTo(numberOfAsyncOps));

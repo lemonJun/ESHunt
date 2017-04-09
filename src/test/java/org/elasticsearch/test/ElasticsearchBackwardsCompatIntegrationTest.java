@@ -102,8 +102,7 @@ public abstract class ElasticsearchBackwardsCompatIntegrationTest extends Elasti
             throw new IllegalArgumentException("Must specify backwards test version with property " + TESTS_BACKWARDS_COMPATIBILITY_VERSION);
         }
         if (Version.fromString(version).before(Version.CURRENT.minimumCompatibilityVersion())) {
-            throw new IllegalArgumentException("Backcompat elasticsearch version must be same major version as current. " +
-                "backcompat: " + version + ", current: " + Version.CURRENT.toString());
+            throw new IllegalArgumentException("Backcompat elasticsearch version must be same major version as current. " + "backcompat: " + version + ", current: " + Version.CURRENT.toString());
         }
         File file = new File(path, "elasticsearch-" + version);
         if (!file.exists()) {
@@ -148,7 +147,9 @@ public abstract class ElasticsearchBackwardsCompatIntegrationTest extends Elasti
         return finalSettings.build();
     }
 
-    protected int minExternalNodes() { return 1; }
+    protected int minExternalNodes() {
+        return 1;
+    }
 
     protected int maxExternalNodes() {
         return 2;
@@ -189,14 +190,12 @@ public abstract class ElasticsearchBackwardsCompatIntegrationTest extends Elasti
     }
 
     protected Settings commonNodeSettings(int nodeOrdinal) {
-        ImmutableSettings.Builder builder = ImmutableSettings.builder().put(requiredSettings())
-                .put(TransportModule.TRANSPORT_TYPE_KEY, NettyTransport.class.getName()) // run same transport  / disco as external
-                .put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, TransportService.class.getName());
+        ImmutableSettings.Builder builder = ImmutableSettings.builder().put(requiredSettings()).put(TransportModule.TRANSPORT_TYPE_KEY, NettyTransport.class.getName()) // run same transport  / disco as external
+                        .put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, TransportService.class.getName());
         if (compatibilityVersion().before(Version.V_1_3_2)) {
             // if we test against nodes before 1.3.2 we disable all the compression due to a known bug
             // see #7210
-            builder.put(Transport.TransportSettings.TRANSPORT_TCP_COMPRESS, false)
-                    .put(RecoverySettings.INDICES_RECOVERY_COMPRESS, false);
+            builder.put(Transport.TransportSettings.TRANSPORT_TCP_COMPRESS, false).put(RecoverySettings.INDICES_RECOVERY_COMPRESS, false);
         }
         return builder.build();
     }

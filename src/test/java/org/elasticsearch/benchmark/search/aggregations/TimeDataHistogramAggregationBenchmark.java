@@ -73,20 +73,12 @@ public class TimeDataHistogramAggregationBenchmark {
 
     public static void main(String[] args) throws Exception {
 
-        Settings settings = settingsBuilder()
-                .put("index.refresh_interval", "-1")
-                .put("gateway.type", "local")
-                .put("node.local", true)
-                .put(SETTING_NUMBER_OF_SHARDS, 1)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put("index.refresh_interval", "-1").put("gateway.type", "local").put("node.local", true).put(SETTING_NUMBER_OF_SHARDS, 1).put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
         String clusterName = TimeDataHistogramAggregationBenchmark.class.getSimpleName();
         Node[] nodes = new Node[1];
         for (int i = 0; i < nodes.length; i++) {
-            nodes[i] = nodeBuilder().clusterName(clusterName)
-                    .settings(settingsBuilder().put(settings).put("name", "node" + i))
-                    .node();
+            nodes[i] = nodeBuilder().clusterName(clusterName).settings(settingsBuilder().put(settings).put("name", "node" + i)).node();
         }
 
         client = nodes[0].client();
@@ -101,8 +93,8 @@ public class TimeDataHistogramAggregationBenchmark {
             long ITERS = COUNT / BATCH;
             long i = 1;
             int counter = 0;
-            long[] currentTimeInMillis1 = new long[]{System.currentTimeMillis()};
-            long[] currentTimeInMillis2 = new long[]{System.currentTimeMillis()};
+            long[] currentTimeInMillis1 = new long[] { System.currentTimeMillis() };
+            long[] currentTimeInMillis2 = new long[] { System.currentTimeMillis() };
             long startTimeInMillis = currentTimeInMillis1[0];
             long averageMillisChange = TIME_PERIOD / COUNT * 2;
             long backwardSkew = Math.max(1, (long) (averageMillisChange * 0.1));
@@ -126,8 +118,7 @@ public class TimeDataHistogramAggregationBenchmark {
 
                     builder.endObject();
 
-                    request.add(Requests.indexRequest("test").type("type1").id(Integer.toString(counter))
-                            .source(builder));
+                    request.add(Requests.indexRequest("test").type("type1").id(Integer.toString(counter)).source(builder));
                 }
                 BulkResponse response = request.execute().actionGet();
                 if (response.hasFailures()) {
@@ -164,9 +155,7 @@ public class TimeDataHistogramAggregationBenchmark {
         List<StatsResult> stats = Lists.newArrayList();
         stats.add(measureAgg("hist_l", "l_value", MATCH_PERCENTAGE));
 
-        NodesStatsResponse nodeStats = client.admin().cluster().prepareNodesStats(nodes[0].settings().get("name")).clear()
-                .setIndices(new CommonStatsFlags(CommonStatsFlags.Flag.FieldData)).get();
-
+        NodesStatsResponse nodeStats = client.admin().cluster().prepareNodesStats(nodes[0].settings().get("name")).clear().setIndices(new CommonStatsFlags(CommonStatsFlags.Flag.FieldData)).get();
 
         System.out.println("------------------ SUMMARY -------------------------------");
 
@@ -188,14 +177,7 @@ public class TimeDataHistogramAggregationBenchmark {
 
     protected static void setMapping(double acceptableOverheadRatio, IndexFieldData.CommonSettings.MemoryStorageFormat fielddataStorageFormat) throws IOException {
         XContentBuilder mapping = JsonXContent.contentBuilder();
-        mapping.startObject().startObject("type1").startObject("properties").startObject("l_value")
-                .field("type", "long")
-                .startObject("fielddata")
-                .field("acceptable_transient_overhead_ratio", acceptableOverheadRatio)
-                .field("acceptable_overhead_ratio", acceptableOverheadRatio)
-                .field(IndexFieldData.CommonSettings.SETTING_MEMORY_STORAGE_HINT, fielddataStorageFormat.name().toLowerCase(Locale.ROOT))
-                .endObject()
-                .endObject().endObject().endObject().endObject();
+        mapping.startObject().startObject("type1").startObject("properties").startObject("l_value").field("type", "long").startObject("fielddata").field("acceptable_transient_overhead_ratio", acceptableOverheadRatio).field("acceptable_overhead_ratio", acceptableOverheadRatio).field(IndexFieldData.CommonSettings.SETTING_MEMORY_STORAGE_HINT, fielddataStorageFormat.name().toLowerCase(Locale.ROOT)).endObject().endObject().endObject().endObject().endObject();
         client.admin().indices().preparePutMapping("test").setType("type1").setSource(mapping).get();
     }
 
@@ -210,10 +192,7 @@ public class TimeDataHistogramAggregationBenchmark {
     }
 
     private static SearchResponse doTermsAggsSearch(String name, String field, float matchPercentage) {
-        SearchResponse response = client.prepareSearch()
-                .setSearchType(SearchType.COUNT)
-                .setQuery(QueryBuilders.constantScoreQuery(FilterBuilders.scriptFilter("random()<matchP").addParam("matchP", matchPercentage).cache(true)))
-                .addAggregation(AggregationBuilders.histogram(name).field(field).interval(3600 * 1000)).get();
+        SearchResponse response = client.prepareSearch().setSearchType(SearchType.COUNT).setQuery(QueryBuilders.constantScoreQuery(FilterBuilders.scriptFilter("random()<matchP").addParam("matchP", matchPercentage).cache(true))).addAggregation(AggregationBuilders.histogram(name).field(field).interval(3600 * 1000)).get();
 
         if (response.getHits().totalHits() < COUNT * matchPercentage * 0.7) {
             System.err.println("--> warning - big deviation from expected count: " + response.getHits().totalHits() + " expected: " + COUNT * matchPercentage);

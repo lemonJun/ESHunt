@@ -46,7 +46,7 @@ import static org.hamcrest.Matchers.equalTo;
  * AssertingLocalTransport for these tests can be set to only use versions 1.4 onwards while keeping the other tests using all versions
  */
 @ElasticsearchIntegrationTest.SuiteScopeTest
-@ElasticsearchIntegrationTest.ClusterScope(scope=ElasticsearchIntegrationTest.Scope.SUITE)
+@ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.SUITE)
 public class DateHistogramOffsetTests extends ElasticsearchIntegrationTest {
 
     private DateTime date(String date) {
@@ -55,9 +55,7 @@ public class DateHistogramOffsetTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put(AssertingLocalTransport.ASSERTING_TRANSPORT_MIN_VERSION_KEY, Version.V_1_4_0_Beta1).build();
+        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal)).put(AssertingLocalTransport.ASSERTING_TRANSPORT_MIN_VERSION_KEY, Version.V_1_4_0_Beta1).build();
     }
 
     @After
@@ -76,14 +74,7 @@ public class DateHistogramOffsetTests extends ElasticsearchIntegrationTest {
         }
         indexRandom(true, reqs);
 
-        SearchResponse response = client().prepareSearch("idx2")
-                .setQuery(matchAllQuery())
-                .addAggregation(dateHistogram("date_histo")
-                        .field("date")
-                        .preOffset("-2h")
-                        .interval(DateHistogram.Interval.DAY)
-                        .format("yyyy-MM-dd"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx2").setQuery(matchAllQuery()).addAggregation(dateHistogram("date_histo").field("date").preOffset("-2h").interval(DateHistogram.Interval.DAY).format("yyyy-MM-dd")).execute().actionGet();
 
         assertThat(response.getHits().getTotalHits(), equalTo(5l));
 
@@ -111,15 +102,7 @@ public class DateHistogramOffsetTests extends ElasticsearchIntegrationTest {
         }
         indexRandom(true, reqs);
 
-        SearchResponse response = client().prepareSearch("idx2")
-                .setQuery(matchAllQuery())
-                .addAggregation(dateHistogram("date_histo")
-                        .field("date")
-                        .preOffset("-2h")
-                        .minDocCount(0)
-                        .interval(DateHistogram.Interval.DAY)
-                        .format("yyyy-MM-dd"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx2").setQuery(matchAllQuery()).addAggregation(dateHistogram("date_histo").field("date").preOffset("-2h").minDocCount(0).interval(DateHistogram.Interval.DAY).format("yyyy-MM-dd")).execute().actionGet();
 
         assertThat(response.getHits().getTotalHits(), equalTo(5l));
 
@@ -147,14 +130,7 @@ public class DateHistogramOffsetTests extends ElasticsearchIntegrationTest {
         }
         indexRandom(true, reqs);
 
-        SearchResponse response = client().prepareSearch("idx2")
-                .setQuery(matchAllQuery())
-                .addAggregation(dateHistogram("date_histo")
-                        .field("date")
-                        .postOffset("2d")
-                        .interval(DateHistogram.Interval.DAY)
-                        .format("yyyy-MM-dd"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx2").setQuery(matchAllQuery()).addAggregation(dateHistogram("date_histo").field("date").postOffset("2d").interval(DateHistogram.Interval.DAY).format("yyyy-MM-dd")).execute().actionGet();
 
         assertThat(response.getHits().getTotalHits(), equalTo(5l));
 
@@ -182,15 +158,7 @@ public class DateHistogramOffsetTests extends ElasticsearchIntegrationTest {
         }
         indexRandom(true, reqs);
 
-        SearchResponse response = client().prepareSearch("idx2")
-                .setQuery(matchAllQuery())
-                .addAggregation(dateHistogram("date_histo")
-                        .field("date")
-                        .postOffset("2d")
-                        .minDocCount(0)
-                        .interval(DateHistogram.Interval.DAY)
-                        .format("yyyy-MM-dd"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx2").setQuery(matchAllQuery()).addAggregation(dateHistogram("date_histo").field("date").postOffset("2d").minDocCount(0).interval(DateHistogram.Interval.DAY).format("yyyy-MM-dd")).execute().actionGet();
 
         assertThat(response.getHits().getTotalHits(), equalTo(5l));
 

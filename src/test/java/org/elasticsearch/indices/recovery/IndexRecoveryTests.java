@@ -86,9 +86,7 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
     private static final int SHARD_COUNT = 1;
     private static final int REPLICA_COUNT = 0;
 
-
-    private void assertRecoveryStateWithoutStage(RecoveryState state, int shardId, Type type,
-                                                 String sourceNode, String targetNode, boolean hasRestoreSource) {
+    private void assertRecoveryStateWithoutStage(RecoveryState state, int shardId, Type type, String sourceNode, String targetNode, boolean hasRestoreSource) {
         assertThat(state.getShardId().getId(), equalTo(shardId));
         assertThat(state.getType(), equalTo(type));
         if (sourceNode == null) {
@@ -111,36 +109,25 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
 
     }
 
-    private void assertRecoveryState(RecoveryState state, int shardId, Type type, Stage stage,
-                                     String sourceNode, String targetNode, boolean hasRestoreSource) {
+    private void assertRecoveryState(RecoveryState state, int shardId, Type type, Stage stage, String sourceNode, String targetNode, boolean hasRestoreSource) {
         assertRecoveryStateWithoutStage(state, shardId, type, sourceNode, targetNode, hasRestoreSource);
         assertThat(state.getStage(), equalTo(stage));
     }
 
-    private void assertOnGoingRecoveryState(RecoveryState state, int shardId, Type type,
-                                            String sourceNode, String targetNode, boolean hasRestoreSource) {
+    private void assertOnGoingRecoveryState(RecoveryState state, int shardId, Type type, String sourceNode, String targetNode, boolean hasRestoreSource) {
         assertRecoveryStateWithoutStage(state, shardId, type, sourceNode, targetNode, hasRestoreSource);
         assertThat(state.getStage(), not(equalTo(Stage.DONE)));
     }
 
     private void slowDownRecovery(ByteSizeValue shardSize) {
         long chunkSize = shardSize.bytes() / 10;
-        assertTrue(client().admin().cluster().prepareUpdateSettings()
-                .setTransientSettings(ImmutableSettings.builder()
-                                // one chunk per sec..
-                                .put(RecoverySettings.INDICES_RECOVERY_MAX_BYTES_PER_SEC, chunkSize)
-                                .put(RecoverySettings.INDICES_RECOVERY_FILE_CHUNK_SIZE, chunkSize)
-                )
-                .get().isAcknowledged());
+        assertTrue(client().admin().cluster().prepareUpdateSettings().setTransientSettings(ImmutableSettings.builder()
+                        // one chunk per sec..
+                        .put(RecoverySettings.INDICES_RECOVERY_MAX_BYTES_PER_SEC, chunkSize).put(RecoverySettings.INDICES_RECOVERY_FILE_CHUNK_SIZE, chunkSize)).get().isAcknowledged());
     }
 
     private void restoreRecoverySpeed() {
-        assertTrue(client().admin().cluster().prepareUpdateSettings()
-                .setTransientSettings(ImmutableSettings.builder()
-                                .put(RecoverySettings.INDICES_RECOVERY_MAX_BYTES_PER_SEC, "20mb")
-                                .put(RecoverySettings.INDICES_RECOVERY_FILE_CHUNK_SIZE, "512kb")
-                )
-                .get().isAcknowledged());
+        assertTrue(client().admin().cluster().prepareUpdateSettings().setTransientSettings(ImmutableSettings.builder().put(RecoverySettings.INDICES_RECOVERY_MAX_BYTES_PER_SEC, "20mb").put(RecoverySettings.INDICES_RECOVERY_FILE_CHUNK_SIZE, "512kb")).get().isAcknowledged());
     }
 
     @Test
@@ -185,7 +172,7 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
         RecoveryResponse response = client().admin().indices().prepareRecoveries(INDEX_NAME).setActiveOnly(true).execute().actionGet();
 
         List<ShardRecoveryResponse> shardResponses = response.shardResponses().get(INDEX_NAME);
-        assertThat(shardResponses.size(), equalTo(0));  // Should not expect any responses back
+        assertThat(shardResponses.size(), equalTo(0)); // Should not expect any responses back
     }
 
     @Test
@@ -202,8 +189,7 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
 
         // force a shard recovery from nodeA to nodeB
         logger.info("--> bump replica count");
-        client().admin().indices().prepareUpdateSettings(INDEX_NAME)
-                .setSettings(settingsBuilder().put("number_of_replicas", 1)).execute().actionGet();
+        client().admin().indices().prepareUpdateSettings(INDEX_NAME).setSettings(settingsBuilder().put("number_of_replicas", 1)).execute().actionGet();
         ensureGreen();
 
         logger.info("--> request recoveries");
@@ -247,20 +233,16 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
         slowDownRecovery(shardSize);
 
         logger.info("--> move shard from: {} to: {}", nodeA, nodeB);
-        client().admin().cluster().prepareReroute()
-                .add(new MoveAllocationCommand(new ShardId(INDEX_NAME, 0), nodeA, nodeB))
-                .execute().actionGet().getState();
+        client().admin().cluster().prepareReroute().add(new MoveAllocationCommand(new ShardId(INDEX_NAME, 0), nodeA, nodeB)).execute().actionGet().getState();
 
         logger.info("--> waiting for recovery to start both on source and target");
         assertBusy(new Runnable() {
             @Override
             public void run() {
                 IndicesService indicesService = internalCluster().getInstance(IndicesService.class, nodeA);
-                assertThat(indicesService.indexServiceSafe(INDEX_NAME).shardSafe(0).recoveryStats().currentAsSource(),
-                        equalTo(1));
+                assertThat(indicesService.indexServiceSafe(INDEX_NAME).shardSafe(0).recoveryStats().currentAsSource(), equalTo(1));
                 indicesService = internalCluster().getInstance(IndicesService.class, nodeB);
-                assertThat(indicesService.indexServiceSafe(INDEX_NAME).shardSafe(0).recoveryStats().currentAsTarget(),
-                        equalTo(1));
+                assertThat(indicesService.indexServiceSafe(INDEX_NAME).shardSafe(0).recoveryStats().currentAsTarget(), equalTo(1));
             }
         });
 
@@ -317,7 +299,6 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
             }
         });
 
-
         logger.info("--> speeding up recoveries");
         restoreRecoverySpeed();
 
@@ -347,8 +328,7 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
         }
 
         logger.info("--> bump replica count");
-        client().admin().indices().prepareUpdateSettings(INDEX_NAME)
-                .setSettings(settingsBuilder().put("number_of_replicas", 1)).execute().actionGet();
+        client().admin().indices().prepareUpdateSettings(INDEX_NAME).setSettings(settingsBuilder().put("number_of_replicas", 1)).execute().actionGet();
         ensureGreen();
 
         statsResponse = client().admin().cluster().prepareNodesStats().clear().setIndices(new CommonStatsFlags(CommonStatsFlags.Flag.Recovery)).get();
@@ -373,9 +353,7 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
         slowDownRecovery(shardSize);
 
         logger.info("--> move replica shard from: {} to: {}", nodeA, nodeC);
-        client().admin().cluster().prepareReroute()
-                .add(new MoveAllocationCommand(new ShardId(INDEX_NAME, 0), nodeA, nodeC))
-                .execute().actionGet().getState();
+        client().admin().cluster().prepareReroute().add(new MoveAllocationCommand(new ShardId(INDEX_NAME, 0), nodeA, nodeC)).execute().actionGet().getState();
 
         response = client().admin().indices().prepareRecoveries(INDEX_NAME).execute().actionGet();
         shardResponses = response.shardResponses().get(INDEX_NAME);
@@ -425,11 +403,7 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
         String nodeA = internalCluster().startNode(settingsBuilder().put("gateway.type", "local"));
 
         logger.info("--> create repository");
-        assertAcked(client().admin().cluster().preparePutRepository(REPO_NAME)
-                .setType("fs").setSettings(ImmutableSettings.settingsBuilder()
-                                .put("location", randomRepoPath())
-                                .put("compress", false)
-                ).get());
+        assertAcked(client().admin().cluster().preparePutRepository(REPO_NAME).setType("fs").setSettings(ImmutableSettings.settingsBuilder().put("location", randomRepoPath()).put("compress", false)).get());
 
         ensureGreen();
 
@@ -437,19 +411,16 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
         createAndPopulateIndex(INDEX_NAME, 1, SHARD_COUNT, REPLICA_COUNT);
 
         logger.info("--> snapshot");
-        CreateSnapshotResponse createSnapshotResponse = client().admin().cluster().prepareCreateSnapshot(REPO_NAME, SNAP_NAME)
-                .setWaitForCompletion(true).setIndices(INDEX_NAME).get();
+        CreateSnapshotResponse createSnapshotResponse = client().admin().cluster().prepareCreateSnapshot(REPO_NAME, SNAP_NAME).setWaitForCompletion(true).setIndices(INDEX_NAME).get();
         assertThat(createSnapshotResponse.getSnapshotInfo().successfulShards(), greaterThan(0));
         assertThat(createSnapshotResponse.getSnapshotInfo().successfulShards(), equalTo(createSnapshotResponse.getSnapshotInfo().totalShards()));
 
-        assertThat(client().admin().cluster().prepareGetSnapshots(REPO_NAME).setSnapshots(SNAP_NAME).get()
-                .getSnapshots().get(0).state(), equalTo(SnapshotState.SUCCESS));
+        assertThat(client().admin().cluster().prepareGetSnapshots(REPO_NAME).setSnapshots(SNAP_NAME).get().getSnapshots().get(0).state(), equalTo(SnapshotState.SUCCESS));
 
         client().admin().indices().prepareClose(INDEX_NAME).execute().actionGet();
 
         logger.info("--> restore");
-        RestoreSnapshotResponse restoreSnapshotResponse = client().admin().cluster()
-                .prepareRestoreSnapshot(REPO_NAME, SNAP_NAME).setWaitForCompletion(true).execute().actionGet();
+        RestoreSnapshotResponse restoreSnapshotResponse = client().admin().cluster().prepareRestoreSnapshot(REPO_NAME, SNAP_NAME).setWaitForCompletion(true).execute().actionGet();
         int totalShards = restoreSnapshotResponse.getRestoreInfo().totalShards();
         assertThat(totalShards, greaterThan(0));
 
@@ -481,12 +452,10 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
         return nodeResponses;
     }
 
-    private IndicesStatsResponse createAndPopulateIndex(String name, int nodeCount, int shardCount, int replicaCount)
-            throws ExecutionException, InterruptedException {
+    private IndicesStatsResponse createAndPopulateIndex(String name, int nodeCount, int shardCount, int replicaCount) throws ExecutionException, InterruptedException {
 
         logger.info("--> creating test index: {}", name);
-        assertAcked(prepareCreate(name, nodeCount, settingsBuilder().put("number_of_shards", shardCount)
-                .put("number_of_replicas", replicaCount).put(Store.INDEX_STORE_STATS_REFRESH_INTERVAL, 0)));
+        assertAcked(prepareCreate(name, nodeCount, settingsBuilder().put("number_of_shards", shardCount).put("number_of_replicas", replicaCount).put(Store.INDEX_STORE_STATS_REFRESH_INTERVAL, 0)));
         ensureGreen();
 
         logger.info("--> indexing sample data");
@@ -494,10 +463,7 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
         final IndexRequestBuilder[] docs = new IndexRequestBuilder[numDocs];
 
         for (int i = 0; i < numDocs; i++) {
-            docs[i] = client().prepareIndex(INDEX_NAME, INDEX_TYPE).
-                    setSource("foo-int", randomInt(),
-                            "foo-string", randomAsciiOfLength(32),
-                            "foo-float", randomFloat());
+            docs[i] = client().prepareIndex(INDEX_NAME, INDEX_TYPE).setSource("foo-int", randomInt(), "foo-string", randomAsciiOfLength(32), "foo-float", randomFloat());
         }
 
         indexRandom(true, docs);
@@ -517,12 +483,8 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
     @Test
     public void disconnectsWhileRecoveringTest() throws Exception {
         final String indexName = "test";
-        final Settings nodeSettings = ImmutableSettings.builder()
-                .put(RecoverySettings.INDICES_RECOVERY_RETRY_DELAY_NETWORK, "100ms")
-                .put(RecoverySettings.INDICES_RECOVERY_INTERNAL_ACTION_TIMEOUT, "1s")
-                .put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, MockTransportService.class.getName())
-                .put(MockDirectoryHelper.RANDOM_PREVENT_DOUBLE_WRITE, false) // restarted recoveries will delete temp files and write them again
-                .build();
+        final Settings nodeSettings = ImmutableSettings.builder().put(RecoverySettings.INDICES_RECOVERY_RETRY_DELAY_NETWORK, "100ms").put(RecoverySettings.INDICES_RECOVERY_INTERNAL_ACTION_TIMEOUT, "1s").put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, MockTransportService.class.getName()).put(MockDirectoryHelper.RANDOM_PREVENT_DOUBLE_WRITE, false) // restarted recoveries will delete temp files and write them again
+                        .build();
         // start a master node
         internalCluster().startNode(nodeSettings);
 
@@ -534,14 +496,7 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
         ClusterHealthResponse response = client().admin().cluster().prepareHealth().setWaitForNodes(">=3").get();
         assertThat(response.isTimedOut(), is(false));
 
-
-        client().admin().indices().prepareCreate(indexName)
-                .setSettings(
-                        ImmutableSettings.builder()
-                                .put(FilterAllocationDecider.INDEX_ROUTING_INCLUDE_GROUP + "color", "blue")
-                                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)
-                ).get();
+        client().admin().indices().prepareCreate(indexName).setSettings(ImmutableSettings.builder().put(FilterAllocationDecider.INDEX_ROUTING_INCLUDE_GROUP + "color", "blue").put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)).get();
 
         List<IndexRequestBuilder> requests = new ArrayList<>();
         int numDocs = scaledRandomIntBetween(25, 250);
@@ -559,15 +514,9 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
         SearchResponse searchResponse = client().prepareSearch(indexName).get();
         assertHitCount(searchResponse, numDocs);
 
-        String[] recoveryActions = new String[]{
-                RecoverySource.Actions.START_RECOVERY,
-                RecoveryTarget.Actions.FILES_INFO,
-                RecoveryTarget.Actions.FILE_CHUNK,
-                RecoveryTarget.Actions.CLEAN_FILES,
+        String[] recoveryActions = new String[] { RecoverySource.Actions.START_RECOVERY, RecoveryTarget.Actions.FILES_INFO, RecoveryTarget.Actions.FILE_CHUNK, RecoveryTarget.Actions.CLEAN_FILES,
                 //RecoveryTarget.Actions.TRANSLOG_OPS, <-- may not be sent if already flushed
-                RecoveryTarget.Actions.PREPARE_TRANSLOG,
-                RecoveryTarget.Actions.FINALIZE
-        };
+                RecoveryTarget.Actions.PREPARE_TRANSLOG, RecoveryTarget.Actions.FINALIZE };
         final String recoveryActionToBlock = randomFrom(recoveryActions);
         final boolean dropRequests = randomBoolean();
         logger.info("--> will {} between blue & red on [{}]", dropRequests ? "drop requests" : "break connection", recoveryActionToBlock);
@@ -582,11 +531,7 @@ public class IndexRecoveryTests extends ElasticsearchIntegrationTest {
         redMockTransportService.addDelegate(blueDiscoNode, new RecoveryActionBlocker(dropRequests, recoveryActionToBlock, redMockTransportService.original(), requestBlocked));
 
         logger.info("--> starting recovery from blue to red");
-        client().admin().indices().prepareUpdateSettings(indexName).setSettings(
-                ImmutableSettings.builder()
-                        .put(FilterAllocationDecider.INDEX_ROUTING_INCLUDE_GROUP + "color", "red,blue")
-                        .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-        ).get();
+        client().admin().indices().prepareUpdateSettings(indexName).setSettings(ImmutableSettings.builder().put(FilterAllocationDecider.INDEX_ROUTING_INCLUDE_GROUP + "color", "red,blue").put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)).get();
 
         requestBlocked.await();
 

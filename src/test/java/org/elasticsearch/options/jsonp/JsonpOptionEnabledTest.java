@@ -42,11 +42,7 @@ public class JsonpOptionEnabledTest extends ElasticsearchIntegrationTest {
     // Build our cluster settings
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put(RestController.HTTP_JSON_ENABLE, true)
-                .put(InternalNode.HTTP_ENABLED, true)
-                .build();
+        return ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put(RestController.HTTP_JSON_ENABLE, true).put(InternalNode.HTTP_ENABLED, true).build();
     }
 
     // Make sure our response has both the callback and opening paren, as well as the famous Elasticsearch tagline :)

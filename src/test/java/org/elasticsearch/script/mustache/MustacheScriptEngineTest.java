@@ -48,25 +48,19 @@ public class MustacheScriptEngineTest extends ElasticsearchTestCase {
     @Test
     public void testSimpleParameterReplace() {
         {
-            String template = "GET _search {\"query\": " + "{\"boosting\": {" + "\"positive\": {\"match\": {\"body\": \"gift\"}},"
-                    + "\"negative\": {\"term\": {\"body\": {\"value\": \"solr\"}" + "}}, \"negative_boost\": {{boost_val}} } }}";
+            String template = "GET _search {\"query\": " + "{\"boosting\": {" + "\"positive\": {\"match\": {\"body\": \"gift\"}}," + "\"negative\": {\"term\": {\"body\": {\"value\": \"solr\"}" + "}}, \"negative_boost\": {{boost_val}} } }}";
             Map<String, Object> vars = new HashMap<>();
             vars.put("boost_val", "0.3");
             BytesReference o = (BytesReference) qe.execute(qe.compile(template), vars);
-            assertEquals("GET _search {\"query\": {\"boosting\": {\"positive\": {\"match\": {\"body\": \"gift\"}},"
-                    + "\"negative\": {\"term\": {\"body\": {\"value\": \"solr\"}}}, \"negative_boost\": 0.3 } }}",
-                    new String(o.toBytes(), Charset.forName("UTF-8")));
+            assertEquals("GET _search {\"query\": {\"boosting\": {\"positive\": {\"match\": {\"body\": \"gift\"}}," + "\"negative\": {\"term\": {\"body\": {\"value\": \"solr\"}}}, \"negative_boost\": 0.3 } }}", new String(o.toBytes(), Charset.forName("UTF-8")));
         }
         {
-            String template = "GET _search {\"query\": " + "{\"boosting\": {" + "\"positive\": {\"match\": {\"body\": \"gift\"}},"
-                    + "\"negative\": {\"term\": {\"body\": {\"value\": \"{{body_val}}\"}" + "}}, \"negative_boost\": {{boost_val}} } }}";
+            String template = "GET _search {\"query\": " + "{\"boosting\": {" + "\"positive\": {\"match\": {\"body\": \"gift\"}}," + "\"negative\": {\"term\": {\"body\": {\"value\": \"{{body_val}}\"}" + "}}, \"negative_boost\": {{boost_val}} } }}";
             Map<String, Object> vars = new HashMap<>();
             vars.put("boost_val", "0.3");
             vars.put("body_val", "\"quick brown\"");
             BytesReference o = (BytesReference) qe.execute(qe.compile(template), vars);
-            assertEquals("GET _search {\"query\": {\"boosting\": {\"positive\": {\"match\": {\"body\": \"gift\"}},"
-                    + "\"negative\": {\"term\": {\"body\": {\"value\": \"\\\"quick brown\\\"\"}}}, \"negative_boost\": 0.3 } }}",
-                    new String(o.toBytes(), Charset.forName("UTF-8")));
+            assertEquals("GET _search {\"query\": {\"boosting\": {\"positive\": {\"match\": {\"body\": \"gift\"}}," + "\"negative\": {\"term\": {\"body\": {\"value\": \"\\\"quick brown\\\"\"}}}, \"negative_boost\": 0.3 } }}", new String(o.toBytes(), Charset.forName("UTF-8")));
         }
     }
 
@@ -83,42 +77,8 @@ public class MustacheScriptEngineTest extends ElasticsearchTestCase {
             assertThat(writer.toString(), equalTo("\\n"));
         }
 
-        Character[] specialChars = new Character[]{
-                '\"', 
-                '\\', 
-                '\u0000', 
-                '\u0001',
-                '\u0002',
-                '\u0003',
-                '\u0004',
-                '\u0005',
-                '\u0006',
-                '\u0007',
-                '\u0008',
-                '\u0009',
-                '\u000B',
-                '\u000C',
-                '\u000E',
-                '\u000F',
-                '\u001F'};
-        String[] escapedChars = new String[]{
-                "\\\"", 
-                "\\\\", 
-                "\\u0000", 
-                "\\u0001",
-                "\\u0002",
-                "\\u0003",
-                "\\u0004",
-                "\\u0005",
-                "\\u0006",
-                "\\u0007",
-                "\\u0008",
-                "\\u0009",
-                "\\u000B",
-                "\\u000C",
-                "\\u000E",
-                "\\u000F",
-                "\\u001F"};
+        Character[] specialChars = new Character[] { '\"', '\\', '\u0000', '\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0006', '\u0007', '\u0008', '\u0009', '\u000B', '\u000C', '\u000E', '\u000F', '\u001F' };
+        String[] escapedChars = new String[] { "\\\"", "\\\\", "\\u0000", "\\u0001", "\\u0002", "\\u0003", "\\u0004", "\\u0005", "\\u0006", "\\u0007", "\\u0008", "\\u0009", "\\u000B", "\\u000C", "\\u000E", "\\u000F", "\\u001F" };
         int iters = scaledRandomIntBetween(100, 1000);
         for (int i = 0; i < iters; i++) {
             int rounds = scaledRandomIntBetween(1, 20);
@@ -148,7 +108,7 @@ public class MustacheScriptEngineTest extends ElasticsearchTestCase {
         }
         return string;
     }
-    
+
     /**
      * From https://www.ietf.org/rfc/rfc4627.txt:
      * 
@@ -159,11 +119,11 @@ public class MustacheScriptEngineTest extends ElasticsearchTestCase {
      * */
     private static boolean isEscapeChar(char c) {
         switch (c) {
-        case '"':
-        case '\\':
-            return true;
+            case '"':
+            case '\\':
+                return true;
         }
-        
+
         if (c < '\u002F')
             return true;
         return false;

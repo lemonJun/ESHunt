@@ -81,10 +81,7 @@ public class ActionNamesTests extends ElasticsearchIntegrationTest {
     public void testActionNamesCategories() throws NoSuchFieldException, IllegalAccessException {
         TransportService transportService = internalCluster().getInstance(TransportService.class);
         for (String action : transportService.serverHandlers.keySet()) {
-            assertThat("action doesn't belong to known category", action, either(startsWith("indices:admin")).or(startsWith("indices:monitor"))
-                    .or(startsWith("indices:data/read")).or(startsWith("indices:data/write"))
-                    .or(startsWith("cluster:admin")).or(startsWith("cluster:monitor"))
-                    .or(startsWith("internal:")));
+            assertThat("action doesn't belong to known category", action, either(startsWith("indices:admin")).or(startsWith("indices:monitor")).or(startsWith("indices:data/read")).or(startsWith("indices:data/write")).or(startsWith("cluster:admin")).or(startsWith("cluster:monitor")).or(startsWith("internal:")));
         }
     }
 
@@ -115,7 +112,7 @@ public class ActionNamesTests extends ElasticsearchIntegrationTest {
             if (customAction) {
                 do {
                     action = randomAsciiOfLength(randomInt(30));
-                } while(actions.contains(action));
+                } while (actions.contains(action));
             } else {
                 action = randomFrom(actions);
             }
@@ -146,7 +143,7 @@ public class ActionNamesTests extends ElasticsearchIntegrationTest {
             if (customAction) {
                 do {
                     action = randomAsciiOfLength(randomInt(30));
-                } while(pre_1_4_names.contains(action));
+                } while (pre_1_4_names.contains(action));
             } else {
                 if (version.before(Version.V_1_4_0_Beta1)) {
                     action = randomFrom(pre_1_4_names);

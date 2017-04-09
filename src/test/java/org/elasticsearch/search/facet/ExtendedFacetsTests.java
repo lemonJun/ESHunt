@@ -58,50 +58,7 @@ public class ExtendedFacetsTests extends ElasticsearchIntegrationTest {
     @Test
     @Slow
     public void testTermFacet_stringFields() throws Throwable {
-        prepareCreate("test")
-                .addMapping("type1", jsonBuilder().startObject()
-                        .startObject("type1")
-                        .startObject("properties")
-                        .startObject("field1_paged")
-                        .field("type", "string")
-                        .field("index", "not_analyzed")
-                        .startObject("fielddata")
-                        .field("format", "paged_bytes")
-                        .field("loading", randomBoolean() ? "eager" : "lazy")
-                        .endObject()
-                        .endObject()
-                        .startObject("field1_fst")
-                        .field("type", "string")
-                        .field("index", "not_analyzed")
-                        .startObject("fielddata")
-                        .field("format", "fst")
-                        .field("loading", randomBoolean() ? "eager" : "lazy")
-                        .endObject()
-                        .endObject()
-                        .startObject("field1_dv")
-                        .field("type", "string")
-                        .field("index", randomBoolean() ? "no" : "not_analyzed")
-                        .startObject("fielddata")
-                        .field("format", "doc_values")
-                        .endObject()
-                        .endObject()
-                        .startObject("field2")
-                        .field("type", "string")
-                        .field("index", "not_analyzed")
-                        .startObject("fielddata")
-                        .field("format", "fst")
-                        .field("loading", randomBoolean() ? "eager" : "lazy")
-                        .endObject()
-                        .endObject()
-                        .startObject("q_field")
-                        .field("type", "string")
-                        .field("index", "not_analyzed")
-                        .endObject()
-                        .endObject()
-                        .endObject().endObject()
-                )
-                .execute().actionGet();
-
+        prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1_paged").field("type", "string").field("index", "not_analyzed").startObject("fielddata").field("format", "paged_bytes").field("loading", randomBoolean() ? "eager" : "lazy").endObject().endObject().startObject("field1_fst").field("type", "string").field("index", "not_analyzed").startObject("fielddata").field("format", "fst").field("loading", randomBoolean() ? "eager" : "lazy").endObject().endObject().startObject("field1_dv").field("type", "string").field("index", randomBoolean() ? "no" : "not_analyzed").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("field2").field("type", "string").field("index", "not_analyzed").startObject("fielddata").field("format", "fst").field("loading", randomBoolean() ? "eager" : "lazy").endObject().endObject().startObject("q_field").field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject().endObject()).execute().actionGet();
 
         Random random = getRandom();
         int numOfQueryValues = 50;
@@ -135,15 +92,7 @@ public class ExtendedFacetsTests extends ElasticsearchIntegrationTest {
             String field2Val = allUniqueFieldValues[random.nextInt(numOfVals)];
             allField1AndField2Values.add(field2Val);
             String queryVal = queryValues[random.nextInt(numOfQueryValues)];
-            client().prepareIndex("test", "type1", Integer.toString(i))
-                    .setSource(jsonBuilder().startObject()
-                            .field("field1_paged", field1Values)
-                            .field("field1_fst", field1Values)
-                            .field("field1_dv", field1Values)
-                            .field("field2", field2Val)
-                            .field("q_field", queryVal)
-                            .endObject())
-                    .execute().actionGet();
+            client().prepareIndex("test", "type1", Integer.toString(i)).setSource(jsonBuilder().startObject().field("field1_paged", field1Values).field("field1_fst", field1Values).field("field1_dv", field1Values).field("field2", field2Val).field("q_field", queryVal).endObject()).execute().actionGet();
 
             if (random.nextInt(2000) == 854) {
                 client().admin().indices().prepareFlush("test").execute().actionGet();
@@ -154,7 +103,7 @@ public class ExtendedFacetsTests extends ElasticsearchIntegrationTest {
         }
 
         client().admin().indices().prepareRefresh().execute().actionGet();
-        String[] facetFields = new String[]{"field1_paged", "field1_fst", "field1_dv"};
+        String[] facetFields = new String[] { "field1_paged", "field1_fst", "field1_dv" };
         TermsFacet.ComparatorType[] compTypes = TermsFacet.ComparatorType.values();
         for (String facetField : facetFields) {
             for (String queryVal : queryValToField1FacetEntries.keySet()) {
@@ -206,10 +155,7 @@ public class ExtendedFacetsTests extends ElasticsearchIntegrationTest {
                 boolean allTerms = random.nextInt(10) == 3;
                 termsFacetBuilder.allTerms(allTerms);
 
-                SearchResponse response = client().prepareSearch("test")
-                        .setQuery(QueryBuilders.termQuery("q_field", queryVal))
-                        .addFacet(termsFacetBuilder)
-                        .execute().actionGet();
+                SearchResponse response = client().prepareSearch("test").setQuery(QueryBuilders.termQuery("q_field", queryVal)).addFacet(termsFacetBuilder).execute().actionGet();
                 TermsFacet actualFacetEntries = response.getFacets().facet("facet1");
 
                 List<Tuple<Text, Integer>> expectedFacetEntries = getExpectedFacetEntries(allFieldValues, queryControlFacets, size, compType, excludes, regex, allTerms);
@@ -242,13 +188,7 @@ public class ExtendedFacetsTests extends ElasticsearchIntegrationTest {
         }
     }
 
-    private List<Tuple<Text, Integer>> getExpectedFacetEntries(Set<String> fieldValues,
-                                                               Map<String, Integer> controlFacetsField,
-                                                               int size,
-                                                               TermsFacet.ComparatorType sort,
-                                                               List<String> excludes,
-                                                               String regex,
-                                                               boolean allTerms) {
+    private List<Tuple<Text, Integer>> getExpectedFacetEntries(Set<String> fieldValues, Map<String, Integer> controlFacetsField, int size, TermsFacet.ComparatorType sort, List<String> excludes, String regex, boolean allTerms) {
         Pattern pattern = null;
         if (regex != null) {
             pattern = Regex.compile(regex, null);

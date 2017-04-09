@@ -39,10 +39,7 @@ public class ClientFailover {
             nodes[i] = NodeBuilder.nodeBuilder().node();
         }
 
-        final TransportClient client = new TransportClient()
-                .addTransportAddress(new InetSocketTransportAddress("localhost", 9300))
-                .addTransportAddress(new InetSocketTransportAddress("localhost", 9301))
-                .addTransportAddress(new InetSocketTransportAddress("localhost", 9302));
+        final TransportClient client = new TransportClient().addTransportAddress(new InetSocketTransportAddress("localhost", 9300)).addTransportAddress(new InetSocketTransportAddress("localhost", 9301)).addTransportAddress(new InetSocketTransportAddress("localhost", 9302));
 
         final AtomicBoolean done = new AtomicBoolean();
         final AtomicLong indexed = new AtomicLong();

@@ -47,30 +47,18 @@ public class FilterRoutingTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void testClusterFilters() {
-        AllocationService strategy = createAllocationService(settingsBuilder()
-                .put("cluster.routing.allocation.include.tag1", "value1,value2")
-                .put("cluster.routing.allocation.exclude.tag1", "value3,value4")
-                .build());
+        AllocationService strategy = createAllocationService(settingsBuilder().put("cluster.routing.allocation.include.tag1", "value1,value2").put("cluster.routing.allocation.exclude.tag1", "value3,value4").build());
 
         logger.info("Building initial routing table");
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(2).numberOfReplicas(1))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(2).numberOfReplicas(1)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
         logger.info("--> adding four nodes and performing rerouting");
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(newNode("node1", ImmutableMap.of("tag1", "value1")))
-                .put(newNode("node2", ImmutableMap.of("tag1", "value2")))
-                .put(newNode("node3", ImmutableMap.of("tag1", "value3")))
-                .put(newNode("node4", ImmutableMap.of("tag1", "value4")))
-        ).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1", ImmutableMap.of("tag1", "value1"))).put(newNode("node2", ImmutableMap.of("tag1", "value2"))).put(newNode("node3", ImmutableMap.of("tag1", "value3"))).put(newNode("node4", ImmutableMap.of("tag1", "value4")))).build();
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
         assertThat(clusterState.routingNodes().shardsWithState(INITIALIZING).size(), equalTo(2));
@@ -93,33 +81,18 @@ public class FilterRoutingTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void testIndexFilters() {
-        AllocationService strategy = createAllocationService(settingsBuilder()
-                .build());
+        AllocationService strategy = createAllocationService(settingsBuilder().build());
 
         logger.info("Building initial routing table");
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").settings(settingsBuilder()
-                        .put("index.number_of_shards", 2)
-                        .put("index.number_of_replicas", 1)
-                        .put("index.routing.allocation.include.tag1", "value1,value2")
-                        .put("index.routing.allocation.exclude.tag1", "value3,value4")
-                        .build()))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").settings(settingsBuilder().put("index.number_of_shards", 2).put("index.number_of_replicas", 1).put("index.routing.allocation.include.tag1", "value1,value2").put("index.routing.allocation.exclude.tag1", "value3,value4").build())).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
         logger.info("--> adding two nodes and performing rerouting");
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(newNode("node1", ImmutableMap.of("tag1", "value1")))
-                .put(newNode("node2", ImmutableMap.of("tag1", "value2")))
-                .put(newNode("node3", ImmutableMap.of("tag1", "value3")))
-                .put(newNode("node4", ImmutableMap.of("tag1", "value4")))
-        ).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1", ImmutableMap.of("tag1", "value1"))).put(newNode("node2", ImmutableMap.of("tag1", "value2"))).put(newNode("node3", ImmutableMap.of("tag1", "value3"))).put(newNode("node4", ImmutableMap.of("tag1", "value4")))).build();
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
         assertThat(clusterState.routingNodes().shardsWithState(INITIALIZING).size(), equalTo(2));
@@ -141,14 +114,7 @@ public class FilterRoutingTests extends ElasticsearchAllocationTestCase {
 
         logger.info("--> switch between value2 and value4, shards should be relocating");
 
-        metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").settings(settingsBuilder()
-                        .put("index.number_of_shards", 2)
-                        .put("index.number_of_replicas", 1)
-                        .put("index.routing.allocation.include.tag1", "value1,value4")
-                        .put("index.routing.allocation.exclude.tag1", "value2,value3")
-                        .build()))
-                .build();
+        metaData = MetaData.builder().put(IndexMetaData.builder("test").settings(settingsBuilder().put("index.number_of_shards", 2).put("index.number_of_replicas", 1).put("index.routing.allocation.include.tag1", "value1,value4").put("index.routing.allocation.exclude.tag1", "value2,value3").build())).build();
         clusterState = ClusterState.builder(clusterState).metaData(metaData).build();
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();

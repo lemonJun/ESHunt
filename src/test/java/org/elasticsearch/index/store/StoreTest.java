@@ -474,7 +474,7 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
             output.writeBytes(new byte[20], 20);
             output.verify();
         }
-        
+
         // .tii: old version
         tii = new StoreFileMetaData("foo.tii", 20, "boguschecksum", Version.LUCENE_36);
         assertTrue(Store.isUnreliableLegacyChecksum(tii));
@@ -482,7 +482,7 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
             output.writeBytes(new byte[20], 20);
             output.verify();
         }
-        
+
         // .tii: checkIntegrity
         tii = new StoreFileMetaData("foo.tii", 20, "boguschecksum", Version.LUCENE_36);
         assertTrue(Store.isUnreliableLegacyChecksum(tii));
@@ -506,7 +506,8 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
         try (VerifyingIndexOutput output = (VerifyingIndexOutput) store.createVerifyingOutput("foo.temp", tis, IOContext.DEFAULT)) {
             output.writeBytes(new byte[20], 20);
             output.verify();
-        };
+        }
+        ;
 
         // .tis: old version
         tis = new StoreFileMetaData("foo.tis", 20, "boguschecksum", Version.LUCENE_36);
@@ -514,15 +515,17 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
         try (VerifyingIndexOutput output = (VerifyingIndexOutput) store.createVerifyingOutput("foo.temp", tis, IOContext.DEFAULT)) {
             output.writeBytes(new byte[20], 20);
             output.verify();
-        };
-        
+        }
+        ;
+
         // .tis: checkIntegrity
         tis = new StoreFileMetaData("foo.tis", 20, "boguschecksum", Version.LUCENE_36);
         assertTrue(Store.isUnreliableLegacyChecksum(tis));
         try (VerifyingIndexOutput output = (VerifyingIndexOutput) store.createVerifyingOutput("foo.tis", tis, IOContext.DEFAULT)) {
             output.writeBytes(new byte[20], 20);
             output.verify();
-        };
+        }
+        ;
         assertTrue(store.checkIntegrity(tis));
 
         store.close();
@@ -560,7 +563,7 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
         } catch (CorruptIndexException expected) {
             assertTrue(expected.getMessage().startsWith("checksum failed"));
         }
-        
+
         // .cfs: checkIntegrity
         cfs = new StoreFileMetaData("foo.cfs", 20, "boguschecksum", Version.LUCENE_33);
         assertTrue(Store.isUnreliableLegacyChecksum(cfs));
@@ -750,8 +753,8 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
         }
 
         { // negative check - wrong checksum
-            StoreFileMetaData lucene = new StoreFileMetaData("lucene_checksum.bin", luceneFileLength, Store.digestToString(luceneChecksum+1), Version.LUCENE_48);
-            StoreFileMetaData legacy = new StoreFileMetaData("legacy.bin", legacyFileLength, Store.digestToString(adler32LegacyChecksum+1));
+            StoreFileMetaData lucene = new StoreFileMetaData("lucene_checksum.bin", luceneFileLength, Store.digestToString(luceneChecksum + 1), Version.LUCENE_48);
+            StoreFileMetaData legacy = new StoreFileMetaData("legacy.bin", legacyFileLength, Store.digestToString(adler32LegacyChecksum + 1));
             assertTrue(legacy.hasLegacyChecksum());
             assertFalse(lucene.hasLegacyChecksum());
             assertFalse(Store.checkIntegrity(lucene, dir));
@@ -759,8 +762,8 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
         }
 
         { // negative check - wrong length
-            StoreFileMetaData lucene = new StoreFileMetaData("lucene_checksum.bin", luceneFileLength+1, Store.digestToString(luceneChecksum), Version.LUCENE_48);
-            StoreFileMetaData legacy = new StoreFileMetaData("legacy.bin", legacyFileLength+1, Store.digestToString(adler32LegacyChecksum));
+            StoreFileMetaData lucene = new StoreFileMetaData("lucene_checksum.bin", luceneFileLength + 1, Store.digestToString(luceneChecksum), Version.LUCENE_48);
+            StoreFileMetaData legacy = new StoreFileMetaData("legacy.bin", legacyFileLength + 1, Store.digestToString(adler32LegacyChecksum));
             assertTrue(legacy.hasLegacyChecksum());
             assertFalse(lucene.hasLegacyChecksum());
             assertFalse(Store.checkIntegrity(lucene, dir));
@@ -879,11 +882,11 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
             super(new ShardId("fake", 1), ImmutableSettings.EMPTY);
             this.dirs = new Directory[1 + random.nextInt(5)];
             for (int i = 0; i < dirs.length; i++) {
-                dirs[i]  = newDirectory(random);
+                dirs[i] = newDirectory(random);
                 if (dirs[i] instanceof MockDirectoryWrapper) {
-                    ((MockDirectoryWrapper)dirs[i]).setPreventDoubleWrite(preventDoubleWrite);
+                    ((MockDirectoryWrapper) dirs[i]).setPreventDoubleWrite(preventDoubleWrite);
                     // TODO: fix this test to handle virus checker
-                    ((MockDirectoryWrapper)dirs[i]).setEnableVirusScanner(false);
+                    ((MockDirectoryWrapper) dirs[i]).setEnableVirusScanner(false);
                 }
             }
             this.random = random;
@@ -915,6 +918,7 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
             }
         }
     }
+
     private Distributor randomDistributor(DirectoryService service) throws IOException {
         return randomDistributor(random(), service);
     }
@@ -930,7 +934,7 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
     @Test
     public void testRecoveryDiffWithLegacyCommit() {
         Map<String, StoreFileMetaData> metaDataMap = new HashMap<>();
-        metaDataMap.put("segments_1", new StoreFileMetaData("segments_1", 50, null, null, new BytesRef(new byte[]{1})));
+        metaDataMap.put("segments_1", new StoreFileMetaData("segments_1", 50, null, null, new BytesRef(new byte[] { 1 })));
         metaDataMap.put("_0_1.del", new StoreFileMetaData("_0_1.del", 42, "foobarbaz", null, new BytesRef()));
         Store.MetadataSnapshot first = new Store.MetadataSnapshot(metaDataMap, Collections.EMPTY_MAP, 0);
 
@@ -938,7 +942,6 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
         Store.RecoveryDiff recoveryDiff = first.recoveryDiff(second);
         assertEquals(recoveryDiff.toString(), recoveryDiff.different.size(), 2);
     }
-
 
     @Test
     public void testRecoveryDiff() throws IOException, InterruptedException {
@@ -1012,7 +1015,7 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
             // si files are different - containing timestamps etc
             assertThat(second.get(md.name()).isSame(md), equalTo(md.name().endsWith(".si") == false));
         }
-        assertThat(diff.different.size(), equalTo(first.size()-1));
+        assertThat(diff.different.size(), equalTo(first.size() - 1));
         assertThat(diff.identical.size(), equalTo(1)); // commit point is identical
         assertThat(diff.missing, empty());
 
@@ -1021,7 +1024,6 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
         assertThat(selfDiff.identical.size(), equalTo(first.size()));
         assertThat(selfDiff.different, empty());
         assertThat(selfDiff.missing, empty());
-
 
         // lets add some deletes
         Random random = new Random(seed);
@@ -1193,7 +1195,7 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
     @Test
     public void testCleanUpWithLegacyChecksums() throws IOException {
         Map<String, StoreFileMetaData> metaDataMap = new HashMap<>();
-        metaDataMap.put("segments_1", new StoreFileMetaData("segments_1", 50, null, null, new BytesRef(new byte[]{1})));
+        metaDataMap.put("segments_1", new StoreFileMetaData("segments_1", 50, null, null, new BytesRef(new byte[] { 1 })));
         metaDataMap.put("_0_1.del", new StoreFileMetaData("_0_1.del", 42, "foobarbaz", null, new BytesRef()));
         Store.MetadataSnapshot snapshot = new Store.MetadataSnapshot(metaDataMap, Collections.EMPTY_MAP, 0);
 
@@ -1219,7 +1221,7 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
         final AtomicInteger count = new AtomicInteger(0);
         final ShardLock lock = new DummyShardLock(shardId);
 
-        Store store = new Store(shardId, ImmutableSettings.EMPTY, directoryService, randomDistributor(directoryService), lock , new Store.OnClose() {
+        Store store = new Store(shardId, ImmutableSettings.EMPTY, directoryService, randomDistributor(directoryService), lock, new Store.OnClose() {
             @Override
             public void handle(ShardLock theLock) {
                 assertEquals(shardId, theLock.getShardId());
@@ -1265,7 +1267,6 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
         deleteContent(store.directory());
         IOUtils.close(store);
     }
-
 
     public static void deleteContent(Directory directory) throws IOException {
         final String[] files = directory.listAll();
@@ -1345,7 +1346,7 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
 
             @Override
             public Directory[] build() throws IOException {
-                return new Directory[]{dir};
+                return new Directory[] { dir };
             }
 
             @Override
@@ -1438,7 +1439,7 @@ public class StoreTest extends ElasticsearchLuceneTestCase {
     @Test
     public void testStreamStoreFilesMetaData() throws Exception {
         Store.MetadataSnapshot metadataSnapshot = createMetaDataSnapshot();
-        TransportNodesListShardStoreMetaData.StoreFilesMetaData outStoreFileMetaData = new TransportNodesListShardStoreMetaData.StoreFilesMetaData(randomBoolean(), new ShardId("test", 0),metadataSnapshot);
+        TransportNodesListShardStoreMetaData.StoreFilesMetaData outStoreFileMetaData = new TransportNodesListShardStoreMetaData.StoreFilesMetaData(randomBoolean(), new ShardId("test", 0), metadataSnapshot);
         ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
         OutputStreamStreamOutput out = new OutputStreamStreamOutput(outBuffer);
         org.elasticsearch.Version targetNodeVersion = ElasticsearchIntegrationTest.randomVersion(random());

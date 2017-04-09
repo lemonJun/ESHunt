@@ -177,9 +177,7 @@ public class SimpleRoutingTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testRequiredRoutingMapping() throws Exception {
-        client().admin().indices().prepareCreate("test").addAlias(new Alias("alias"))
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_routing").field("required", true).endObject().endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test").addAlias(new Alias("alias")).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_routing").field("required", true).endObject().endObject().endObject()).execute().actionGet();
         ensureGreen();
 
         logger.info("--> indexing with id [1], and routing [0]");
@@ -233,13 +231,7 @@ public class SimpleRoutingTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testRequiredRoutingWithPathMapping() throws Exception {
-        client().admin().indices().prepareCreate("test")
-                .addAlias(new Alias("alias"))
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1")
-                        .startObject("_routing").field("required", true).field("path", "routing_field").endObject().startObject("properties")
-                        .startObject("routing_field").field("type", "string").field("index", randomBoolean() ? "no" : "not_analyzed").field("doc_values", randomBoolean() ? "yes" : "no").endObject().endObject()
-                        .endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test").addAlias(new Alias("alias")).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_routing").field("required", true).field("path", "routing_field").endObject().startObject("properties").startObject("routing_field").field("type", "string").field("index", randomBoolean() ? "no" : "not_analyzed").field("doc_values", randomBoolean() ? "yes" : "no").endObject().endObject().endObject().endObject()).execute().actionGet();
         ensureGreen();
 
         logger.info("--> indexing with id [1], and routing [0]");
@@ -252,7 +244,6 @@ public class SimpleRoutingTests extends ElasticsearchIntegrationTest {
         } catch (ElasticsearchException e) {
             assertThat(e.unwrapCause(), instanceOf(MapperParsingException.class));
         }
-
 
         logger.info("--> verifying get with no routing, should fail");
         for (int i = 0; i < 5; i++) {
@@ -272,17 +263,11 @@ public class SimpleRoutingTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testRequiredRoutingWithPathMappingBulk() throws Exception {
-        client().admin().indices().prepareCreate("test")
-                .addAlias(new Alias("alias"))
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1")
-                        .startObject("_routing").field("required", true).field("path", "routing_field").endObject()
-                        .endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test").addAlias(new Alias("alias")).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_routing").field("required", true).field("path", "routing_field").endObject().endObject().endObject()).execute().actionGet();
         ensureGreen();
 
         logger.info("--> indexing with id [1], and routing [0]");
-        client().prepareBulk().add(
-                client().prepareIndex(indexOrAlias(), "type1", "1").setSource("field", "value1", "routing_field", "0")).execute().actionGet();
+        client().prepareBulk().add(client().prepareIndex(indexOrAlias(), "type1", "1").setSource("field", "value1", "routing_field", "0")).execute().actionGet();
         client().admin().indices().prepareRefresh().execute().actionGet();
 
         logger.info("--> verifying get with no routing, should fail");
@@ -304,12 +289,7 @@ public class SimpleRoutingTests extends ElasticsearchIntegrationTest {
     @Test
     public void testRequiredRoutingWithPathNumericType() throws Exception {
 
-        client().admin().indices().prepareCreate("test")
-                .addAlias(new Alias("alias"))
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1")
-                        .startObject("_routing").field("required", true).field("path", "routing_field").endObject()
-                        .endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test").addAlias(new Alias("alias")).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_routing").field("required", true).field("path", "routing_field").endObject().endObject().endObject()).execute().actionGet();
         ensureGreen();
 
         logger.info("--> indexing with id [1], and routing [0]");
@@ -334,9 +314,7 @@ public class SimpleRoutingTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testRequiredRoutingMapping_variousAPIs() throws Exception {
-        client().admin().indices().prepareCreate("test").addAlias(new Alias("alias"))
-                .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_routing").field("required", true).endObject().endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test").addAlias(new Alias("alias")).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_routing").field("required", true).endObject().endObject().endObject()).execute().actionGet();
         ensureGreen();
 
         logger.info("--> indexing with id [1], and routing [0]");
@@ -356,16 +334,13 @@ public class SimpleRoutingTests extends ElasticsearchIntegrationTest {
         }
 
         logger.info("--> verifying explain with id [2], with routing [0], should succeed");
-        ExplainResponse explainResponse = client().prepareExplain(indexOrAlias(), "type1", "2")
-                .setQuery(QueryBuilders.matchAllQuery())
-                .setRouting("0").get();
+        ExplainResponse explainResponse = client().prepareExplain(indexOrAlias(), "type1", "2").setQuery(QueryBuilders.matchAllQuery()).setRouting("0").get();
         assertThat(explainResponse.isExists(), equalTo(true));
         assertThat(explainResponse.isMatch(), equalTo(true));
 
         logger.info("--> verifying explain with id [2], with no routing, should fail");
         try {
-            client().prepareExplain(indexOrAlias(), "type1", "2")
-                    .setQuery(QueryBuilders.matchAllQuery()).get();
+            client().prepareExplain(indexOrAlias(), "type1", "2").setQuery(QueryBuilders.matchAllQuery()).get();
             fail();
         } catch (RoutingMissingException e) {
             assertThat(e.getMessage(), equalTo("routing is required for [test]/[type1]/[2]"));
@@ -383,8 +358,7 @@ public class SimpleRoutingTests extends ElasticsearchIntegrationTest {
             assertThat(e.getMessage(), equalTo("routing is required for [test]/[type1]/[1]"));
         }
 
-        UpdateResponse updateResponse = client().prepareUpdate(indexOrAlias(), "type1", "1").setRouting("0")
-                .setDoc("field1", "value1").get();
+        UpdateResponse updateResponse = client().prepareUpdate(indexOrAlias(), "type1", "1").setRouting("0").setDoc("field1", "value1").get();
         assertThat(updateResponse.getId(), equalTo("1"));
         assertThat(updateResponse.getVersion(), equalTo(2l));
 
@@ -396,9 +370,7 @@ public class SimpleRoutingTests extends ElasticsearchIntegrationTest {
         }
 
         logger.info("--> verifying mget with ids [1,2], with routing [0], should succeed");
-        MultiGetResponse multiGetResponse = client().prepareMultiGet()
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").routing("0"))
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2").routing("0")).get();
+        MultiGetResponse multiGetResponse = client().prepareMultiGet().add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1").routing("0")).add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2").routing("0")).get();
         assertThat(multiGetResponse.getResponses().length, equalTo(2));
         assertThat(multiGetResponse.getResponses()[0].isFailed(), equalTo(false));
         assertThat(multiGetResponse.getResponses()[0].getResponse().getId(), equalTo("1"));
@@ -406,9 +378,7 @@ public class SimpleRoutingTests extends ElasticsearchIntegrationTest {
         assertThat(multiGetResponse.getResponses()[1].getResponse().getId(), equalTo("2"));
 
         logger.info("--> verifying mget with ids [1,2], with no routing, should fail");
-        multiGetResponse = client().prepareMultiGet()
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1"))
-                .add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2")).get();
+        multiGetResponse = client().prepareMultiGet().add(new MultiGetRequest.Item(indexOrAlias(), "type1", "1")).add(new MultiGetRequest.Item(indexOrAlias(), "type1", "2")).get();
         assertThat(multiGetResponse.getResponses().length, equalTo(2));
         assertThat(multiGetResponse.getResponses()[0].isFailed(), equalTo(true));
         assertThat(multiGetResponse.getResponses()[0].getFailure().getId(), equalTo("1"));
@@ -417,9 +387,7 @@ public class SimpleRoutingTests extends ElasticsearchIntegrationTest {
         assertThat(multiGetResponse.getResponses()[1].getFailure().getId(), equalTo("2"));
         assertThat(multiGetResponse.getResponses()[1].getFailure().getMessage(), equalTo("routing is required for [test]/[type1]/[2]"));
 
-        MultiTermVectorsResponse multiTermVectorsResponse = client().prepareMultiTermVectors()
-                .add(new TermVectorRequest(indexOrAlias(), "type1", "1").routing("0"))
-                .add(new TermVectorRequest(indexOrAlias(), "type1", "2").routing("0")).get();
+        MultiTermVectorsResponse multiTermVectorsResponse = client().prepareMultiTermVectors().add(new TermVectorRequest(indexOrAlias(), "type1", "1").routing("0")).add(new TermVectorRequest(indexOrAlias(), "type1", "2").routing("0")).get();
         assertThat(multiTermVectorsResponse.getResponses().length, equalTo(2));
         assertThat(multiTermVectorsResponse.getResponses()[0].getId(), equalTo("1"));
         assertThat(multiTermVectorsResponse.getResponses()[0].isFailed(), equalTo(false));
@@ -430,9 +398,7 @@ public class SimpleRoutingTests extends ElasticsearchIntegrationTest {
         assertThat(multiTermVectorsResponse.getResponses()[1].getResponse().getId(), equalTo("2"));
         assertThat(multiTermVectorsResponse.getResponses()[1].getResponse().isExists(), equalTo(true));
 
-        multiTermVectorsResponse = client().prepareMultiTermVectors()
-                .add(new TermVectorRequest(indexOrAlias(), "type1", "1"))
-                .add(new TermVectorRequest(indexOrAlias(), "type1", "2")).get();
+        multiTermVectorsResponse = client().prepareMultiTermVectors().add(new TermVectorRequest(indexOrAlias(), "type1", "1")).add(new TermVectorRequest(indexOrAlias(), "type1", "2")).get();
         assertThat(multiTermVectorsResponse.getResponses().length, equalTo(2));
         assertThat(multiTermVectorsResponse.getResponses()[0].getId(), equalTo("1"));
         assertThat(multiTermVectorsResponse.getResponses()[0].isFailed(), equalTo(true));
@@ -440,7 +406,7 @@ public class SimpleRoutingTests extends ElasticsearchIntegrationTest {
         assertThat(multiTermVectorsResponse.getResponses()[0].getResponse(), nullValue());
         assertThat(multiTermVectorsResponse.getResponses()[1].getId(), equalTo("2"));
         assertThat(multiTermVectorsResponse.getResponses()[1].isFailed(), equalTo(true));
-        assertThat(multiTermVectorsResponse.getResponses()[1].getResponse(),nullValue());
+        assertThat(multiTermVectorsResponse.getResponses()[1].getResponse(), nullValue());
         assertThat(multiTermVectorsResponse.getResponses()[1].getFailure().getMessage(), equalTo("routing is required for [test]/[type1]/[2]"));
     }
 

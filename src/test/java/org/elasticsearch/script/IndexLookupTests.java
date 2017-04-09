@@ -127,20 +127,9 @@ public class IndexLookupTests extends ElasticsearchIntegrationTest {
         ends3.add(17);
         expectedEndOffsetsArray.put("3", ends3);
 
-        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                .startObject("int_payload_field").field("type", "string").field("index_options", "offsets")
-                .field("analyzer", "payload_int").endObject().endObject().endObject().endObject();
-        assertAcked(prepareCreate("test").addMapping("type1", mapping).setSettings(
-                ImmutableSettings.settingsBuilder()
-                        .put(indexSettings())
-                        .put("index.analysis.analyzer.payload_int.tokenizer", "whitespace")
-                        .putArray("index.analysis.analyzer.payload_int.filter", "delimited_int")
-                        .put("index.analysis.filter.delimited_int.delimiter", "|")
-                        .put("index.analysis.filter.delimited_int.encoding", "int")
-                        .put("index.analysis.filter.delimited_int.type", "delimited_payload_filter")));
-        indexRandom(true, client().prepareIndex("test", "type1", "1").setSource("int_payload_field", "a|1 b|2 b|3 c|4 d "), client()
-                .prepareIndex("test", "type1", "2").setSource("int_payload_field", "b|1 b|2 c|3 d|4 a "),
-                client().prepareIndex("test", "type1", "3").setSource("int_payload_field", "b|1 c|2 d|3 a|4 b "));
+        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("int_payload_field").field("type", "string").field("index_options", "offsets").field("analyzer", "payload_int").endObject().endObject().endObject().endObject();
+        assertAcked(prepareCreate("test").addMapping("type1", mapping).setSettings(ImmutableSettings.settingsBuilder().put(indexSettings()).put("index.analysis.analyzer.payload_int.tokenizer", "whitespace").putArray("index.analysis.analyzer.payload_int.filter", "delimited_int").put("index.analysis.filter.delimited_int.delimiter", "|").put("index.analysis.filter.delimited_int.encoding", "int").put("index.analysis.filter.delimited_int.type", "delimited_payload_filter")));
+        indexRandom(true, client().prepareIndex("test", "type1", "1").setSource("int_payload_field", "a|1 b|2 b|3 c|4 d "), client().prepareIndex("test", "type1", "2").setSource("int_payload_field", "b|1 b|2 c|3 d|4 a "), client().prepareIndex("test", "type1", "3").setSource("int_payload_field", "b|1 c|2 d|3 a|4 b "));
         ensureGreen();
     }
 
@@ -177,12 +166,7 @@ public class IndexLookupTests extends ElasticsearchIntegrationTest {
         try {
             client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).addScriptField("tvtest", script).execute().actionGet();
         } catch (SearchPhaseExecutionException e) {
-            assertThat(
-                    "got: " + e.getDetailedMessage(),
-                    e.getDetailedMessage()
-                            .indexOf(
-                                    "You must call get with all required flags! Instead of  _index['int_payload_field'].get('b', _FREQUENCIES) and _index['int_payload_field'].get('b', _POSITIONS) call  _index['int_payload_field'].get('b', _FREQUENCIES | _POSITIONS)  once]"),
-                    Matchers.greaterThan(-1));
+            assertThat("got: " + e.getDetailedMessage(), e.getDetailedMessage().indexOf("You must call get with all required flags! Instead of  _index['int_payload_field'].get('b', _FREQUENCIES) and _index['int_payload_field'].get('b', _POSITIONS) call  _index['int_payload_field'].get('b', _FREQUENCIES | _POSITIONS)  once]"), Matchers.greaterThan(-1));
         }
 
         // Should not throw an exception this way round
@@ -191,12 +175,10 @@ public class IndexLookupTests extends ElasticsearchIntegrationTest {
     }
 
     private void checkOnlyFunctionScore(String scoreScript, Map<String, Object> expectedScore, int numExpectedDocs) {
-        SearchResponse sr = client().prepareSearch("test")
-                .setQuery(QueryBuilders.functionScoreQuery(ScoreFunctionBuilders.scriptFunction(scoreScript))).execute().actionGet();
+        SearchResponse sr = client().prepareSearch("test").setQuery(QueryBuilders.functionScoreQuery(ScoreFunctionBuilders.scriptFunction(scoreScript))).execute().actionGet();
         assertHitCount(sr, numExpectedDocs);
         for (SearchHit hit : sr.getHits().getHits()) {
-            assertThat("for doc " + hit.getId(), ((Float) expectedScore.get(hit.getId())).doubleValue(),
-                    Matchers.closeTo(hit.score(), 1.e-4));
+            assertThat("for doc " + hit.getId(), ((Float) expectedScore.get(hit.getId())).doubleValue(), Matchers.closeTo(hit.score(), 1.e-4));
         }
     }
 
@@ -205,8 +187,7 @@ public class IndexLookupTests extends ElasticsearchIntegrationTest {
 
         initTestData();
 
-        String script = "term = _index['float_payload_field'].get('b'," + includeAllFlag
-                + "); payloadSum=0; for (pos in term) {payloadSum = pos.payloadAsInt(0)}; payloadSum";
+        String script = "term = _index['float_payload_field'].get('b'," + includeAllFlag + "); payloadSum=0; for (pos in term) {payloadSum = pos.payloadAsInt(0)}; payloadSum";
 
         // non existing field: sum should be 0
         HashMap<String, Object> zeroArray = new HashMap<>();
@@ -215,8 +196,7 @@ public class IndexLookupTests extends ElasticsearchIntegrationTest {
         zeroArray.put("3", 0);
         checkValueInEachDoc(script, zeroArray, 3);
 
-        script = "term = _index['int_payload_field'].get('b'," + includeAllFlag
-                + "); payloadSum=0; for (pos in term) {payloadSum = payloadSum + pos.payloadAsInt(0)}; payloadSum";
+        script = "term = _index['int_payload_field'].get('b'," + includeAllFlag + "); payloadSum=0; for (pos in term) {payloadSum = payloadSum + pos.payloadAsInt(0)}; payloadSum";
 
         // existing field: sums should be as here:
         zeroArray.put("1", 5);
@@ -263,28 +243,22 @@ public class IndexLookupTests extends ElasticsearchIntegrationTest {
     }
 
     private String createPositionsArrayScriptGetInfoObjectTwice(String term, String flags, String what) {
-        String script = "term = _index['int_payload_field'].get('" + term + "'," + flags
-                + "); array=[]; for (pos in term) {array.add(pos." + what + ")}; _index['int_payload_field'].get('" + term + "',"
-                + flags + "); array=[]; for (pos in term) {array.add(pos." + what + ")}";
+        String script = "term = _index['int_payload_field'].get('" + term + "'," + flags + "); array=[]; for (pos in term) {array.add(pos." + what + ")}; _index['int_payload_field'].get('" + term + "'," + flags + "); array=[]; for (pos in term) {array.add(pos." + what + ")}";
         return script;
     }
 
     private String createPositionsArrayScriptIterateTwice(String term, String flags, String what) {
-        String script = "term = _index['int_payload_field'].get('" + term + "'," + flags
-                + "); array=[]; for (pos in term) {array.add(pos." + what + ")}; array=[]; for (pos in term) {array.add(pos." + what
-                + ")}; array";
+        String script = "term = _index['int_payload_field'].get('" + term + "'," + flags + "); array=[]; for (pos in term) {array.add(pos." + what + ")}; array=[]; for (pos in term) {array.add(pos." + what + ")}; array";
         return script;
     }
 
     private String createPositionsArrayScript(String field, String term, String flags, String what) {
-        String script = "term = _index['" + field + "'].get('" + term + "'," + flags
-                + "); array=[]; for (pos in term) {array.add(pos." + what + ")}; array";
+        String script = "term = _index['" + field + "'].get('" + term + "'," + flags + "); array=[]; for (pos in term) {array.add(pos." + what + ")}; array";
         return script;
     }
 
     private String createPositionsArrayScriptDefaultGet(String field, String term, String what) {
-        String script = "term = _index['" + field + "']['" + term + "']; array=[]; for (pos in term) {array.add(pos." + what
-                + ")}; array";
+        String script = "term = _index['" + field + "']['" + term + "']; array=[]; for (pos in term) {array.add(pos." + what + ")}; array";
         return script;
     }
 
@@ -380,8 +354,7 @@ public class IndexLookupTests extends ElasticsearchIntegrationTest {
     }
 
     private void checkArrayValsInEachDoc(String script, HashMap<String, List<Object>> expectedArray, int expectedHitSize) {
-        SearchResponse sr = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).addScriptField("tvtest", script)
-                .execute().actionGet();
+        SearchResponse sr = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).addScriptField("tvtest", script).execute().actionGet();
         assertHitCount(sr, expectedHitSize);
         int nullCounter = 0;
         for (SearchHit hit : sr.getHits().getHits()) {
@@ -397,38 +370,10 @@ public class IndexLookupTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testAllExceptPosAndOffset() throws Exception {
-        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                .startObject("float_payload_field").field("type", "string").field("index_options", "offsets").field("term_vector", "no")
-                .field("analyzer", "payload_float").endObject().startObject("string_payload_field").field("type", "string")
-                .field("index_options", "offsets").field("term_vector", "no").field("analyzer", "payload_string").endObject()
-                .startObject("int_payload_field").field("type", "string").field("index_options", "offsets")
-                .field("analyzer", "payload_int").endObject().endObject().endObject().endObject();
-        assertAcked(prepareCreate("test").addMapping("type1", mapping).setSettings(
-                ImmutableSettings.settingsBuilder()
-                        .put(indexSettings())
-                        .put("index.analysis.analyzer.payload_float.tokenizer", "whitespace")
-                        .putArray("index.analysis.analyzer.payload_float.filter", "delimited_float")
-                        .put("index.analysis.filter.delimited_float.delimiter", "|")
-                        .put("index.analysis.filter.delimited_float.encoding", "float")
-                        .put("index.analysis.filter.delimited_float.type", "delimited_payload_filter")
-                        .put("index.analysis.analyzer.payload_string.tokenizer", "whitespace")
-                        .putArray("index.analysis.analyzer.payload_string.filter", "delimited_string")
-                        .put("index.analysis.filter.delimited_string.delimiter", "|")
-                        .put("index.analysis.filter.delimited_string.encoding", "identity")
-                        .put("index.analysis.filter.delimited_string.type", "delimited_payload_filter")
-                        .put("index.analysis.analyzer.payload_int.tokenizer", "whitespace")
-                        .putArray("index.analysis.analyzer.payload_int.filter", "delimited_int")
-                        .put("index.analysis.filter.delimited_int.delimiter", "|")
-                        .put("index.analysis.filter.delimited_int.encoding", "int")
-                        .put("index.analysis.filter.delimited_int.type", "delimited_payload_filter")
-                        .put("index.number_of_shards", 1)));
+        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("float_payload_field").field("type", "string").field("index_options", "offsets").field("term_vector", "no").field("analyzer", "payload_float").endObject().startObject("string_payload_field").field("type", "string").field("index_options", "offsets").field("term_vector", "no").field("analyzer", "payload_string").endObject().startObject("int_payload_field").field("type", "string").field("index_options", "offsets").field("analyzer", "payload_int").endObject().endObject().endObject().endObject();
+        assertAcked(prepareCreate("test").addMapping("type1", mapping).setSettings(ImmutableSettings.settingsBuilder().put(indexSettings()).put("index.analysis.analyzer.payload_float.tokenizer", "whitespace").putArray("index.analysis.analyzer.payload_float.filter", "delimited_float").put("index.analysis.filter.delimited_float.delimiter", "|").put("index.analysis.filter.delimited_float.encoding", "float").put("index.analysis.filter.delimited_float.type", "delimited_payload_filter").put("index.analysis.analyzer.payload_string.tokenizer", "whitespace").putArray("index.analysis.analyzer.payload_string.filter", "delimited_string").put("index.analysis.filter.delimited_string.delimiter", "|").put("index.analysis.filter.delimited_string.encoding", "identity").put("index.analysis.filter.delimited_string.type", "delimited_payload_filter").put("index.analysis.analyzer.payload_int.tokenizer", "whitespace").putArray("index.analysis.analyzer.payload_int.filter", "delimited_int").put("index.analysis.filter.delimited_int.delimiter", "|").put("index.analysis.filter.delimited_int.encoding", "int").put("index.analysis.filter.delimited_int.type", "delimited_payload_filter").put("index.number_of_shards", 1)));
         ensureYellow();
-        indexRandom(true, client().prepareIndex("test", "type1", "1").setSource("float_payload_field", "a|1 b|2 a|3 b "), client()
-                .prepareIndex("test", "type1", "2").setSource("string_payload_field", "a|a b|b a|a b "),
-                client().prepareIndex("test", "type1", "3").setSource("float_payload_field", "a|4 b|5 a|6 b "),
-                client().prepareIndex("test", "type1", "4").setSource("string_payload_field", "a|b b|a a|b b "),
-                client().prepareIndex("test", "type1", "5").setSource("float_payload_field", "c "),
-                client().prepareIndex("test", "type1", "6").setSource("int_payload_field", "c|1"));
+        indexRandom(true, client().prepareIndex("test", "type1", "1").setSource("float_payload_field", "a|1 b|2 a|3 b "), client().prepareIndex("test", "type1", "2").setSource("string_payload_field", "a|a b|b a|a b "), client().prepareIndex("test", "type1", "3").setSource("float_payload_field", "a|4 b|5 a|6 b "), client().prepareIndex("test", "type1", "4").setSource("string_payload_field", "a|b b|a a|b b "), client().prepareIndex("test", "type1", "5").setSource("float_payload_field", "c "), client().prepareIndex("test", "type1", "6").setSource("int_payload_field", "c|1"));
 
         // get the number of all docs
         String script = "_index.numDocs()";
@@ -569,40 +514,30 @@ public class IndexLookupTests extends ElasticsearchIntegrationTest {
 
     private void checkExceptions(String script) {
         try {
-            SearchResponse sr = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).addScriptField("tvtest", script)
-                    .execute().actionGet();
+            SearchResponse sr = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).addScriptField("tvtest", script).execute().actionGet();
             assertThat(sr.getHits().hits().length, equalTo(0));
             ShardSearchFailure[] shardFails = sr.getShardFailures();
             for (ShardSearchFailure fail : shardFails) {
-                assertThat(fail.reason().indexOf("Cannot iterate twice! If you want to iterate more that once, add _CACHE explicitely."),
-                        Matchers.greaterThan(-1));
+                assertThat(fail.reason().indexOf("Cannot iterate twice! If you want to iterate more that once, add _CACHE explicitely."), Matchers.greaterThan(-1));
             }
         } catch (SearchPhaseExecutionException ex) {
-            assertThat(
-                    "got " + ex.getDetailedMessage(),
-                    ex.getDetailedMessage().indexOf("Cannot iterate twice! If you want to iterate more that once, add _CACHE explicitely."),
-                    Matchers.greaterThan(-1));
+            assertThat("got " + ex.getDetailedMessage(), ex.getDetailedMessage().indexOf("Cannot iterate twice! If you want to iterate more that once, add _CACHE explicitely."), Matchers.greaterThan(-1));
         }
     }
 
-    private void checkValueInEachDocWithFunctionScore(String fieldScript, Map<String, Object> expectedFieldVals, String scoreScript,
-            Map<String, Object> expectedScore, int numExpectedDocs) {
-        SearchResponse sr = client().prepareSearch("test")
-                .setQuery(QueryBuilders.functionScoreQuery(ScoreFunctionBuilders.scriptFunction(scoreScript)))
-                .addScriptField("tvtest", fieldScript).execute().actionGet();
+    private void checkValueInEachDocWithFunctionScore(String fieldScript, Map<String, Object> expectedFieldVals, String scoreScript, Map<String, Object> expectedScore, int numExpectedDocs) {
+        SearchResponse sr = client().prepareSearch("test").setQuery(QueryBuilders.functionScoreQuery(ScoreFunctionBuilders.scriptFunction(scoreScript))).addScriptField("tvtest", fieldScript).execute().actionGet();
         assertHitCount(sr, numExpectedDocs);
         for (SearchHit hit : sr.getHits().getHits()) {
             Object result = hit.getFields().get("tvtest").getValues().get(0);
             Object expectedResult = expectedFieldVals.get(hit.getId());
             assertThat("for doc " + hit.getId(), result, equalTo(expectedResult));
-            assertThat("for doc " + hit.getId(), ((Float) expectedScore.get(hit.getId())).doubleValue(),
-                    Matchers.closeTo(hit.score(), 1.e-4));
+            assertThat("for doc " + hit.getId(), ((Float) expectedScore.get(hit.getId())).doubleValue(), Matchers.closeTo(hit.score(), 1.e-4));
         }
     }
 
     private void checkValueInEachDoc(String script, Map<String, Object> expectedResults, int numExpectedDocs) {
-        SearchResponse sr = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).addScriptField("tvtest", script)
-                .execute().actionGet();
+        SearchResponse sr = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).addScriptField("tvtest", script).execute().actionGet();
         assertHitCount(sr, numExpectedDocs);
         for (SearchHit hit : sr.getHits().getHits()) {
             Object result = hit.getFields().get("tvtest").getValues().get(0);
@@ -612,13 +547,12 @@ public class IndexLookupTests extends ElasticsearchIntegrationTest {
     }
 
     private void checkValueInEachDoc(int value, String script, int numExpectedDocs) {
-        SearchResponse sr = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).addScriptField("tvtest", script)
-                .execute().actionGet();
+        SearchResponse sr = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).addScriptField("tvtest", script).execute().actionGet();
         assertHitCount(sr, numExpectedDocs);
         for (SearchHit hit : sr.getHits().getHits()) {
             Object result = hit.getFields().get("tvtest").getValues().get(0);
             if (result instanceof Integer) {
-                assertThat((Integer)result, equalTo(value));
+                assertThat((Integer) result, equalTo(value));
             } else if (result instanceof Long) {
                 assertThat(((Long) result).intValue(), equalTo(value));
             } else {

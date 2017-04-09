@@ -129,7 +129,7 @@ public class CliToolTests extends CliToolTestCase {
             };
         }
         MultiCmdTool tool = new MultiCmdTool("tool", terminal, cmds);
-        int cmdIndex = randomIntBetween(0, count-1);
+        int cmdIndex = randomIntBetween(0, count - 1);
         int status = tool.execute("cmd" + cmdIndex);
         assertThat(status, is(CliTool.ExitStatus.OK.status()));
         for (int i = 0; i < executed.length; i++) {
@@ -329,9 +329,7 @@ public class CliToolTests extends CliToolTestCase {
         private final Command command;
 
         private SingleCmdTool(String name, Terminal terminal, NamedCommand command) {
-            super(CliToolConfig.config(name, SingleCmdTool.class)
-                    .cmds(cmd(command.name, command.getClass()))
-                    .build(), terminal);
+            super(CliToolConfig.config(name, SingleCmdTool.class).cmds(cmd(command.name, command.getClass())).build(), terminal);
             this.command = command;
         }
 
@@ -346,9 +344,7 @@ public class CliToolTests extends CliToolTestCase {
         private final Map<String, Command> commands;
 
         private MultiCmdTool(String name, Terminal terminal, NamedCommand... commands) {
-            super(CliToolConfig.config(name, MultiCmdTool.class)
-                    .cmds(cmds(commands))
-                    .build(), terminal);
+            super(CliToolConfig.config(name, MultiCmdTool.class).cmds(cmds(commands)).build(), terminal);
             ImmutableMap.Builder<String, Command> commandByName = ImmutableMap.builder();
             for (int i = 0; i < commands.length; i++) {
                 commandByName.put(commands[i].name, commands[i]);

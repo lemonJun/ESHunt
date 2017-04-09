@@ -40,20 +40,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(3));
-        Map<String, Long> expected = ImmutableMap.<String, Long>builder()
-                .put("1", 8l)
-                .put("3", 8l)
-                .put("2", 4l)
-                .build();
+        Map<String, Long> expected = ImmutableMap.<String, Long> builder().put("1", 8l).put("3", 8l).put("2", 4l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTerm().string())));
         }
@@ -66,22 +59,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(0).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(0).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(5));
-        Map<String, Long> expected = ImmutableMap.<String, Long>builder()
-                .put("1", 8l)
-                .put("3", 8l)
-                .put("2", 5l)
-                .put("4", 4l)
-                .put("5", 2l)
-                .build();
+        Map<String, Long> expected = ImmutableMap.<String, Long> builder().put("1", 8l).put("3", 8l).put("2", 5l).put("4", 4l).put("5", 2l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTerm().string())));
         }
@@ -94,22 +78,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(0).shardSize(3).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(0).shardSize(3).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(5));
-        Map<String, Long> expected = ImmutableMap.<String, Long>builder()
-                .put("1", 8l)
-                .put("3", 8l)
-                .put("2", 5l)
-                .put("4", 4l)
-                .put("5", 2l)
-                .build();
+        Map<String, Long> expected = ImmutableMap.<String, Long> builder().put("1", 8l).put("3", 8l).put("2", 5l).put("4", 4l).put("5", 2l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTerm().string())));
         }
@@ -122,20 +97,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).shardSize(5).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).shardSize(5).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(3));
-        Map<String, Long> expected = ImmutableMap.<String, Long>builder()
-                .put("1", 8l)
-                .put("3", 8l)
-                .put("2", 5l)
-                .build();
+        Map<String, Long> expected = ImmutableMap.<String, Long> builder().put("1", 8l).put("3", 8l).put("2", 5l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTerm().string())));
         }
@@ -148,20 +116,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type").setRouting("1")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).shardSize(5).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setRouting("1").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).shardSize(5).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(3));
-        Map<String, Long> expected = ImmutableMap.<String, Long>builder()
-                .put("1", 5l)
-                .put("2", 4l)
-                .put("3", 3l)
-                .build();
+        Map<String, Long> expected = ImmutableMap.<String, Long> builder().put("1", 5l).put("2", 4l).put("3", 3l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTerm().string())));
         }
@@ -174,20 +135,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(3));
-        Map<Integer, Long> expected = ImmutableMap.<Integer, Long>builder()
-                .put(1, 8l)
-                .put(3, 8l)
-                .put(2, 4l)
-                .build();
+        Map<Integer, Long> expected = ImmutableMap.<Integer, Long> builder().put(1, 8l).put(3, 8l).put(2, 4l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTermAsNumber().intValue())));
         }
@@ -200,22 +154,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(0).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(0).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(5));
-        Map<Integer, Long> expected = ImmutableMap.<Integer, Long>builder()
-                .put(1, 8l)
-                .put(3, 8l)
-                .put(2, 5l)
-                .put(4, 4l)
-                .put(5, 2l)
-                .build();
+        Map<Integer, Long> expected = ImmutableMap.<Integer, Long> builder().put(1, 8l).put(3, 8l).put(2, 5l).put(4, 4l).put(5, 2l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTermAsNumber().intValue())));
         }
@@ -228,22 +173,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(0).shardSize(3).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(0).shardSize(3).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(5));
-        Map<Integer, Long> expected = ImmutableMap.<Integer, Long>builder()
-                .put(1, 8l)
-                .put(3, 8l)
-                .put(2, 5l)
-                .put(4, 4l)
-                .put(5, 2l)
-                .build();
+        Map<Integer, Long> expected = ImmutableMap.<Integer, Long> builder().put(1, 8l).put(3, 8l).put(2, 5l).put(4, 4l).put(5, 2l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTermAsNumber().intValue())));
         }
@@ -256,20 +192,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).shardSize(5).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).shardSize(5).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(3));
-        Map<Integer, Long> expected = ImmutableMap.<Integer, Long>builder()
-                .put(1, 8l)
-                .put(3, 8l)
-                .put(2, 5l)
-                .build();
+        Map<Integer, Long> expected = ImmutableMap.<Integer, Long> builder().put(1, 8l).put(3, 8l).put(2, 5l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTermAsNumber().intValue())));
         }
@@ -282,20 +211,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type").setRouting("1")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).shardSize(5).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setRouting("1").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).shardSize(5).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(3));
-        Map<Integer, Long> expected = ImmutableMap.<Integer, Long>builder()
-                .put(1, 5l)
-                .put(2, 4l)
-                .put(3, 3l)
-                .build();
+        Map<Integer, Long> expected = ImmutableMap.<Integer, Long> builder().put(1, 5l).put(2, 4l).put(3, 3l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTermAsNumber().intValue())));
         }
@@ -308,20 +230,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(3));
-        Map<Integer, Long> expected = ImmutableMap.<Integer, Long>builder()
-                .put(1, 8l)
-                .put(3, 8l)
-                .put(2, 4l)
-                .build();
+        Map<Integer, Long> expected = ImmutableMap.<Integer, Long> builder().put(1, 8l).put(3, 8l).put(2, 4l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTermAsNumber().intValue())));
         }
@@ -334,22 +249,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(0).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(0).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(5));
-        Map<Integer, Long> expected = ImmutableMap.<Integer, Long>builder()
-                .put(1, 8l)
-                .put(3, 8l)
-                .put(2, 5l)
-                .put(4, 4l)
-                .put(5, 2l)
-                .build();
+        Map<Integer, Long> expected = ImmutableMap.<Integer, Long> builder().put(1, 8l).put(3, 8l).put(2, 5l).put(4, 4l).put(5, 2l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTermAsNumber().intValue())));
         }
@@ -362,22 +268,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(0).shardSize(3).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(0).shardSize(3).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(5));
-        Map<Integer, Long> expected = ImmutableMap.<Integer, Long>builder()
-                .put(1, 8l)
-                .put(3, 8l)
-                .put(2, 5l)
-                .put(4, 4l)
-                .put(5, 2l)
-                .build();
+        Map<Integer, Long> expected = ImmutableMap.<Integer, Long> builder().put(1, 8l).put(3, 8l).put(2, 5l).put(4, 4l).put(5, 2l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTermAsNumber().intValue())));
         }
@@ -390,20 +287,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).shardSize(5).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).shardSize(5).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(3));
-        Map<Integer, Long> expected = ImmutableMap.<Integer, Long>builder()
-                .put(1, 8l)
-                .put(3, 8l)
-                .put(2, 5l)
-                .build();
+        Map<Integer, Long> expected = ImmutableMap.<Integer, Long> builder().put(1, 8l).put(3, 8l).put(2, 5l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTermAsNumber().intValue())));
         }
@@ -416,20 +306,13 @@ public class ShardSizeTermsStatsFacetTests extends ShardSizeTests {
 
         indexData();
 
-        SearchResponse response = client().prepareSearch("idx").setTypes("type").setRouting("1")
-                .setQuery(matchAllQuery())
-                .addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).shardSize(5).order(TermsStatsFacet.ComparatorType.COUNT))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setRouting("1").setQuery(matchAllQuery()).addFacet(termsStatsFacet("keys").keyField("key").valueField("value").size(3).shardSize(5).order(TermsStatsFacet.ComparatorType.COUNT)).execute().actionGet();
 
         Facets facets = response.getFacets();
         TermsStatsFacet facet = facets.facet("keys");
         List<? extends TermsStatsFacet.Entry> entries = facet.getEntries();
         assertThat(entries.size(), equalTo(3));
-        Map<Integer, Long> expected = ImmutableMap.<Integer, Long>builder()
-                .put(1, 5l)
-                .put(2, 4l)
-                .put(3, 3l)
-                .build();
+        Map<Integer, Long> expected = ImmutableMap.<Integer, Long> builder().put(1, 5l).put(2, 4l).put(3, 3l).build();
         for (TermsStatsFacet.Entry entry : entries) {
             assertThat(entry.getCount(), equalTo(expected.get(entry.getTermAsNumber().intValue())));
         }

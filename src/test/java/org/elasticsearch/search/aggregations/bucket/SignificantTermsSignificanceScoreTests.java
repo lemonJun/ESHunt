@@ -76,11 +76,7 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
 
     @Override
     public Settings nodeSettings(int nodeOrdinal) {
-        return settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("plugin.types", CustomSignificanceHeuristicPlugin.class.getName())
-                .put("path.conf", this.getResource("config").getPath())
-                .build();
+        return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("plugin.types", CustomSignificanceHeuristicPlugin.class.getName()).put("path.conf", this.getResource("config").getPath()).build();
     }
 
     public String randomExecutionHint() {
@@ -92,17 +88,7 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
         String type = randomBoolean() ? "string" : "long";
         String settings = "{\"index.number_of_shards\": 1, \"index.number_of_replicas\": 0}";
         index01Docs(type, settings);
-        SearchResponse response = client().prepareSearch(INDEX_NAME).setTypes(DOC_TYPE)
-                .addAggregation(new TermsBuilder("class")
-                        .field(CLASS_FIELD)
-                        .subAggregation((new SignificantTermsBuilder("sig_terms"))
-                                .field(TEXT_FIELD)
-                                .significanceHeuristic(new SimpleHeuristic.SimpleHeuristicBuilder())
-                                .minDocCount(1)
-                        )
-                )
-                .execute()
-                .actionGet();
+        SearchResponse response = client().prepareSearch(INDEX_NAME).setTypes(DOC_TYPE).addAggregation(new TermsBuilder("class").field(CLASS_FIELD).subAggregation((new SignificantTermsBuilder("sig_terms")).field(TEXT_FIELD).significanceHeuristic(new SimpleHeuristic.SimpleHeuristicBuilder()).minDocCount(1))).execute().actionGet();
         assertSearchResponse(response);
         StringTerms classes = (StringTerms) response.getAggregations().get("class");
         assertThat(classes.getBuckets().size(), equalTo(2));
@@ -124,17 +110,7 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
         // we run the same test again but this time we do not call assertSearchResponse() before the assertions
         // the reason is that this would trigger toXContent and we would like to check that this has no potential side effects
 
-        response = client().prepareSearch(INDEX_NAME).setTypes(DOC_TYPE)
-                .addAggregation(new TermsBuilder("class")
-                        .field(CLASS_FIELD)
-                        .subAggregation((new SignificantTermsBuilder("sig_terms"))
-                                .field(TEXT_FIELD)
-                                .significanceHeuristic(new SimpleHeuristic.SimpleHeuristicBuilder())
-                                .minDocCount(1)
-                        )
-                )
-                .execute()
-                .actionGet();
+        response = client().prepareSearch(INDEX_NAME).setTypes(DOC_TYPE).addAggregation(new TermsBuilder("class").field(CLASS_FIELD).subAggregation((new SignificantTermsBuilder("sig_terms")).field(TEXT_FIELD).significanceHeuristic(new SimpleHeuristic.SimpleHeuristicBuilder()).minDocCount(1))).execute().actionGet();
 
         classes = (StringTerms) response.getAggregations().get("class");
         assertThat(classes.getBuckets().size(), equalTo(2));
@@ -173,6 +149,7 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
         public void onModule(TransportSignificantTermsHeuristicModule significanceModule) {
             significanceModule.registerStream(SimpleHeuristic.STREAM);
         }
+
         public void onModule(ScriptModule module) {
             module.registerScript(NativeSignificanceScoreScriptNoParams.NATIVE_SIGNIFICANCE_SCORE_SCRIPT_NO_PARAMS, NativeSignificanceScoreScriptNoParams.Factory.class);
             module.registerScript(NativeSignificanceScoreScriptWithParams.NATIVE_SIGNIFICANCE_SCORE_SCRIPT_WITH_PARAMS, NativeSignificanceScoreScriptWithParams.Factory.class);
@@ -181,7 +158,7 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
 
     public static class SimpleHeuristic extends SignificanceHeuristic {
 
-        protected static final String[] NAMES = {"simple"};
+        protected static final String[] NAMES = { "simple" };
 
         public static final SignificanceHeuristicStreams.Stream STREAM = new SignificanceHeuristicStreams.Stream() {
             @Override
@@ -239,17 +216,13 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
         }
     }
 
-
     @Test
     public void testXContentResponse() throws Exception {
 
         String type = randomBoolean() ? "string" : "long";
         String settings = "{\"index.number_of_shards\": 1, \"index.number_of_replicas\": 0}";
         index01Docs(type, settings);
-        SearchResponse response = client().prepareSearch(INDEX_NAME).setTypes(DOC_TYPE)
-                .addAggregation(new TermsBuilder("class").field(CLASS_FIELD).subAggregation(new SignificantTermsBuilder("sig_terms").field(TEXT_FIELD)))
-                .execute()
-                .actionGet();
+        SearchResponse response = client().prepareSearch(INDEX_NAME).setTypes(DOC_TYPE).addAggregation(new TermsBuilder("class").field(CLASS_FIELD).subAggregation(new SignificantTermsBuilder("sig_terms").field(TEXT_FIELD))).execute().actionGet();
         assertSearchResponse(response);
         StringTerms classes = (StringTerms) response.getAggregations().get("class");
         assertThat(classes.getBuckets().size(), equalTo(2));
@@ -274,27 +247,23 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
         assertThat(responseBuilder.string(), equalTo(result));
 
     }
-    
+
     @Test
     public void testDeletesIssue7951() throws Exception {
         String settings = "{\"index.number_of_shards\": 1, \"index.number_of_replicas\": 0}";
         String mappings = "{\"doc\": {\"properties\":{\"text\": {\"type\":\"string\",\"index\":\"not_analyzed\"}}}}";
         assertAcked(prepareCreate(INDEX_NAME).setSettings(settings).addMapping("doc", mappings));
-        String[] cat1v1 = {"constant", "one"};
-        String[] cat1v2 = {"constant", "uno"};
-        String[] cat2v1 = {"constant", "two"};
-        String[] cat2v2 = {"constant", "duo"};
+        String[] cat1v1 = { "constant", "one" };
+        String[] cat1v2 = { "constant", "uno" };
+        String[] cat2v1 = { "constant", "two" };
+        String[] cat2v2 = { "constant", "duo" };
         List<IndexRequestBuilder> indexRequestBuilderList = new ArrayList<>();
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "1")
-                .setSource(TEXT_FIELD, cat1v1, CLASS_FIELD, "1"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "2")
-                .setSource(TEXT_FIELD, cat1v2, CLASS_FIELD, "1"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "3")
-                .setSource(TEXT_FIELD, cat2v1, CLASS_FIELD, "2"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "4")
-                .setSource(TEXT_FIELD, cat2v2, CLASS_FIELD, "2"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "1").setSource(TEXT_FIELD, cat1v1, CLASS_FIELD, "1"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "2").setSource(TEXT_FIELD, cat1v2, CLASS_FIELD, "1"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "3").setSource(TEXT_FIELD, cat2v1, CLASS_FIELD, "2"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "4").setSource(TEXT_FIELD, cat2v2, CLASS_FIELD, "2"));
         indexRandom(true, false, indexRequestBuilderList);
-        
+
         // Now create some holes in the index with selective deletes caused by updates.
         // This is the scenario that caused this issue https://github.com/elasticsearch/elasticsearch/issues/7951
         // Scoring algorithms throw exceptions if term docFreqs exceed the reported size of the index 
@@ -306,17 +275,9 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
             indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "1").setSource(TEXT_FIELD, text, CLASS_FIELD, "1"));
         }
         indexRandom(true, false, indexRequestBuilderList);
-        
-        SearchResponse response1 = client().prepareSearch(INDEX_NAME).setTypes(DOC_TYPE)
-                .addAggregation(new TermsBuilder("class")
-                        .field(CLASS_FIELD)
-                        .subAggregation(
-                                new SignificantTermsBuilder("sig_terms")
-                                        .field(TEXT_FIELD)
-                                        .minDocCount(1)))
-                .execute()
-                .actionGet();
-    }    
+
+        SearchResponse response1 = client().prepareSearch(INDEX_NAME).setTypes(DOC_TYPE).addAggregation(new TermsBuilder("class").field(CLASS_FIELD).subAggregation(new SignificantTermsBuilder("sig_terms").field(TEXT_FIELD).minDocCount(1))).execute().actionGet();
+    }
 
     @Test
     public void testBackgroundVsSeparateSet() throws Exception {
@@ -334,35 +295,9 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
     // both should yield exact same result
     public void testBackgroundVsSeparateSet(SignificanceHeuristicBuilder significanceHeuristicExpectingSuperset, SignificanceHeuristicBuilder significanceHeuristicExpectingSeparateSets) throws Exception {
 
-        SearchResponse response1 = client().prepareSearch(INDEX_NAME).setTypes(DOC_TYPE)
-                .addAggregation(new TermsBuilder("class")
-                        .field(CLASS_FIELD)
-                        .subAggregation(
-                                new SignificantTermsBuilder("sig_terms")
-                                        .field(TEXT_FIELD)
-                                        .minDocCount(1)
-                                        .significanceHeuristic(
-                                                significanceHeuristicExpectingSuperset)))
-                .execute()
-                .actionGet();
+        SearchResponse response1 = client().prepareSearch(INDEX_NAME).setTypes(DOC_TYPE).addAggregation(new TermsBuilder("class").field(CLASS_FIELD).subAggregation(new SignificantTermsBuilder("sig_terms").field(TEXT_FIELD).minDocCount(1).significanceHeuristic(significanceHeuristicExpectingSuperset))).execute().actionGet();
         assertSearchResponse(response1);
-        SearchResponse response2 = client().prepareSearch(INDEX_NAME).setTypes(DOC_TYPE)
-                .addAggregation((new FilterAggregationBuilder("0"))
-                        .filter(FilterBuilders.termFilter(CLASS_FIELD, "0"))
-                        .subAggregation(new SignificantTermsBuilder("sig_terms")
-                                .field(TEXT_FIELD)
-                                .minDocCount(1)
-                                .backgroundFilter(FilterBuilders.termFilter(CLASS_FIELD, "1"))
-                                .significanceHeuristic(significanceHeuristicExpectingSeparateSets)))
-                .addAggregation((new FilterAggregationBuilder("1"))
-                        .filter(FilterBuilders.termFilter(CLASS_FIELD, "1"))
-                        .subAggregation(new SignificantTermsBuilder("sig_terms")
-                                .field(TEXT_FIELD)
-                                .minDocCount(1)
-                                .backgroundFilter(FilterBuilders.termFilter(CLASS_FIELD, "0"))
-                                .significanceHeuristic(significanceHeuristicExpectingSeparateSets)))
-                .execute()
-                .actionGet();
+        SearchResponse response2 = client().prepareSearch(INDEX_NAME).setTypes(DOC_TYPE).addAggregation((new FilterAggregationBuilder("0")).filter(FilterBuilders.termFilter(CLASS_FIELD, "0")).subAggregation(new SignificantTermsBuilder("sig_terms").field(TEXT_FIELD).minDocCount(1).backgroundFilter(FilterBuilders.termFilter(CLASS_FIELD, "1")).significanceHeuristic(significanceHeuristicExpectingSeparateSets))).addAggregation((new FilterAggregationBuilder("1")).filter(FilterBuilders.termFilter(CLASS_FIELD, "1")).subAggregation(new SignificantTermsBuilder("sig_terms").field(TEXT_FIELD).minDocCount(1).backgroundFilter(FilterBuilders.termFilter(CLASS_FIELD, "0")).significanceHeuristic(significanceHeuristicExpectingSeparateSets))).execute().actionGet();
 
         SignificantTerms sigTerms0 = ((SignificantTerms) (((StringTerms) response1.getAggregations().get("class")).getBucketByKey("0").getAggregations().asMap().get("sig_terms")));
         assertThat(sigTerms0.getBuckets().size(), equalTo(2));
@@ -386,22 +321,15 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
     private void index01Docs(String type, String settings) throws ExecutionException, InterruptedException {
         String mappings = "{\"doc\": {\"properties\":{\"text\": {\"type\":\"" + type + "\"}}}}";
         assertAcked(prepareCreate(INDEX_NAME).setSettings(settings).addMapping("doc", mappings));
-        String[] gb = {"0", "1"};
+        String[] gb = { "0", "1" };
         List<IndexRequestBuilder> indexRequestBuilderList = new ArrayList<>();
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "1")
-                .setSource(TEXT_FIELD, "1", CLASS_FIELD, "1"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "2")
-                .setSource(TEXT_FIELD, "1", CLASS_FIELD, "1"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "3")
-                .setSource(TEXT_FIELD, "0", CLASS_FIELD, "0"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "4")
-                .setSource(TEXT_FIELD, "0", CLASS_FIELD, "0"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "5")
-                .setSource(TEXT_FIELD, gb, CLASS_FIELD, "1"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "6")
-                .setSource(TEXT_FIELD, gb, CLASS_FIELD, "0"));
-        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "7")
-                .setSource(TEXT_FIELD, "0", CLASS_FIELD, "0"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "1").setSource(TEXT_FIELD, "1", CLASS_FIELD, "1"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "2").setSource(TEXT_FIELD, "1", CLASS_FIELD, "1"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "3").setSource(TEXT_FIELD, "0", CLASS_FIELD, "0"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "4").setSource(TEXT_FIELD, "0", CLASS_FIELD, "0"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "5").setSource(TEXT_FIELD, gb, CLASS_FIELD, "1"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "6").setSource(TEXT_FIELD, gb, CLASS_FIELD, "0"));
+        indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE, "7").setSource(TEXT_FIELD, "0", CLASS_FIELD, "0"));
         indexRandom(true, false, indexRequestBuilderList);
     }
 
@@ -415,14 +343,7 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
     public void testScoresEqualForPositiveAndNegative(SignificanceHeuristicBuilder heuristic) throws Exception {
 
         //check that results for both classes are the same with exclude negatives = false and classes are routing ids
-        SearchResponse response = client().prepareSearch("test")
-                .addAggregation(new TermsBuilder("class").field("class").subAggregation(new SignificantTermsBuilder("mySignificantTerms")
-                        .field("text")
-                        .executionHint(randomExecutionHint())
-                        .significanceHeuristic(heuristic)
-                        .minDocCount(1).shardSize(1000).size(1000)))
-                .execute()
-                .actionGet();
+        SearchResponse response = client().prepareSearch("test").addAggregation(new TermsBuilder("class").field("class").subAggregation(new SignificantTermsBuilder("mySignificantTerms").field("text").executionHint(randomExecutionHint()).significanceHeuristic(heuristic).minDocCount(1).shardSize(1000).size(1000))).execute().actionGet();
         assertSearchResponse(response);
         StringTerms classes = (StringTerms) response.getAggregations().get("class");
         assertThat(classes.getBuckets().size(), equalTo(2));
@@ -438,35 +359,16 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
     }
 
     private void indexEqualTestData() throws ExecutionException, InterruptedException {
-        assertAcked(prepareCreate("test").setSettings(SETTING_NUMBER_OF_SHARDS, 1, SETTING_NUMBER_OF_REPLICAS, 0).addMapping("doc",
-                "text", "type=string", "class", "type=string"));
+        assertAcked(prepareCreate("test").setSettings(SETTING_NUMBER_OF_SHARDS, 1, SETTING_NUMBER_OF_REPLICAS, 0).addMapping("doc", "text", "type=string", "class", "type=string"));
         createIndex("idx_unmapped");
 
         ensureGreen();
-        String data[] = {
-                "A\ta",
-                "A\ta",
-                "A\tb",
-                "A\tb",
-                "A\tb",
-                "B\tc",
-                "B\tc",
-                "B\tc",
-                "B\tc",
-                "B\td",
-                "B\td",
-                "B\td",
-                "B\td",
-                "B\td",
-                "A\tc d",
-                "B\ta b"
-        };
+        String data[] = { "A\ta", "A\ta", "A\tb", "A\tb", "A\tb", "B\tc", "B\tc", "B\tc", "B\tc", "B\td", "B\td", "B\td", "B\td", "B\td", "A\tc d", "B\ta b" };
 
         List<IndexRequestBuilder> indexRequestBuilders = new ArrayList<>();
         for (int i = 0; i < data.length; i++) {
             String[] parts = data[i].split("\t");
-            indexRequestBuilders.add(client().prepareIndex("test", "doc", "" + i)
-                    .setSource("class", parts[0], "text", parts[1]));
+            indexRequestBuilders.add(client().prepareIndex("test", "doc", "" + i).setSource("class", parts[0], "text", parts[1]));
         }
         indexRandom(true, false, indexRequestBuilders);
     }
@@ -476,14 +378,7 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
         indexRandomFrequencies01(randomBoolean() ? "string" : "long");
         ScriptHeuristic.ScriptHeuristicBuilder scriptHeuristicBuilder = getScriptSignificanceHeuristicBuilder();
         ensureYellow();
-        SearchResponse response = client().prepareSearch(INDEX_NAME)
-                .addAggregation(new TermsBuilder("class").field(CLASS_FIELD).subAggregation(new SignificantTermsBuilder("mySignificantTerms")
-                        .field(TEXT_FIELD)
-                        .executionHint(randomExecutionHint())
-                        .significanceHeuristic(scriptHeuristicBuilder)
-                        .minDocCount(1).shardSize(2).size(2)))
-                .execute()
-                .actionGet();
+        SearchResponse response = client().prepareSearch(INDEX_NAME).addAggregation(new TermsBuilder("class").field(CLASS_FIELD).subAggregation(new SignificantTermsBuilder("mySignificantTerms").field(TEXT_FIELD).executionHint(randomExecutionHint()).significanceHeuristic(scriptHeuristicBuilder).minDocCount(1).shardSize(2).size(2))).execute().actionGet();
         assertSearchResponse(response);
         for (Terms.Bucket classBucket : ((Terms) response.getAggregations().get("class")).getBuckets()) {
             for (SignificantTerms.Bucket bucket : ((SignificantTerms) classBucket.getAggregations().get("mySignificantTerms")).getBuckets()) {
@@ -505,20 +400,13 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
         scriptHeuristicBuilder.setScript("_subset_freq/(_superset_freq - _subset_freq + 1)");
         ensureYellow();
         refresh();
-        SearchResponse response = client().prepareSearch("test")
-                .addAggregation(new TermsBuilder("letters").field("field").subAggregation(new SignificantTermsBuilder("mySignificantTerms")
-                        .field("field")
-                        .executionHint(randomExecutionHint())
-                        .significanceHeuristic(scriptHeuristicBuilder)
-                        .minDocCount(1).shardSize(2).size(2)))
-                .execute()
-                .actionGet();
+        SearchResponse response = client().prepareSearch("test").addAggregation(new TermsBuilder("letters").field("field").subAggregation(new SignificantTermsBuilder("mySignificantTerms").field("field").executionHint(randomExecutionHint()).significanceHeuristic(scriptHeuristicBuilder).minDocCount(1).shardSize(2).size(2))).execute().actionGet();
         assertSearchResponse(response);
         assertThat(((Terms) response.getAggregations().get("letters")).getBuckets().size(), equalTo(2));
         for (Terms.Bucket classBucket : ((Terms) response.getAggregations().get("letters")).getBuckets()) {
             assertThat(((SignificantStringTerms) classBucket.getAggregations().get("mySignificantTerms")).getBuckets().size(), equalTo(2));
             for (SignificantTerms.Bucket bucket : ((SignificantTerms) classBucket.getAggregations().get("mySignificantTerms")).getBuckets()) {
-                assertThat(bucket.getSignificanceScore(), closeTo((double)bucket.getSubsetDf() /(bucket.getSupersetDf() - bucket.getSubsetDf()+ 1), 1.e-6));
+                assertThat(bucket.getSignificanceScore(), closeTo((double) bucket.getSubsetDf() / (bucket.getSupersetDf() - bucket.getSubsetDf() + 1), 1.e-6));
             }
         }
     }
@@ -552,10 +440,7 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
                 } else {
                     script = "return param*(_subset_freq + _subset_size + _superset_freq + _superset_size)/param";
                 }
-                client().prepareIndex().setIndex(ScriptService.SCRIPT_INDEX).setType(ScriptService.DEFAULT_LANG).setId("my_script")
-                        .setSource(XContentFactory.jsonBuilder().startObject()
-                                .field("script", script)
-                                .endObject()).get();
+                client().prepareIndex().setIndex(ScriptService.SCRIPT_INDEX).setType(ScriptService.DEFAULT_LANG).setId("my_script").setSource(XContentFactory.jsonBuilder().startObject().field("script", script).endObject()).get();
                 refresh();
                 scriptId = "my_script";
                 script = null;
@@ -590,7 +475,7 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
     private void indexRandomFrequencies01(String type) throws ExecutionException, InterruptedException {
         String mappings = "{\"" + DOC_TYPE + "\": {\"properties\":{\"" + TEXT_FIELD + "\": {\"type\":\"" + type + "\"}}}}";
         assertAcked(prepareCreate(INDEX_NAME).addMapping(DOC_TYPE, mappings));
-        String[] gb = {"0", "1"};
+        String[] gb = { "0", "1" };
         List<IndexRequestBuilder> indexRequestBuilderList = new ArrayList<>();
         for (int i = 0; i < randomInt(20); i++) {
             int randNum = randomInt(2);
@@ -600,8 +485,7 @@ public class SignificantTermsSignificanceScoreTests extends ElasticsearchIntegra
             } else {
                 text[0] = gb[randNum];
             }
-            indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE)
-                    .setSource(TEXT_FIELD, text, CLASS_FIELD, randomBoolean() ? "one" : "zero"));
+            indexRequestBuilderList.add(client().prepareIndex(INDEX_NAME, DOC_TYPE).setSource(TEXT_FIELD, text, CLASS_FIELD, randomBoolean() ? "one" : "zero"));
         }
         indexRandom(true, indexRequestBuilderList);
     }

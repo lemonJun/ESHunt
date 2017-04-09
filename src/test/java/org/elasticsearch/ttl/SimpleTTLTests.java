@@ -44,7 +44,7 @@ import static org.elasticsearch.test.ElasticsearchIntegrationTest.*;
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertAcked;
 import static org.hamcrest.Matchers.*;
 
-@ClusterScope(scope= Scope.SUITE, numDataNodes = 1)
+@ClusterScope(scope = Scope.SUITE, numDataNodes = 1)
 public class SimpleTTLTests extends ElasticsearchIntegrationTest {
 
     static private final long PURGE_INTERVAL = 200;
@@ -56,31 +56,13 @@ public class SimpleTTLTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("indices.ttl.interval", PURGE_INTERVAL)
-                .put("cluster.routing.operation.use_type", false) // make sure we control the shard computation
-                .put("cluster.routing.operation.hash.type", "djb")
-                .build();
+        return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("indices.ttl.interval", PURGE_INTERVAL).put("cluster.routing.operation.use_type", false) // make sure we control the shard computation
+                        .put("cluster.routing.operation.hash.type", "djb").build();
     }
 
     @Test
     public void testSimpleTTL() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("type1", XContentFactory.jsonBuilder()
-                        .startObject()
-                        .startObject("type1")
-                        .startObject("_timestamp").field("enabled", true).field("store", "yes").endObject()
-                        .startObject("_ttl").field("enabled", true).field("store", "yes").endObject()
-                        .endObject()
-                        .endObject())
-                .addMapping("type2", XContentFactory.jsonBuilder()
-                        .startObject()
-                        .startObject("type2")
-                        .startObject("_timestamp").field("enabled", true).field("store", "yes").endObject()
-                        .startObject("_ttl").field("enabled", true).field("store", "yes").field("default", "1d").endObject()
-                        .endObject()
-                        .endObject()));
+        assertAcked(prepareCreate("test").addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_timestamp").field("enabled", true).field("store", "yes").endObject().startObject("_ttl").field("enabled", true).field("store", "yes").endObject().endObject().endObject()).addMapping("type2", XContentFactory.jsonBuilder().startObject().startObject("type2").startObject("_timestamp").field("enabled", true).field("store", "yes").endObject().startObject("_ttl").field("enabled", true).field("store", "yes").field("default", "1d").endObject().endObject().endObject()));
         ensureYellow("test");
 
         final NumShards test = getNumShards("test");
@@ -89,11 +71,9 @@ public class SimpleTTLTests extends ElasticsearchIntegrationTest {
         logger.info("--> checking ttl");
         // Index one doc without routing, one doc with routing, one doc with not TTL and no default and one doc with default TTL
         long now = System.currentTimeMillis();
-        IndexResponse indexResponse = client().prepareIndex("test", "type1", "1").setSource("field1", "value1")
-                .setTimestamp(String.valueOf(now)).setTTL(providedTTLValue).setRefresh(true).get();
+        IndexResponse indexResponse = client().prepareIndex("test", "type1", "1").setSource("field1", "value1").setTimestamp(String.valueOf(now)).setTTL(providedTTLValue).setRefresh(true).get();
         assertThat(indexResponse.isCreated(), is(true));
-        indexResponse = client().prepareIndex("test", "type1", "with_routing").setSource("field1", "value1")
-                .setTimestamp(String.valueOf(now)).setTTL(providedTTLValue).setRouting("routing").setRefresh(true).get();
+        indexResponse = client().prepareIndex("test", "type1", "with_routing").setSource("field1", "value1").setTimestamp(String.valueOf(now)).setTTL(providedTTLValue).setRouting("routing").setRefresh(true).get();
         assertThat(indexResponse.isCreated(), is(true));
         indexResponse = client().prepareIndex("test", "type1", "no_ttl").setSource("field1", "value1").get();
         assertThat(indexResponse.isCreated(), is(true));

@@ -69,9 +69,7 @@ public class RandomTests extends ElasticsearchIntegrationTest {
 
         createIndex("idx");
         for (int i = 0; i < docs.length; ++i) {
-            XContentBuilder source = jsonBuilder()
-                    .startObject()
-                    .startArray("values");
+            XContentBuilder source = jsonBuilder().startObject().startArray("values");
             for (int j = 0; j < docs[i].length; ++j) {
                 source = source.value(docs[i][j]);
             }
@@ -84,17 +82,17 @@ public class RandomTests extends ElasticsearchIntegrationTest {
         final double[][] ranges = new double[numRanges][];
         for (int i = 0; i < ranges.length; ++i) {
             switch (randomInt(2)) {
-            case 0:
-                ranges[i] = new double[] { Double.NEGATIVE_INFINITY, randomInt(100) };
-                break;
-            case 1:
-                ranges[i] = new double[] { randomInt(100), Double.POSITIVE_INFINITY };
-                break;
-            case 2:
-                ranges[i] = new double[] { randomInt(100), randomInt(100) };
-                break;
-            default:
-                throw new AssertionError();
+                case 0:
+                    ranges[i] = new double[] { Double.NEGATIVE_INFINITY, randomInt(100) };
+                    break;
+                case 1:
+                    ranges[i] = new double[] { randomInt(100), Double.POSITIVE_INFINITY };
+                    break;
+                case 2:
+                    ranges[i] = new double[] { randomInt(100), randomInt(100) };
+                    break;
+                default:
+                    throw new AssertionError();
             }
         }
 
@@ -116,7 +114,7 @@ public class RandomTests extends ElasticsearchIntegrationTest {
             if (ranges[i][0] != Double.NEGATIVE_INFINITY) {
                 filter = filter.from(ranges[i][0]);
             }
-            if (ranges[i][1] != Double.POSITIVE_INFINITY){
+            if (ranges[i][1] != Double.POSITIVE_INFINITY) {
                 filter = filter.to(ranges[i][1]);
             }
             reqBuilder = reqBuilder.addAggregation(filter("filter" + i).filter(filter));
@@ -152,31 +150,7 @@ public class RandomTests extends ElasticsearchIntegrationTest {
 
         final IntOpenHashSet valuesSet = new IntOpenHashSet();
         cluster().wipeIndices("idx");
-        prepareCreate("idx")
-                .addMapping("type", jsonBuilder().startObject()
-                        .startObject("type")
-                        .startObject("properties")
-                        .startObject("string_values")
-                        .field("type", "string")
-                        .field("index", "not_analyzed")
-                        .startObject("fields")
-                            .startObject("doc_values")
-                                .field("type", "string")
-                                .field("index", "no")
-                                .startObject("fielddata")
-                                    .field("format", "doc_values")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                        .endObject()
-                        .startObject("long_values")
-                        .field("type", "long")
-                        .endObject()
-                        .startObject("double_values")
-                        .field("type", "double")
-                        .endObject()
-                        .endObject()
-                        .endObject()).execute().actionGet();
+        prepareCreate("idx").addMapping("type", jsonBuilder().startObject().startObject("type").startObject("properties").startObject("string_values").field("type", "string").field("index", "not_analyzed").startObject("fields").startObject("doc_values").field("type", "string").field("index", "no").startObject("fielddata").field("format", "doc_values").endObject().endObject().endObject().endObject().startObject("long_values").field("type", "long").endObject().startObject("double_values").field("type", "double").endObject().endObject().endObject()).execute().actionGet();
 
         List<IndexRequestBuilder> indexingRequests = Lists.newArrayList();
         for (int i = 0; i < numDocs; ++i) {
@@ -185,10 +159,7 @@ public class RandomTests extends ElasticsearchIntegrationTest {
                 values[j] = randomInt(maxNumTerms - 1) - 1000;
                 valuesSet.add(values[j]);
             }
-            XContentBuilder source = jsonBuilder()
-                    .startObject()
-                    .field("num", randomDouble())
-                    .startArray("long_values");
+            XContentBuilder source = jsonBuilder().startObject().field("num", randomDouble()).startArray("long_values");
             for (int j = 0; j < values.length; ++j) {
                 source = source.value(values[j]);
             }
@@ -207,18 +178,9 @@ public class RandomTests extends ElasticsearchIntegrationTest {
 
         assertNoFailures(client().admin().indices().prepareRefresh("idx").setIndicesOptions(IndicesOptions.lenientExpandOpen()).execute().get());
 
-        TermsAggregatorFactory.ExecutionMode[] globalOrdinalModes = new TermsAggregatorFactory.ExecutionMode[]{
-                TermsAggregatorFactory.ExecutionMode.GLOBAL_ORDINALS_HASH,
-                TermsAggregatorFactory.ExecutionMode.GLOBAL_ORDINALS
-        };
+        TermsAggregatorFactory.ExecutionMode[] globalOrdinalModes = new TermsAggregatorFactory.ExecutionMode[] { TermsAggregatorFactory.ExecutionMode.GLOBAL_ORDINALS_HASH, TermsAggregatorFactory.ExecutionMode.GLOBAL_ORDINALS };
 
-        SearchResponse resp = client().prepareSearch("idx")
-                .addAggregation(terms("long").field("long_values").size(maxNumTerms).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(min("min").field("num")))
-                .addAggregation(terms("double").field("double_values").size(maxNumTerms).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(max("max").field("num")))
-                .addAggregation(terms("string_map").field("string_values").collectMode(randomFrom(SubAggCollectionMode.values())).executionHint(TermsAggregatorFactory.ExecutionMode.MAP.toString()).size(maxNumTerms).subAggregation(stats("stats").field("num")))
-                .addAggregation(terms("string_global_ordinals").field("string_values").collectMode(randomFrom(SubAggCollectionMode.values())).executionHint(globalOrdinalModes[randomInt(globalOrdinalModes.length - 1)].toString()).size(maxNumTerms).subAggregation(extendedStats("stats").field("num")))
-                .addAggregation(terms("string_global_ordinals_doc_values").field("string_values.doc_values").collectMode(randomFrom(SubAggCollectionMode.values())).executionHint(globalOrdinalModes[randomInt(globalOrdinalModes.length - 1)].toString()).size(maxNumTerms).subAggregation(extendedStats("stats").field("num")))
-                .execute().actionGet();
+        SearchResponse resp = client().prepareSearch("idx").addAggregation(terms("long").field("long_values").size(maxNumTerms).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(min("min").field("num"))).addAggregation(terms("double").field("double_values").size(maxNumTerms).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(max("max").field("num"))).addAggregation(terms("string_map").field("string_values").collectMode(randomFrom(SubAggCollectionMode.values())).executionHint(TermsAggregatorFactory.ExecutionMode.MAP.toString()).size(maxNumTerms).subAggregation(stats("stats").field("num"))).addAggregation(terms("string_global_ordinals").field("string_values").collectMode(randomFrom(SubAggCollectionMode.values())).executionHint(globalOrdinalModes[randomInt(globalOrdinalModes.length - 1)].toString()).size(maxNumTerms).subAggregation(extendedStats("stats").field("num"))).addAggregation(terms("string_global_ordinals_doc_values").field("string_values.doc_values").collectMode(randomFrom(SubAggCollectionMode.values())).executionHint(globalOrdinalModes[randomInt(globalOrdinalModes.length - 1)].toString()).size(maxNumTerms).subAggregation(extendedStats("stats").field("num"))).execute().actionGet();
         assertAllSuccessful(resp);
         assertEquals(numDocs, resp.getHits().getTotalHits());
 
@@ -263,10 +225,7 @@ public class RandomTests extends ElasticsearchIntegrationTest {
         }
 
         for (int i = 0; i < numDocs; ++i) {
-            XContentBuilder source = jsonBuilder()
-                    .startObject()
-                    .field("num", randomDouble())
-                    .startArray("values");
+            XContentBuilder source = jsonBuilder().startObject().field("num", randomDouble()).startArray("values");
             final int numValues = randomInt(4);
             for (int j = 0; j < numValues; ++j) {
                 source = source.value(randomFrom(values));
@@ -276,10 +235,7 @@ public class RandomTests extends ElasticsearchIntegrationTest {
         }
         assertNoFailures(client().admin().indices().prepareRefresh("idx").setIndicesOptions(IndicesOptions.lenientExpandOpen()).execute().get());
 
-        SearchResponse resp = client().prepareSearch("idx")
-                .addAggregation(terms("terms").field("values").collectMode(randomFrom(SubAggCollectionMode.values())).script("floor(_value / interval)").param("interval", interval).size(maxNumTerms))
-                .addAggregation(histogram("histo").field("values").interval(interval))
-                .execute().actionGet();
+        SearchResponse resp = client().prepareSearch("idx").addAggregation(terms("terms").field("values").collectMode(randomFrom(SubAggCollectionMode.values())).script("floor(_value / interval)").param("interval", interval).size(maxNumTerms)).addAggregation(histogram("histo").field("values").interval(interval)).execute().actionGet();
 
         assertSearchResponse(resp);
 
@@ -300,7 +256,7 @@ public class RandomTests extends ElasticsearchIntegrationTest {
         createIndex("idx");
 
         final int numDocs = scaledRandomIntBetween(2500, 5000);
-        logger.info("Indexing [" + numDocs +"] docs");
+        logger.info("Indexing [" + numDocs + "] docs");
         List<IndexRequestBuilder> indexingRequests = Lists.newArrayList();
         for (int i = 0; i < numDocs; ++i) {
             indexingRequests.add(client().prepareIndex("idx", "type", Integer.toString(i)).setSource("double_value", randomDouble()));
@@ -318,14 +274,7 @@ public class RandomTests extends ElasticsearchIntegrationTest {
         final int value = randomIntBetween(0, 10);
         indexRandom(true, client().prepareIndex("idx", "type").setSource("f", value));
         ensureYellow("idx"); // only one document let's make sure all shards have an active primary
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(filter("filter").filter(FilterBuilders.matchAllFilter())
-                .subAggregation(range("range")
-                        .field("f")
-                        .addUnboundedTo(6)
-                        .addUnboundedFrom(6)
-                .subAggregation(sum("sum").field("f"))))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(filter("filter").filter(FilterBuilders.matchAllFilter()).subAggregation(range("range").field("f").addUnboundedTo(6).addUnboundedFrom(6).subAggregation(sum("sum").field("f")))).execute().actionGet();
 
         assertSearchResponse(response);
 

@@ -37,10 +37,7 @@ public class StatsTests extends AbstractNumericTests {
     @Test
     public void testEmptyAggregation() throws Exception {
 
-        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0).subAggregation(stats("stats")))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx").setQuery(matchAllQuery()).addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0).subAggregation(stats("stats"))).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -62,10 +59,7 @@ public class StatsTests extends AbstractNumericTests {
 
     @Test
     public void testUnmapped() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx_unmapped")
-                .setQuery(matchAllQuery())
-                .addAggregation(stats("stats").field("value"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx_unmapped").setQuery(matchAllQuery()).addAggregation(stats("stats").field("value")).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -83,10 +77,7 @@ public class StatsTests extends AbstractNumericTests {
 
     @Test
     public void testSingleValuedField() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(stats("stats").field("value"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(stats("stats").field("value")).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -95,17 +86,16 @@ public class StatsTests extends AbstractNumericTests {
         Stats stats = searchResponse.getAggregations().get("stats");
         assertThat(stats, notNullValue());
         assertThat(stats.getName(), equalTo("stats"));
-        assertThat(stats.getAvg(), equalTo((double) (1+2+3+4+5+6+7+8+9+10) / 10));
+        assertThat(stats.getAvg(), equalTo((double) (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10) / 10));
         assertThat(stats.getMin(), equalTo(1.0));
         assertThat(stats.getMax(), equalTo(10.0));
-        assertThat(stats.getSum(), equalTo((double) 1+2+3+4+5+6+7+8+9+10));
+        assertThat(stats.getSum(), equalTo((double) 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10));
         assertThat(stats.getCount(), equalTo(10l));
     }
 
     public void testSingleValuedField_WithFormatter() throws Exception {
 
-        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery())
-                .addAggregation(stats("stats").format("0000.0").field("value")).execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(stats("stats").format("0000.0").field("value")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -126,10 +116,7 @@ public class StatsTests extends AbstractNumericTests {
 
     @Test
     public void testSingleValuedField_PartiallyUnmapped() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx", "idx_unmapped")
-                .setQuery(matchAllQuery())
-                .addAggregation(stats("stats").field("value"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx", "idx_unmapped").setQuery(matchAllQuery()).addAggregation(stats("stats").field("value")).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -138,19 +125,16 @@ public class StatsTests extends AbstractNumericTests {
         Stats stats = searchResponse.getAggregations().get("stats");
         assertThat(stats, notNullValue());
         assertThat(stats.getName(), equalTo("stats"));
-        assertThat(stats.getAvg(), equalTo((double) (1+2+3+4+5+6+7+8+9+10) / 10));
+        assertThat(stats.getAvg(), equalTo((double) (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10) / 10));
         assertThat(stats.getMin(), equalTo(1.0));
         assertThat(stats.getMax(), equalTo(10.0));
-        assertThat(stats.getSum(), equalTo((double) 1+2+3+4+5+6+7+8+9+10));
+        assertThat(stats.getSum(), equalTo((double) 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10));
         assertThat(stats.getCount(), equalTo(10l));
     }
 
     @Test
     public void testSingleValuedField_WithValueScript() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(stats("stats").field("value").script("_value + 1"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(stats("stats").field("value").script("_value + 1")).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -159,19 +143,16 @@ public class StatsTests extends AbstractNumericTests {
         Stats stats = searchResponse.getAggregations().get("stats");
         assertThat(stats, notNullValue());
         assertThat(stats.getName(), equalTo("stats"));
-        assertThat(stats.getAvg(), equalTo((double) (2+3+4+5+6+7+8+9+10+11) / 10));
+        assertThat(stats.getAvg(), equalTo((double) (2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11) / 10));
         assertThat(stats.getMin(), equalTo(2.0));
         assertThat(stats.getMax(), equalTo(11.0));
-        assertThat(stats.getSum(), equalTo((double) 2+3+4+5+6+7+8+9+10+11));
+        assertThat(stats.getSum(), equalTo((double) 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11));
         assertThat(stats.getCount(), equalTo(10l));
     }
 
     @Test
     public void testSingleValuedField_WithValueScript_WithParams() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(stats("stats").field("value").script("_value + inc").param("inc", 1))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(stats("stats").field("value").script("_value + inc").param("inc", 1)).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -180,19 +161,16 @@ public class StatsTests extends AbstractNumericTests {
         Stats stats = searchResponse.getAggregations().get("stats");
         assertThat(stats, notNullValue());
         assertThat(stats.getName(), equalTo("stats"));
-        assertThat(stats.getAvg(), equalTo((double) (2+3+4+5+6+7+8+9+10+11) / 10));
+        assertThat(stats.getAvg(), equalTo((double) (2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11) / 10));
         assertThat(stats.getMin(), equalTo(2.0));
         assertThat(stats.getMax(), equalTo(11.0));
-        assertThat(stats.getSum(), equalTo((double) 2+3+4+5+6+7+8+9+10+11));
+        assertThat(stats.getSum(), equalTo((double) 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11));
         assertThat(stats.getCount(), equalTo(10l));
     }
 
     @Test
     public void testMultiValuedField() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(stats("stats").field("values"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(stats("stats").field("values")).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -201,19 +179,16 @@ public class StatsTests extends AbstractNumericTests {
         Stats stats = searchResponse.getAggregations().get("stats");
         assertThat(stats, notNullValue());
         assertThat(stats.getName(), equalTo("stats"));
-        assertThat(stats.getAvg(), equalTo((double) (2+3+4+5+6+7+8+9+10+11+3+4+5+6+7+8+9+10+11+12) / 20));
+        assertThat(stats.getAvg(), equalTo((double) (2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 12) / 20));
         assertThat(stats.getMin(), equalTo(2.0));
         assertThat(stats.getMax(), equalTo(12.0));
-        assertThat(stats.getSum(), equalTo((double) 2+3+4+5+6+7+8+9+10+11+3+4+5+6+7+8+9+10+11+12));
+        assertThat(stats.getSum(), equalTo((double) 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 12));
         assertThat(stats.getCount(), equalTo(20l));
     }
 
     @Test
     public void testMultiValuedField_WithValueScript() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(stats("stats").field("values").script("_value - 1"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(stats("stats").field("values").script("_value - 1")).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -222,19 +197,16 @@ public class StatsTests extends AbstractNumericTests {
         Stats stats = searchResponse.getAggregations().get("stats");
         assertThat(stats, notNullValue());
         assertThat(stats.getName(), equalTo("stats"));
-        assertThat(stats.getAvg(), equalTo((double) (1+2+3+4+5+6+7+8+9+10+2+3+4+5+6+7+8+9+10+11) / 20));
+        assertThat(stats.getAvg(), equalTo((double) (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11) / 20));
         assertThat(stats.getMin(), equalTo(1.0));
         assertThat(stats.getMax(), equalTo(11.0));
-        assertThat(stats.getSum(), equalTo((double) 1+2+3+4+5+6+7+8+9+10+2+3+4+5+6+7+8+9+10+11));
+        assertThat(stats.getSum(), equalTo((double) 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11));
         assertThat(stats.getCount(), equalTo(20l));
     }
 
     @Test
     public void testMultiValuedField_WithValueScript_WithParams() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(stats("stats").field("values").script("_value - dec").param("dec", 1))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(stats("stats").field("values").script("_value - dec").param("dec", 1)).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -243,19 +215,16 @@ public class StatsTests extends AbstractNumericTests {
         Stats stats = searchResponse.getAggregations().get("stats");
         assertThat(stats, notNullValue());
         assertThat(stats.getName(), equalTo("stats"));
-        assertThat(stats.getAvg(), equalTo((double) (1+2+3+4+5+6+7+8+9+10+2+3+4+5+6+7+8+9+10+11) / 20));
+        assertThat(stats.getAvg(), equalTo((double) (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11) / 20));
         assertThat(stats.getMin(), equalTo(1.0));
         assertThat(stats.getMax(), equalTo(11.0));
-        assertThat(stats.getSum(), equalTo((double) 1+2+3+4+5+6+7+8+9+10+2+3+4+5+6+7+8+9+10+11));
+        assertThat(stats.getSum(), equalTo((double) 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11));
         assertThat(stats.getCount(), equalTo(20l));
     }
 
     @Test
     public void testScript_SingleValued() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(stats("stats").script("doc['value'].value"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(stats("stats").script("doc['value'].value")).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -264,19 +233,16 @@ public class StatsTests extends AbstractNumericTests {
         Stats stats = searchResponse.getAggregations().get("stats");
         assertThat(stats, notNullValue());
         assertThat(stats.getName(), equalTo("stats"));
-        assertThat(stats.getAvg(), equalTo((double) (1+2+3+4+5+6+7+8+9+10) / 10));
+        assertThat(stats.getAvg(), equalTo((double) (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10) / 10));
         assertThat(stats.getMin(), equalTo(1.0));
         assertThat(stats.getMax(), equalTo(10.0));
-        assertThat(stats.getSum(), equalTo((double) 1+2+3+4+5+6+7+8+9+10));
+        assertThat(stats.getSum(), equalTo((double) 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10));
         assertThat(stats.getCount(), equalTo(10l));
     }
 
     @Test
     public void testScript_SingleValued_WithParams() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(stats("stats").script("doc['value'].value + inc").param("inc", 1))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(stats("stats").script("doc['value'].value + inc").param("inc", 1)).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -285,19 +251,16 @@ public class StatsTests extends AbstractNumericTests {
         Stats stats = searchResponse.getAggregations().get("stats");
         assertThat(stats, notNullValue());
         assertThat(stats.getName(), equalTo("stats"));
-        assertThat(stats.getAvg(), equalTo((double) (2+3+4+5+6+7+8+9+10+11) / 10));
+        assertThat(stats.getAvg(), equalTo((double) (2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11) / 10));
         assertThat(stats.getMin(), equalTo(2.0));
         assertThat(stats.getMax(), equalTo(11.0));
-        assertThat(stats.getSum(), equalTo((double) 2+3+4+5+6+7+8+9+10+11));
+        assertThat(stats.getSum(), equalTo((double) 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11));
         assertThat(stats.getCount(), equalTo(10l));
     }
 
     @Test
     public void testScript_ExplicitSingleValued_WithParams() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(stats("stats").script("doc['value'].value + inc").param("inc", 1))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(stats("stats").script("doc['value'].value + inc").param("inc", 1)).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -306,19 +269,16 @@ public class StatsTests extends AbstractNumericTests {
         Stats stats = searchResponse.getAggregations().get("stats");
         assertThat(stats, notNullValue());
         assertThat(stats.getName(), equalTo("stats"));
-        assertThat(stats.getAvg(), equalTo((double) (2+3+4+5+6+7+8+9+10+11) / 10));
+        assertThat(stats.getAvg(), equalTo((double) (2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11) / 10));
         assertThat(stats.getMin(), equalTo(2.0));
         assertThat(stats.getMax(), equalTo(11.0));
-        assertThat(stats.getSum(), equalTo((double) 2+3+4+5+6+7+8+9+10+11));
+        assertThat(stats.getSum(), equalTo((double) 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11));
         assertThat(stats.getCount(), equalTo(10l));
     }
 
     @Test
     public void testScript_MultiValued() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(stats("stats").script("doc['values'].values"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(stats("stats").script("doc['values'].values")).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -327,19 +287,16 @@ public class StatsTests extends AbstractNumericTests {
         Stats stats = searchResponse.getAggregations().get("stats");
         assertThat(stats, notNullValue());
         assertThat(stats.getName(), equalTo("stats"));
-        assertThat(stats.getAvg(), equalTo((double) (2+3+4+5+6+7+8+9+10+11+3+4+5+6+7+8+9+10+11+12) / 20));
+        assertThat(stats.getAvg(), equalTo((double) (2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 12) / 20));
         assertThat(stats.getMin(), equalTo(2.0));
         assertThat(stats.getMax(), equalTo(12.0));
-        assertThat(stats.getSum(), equalTo((double) 2+3+4+5+6+7+8+9+10+11+3+4+5+6+7+8+9+10+11+12));
+        assertThat(stats.getSum(), equalTo((double) 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 12));
         assertThat(stats.getCount(), equalTo(20l));
     }
 
     @Test
     public void testScript_ExplicitMultiValued() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(stats("stats").script("doc['values'].values"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(stats("stats").script("doc['values'].values")).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -348,19 +305,16 @@ public class StatsTests extends AbstractNumericTests {
         Stats stats = searchResponse.getAggregations().get("stats");
         assertThat(stats, notNullValue());
         assertThat(stats.getName(), equalTo("stats"));
-        assertThat(stats.getAvg(), equalTo((double) (2+3+4+5+6+7+8+9+10+11+3+4+5+6+7+8+9+10+11+12) / 20));
+        assertThat(stats.getAvg(), equalTo((double) (2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 12) / 20));
         assertThat(stats.getMin(), equalTo(2.0));
         assertThat(stats.getMax(), equalTo(12.0));
-        assertThat(stats.getSum(), equalTo((double) 2+3+4+5+6+7+8+9+10+11+3+4+5+6+7+8+9+10+11+12));
+        assertThat(stats.getSum(), equalTo((double) 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 12));
         assertThat(stats.getCount(), equalTo(20l));
     }
 
     @Test
     public void testScript_MultiValued_WithParams() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(stats("stats").script("[ doc['value'].value, doc['value'].value - dec ]").param("dec", 1))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(stats("stats").script("[ doc['value'].value, doc['value'].value - dec ]").param("dec", 1)).execute().actionGet();
 
         assertShardExecutionState(searchResponse, 0);
 
@@ -369,13 +323,12 @@ public class StatsTests extends AbstractNumericTests {
         Stats stats = searchResponse.getAggregations().get("stats");
         assertThat(stats, notNullValue());
         assertThat(stats.getName(), equalTo("stats"));
-        assertThat(stats.getAvg(), equalTo((double) (1+2+3+4+5+6+7+8+9+10+0+1+2+3+4+5+6+7+8+9) / 20));
+        assertThat(stats.getAvg(), equalTo((double) (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 0 + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9) / 20));
         assertThat(stats.getMin(), equalTo(0.0));
         assertThat(stats.getMax(), equalTo(10.0));
-        assertThat(stats.getSum(), equalTo((double) 1+2+3+4+5+6+7+8+9+10+0+1+2+3+4+5+6+7+8+9));
+        assertThat(stats.getSum(), equalTo((double) 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 0 + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9));
         assertThat(stats.getCount(), equalTo(20l));
     }
-
 
     private void assertShardExecutionState(SearchResponse response, int expectedFailures) throws Exception {
         ShardSearchFailure[] failures = response.getShardFailures();

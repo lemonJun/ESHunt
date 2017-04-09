@@ -60,7 +60,7 @@ public class HyperLogLogPlusPlusTests extends ElasticsearchTestCase {
     public void accuracy() {
         final long bucket = randomInt(20);
         final int numValues = randomIntBetween(1, 100000);
-        final int maxValue = randomIntBetween(1, randomBoolean() ? 1000: 100000);
+        final int maxValue = randomIntBetween(1, randomBoolean() ? 1000 : 100000);
         final int p = randomIntBetween(14, MAX_PRECISION);
         IntOpenHashSet set = new IntOpenHashSet();
         HyperLogLogPlusPlus e = new HyperLogLogPlusPlus(p, BigArrays.NON_RECYCLING_INSTANCE, 1);
@@ -88,7 +88,7 @@ public class HyperLogLogPlusPlusTests extends ElasticsearchTestCase {
             multi[i] = new HyperLogLogPlusPlus(p, BigArrays.NON_RECYCLING_INSTANCE, 5);
         }
         final int numValues = randomIntBetween(1, 100000);
-        final int maxValue = randomIntBetween(1, randomBoolean() ? 1000: 1000000);
+        final int maxValue = randomIntBetween(1, randomBoolean() ? 1000 : 1000000);
         for (int i = 0; i < numValues; ++i) {
             final int n = randomInt(maxValue);
             final long hash = MurmurHash3.hash((long) n);

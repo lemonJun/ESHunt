@@ -45,68 +45,50 @@ public class DefaultSourceMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testNoFormat() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_source").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_source").endObject().endObject().endObject().string();
 
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
         DocumentMapper documentMapper = parser.parse(mapping);
-        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field", "value")
-                .endObject().bytes());
+        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "value").endObject().bytes());
 
         assertThat(XContentFactory.xContentType(doc.source()), equalTo(XContentType.JSON));
 
         documentMapper = parser.parse(mapping);
-        doc = documentMapper.parse("type", "1", XContentFactory.smileBuilder().startObject()
-                .field("field", "value")
-                .endObject().bytes());
+        doc = documentMapper.parse("type", "1", XContentFactory.smileBuilder().startObject().field("field", "value").endObject().bytes());
 
         assertThat(XContentFactory.xContentType(doc.source()), equalTo(XContentType.SMILE));
     }
 
     @Test
     public void testJsonFormat() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_source").field("format", "json").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_source").field("format", "json").endObject().endObject().endObject().string();
 
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
         DocumentMapper documentMapper = parser.parse(mapping);
-        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field", "value")
-                .endObject().bytes());
+        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "value").endObject().bytes());
 
         assertThat(XContentFactory.xContentType(doc.source()), equalTo(XContentType.JSON));
 
         documentMapper = parser.parse(mapping);
-        doc = documentMapper.parse("type", "1", XContentFactory.smileBuilder().startObject()
-                .field("field", "value")
-                .endObject().bytes());
+        doc = documentMapper.parse("type", "1", XContentFactory.smileBuilder().startObject().field("field", "value").endObject().bytes());
 
         assertThat(XContentFactory.xContentType(doc.source()), equalTo(XContentType.JSON));
     }
 
     @Test
     public void testJsonFormatCompressed() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_source").field("format", "json").field("compress", true).endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_source").field("format", "json").field("compress", true).endObject().endObject().endObject().string();
 
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
         DocumentMapper documentMapper = parser.parse(mapping);
-        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field", "value")
-                .endObject().bytes());
+        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "value").endObject().bytes());
 
         assertThat(CompressorFactory.isCompressed(doc.source()), equalTo(true));
         byte[] uncompressed = CompressorFactory.uncompressIfNeeded(doc.source()).toBytes();
         assertThat(XContentFactory.xContentType(uncompressed), equalTo(XContentType.JSON));
 
         documentMapper = parser.parse(mapping);
-        doc = documentMapper.parse("type", "1", XContentFactory.smileBuilder().startObject()
-                .field("field", "value")
-                .endObject().bytes());
+        doc = documentMapper.parse("type", "1", XContentFactory.smileBuilder().startObject().field("field", "value").endObject().bytes());
 
         assertThat(CompressorFactory.isCompressed(doc.source()), equalTo(true));
         uncompressed = CompressorFactory.uncompressIfNeeded(doc.source()).toBytes();
@@ -115,16 +97,11 @@ public class DefaultSourceMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testIncludeExclude() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_source").field("includes", new String[]{"path1*"}).endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_source").field("includes", new String[] { "path1*" }).endObject().endObject().endObject().string();
 
         DocumentMapper documentMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .startObject("path1").field("field1", "value1").endObject()
-                .startObject("path2").field("field2", "value2").endObject()
-                .endObject().bytes());
+        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().startObject("path1").field("field1", "value1").endObject().startObject("path2").field("field2", "value2").endObject().endObject().bytes());
 
         IndexableField sourceField = doc.rootDoc().getField("_source");
         Map<String, Object> sourceAsMap = XContentFactory.xContent(XContentType.JSON).createParser(new BytesArray(sourceField.binaryValue())).mapAndClose();
@@ -134,9 +111,7 @@ public class DefaultSourceMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testDefaultMappingAndNoMapping() throws Exception {
-        String defaultMapping = XContentFactory.jsonBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING)
-                .startObject("_source").field("enabled", false).endObject()
-                .endObject().endObject().string();
+        String defaultMapping = XContentFactory.jsonBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING).startObject("_source").field("enabled", false).endObject().endObject().endObject().string();
 
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
         DocumentMapper mapper = parser.parse("my_type", null, defaultMapping);
@@ -163,13 +138,9 @@ public class DefaultSourceMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testDefaultMappingAndWithMappingOverride() throws Exception {
-        String defaultMapping = XContentFactory.jsonBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING)
-                .startObject("_source").field("enabled", false).endObject()
-                .endObject().endObject().string();
+        String defaultMapping = XContentFactory.jsonBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING).startObject("_source").field("enabled", false).endObject().endObject().endObject().string();
 
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("my_type")
-                .startObject("_source").field("enabled", true).endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("my_type").startObject("_source").field("enabled", true).endObject().endObject().endObject().string();
 
         DocumentMapper mapper = createIndex("test").mapperService().documentMapperParser().parse("my_type", mapping, defaultMapping);
         assertThat(mapper.type(), equalTo("my_type"));
@@ -178,9 +149,7 @@ public class DefaultSourceMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testDefaultMappingAndNoMappingWithMapperService() throws Exception {
-        String defaultMapping = XContentFactory.jsonBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING)
-                .startObject("_source").field("enabled", false).endObject()
-                .endObject().endObject().string();
+        String defaultMapping = XContentFactory.jsonBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING).startObject("_source").field("enabled", false).endObject().endObject().endObject().string();
 
         MapperService mapperService = createIndex("test").mapperService();
         mapperService.merge(MapperService.DEFAULT_MAPPING, new CompressedString(defaultMapping), true);
@@ -192,16 +161,12 @@ public class DefaultSourceMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testDefaultMappingAndWithMappingOverrideWithMapperService() throws Exception {
-        String defaultMapping = XContentFactory.jsonBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING)
-                .startObject("_source").field("enabled", false).endObject()
-                .endObject().endObject().string();
+        String defaultMapping = XContentFactory.jsonBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING).startObject("_source").field("enabled", false).endObject().endObject().endObject().string();
 
         MapperService mapperService = createIndex("test").mapperService();
         mapperService.merge(MapperService.DEFAULT_MAPPING, new CompressedString(defaultMapping), true);
 
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("my_type")
-                .startObject("_source").field("enabled", true).endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("my_type").startObject("_source").field("enabled", true).endObject().endObject().endObject().string();
         mapperService.merge("my_type", new CompressedString(mapping), true);
 
         DocumentMapper mapper = mapperService.documentMapper("my_type");
@@ -211,16 +176,12 @@ public class DefaultSourceMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testParsingWithDefaultAppliedAndNotApplied() throws Exception {
-        String defaultMapping = XContentFactory.jsonBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING)
-                .startObject("_source").array("includes", "default_field_path.").endObject()
-                .endObject().endObject().string();
+        String defaultMapping = XContentFactory.jsonBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING).startObject("_source").array("includes", "default_field_path.").endObject().endObject().endObject().string();
 
         MapperService mapperService = createIndex("test").mapperService();
         mapperService.merge(MapperService.DEFAULT_MAPPING, new CompressedString(defaultMapping), true);
 
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("my_type")
-                .startObject("_source").array("includes", "custom_field_path.").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("my_type").startObject("_source").array("includes", "custom_field_path.").endObject().endObject().endObject().string();
         mapperService.merge("my_type", new CompressedString(mapping), true);
         DocumentMapper mapper = mapperService.documentMapper("my_type");
         assertThat(mapper.type(), equalTo("my_type"));
@@ -228,9 +189,7 @@ public class DefaultSourceMappingTests extends ElasticsearchSingleNodeTest {
         assertThat(mapper.sourceMapper().includes(), hasItemInArray("default_field_path."));
         assertThat(mapper.sourceMapper().includes(), hasItemInArray("custom_field_path."));
 
-        mapping = XContentFactory.jsonBuilder().startObject().startObject("my_type")
-                .startObject("properties").startObject("text").field("type", "string").endObject().endObject()
-                .endObject().endObject().string();
+        mapping = XContentFactory.jsonBuilder().startObject().startObject("my_type").startObject("properties").startObject("text").field("type", "string").endObject().endObject().endObject().endObject().string();
         mapperService.merge("my_type", new CompressedString(mapping), false);
         mapper = mapperService.documentMapper("my_type");
         assertThat(mapper.type(), equalTo("my_type"));
@@ -240,15 +199,11 @@ public class DefaultSourceMappingTests extends ElasticsearchSingleNodeTest {
     }
 
     public void testDefaultNotAppliedOnUpdate() throws Exception {
-        XContentBuilder defaultMapping = XContentFactory.jsonBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING)
-                .startObject("_source").array("includes", "default_field_path.").endObject()
-                .endObject().endObject();
+        XContentBuilder defaultMapping = XContentFactory.jsonBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING).startObject("_source").array("includes", "default_field_path.").endObject().endObject().endObject();
 
         IndexService indexService = createIndex("test", ImmutableSettings.EMPTY, MapperService.DEFAULT_MAPPING, defaultMapping);
 
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("my_type")
-                .startObject("_source").array("includes", "custom_field_path.").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("my_type").startObject("_source").array("includes", "custom_field_path.").endObject().endObject().endObject().string();
         client().admin().indices().preparePutMapping("test").setType("my_type").setSource(mapping).get();
 
         DocumentMapper mapper = indexService.mapperService().documentMapper("my_type");
@@ -258,9 +213,7 @@ public class DefaultSourceMappingTests extends ElasticsearchSingleNodeTest {
         assertThat("default_field_path.", isIn(includes));
         assertThat("custom_field_path.", isIn(includes));
 
-        mapping = XContentFactory.jsonBuilder().startObject().startObject("my_type")
-                .startObject("properties").startObject("text").field("type", "string").endObject().endObject()
-                .endObject().endObject().string();
+        mapping = XContentFactory.jsonBuilder().startObject().startObject("my_type").startObject("properties").startObject("text").field("type", "string").endObject().endObject().endObject().endObject().string();
         client().admin().indices().preparePutMapping("test").setType("my_type").setSource(mapping).get();
 
         mapper = indexService.mapperService().documentMapper("my_type");

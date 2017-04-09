@@ -28,15 +28,10 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-
 public class GatewayServiceTests extends ElasticsearchTestCase {
 
-
     private GatewayService createService(ImmutableSettings.Builder settings) {
-        return new GatewayService(ImmutableSettings.builder()
-                .put("http.enabled", "false")
-                .put("discovery.type", "local")
-                .put(settings.build()).build(), null, null, new NoopClusterService(), null, null);
+        return new GatewayService(ImmutableSettings.builder().put("http.enabled", "false").put("discovery.type", "local").put(settings.build()).build(), null, null, new NoopClusterService(), null, null);
 
     }
 

@@ -30,23 +30,18 @@ import java.util.Map;
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertAcked;
 import static org.hamcrest.Matchers.equalTo;
 
-
 public class BoostMappingIntegrationTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testSetValues() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_boost")
-                .field("store", "yes").field("index", "not_analyzed")
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_boost").field("store", "yes").field("index", "not_analyzed").endObject().endObject().endObject().string();
         assertAcked(prepareCreate("test").addMapping("type", mapping));
         ensureYellow();
         GetFieldMappingsResponse response = client().admin().indices().prepareGetFieldMappings().addIndices("test").addTypes("type").setFields("_boost").get();
         assertTrue(response.mappings().containsKey("test"));
         assertNotNull(response.fieldMappings("test", "type", "_boost"));
         Map<String, Object> boostSource = response.fieldMappings("test", "type", "_boost").sourceAsMap();
-        assertThat((Boolean)((LinkedHashMap)(boostSource.get("_boost"))).get("store"), equalTo(true));
-        assertThat((String)((LinkedHashMap)(boostSource.get("_boost"))).get("index"), equalTo("not_analyzed"));
+        assertThat((Boolean) ((LinkedHashMap) (boostSource.get("_boost"))).get("store"), equalTo(true));
+        assertThat((String) ((LinkedHashMap) (boostSource.get("_boost"))).get("index"), equalTo("not_analyzed"));
     }
 }

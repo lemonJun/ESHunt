@@ -41,8 +41,7 @@ public class UniqueTokenFilterTests extends ElasticsearchTestCase {
     public void simpleTest() throws IOException {
         Analyzer analyzer = new Analyzer() {
             @Override
-            protected TokenStreamComponents createComponents(String fieldName,
-                                                             Reader reader) {
+            protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
                 Tokenizer t = new WhitespaceTokenizer(Lucene.VERSION, reader);
                 return new TokenStreamComponents(t, new UniqueTokenFilter(t));
             }

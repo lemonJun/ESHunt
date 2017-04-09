@@ -356,7 +356,7 @@ public class MultiValueModeTests extends ElasticsearchTestCase {
 
     private void verify(SortedBinaryDocValues values, int maxDoc) {
         for (BytesRef missingValue : new BytesRef[] { new BytesRef(), new BytesRef(RandomStrings.randomAsciiOfLength(getRandom(), 8)) }) {
-            for (MultiValueMode mode : new MultiValueMode[] {MultiValueMode.MIN, MultiValueMode.MAX}) {
+            for (MultiValueMode mode : new MultiValueMode[] { MultiValueMode.MIN, MultiValueMode.MAX }) {
                 final BinaryDocValues selected = mode.select(values, missingValue);
                 for (int i = 0; i < maxDoc; ++i) {
                     final BytesRef actual = selected.get(i);
@@ -386,7 +386,7 @@ public class MultiValueModeTests extends ElasticsearchTestCase {
 
     private void verify(SortedBinaryDocValues values, int maxDoc, FixedBitSet rootDocs, FixedBitSet innerDocs) {
         for (BytesRef missingValue : new BytesRef[] { new BytesRef(), new BytesRef(RandomStrings.randomAsciiOfLength(getRandom(), 8)) }) {
-            for (MultiValueMode mode : new MultiValueMode[] {MultiValueMode.MIN, MultiValueMode.MAX}) {
+            for (MultiValueMode mode : new MultiValueMode[] { MultiValueMode.MIN, MultiValueMode.MAX }) {
                 final BinaryDocValues selected = mode.select(values, missingValue, rootDocs, innerDocs, maxDoc);
                 int prevRoot = -1;
                 for (int root = rootDocs.nextSetBit(0); root != -1; root = root + 1 < maxDoc ? rootDocs.nextSetBit(root + 1) : -1) {
@@ -414,7 +414,6 @@ public class MultiValueModeTests extends ElasticsearchTestCase {
             }
         }
     }
-
 
     public void testSingleValuedOrds() {
         final int numDocs = scaledRandomIntBetween(1, 100);
@@ -499,7 +498,7 @@ public class MultiValueModeTests extends ElasticsearchTestCase {
     }
 
     private void verify(RandomAccessOrds values, int maxDoc) {
-        for (MultiValueMode mode : new MultiValueMode[] {MultiValueMode.MIN, MultiValueMode.MAX}) {
+        for (MultiValueMode mode : new MultiValueMode[] { MultiValueMode.MIN, MultiValueMode.MAX }) {
             final SortedDocValues selected = mode.select(values);
             for (int i = 0; i < maxDoc; ++i) {
                 final long actual = selected.getOrd(i);
@@ -519,7 +518,7 @@ public class MultiValueModeTests extends ElasticsearchTestCase {
     }
 
     private void verify(RandomAccessOrds values, int maxDoc, FixedBitSet rootDocs, FixedBitSet innerDocs) {
-        for (MultiValueMode mode : new MultiValueMode[] {MultiValueMode.MIN, MultiValueMode.MAX}) {
+        for (MultiValueMode mode : new MultiValueMode[] { MultiValueMode.MIN, MultiValueMode.MAX }) {
             final SortedDocValues selected = mode.select(values, rootDocs, innerDocs);
             int prevRoot = -1;
             for (int root = rootDocs.nextSetBit(0); root != -1; root = root + 1 < maxDoc ? rootDocs.nextSetBit(root + 1) : -1) {

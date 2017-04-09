@@ -47,7 +47,6 @@ public class VersionTypeTests extends ElasticsearchTestCase {
         assertFalse(VersionType.INTERNAL.isVersionConflictForWrites(10, Versions.MATCH_ANY_PRE_1_2_0));
         assertFalse(VersionType.INTERNAL.isVersionConflictForReads(10, Versions.MATCH_ANY_PRE_1_2_0));
 
-
         // and the stupid usual case
         assertFalse(VersionType.INTERNAL.isVersionConflictForWrites(10, 10));
         assertFalse(VersionType.INTERNAL.isVersionConflictForReads(10, 10));
@@ -56,18 +55,18 @@ public class VersionTypeTests extends ElasticsearchTestCase {
         assertTrue(VersionType.INTERNAL.isVersionConflictForWrites(10, 9));
         assertTrue(VersionType.INTERNAL.isVersionConflictForReads(10, 9));
 
-// Old indexing code, dictating behavior
-//        if (expectedVersion != Versions.MATCH_ANY && currentVersion != Versions.NOT_SET) {
-//            // an explicit version is provided, see if there is a conflict
-//            // if we did not find anything, and a version is provided, so we do expect to find a doc under that version
-//            // this is important, since we don't allow to preset a version in order to handle deletes
-//            if (currentVersion == Versions.NOT_FOUND) {
-//                throw new VersionConflictEngineException(shardId, index.type(), index.id(), Versions.NOT_FOUND, expectedVersion);
-//            } else if (expectedVersion != currentVersion) {
-//                throw new VersionConflictEngineException(shardId, index.type(), index.id(), currentVersion, expectedVersion);
-//            }
-//        }
-//        updatedVersion = (currentVersion == Versions.NOT_SET || currentVersion == Versions.NOT_FOUND) ? 1 : currentVersion + 1;
+        // Old indexing code, dictating behavior
+        //        if (expectedVersion != Versions.MATCH_ANY && currentVersion != Versions.NOT_SET) {
+        //            // an explicit version is provided, see if there is a conflict
+        //            // if we did not find anything, and a version is provided, so we do expect to find a doc under that version
+        //            // this is important, since we don't allow to preset a version in order to handle deletes
+        //            if (currentVersion == Versions.NOT_FOUND) {
+        //                throw new VersionConflictEngineException(shardId, index.type(), index.id(), Versions.NOT_FOUND, expectedVersion);
+        //            } else if (expectedVersion != currentVersion) {
+        //                throw new VersionConflictEngineException(shardId, index.type(), index.id(), currentVersion, expectedVersion);
+        //            }
+        //        }
+        //        updatedVersion = (currentVersion == Versions.NOT_SET || currentVersion == Versions.NOT_FOUND) ? 1 : currentVersion + 1;
     }
 
     @Test
@@ -127,16 +126,15 @@ public class VersionTypeTests extends ElasticsearchTestCase {
         assertTrue(VersionType.EXTERNAL.isVersionConflictForReads(10, 9));
         assertFalse(VersionType.EXTERNAL.isVersionConflictForReads(10, Versions.MATCH_ANY));
 
-
-// Old indexing code, dictating behavior
-//        // an external version is provided, just check, if a local version exists, that its higher than it
-//        // the actual version checking is one in an external system, and we just want to not index older versions
-//        if (currentVersion >= 0) { // we can check!, its there
-//            if (currentVersion >= index.version()) {
-//                throw new VersionConflictEngineException(shardId, index.type(), index.id(), currentVersion, index.version());
-//            }
-//        }
-//        updatedVersion = index.version();
+        // Old indexing code, dictating behavior
+        //        // an external version is provided, just check, if a local version exists, that its higher than it
+        //        // the actual version checking is one in an external system, and we just want to not index older versions
+        //        if (currentVersion >= 0) { // we can check!, its there
+        //            if (currentVersion >= index.version()) {
+        //                throw new VersionConflictEngineException(shardId, index.type(), index.id(), currentVersion, index.version());
+        //            }
+        //        }
+        //        updatedVersion = index.version();
     }
 
     @Test
@@ -154,7 +152,6 @@ public class VersionTypeTests extends ElasticsearchTestCase {
         assertTrue(VersionType.EXTERNAL_GTE.isVersionConflictForReads(Versions.NOT_FOUND, Versions.NOT_FOUND));
         assertTrue(VersionType.EXTERNAL_GTE.isVersionConflictForReads(Versions.NOT_FOUND, 10));
         assertFalse(VersionType.EXTERNAL_GTE.isVersionConflictForReads(Versions.NOT_FOUND, Versions.MATCH_ANY));
-
 
         // and the standard behavior
         assertFalse(VersionType.EXTERNAL_GTE.isVersionConflictForWrites(10, 10));
@@ -184,7 +181,6 @@ public class VersionTypeTests extends ElasticsearchTestCase {
         assertFalse(VersionType.FORCE.isVersionConflictForReads(Versions.NOT_FOUND, 10));
         assertFalse(VersionType.FORCE.isVersionConflictForReads(Versions.NOT_FOUND, Versions.MATCH_ANY));
 
-
         // and the standard behavior
         assertFalse(VersionType.FORCE.isVersionConflictForWrites(10, 10));
         assertFalse(VersionType.FORCE.isVersionConflictForWrites(9, 10));
@@ -203,7 +199,6 @@ public class VersionTypeTests extends ElasticsearchTestCase {
         assertThat(VersionType.INTERNAL.updateVersion(1, 1), equalTo(2l));
         assertThat(VersionType.INTERNAL.updateVersion(2, Versions.MATCH_ANY), equalTo(3l));
 
-
         assertThat(VersionType.EXTERNAL.updateVersion(Versions.NOT_SET, 10), equalTo(10l));
         assertThat(VersionType.EXTERNAL.updateVersion(Versions.NOT_FOUND, 10), equalTo(10l));
         assertThat(VersionType.EXTERNAL.updateVersion(1, 10), equalTo(10l));
@@ -217,11 +212,11 @@ public class VersionTypeTests extends ElasticsearchTestCase {
         assertThat(VersionType.FORCE.updateVersion(Versions.NOT_FOUND, 10), equalTo(10l));
         assertThat(VersionType.FORCE.updateVersion(11, 10), equalTo(10l));
 
-// Old indexing code
-//        if (index.versionType() == VersionType.INTERNAL) { // internal version type
-//            updatedVersion = (currentVersion == Versions.NOT_SET || currentVersion == Versions.NOT_FOUND) ? 1 : currentVersion + 1;
-//        } else { // external version type
-//            updatedVersion = expectedVersion;
-//        }
+        // Old indexing code
+        //        if (index.versionType() == VersionType.INTERNAL) { // internal version type
+        //            updatedVersion = (currentVersion == Versions.NOT_SET || currentVersion == Versions.NOT_FOUND) ? 1 : currentVersion + 1;
+        //        } else { // external version type
+        //            updatedVersion = expectedVersion;
+        //        }
     }
 }

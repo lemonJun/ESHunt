@@ -57,103 +57,49 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
     private static final String TYPE = "testType";
     private static final String FIELD = "testField";
 
-    private static final String[][] HEROS = {
-            { "Afari, Jamal", "Jamal Afari", "Jamal" },
-            { "Allerdyce, St. John", "Allerdyce, John", "St. John", "St. John Allerdyce" },
-            { "Beaubier, Jean-Paul", "Jean-Paul Beaubier", "Jean-Paul" },
-            { "Beaubier, Jeanne-Marie", "Jeanne-Marie Beaubier", "Jeanne-Marie" },
-            { "Braddock, Elizabeth \"Betsy\"", "Betsy", "Braddock, Elizabeth", "Elizabeth Braddock", "Elizabeth" },
-            { "Cody Mushumanski gun Man", "the hunter", "gun man", "Cody Mushumanski" },
-            { "Corbo, Adrian", "Adrian Corbo", "Adrian" },
-            { "Corbo, Jared", "Jared Corbo", "Jared" },
-            { "Creel, Carl \"Crusher\"", "Creel, Carl", "Crusher", "Carl Creel", "Carl" },
-            { "Crichton, Lady Jacqueline Falsworth", "Lady Jacqueline Falsworth Crichton", "Lady Jacqueline Falsworth",
-                    "Jacqueline Falsworth" }, { "Crichton, Kenneth", "Kenneth Crichton", "Kenneth" },
-            { "MacKenzie, Al", "Al MacKenzie", "Al" },
-            { "MacPherran, Mary \"Skeeter\"", "Mary MacPherran \"Skeeter\"", "MacPherran, Mary", "Skeeter", "Mary MacPherran" },
-            { "MacTaggert, Moira", "Moira MacTaggert", "Moira" }, { "Rasputin, Illyana", "Illyana Rasputin", "Illyana" },
-            { "Rasputin, Mikhail", "Mikhail Rasputin", "Mikhail" }, { "Rasputin, Piotr", "Piotr Rasputin", "Piotr" },
-            { "Smythe, Alistair", "Alistair Smythe", "Alistair" }, { "Smythe, Spencer", "Spencer Smythe", "Spencer" },
-            { "Whitemane, Aelfyre", "Aelfyre Whitemane", "Aelfyre" }, { "Whitemane, Kofi", "Kofi Whitemane", "Kofi" } };
+    private static final String[][] HEROS = { { "Afari, Jamal", "Jamal Afari", "Jamal" }, { "Allerdyce, St. John", "Allerdyce, John", "St. John", "St. John Allerdyce" }, { "Beaubier, Jean-Paul", "Jean-Paul Beaubier", "Jean-Paul" }, { "Beaubier, Jeanne-Marie", "Jeanne-Marie Beaubier", "Jeanne-Marie" }, { "Braddock, Elizabeth \"Betsy\"", "Betsy", "Braddock, Elizabeth", "Elizabeth Braddock", "Elizabeth" }, { "Cody Mushumanski gun Man", "the hunter", "gun man", "Cody Mushumanski" }, { "Corbo, Adrian", "Adrian Corbo", "Adrian" }, { "Corbo, Jared", "Jared Corbo", "Jared" }, { "Creel, Carl \"Crusher\"", "Creel, Carl", "Crusher", "Carl Creel", "Carl" }, { "Crichton, Lady Jacqueline Falsworth", "Lady Jacqueline Falsworth Crichton", "Lady Jacqueline Falsworth", "Jacqueline Falsworth" }, { "Crichton, Kenneth", "Kenneth Crichton", "Kenneth" }, { "MacKenzie, Al", "Al MacKenzie", "Al" }, { "MacPherran, Mary \"Skeeter\"", "Mary MacPherran \"Skeeter\"", "MacPherran, Mary", "Skeeter", "Mary MacPherran" }, { "MacTaggert, Moira", "Moira MacTaggert", "Moira" }, { "Rasputin, Illyana", "Illyana Rasputin", "Illyana" }, { "Rasputin, Mikhail", "Mikhail Rasputin", "Mikhail" }, { "Rasputin, Piotr", "Piotr Rasputin", "Piotr" }, { "Smythe, Alistair", "Alistair Smythe", "Alistair" }, { "Smythe, Spencer", "Spencer Smythe", "Spencer" }, { "Whitemane, Aelfyre", "Aelfyre Whitemane", "Aelfyre" }, { "Whitemane, Kofi", "Kofi Whitemane", "Kofi" } };
 
     @Test
     public void testBasicGeo() throws Exception {
         assertAcked(prepareCreate(INDEX).addMapping(TYPE, createMapping(TYPE, ContextBuilder.location("st").precision("5km").neighbors(true))));
         ensureYellow();
 
-        XContentBuilder source1 = jsonBuilder()
-                .startObject()
-                    .startObject(FIELD)
-                        .array("input", "Hotel Amsterdam", "Amsterdam")
-                        .field("output", "Hotel Amsterdam in Berlin")
-                        .startObject("context").latlon("st", 52.529172, 13.407333).endObject()
-                    .endObject()
-                .endObject();
+        XContentBuilder source1 = jsonBuilder().startObject().startObject(FIELD).array("input", "Hotel Amsterdam", "Amsterdam").field("output", "Hotel Amsterdam in Berlin").startObject("context").latlon("st", 52.529172, 13.407333).endObject().endObject().endObject();
         client().prepareIndex(INDEX, TYPE, "1").setSource(source1).execute().actionGet();
 
-        XContentBuilder source2 = jsonBuilder()
-                .startObject()
-                    .startObject(FIELD)
-                        .array("input", "Hotel Berlin", "Berlin")
-                        .field("output", "Hotel Berlin in Amsterdam")
-                        .startObject("context").latlon("st", 52.363389, 4.888695).endObject()
-                    .endObject()
-                .endObject();
+        XContentBuilder source2 = jsonBuilder().startObject().startObject(FIELD).array("input", "Hotel Berlin", "Berlin").field("output", "Hotel Berlin in Amsterdam").startObject("context").latlon("st", 52.363389, 4.888695).endObject().endObject().endObject();
         client().prepareIndex(INDEX, TYPE, "2").setSource(source2).execute().actionGet();
 
         client().admin().indices().prepareRefresh(INDEX).get();
-        
+
         String suggestionName = randomAsciiOfLength(10);
-        CompletionSuggestionBuilder context = SuggestBuilders.completionSuggestion(suggestionName).field(FIELD).text("h").size(10)
-                .addGeoLocation("st", 52.52, 13.4);
-        
+        CompletionSuggestionBuilder context = SuggestBuilders.completionSuggestion(suggestionName).field(FIELD).text("h").size(10).addGeoLocation("st", 52.52, 13.4);
+
         SuggestRequestBuilder suggestionRequest = client().prepareSuggest(INDEX).addSuggestion(context);
         SuggestResponse suggestResponse = suggestionRequest.execute().actionGet();
-        
+
         assertEquals(suggestResponse.getSuggest().size(), 1);
         assertEquals("Hotel Amsterdam in Berlin", suggestResponse.getSuggest().getSuggestion(suggestionName).iterator().next().getOptions().iterator().next().getText().string());
     }
-    
+
     @Test
     public void testMultiLevelGeo() throws Exception {
-        assertAcked(prepareCreate(INDEX).addMapping(TYPE, createMapping(TYPE, ContextBuilder.location("st")
-                .precision(1)
-                .precision(2)
-                .precision(3)
-                .precision(4)
-                .precision(5)
-                .precision(6)
-                .precision(7)
-                .precision(8)
-                .precision(9)
-                .precision(10)
-                .precision(11)
-                .precision(12)
-                .neighbors(true))));
+        assertAcked(prepareCreate(INDEX).addMapping(TYPE, createMapping(TYPE, ContextBuilder.location("st").precision(1).precision(2).precision(3).precision(4).precision(5).precision(6).precision(7).precision(8).precision(9).precision(10).precision(11).precision(12).neighbors(true))));
         ensureYellow();
 
-        XContentBuilder source1 = jsonBuilder()
-                .startObject()
-                    .startObject(FIELD)
-                        .array("input", "Hotel Amsterdam", "Amsterdam")
-                        .field("output", "Hotel Amsterdam in Berlin")
-                        .startObject("context").latlon("st", 52.529172, 13.407333).endObject()
-                    .endObject()
-                .endObject();
+        XContentBuilder source1 = jsonBuilder().startObject().startObject(FIELD).array("input", "Hotel Amsterdam", "Amsterdam").field("output", "Hotel Amsterdam in Berlin").startObject("context").latlon("st", 52.529172, 13.407333).endObject().endObject().endObject();
         client().prepareIndex(INDEX, TYPE, "1").setSource(source1).execute().actionGet();
 
         client().admin().indices().prepareRefresh(INDEX).get();
-        
+
         for (int precision = 1; precision <= 12; precision++) {
             String suggestionName = randomAsciiOfLength(10);
-            CompletionSuggestionBuilder context = new CompletionSuggestionBuilder(suggestionName).field(FIELD).text("h").size(10)
-                    .addGeoLocation("st", 52.529172, 13.407333, precision);
+            CompletionSuggestionBuilder context = new CompletionSuggestionBuilder(suggestionName).field(FIELD).text("h").size(10).addGeoLocation("st", 52.529172, 13.407333, precision);
 
             SuggestRequestBuilder suggestionRequest = client().prepareSuggest(INDEX).addSuggestion(context);
             SuggestResponse suggestResponse = suggestionRequest.execute().actionGet();
             assertEquals(suggestResponse.getSuggest().size(), 1);
-            assertEquals("Hotel Amsterdam in Berlin", suggestResponse.getSuggest().getSuggestion(suggestionName).iterator().next()
-                    .getOptions().iterator().next().getText().string()); 
+            assertEquals("Hotel Amsterdam in Berlin", suggestResponse.getSuggest().getSuggestion(suggestionName).iterator().next().getOptions().iterator().next().getText().string());
         }
     }
 
@@ -161,37 +107,18 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
     public void testMappingIdempotency() throws Exception {
         List<Integer> precisions = new ArrayList<>();
         for (int i = 0; i < randomIntBetween(4, 12); i++) {
-            precisions.add(i+1);
+            precisions.add(i + 1);
         }
         Collections.shuffle(precisions, getRandom());
-        XContentBuilder mapping = jsonBuilder().startObject().startObject(TYPE)
-                .startObject("properties").startObject("completion")
-                .field("type", "completion")
-                .startObject("context")
-                .startObject("location")
-                .field("type", "geo")
-                .array("precision", precisions.toArray(new Integer[precisions.size()]))
-                .endObject()
-                .endObject().endObject()
-                .endObject().endObject();
+        XContentBuilder mapping = jsonBuilder().startObject().startObject(TYPE).startObject("properties").startObject("completion").field("type", "completion").startObject("context").startObject("location").field("type", "geo").array("precision", precisions.toArray(new Integer[precisions.size()])).endObject().endObject().endObject().endObject().endObject();
 
         assertAcked(prepareCreate(INDEX).addMapping(TYPE, mapping.string()));
         ensureYellow();
 
         Collections.shuffle(precisions, getRandom());
-        mapping = jsonBuilder().startObject().startObject(TYPE)
-                .startObject("properties").startObject("completion")
-                .field("type", "completion")
-                .startObject("context")
-                .startObject("location")
-                .field("type", "geo")
-                .array("precision", precisions.toArray(new Integer[precisions.size()]))
-                .endObject()
-                .endObject().endObject()
-                .endObject().endObject();
+        mapping = jsonBuilder().startObject().startObject(TYPE).startObject("properties").startObject("completion").field("type", "completion").startObject("context").startObject("location").field("type", "geo").array("precision", precisions.toArray(new Integer[precisions.size()])).endObject().endObject().endObject().endObject().endObject();
         assertAcked(client().admin().indices().preparePutMapping(INDEX).setType(TYPE).setSource(mapping.string()).get());
     }
-
 
     @Test
     public void testGeoField() throws Exception {
@@ -220,40 +147,23 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
         assertAcked(prepareCreate(INDEX).addMapping(TYPE, mapping));
         ensureYellow();
 
-        XContentBuilder source1 = jsonBuilder()
-                .startObject()
-                    .latlon("pin", 52.529172, 13.407333)
-                    .startObject(FIELD)
-                        .array("input", "Hotel Amsterdam", "Amsterdam")
-                        .field("output", "Hotel Amsterdam in Berlin")
-                        .startObject("context").endObject()
-                    .endObject()
-                .endObject();
+        XContentBuilder source1 = jsonBuilder().startObject().latlon("pin", 52.529172, 13.407333).startObject(FIELD).array("input", "Hotel Amsterdam", "Amsterdam").field("output", "Hotel Amsterdam in Berlin").startObject("context").endObject().endObject().endObject();
         client().prepareIndex(INDEX, TYPE, "1").setSource(source1).execute().actionGet();
 
-        XContentBuilder source2 = jsonBuilder()
-                .startObject()
-                    .latlon("pin", 52.363389, 4.888695)
-                    .startObject(FIELD)
-                        .array("input", "Hotel Berlin", "Berlin")
-                        .field("output", "Hotel Berlin in Amsterdam")
-                        .startObject("context").endObject()
-                    .endObject()
-                .endObject();
+        XContentBuilder source2 = jsonBuilder().startObject().latlon("pin", 52.363389, 4.888695).startObject(FIELD).array("input", "Hotel Berlin", "Berlin").field("output", "Hotel Berlin in Amsterdam").startObject("context").endObject().endObject().endObject();
         client().prepareIndex(INDEX, TYPE, "2").setSource(source2).execute().actionGet();
 
         refresh();
-        
+
         String suggestionName = randomAsciiOfLength(10);
-        CompletionSuggestionBuilder context = SuggestBuilders.completionSuggestion(suggestionName).field(FIELD).text("h").size(10)
-                .addGeoLocation("st", 52.52, 13.4);
+        CompletionSuggestionBuilder context = SuggestBuilders.completionSuggestion(suggestionName).field(FIELD).text("h").size(10).addGeoLocation("st", 52.52, 13.4);
         SuggestRequestBuilder suggestionRequest = client().prepareSuggest(INDEX).addSuggestion(context);
         SuggestResponse suggestResponse = suggestionRequest.execute().actionGet();
-        
+
         assertEquals(suggestResponse.getSuggest().size(), 1);
         assertEquals("Hotel Amsterdam in Berlin", suggestResponse.getSuggest().getSuggestion(suggestionName).iterator().next().getOptions().iterator().next().getText().string());
     }
-    
+
     @Test
     public void testSimpleGeo() throws Exception {
         String reinickendorf = "u337p3mp11e2";
@@ -274,21 +184,12 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
         assertAcked(prepareCreate(INDEX).addMapping(TYPE, createMapping(TYPE, ContextBuilder.location("st").precision(precision).neighbors(true))));
         ensureYellow();
 
-        String[] locations = { reinickendorf, pankow, koepenick, bernau, berlin, mitte, steglitz, wilmersdorf, spandau, tempelhof,
-                schoeneberg, treptow };
+        String[] locations = { reinickendorf, pankow, koepenick, bernau, berlin, mitte, steglitz, wilmersdorf, spandau, tempelhof, schoeneberg, treptow };
 
-        String[][] input = { { "pizza - reinickendorf", "pizza", "food" }, { "pizza - pankow", "pizza", "food" },
-                { "pizza - koepenick", "pizza", "food" }, { "pizza - bernau", "pizza", "food" }, { "pizza - berlin", "pizza", "food" },
-                { "pizza - mitte", "pizza - berlin mitte", "pizza", "food" },
-                { "pizza - steglitz", "pizza - Berlin-Steglitz", "pizza", "food" }, { "pizza - wilmersdorf", "pizza", "food" },
-                { "pizza - spandau", "spandau bei berlin", "pizza", "food" },
-                { "pizza - tempelhof", "pizza - berlin-tempelhof", "pizza", "food" },
-                { "pizza - schoeneberg", "pizza - schöneberg", "pizza - berlin schoeneberg", "pizza", "food" },
-                { "pizza - treptow", "pizza", "food" } };
+        String[][] input = { { "pizza - reinickendorf", "pizza", "food" }, { "pizza - pankow", "pizza", "food" }, { "pizza - koepenick", "pizza", "food" }, { "pizza - bernau", "pizza", "food" }, { "pizza - berlin", "pizza", "food" }, { "pizza - mitte", "pizza - berlin mitte", "pizza", "food" }, { "pizza - steglitz", "pizza - Berlin-Steglitz", "pizza", "food" }, { "pizza - wilmersdorf", "pizza", "food" }, { "pizza - spandau", "spandau bei berlin", "pizza", "food" }, { "pizza - tempelhof", "pizza - berlin-tempelhof", "pizza", "food" }, { "pizza - schoeneberg", "pizza - schöneberg", "pizza - berlin schoeneberg", "pizza", "food" }, { "pizza - treptow", "pizza", "food" } };
 
         for (int i = 0; i < locations.length; i++) {
-            XContentBuilder source = jsonBuilder().startObject().startObject(FIELD).startArray("input").value(input[i]).endArray()
-                    .startObject("context").field("st", locations[i]).endObject().field("payload", locations[i]).endObject().endObject();
+            XContentBuilder source = jsonBuilder().startObject().startObject(FIELD).startArray("input").value(input[i]).endArray().startObject("context").field("st", locations[i]).endObject().field("payload", locations[i]).endObject().endObject();
             client().prepareIndex(INDEX, TYPE, "" + i).setSource(source).execute().actionGet();
         }
 
@@ -315,10 +216,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
         ensureYellow();
 
         for (int i = 0; i < HEROS.length; i++) {
-            XContentBuilder source = jsonBuilder().startObject().startObject(FIELD).startArray("input").value(HEROS[i]).endArray()
-                    .startObject("context").field("st", i%3).endObject()
-                    .startObject("payload").field("group", i % 3).field("id", i).endObject()
-                    .endObject().endObject();
+            XContentBuilder source = jsonBuilder().startObject().startObject(FIELD).startArray("input").value(HEROS[i]).endArray().startObject("context").field("st", i % 3).endObject().startObject("payload").field("group", i % 3).field("id", i).endObject().endObject().endObject();
             client().prepareIndex(INDEX, TYPE, "" + i).setSource(source).execute().actionGet();
         }
 
@@ -338,30 +236,16 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
     @Test
     public void testTypeCategoryIsActuallyCalledCategory() throws Exception {
         XContentBuilder mapping = jsonBuilder();
-        mapping.startObject().startObject(TYPE).startObject("properties")
-                .startObject("suggest_field").field("type", "completion")
-                .startObject("context").startObject("color").field("type", "category").endObject().endObject()
-                .endObject()
-                .endObject().endObject().endObject();
+        mapping.startObject().startObject(TYPE).startObject("properties").startObject("suggest_field").field("type", "completion").startObject("context").startObject("color").field("type", "category").endObject().endObject().endObject().endObject().endObject().endObject();
         assertAcked(prepareCreate(INDEX).addMapping(TYPE, mapping));
         ensureYellow();
         XContentBuilder doc1 = jsonBuilder();
-        doc1.startObject().startObject("suggest_field")
-                .field("input", "backpack_red")
-                .startObject("context").field("color", "red", "all_colors").endObject()
-                .endObject().endObject();
+        doc1.startObject().startObject("suggest_field").field("input", "backpack_red").startObject("context").field("color", "red", "all_colors").endObject().endObject().endObject();
         XContentBuilder doc2 = jsonBuilder();
-        doc2.startObject().startObject("suggest_field")
-                .field("input", "backpack_green")
-                .startObject("context").field("color", "green", "all_colors").endObject()
-                .endObject().endObject();
+        doc2.startObject().startObject("suggest_field").field("input", "backpack_green").startObject("context").field("color", "green", "all_colors").endObject().endObject().endObject();
 
-        client().prepareIndex(INDEX, TYPE, "1")
-                .setSource(doc1).execute()
-                .actionGet();
-        client().prepareIndex(INDEX, TYPE, "2")
-                .setSource(doc2).execute()
-                .actionGet();
+        client().prepareIndex(INDEX, TYPE, "1").setSource(doc1).execute().actionGet();
+        client().prepareIndex(INDEX, TYPE, "2").setSource(doc2).execute().actionGet();
 
         refresh();
         getBackpackSuggestionAndCompare("all_colors", "backpack_red", "backpack_green");
@@ -391,18 +275,12 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
         }
     }
 
-
     @Test
     public void testBasic() throws Exception {
         assertAcked(prepareCreate(INDEX).addMapping(TYPE, createMapping(TYPE, false, ContextBuilder.reference("st", "_type"), ContextBuilder.reference("nd", "_type"))));
         ensureYellow();
 
-        client().prepareIndex(INDEX, TYPE, "1")
-                .setSource(
-                        jsonBuilder().startObject().startObject(FIELD).startArray("input").value("my hotel").value("this hotel").endArray()
-                                .startObject("context").endObject()
-                                .field("payload", TYPE + "|" + TYPE).endObject().endObject()).execute()
-                .actionGet();
+        client().prepareIndex(INDEX, TYPE, "1").setSource(jsonBuilder().startObject().startObject(FIELD).startArray("input").value("my hotel").value("this hotel").endArray().startObject("context").endObject().field("payload", TYPE + "|" + TYPE).endObject().endObject()).execute().actionGet();
 
         refresh();
 
@@ -415,11 +293,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
         ensureYellow();
 
         for (int i = 0; i < HEROS.length; i++) {
-            client().prepareIndex(INDEX, TYPE, "" + i)
-                    .setSource(
-                            jsonBuilder().startObject().field("category", Integer.toString(i % 3)).startObject(FIELD).startArray("input")
-                                    .value(HEROS[i]).endArray().startObject("context").endObject().field("payload", Integer.toString(i % 3))
-                                    .endObject().endObject()).execute().actionGet();
+            client().prepareIndex(INDEX, TYPE, "" + i).setSource(jsonBuilder().startObject().field("category", Integer.toString(i % 3)).startObject(FIELD).startArray("input").value(HEROS[i]).endArray().startObject("context").endObject().field("payload", Integer.toString(i % 3)).endObject().endObject()).execute().actionGet();
         }
 
         refresh();
@@ -438,29 +312,12 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     @Test // see issue #10987
     public void testEmptySuggestion() throws Exception {
-        String mapping = jsonBuilder()
-                .startObject()
-                .startObject(TYPE)
-                .startObject("properties")
-                .startObject(FIELD)
-                .field("type", "completion")
-                .startObject("context")
-                .startObject("type_context")
-                .field("path", "_type")
-                .field("type", "category")
-                .endObject()
-                .endObject()
-                .endObject()
-                .endObject()
-                .endObject()
-                .endObject()
-                .string();
+        String mapping = jsonBuilder().startObject().startObject(TYPE).startObject("properties").startObject(FIELD).field("type", "completion").startObject("context").startObject("type_context").field("path", "_type").field("type", "category").endObject().endObject().endObject().endObject().endObject().endObject().string();
 
         assertAcked(client().admin().indices().prepareCreate(INDEX).addMapping(TYPE, mapping).get());
         ensureGreen();
 
-        client().prepareIndex(INDEX, TYPE, "1").setSource(FIELD, "")
-                .setRefresh(true).get();
+        client().prepareIndex(INDEX, TYPE, "1").setSource(FIELD, "").setRefresh(true).get();
 
     }
 
@@ -470,11 +327,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
         ensureYellow();
 
         for (int i = 0; i < HEROS.length; i++) {
-            client().prepareIndex(INDEX, TYPE, "" + i)
-                    .setSource(
-                            jsonBuilder().startObject().startArray("category").value(Integer.toString(i % 3)).value("other").endArray()
-                                    .startObject(FIELD).startArray("input").value(HEROS[i]).endArray().startObject("context").endObject()
-                                    .field("payload", Integer.toString(i % 3)).endObject().endObject()).execute().actionGet();
+            client().prepareIndex(INDEX, TYPE, "" + i).setSource(jsonBuilder().startObject().startArray("category").value(Integer.toString(i % 3)).value("other").endArray().startObject(FIELD).startArray("input").value(HEROS[i]).endArray().startObject("context").endObject().field("payload", Integer.toString(i % 3)).endObject().endObject()).execute().actionGet();
         }
 
         refresh();
@@ -496,12 +349,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
         ensureYellow();
 
         for (int i = 0; i < HEROS.length; i++) {
-            client().prepareIndex(INDEX, TYPE, "" + i)
-                    .setSource(
-                            jsonBuilder().startObject().field("categoryA").value("" + (char) ('0' + (i % 3))).field("categoryB")
-                                    .value("" + (char) ('A' + (i % 3))).startObject(FIELD).startArray("input").value(HEROS[i]).endArray()
-                                    .startObject("context").endObject().field("payload", ((char) ('0' + (i % 3))) + "" + (char) ('A' + (i % 3)))
-                                    .endObject().endObject()).execute().actionGet();
+            client().prepareIndex(INDEX, TYPE, "" + i).setSource(jsonBuilder().startObject().field("categoryA").value("" + (char) ('0' + (i % 3))).field("categoryB").value("" + (char) ('A' + (i % 3))).startObject(FIELD).startArray("input").value(HEROS[i]).endArray().startObject("context").endObject().field("payload", ((char) ('0' + (i % 3))) + "" + (char) ('A' + (i % 3))).endObject().endObject()).execute().actionGet();
         }
 
         refresh();
@@ -523,10 +371,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
         ensureYellow();
 
         for (int i = 0; i < HEROS.length; i++) {
-            String source = jsonBuilder().startObject().field("categoryA", "" + (char) ('0' + (i % 3)))
-                    .field("categoryB", "" + (char) ('a' + (i % 3))).startObject(FIELD).array("input", HEROS[i])
-                    .startObject("context").endObject().startObject("payload").field("categoryA", "" + (char) ('0' + (i % 3)))
-                    .field("categoryB", "" + (char) ('a' + (i % 3))).endObject().endObject().endObject().string();
+            String source = jsonBuilder().startObject().field("categoryA", "" + (char) ('0' + (i % 3))).field("categoryB", "" + (char) ('a' + (i % 3))).startObject(FIELD).array("input", HEROS[i]).startObject("context").endObject().startObject("payload").field("categoryA", "" + (char) ('0' + (i % 3))).field("categoryB", "" + (char) ('a' + (i % 3))).endObject().endObject().endObject().string();
             client().prepareIndex(INDEX, TYPE, "" + i).setSource(source).execute().actionGet();
         }
 
@@ -537,15 +382,10 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
         String[] prefix3 = { "0", "1" };
         String[] prefix4 = { "a", "b" };
 
-        assertContextWithFuzzySuggestions(prefix1, prefix2, "mary", "MacKenzie, Al", "MacPherran, Mary", "MacPherran, Mary \"Skeeter\"",
-                "MacTaggert, Moira", "Mary MacPherran", "Mary MacPherran \"Skeeter\"");
-        assertContextWithFuzzySuggestions(prefix1, prefix2, "mac", "Mikhail", "Mary MacPherran \"Skeeter\"", "MacTaggert, Moira",
-                "Moira MacTaggert", "Moira", "MacKenzie, Al", "Mary MacPherran", "Mikhail Rasputin", "MacPherran, Mary",
-                "MacPherran, Mary \"Skeeter\"");
-        assertContextWithFuzzySuggestions(prefix3, prefix4, "mary", "MacPherran, Mary", "MacPherran, Mary \"Skeeter\"",
-                "MacTaggert, Moira", "Mary MacPherran", "Mary MacPherran \"Skeeter\"");
-        assertContextWithFuzzySuggestions(prefix3, prefix4, "mac", "MacPherran, Mary", "MacPherran, Mary \"Skeeter\"", "MacTaggert, Moira",
-                "Mary MacPherran", "Mary MacPherran \"Skeeter\"", "Mikhail", "Mikhail Rasputin", "Moira", "Moira MacTaggert");
+        assertContextWithFuzzySuggestions(prefix1, prefix2, "mary", "MacKenzie, Al", "MacPherran, Mary", "MacPherran, Mary \"Skeeter\"", "MacTaggert, Moira", "Mary MacPherran", "Mary MacPherran \"Skeeter\"");
+        assertContextWithFuzzySuggestions(prefix1, prefix2, "mac", "Mikhail", "Mary MacPherran \"Skeeter\"", "MacTaggert, Moira", "Moira MacTaggert", "Moira", "MacKenzie, Al", "Mary MacPherran", "Mikhail Rasputin", "MacPherran, Mary", "MacPherran, Mary \"Skeeter\"");
+        assertContextWithFuzzySuggestions(prefix3, prefix4, "mary", "MacPherran, Mary", "MacPherran, Mary \"Skeeter\"", "MacTaggert, Moira", "Mary MacPherran", "Mary MacPherran \"Skeeter\"");
+        assertContextWithFuzzySuggestions(prefix3, prefix4, "mac", "MacPherran, Mary", "MacPherran, Mary \"Skeeter\"", "MacTaggert, Moira", "Mary MacPherran", "Mary MacPherran \"Skeeter\"", "Mikhail", "Mikhail Rasputin", "Moira", "Moira MacTaggert");
     }
 
     @Test
@@ -561,10 +401,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
         for (int i = 0; i < HEROS.length; i++) {
             String type = types[i % types.length];
-            client().prepareIndex(INDEX, type, "" + i)
-                    .setSource(
-                            jsonBuilder().startObject().startObject(FIELD).startArray("input").value(HEROS[i]).endArray()
-                                    .startObject("context").endObject().field("payload", type).endObject().endObject()).execute().actionGet();
+            client().prepareIndex(INDEX, type, "" + i).setSource(jsonBuilder().startObject().startObject(FIELD).startArray("input").value(HEROS[i]).endArray().startObject("context").endObject().field("payload", type).endObject().endObject()).execute().actionGet();
         }
 
         refresh();
@@ -584,16 +421,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
     public void testGeoContextDefaultMapping() throws Exception {
         GeoPoint berlinAlexanderplatz = GeoHashUtils.decode("u33dc1");
 
-        XContentBuilder xContentBuilder = jsonBuilder().startObject()
-            .startObject("poi").startObject("properties").startObject("suggest")
-                .field("type", "completion")
-                .startObject("context").startObject("location")
-                    .field("type", "geo")
-                    .field("precision", "500m")
-                    .startObject("default").field("lat", berlinAlexanderplatz.lat()).field("lon", berlinAlexanderplatz.lon()).endObject()
-                .endObject().endObject()
-                .endObject().endObject().endObject()
-            .endObject();
+        XContentBuilder xContentBuilder = jsonBuilder().startObject().startObject("poi").startObject("properties").startObject("suggest").field("type", "completion").startObject("context").startObject("location").field("type", "geo").field("precision", "500m").startObject("default").field("lat", berlinAlexanderplatz.lat()).field("lon", berlinAlexanderplatz.lon()).endObject().endObject().endObject().endObject().endObject().endObject().endObject();
 
         assertAcked(prepareCreate(INDEX).addMapping("poi", xContentBuilder));
         ensureYellow();
@@ -608,15 +436,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     @Test // issue 5525, setting the path of a category context and then indexing a document without that field returned an error
     public void testThatMissingPrefixesForContextReturnException() throws Exception {
-        XContentBuilder xContentBuilder = jsonBuilder().startObject()
-            .startObject("service").startObject("properties").startObject("suggest")
-                .field("type", "completion")
-                .startObject("context").startObject("color")
-                    .field("type", "category")
-                    .field("path", "color")
-                .endObject().endObject()
-            .endObject().endObject().endObject()
-            .endObject();
+        XContentBuilder xContentBuilder = jsonBuilder().startObject().startObject("service").startObject("properties").startObject("suggest").field("type", "completion").startObject("context").startObject("color").field("type", "category").field("path", "color").endObject().endObject().endObject().endObject().endObject().endObject();
 
         assertAcked(prepareCreate(INDEX).addMapping("service", xContentBuilder));
         ensureYellow();
@@ -635,29 +455,13 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     @Test // issue 5525, the geo point parser did not work when the lat/lon values were inside of a value object
     public void testThatLocationVenueCanBeParsedAsDocumented() throws Exception {
-        XContentBuilder xContentBuilder = jsonBuilder().startObject()
-            .startObject("poi").startObject("properties").startObject("suggest")
-                .field("type", "completion")
-                .startObject("context").startObject("location")
-                    .field("type", "geo")
-                    .field("precision", "1m")
-                .endObject().endObject()
-            .endObject().endObject().endObject()
-            .endObject();
+        XContentBuilder xContentBuilder = jsonBuilder().startObject().startObject("poi").startObject("properties").startObject("suggest").field("type", "completion").startObject("context").startObject("location").field("type", "geo").field("precision", "1m").endObject().endObject().endObject().endObject().endObject().endObject();
 
         assertAcked(prepareCreate(INDEX).addMapping("poi", xContentBuilder));
         ensureYellow();
 
         SuggestRequest suggestRequest = new SuggestRequest(INDEX);
-        XContentBuilder builder = jsonBuilder().startObject()
-            .startObject("suggest")
-                .field("text", "m")
-                .startObject("completion")
-                    .field("field", "suggest")
-                    .startObject("context").startObject("location").startObject("value").field("lat", 0).field("lon", 0).endObject().field("precision", "1km").endObject().endObject()
-                .endObject()
-            .endObject()
-            .endObject();
+        XContentBuilder builder = jsonBuilder().startObject().startObject("suggest").field("text", "m").startObject("completion").field("field", "suggest").startObject("context").startObject("location").startObject("value").field("lat", 0).field("lon", 0).endObject().field("precision", "1km").endObject().endObject().endObject().endObject().endObject();
         suggestRequest.suggest(builder.bytes());
 
         SuggestResponse suggestResponse = client().suggest(suggestRequest).get();
@@ -666,14 +470,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testThatCategoryDefaultWorks() throws Exception {
-        XContentBuilder xContentBuilder = jsonBuilder().startObject()
-                .startObject("item").startObject("properties").startObject("suggest")
-                .field("type", "completion")
-                .startObject("context").startObject("color")
-                .field("type", "category").field("default", "red")
-                .endObject().endObject()
-                .endObject().endObject().endObject()
-                .endObject();
+        XContentBuilder xContentBuilder = jsonBuilder().startObject().startObject("item").startObject("properties").startObject("suggest").field("type", "completion").startObject("context").startObject("color").field("type", "category").field("default", "red").endObject().endObject().endObject().endObject().endObject().endObject();
 
         assertAcked(prepareCreate(INDEX).addMapping("item", xContentBuilder));
         ensureYellow();
@@ -689,16 +486,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testThatDefaultCategoryAndPathWorks() throws Exception {
-        XContentBuilder xContentBuilder = jsonBuilder().startObject()
-                .startObject("item").startObject("properties").startObject("suggest")
-                .field("type", "completion")
-                .startObject("context").startObject("color")
-                .field("type", "category")
-                .field("default", "red")
-                .field("path", "color")
-                .endObject().endObject()
-                .endObject().endObject().endObject()
-                .endObject();
+        XContentBuilder xContentBuilder = jsonBuilder().startObject().startObject("item").startObject("properties").startObject("suggest").field("type", "completion").startObject("context").startObject("color").field("type", "category").field("default", "red").field("path", "color").endObject().endObject().endObject().endObject().endObject().endObject();
 
         assertAcked(prepareCreate(INDEX).addMapping("item", xContentBuilder));
         ensureYellow();
@@ -714,15 +502,8 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testThatGeoPrecisionIsWorking() throws Exception {
-        XContentBuilder xContentBuilder = jsonBuilder().startObject()
-                .startObject("item").startObject("properties").startObject("suggest")
-                .field("type", "completion")
-                .startObject("context").startObject("location")
-                .field("type", "geo")
-                .field("precision", 4) // this means geo hashes with a length of four are used, like u345
-                .endObject().endObject()
-                .endObject().endObject().endObject()
-                .endObject();
+        XContentBuilder xContentBuilder = jsonBuilder().startObject().startObject("item").startObject("properties").startObject("suggest").field("type", "completion").startObject("context").startObject("location").field("type", "geo").field("precision", 4) // this means geo hashes with a length of four are used, like u345
+                        .endObject().endObject().endObject().endObject().endObject().endObject();
 
         assertAcked(prepareCreate(INDEX).addMapping("item", xContentBuilder));
         ensureYellow();
@@ -747,16 +528,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testThatNeighborsCanBeExcluded() throws Exception {
-        XContentBuilder xContentBuilder = jsonBuilder().startObject()
-                .startObject("item").startObject("properties").startObject("suggest")
-                .field("type", "completion")
-                .startObject("context").startObject("location")
-                .field("type", "geo")
-                .field("precision", 6)
-                .field("neighbors", false)
-                .endObject().endObject()
-                .endObject().endObject().endObject()
-                .endObject();
+        XContentBuilder xContentBuilder = jsonBuilder().startObject().startObject("item").startObject("properties").startObject("suggest").field("type", "completion").startObject("context").startObject("location").field("type", "geo").field("precision", 6).field("neighbors", false).endObject().endObject().endObject().endObject().endObject().endObject();
 
         assertAcked(prepareCreate(INDEX).addMapping("item", xContentBuilder));
         ensureYellow();
@@ -777,16 +549,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testThatGeoPathCanBeSelected() throws Exception {
-        XContentBuilder xContentBuilder = jsonBuilder().startObject()
-                .startObject("item").startObject("properties").startObject("suggest")
-                .field("type", "completion")
-                .startObject("context").startObject("location")
-                .field("type", "geo")
-                .field("precision", "5m")
-                .field("path", "loc")
-                .endObject().endObject()
-                .endObject().endObject().endObject()
-                .endObject();
+        XContentBuilder xContentBuilder = jsonBuilder().startObject().startObject("item").startObject("properties").startObject("suggest").field("type", "completion").startObject("context").startObject("location").field("type", "geo").field("precision", "5m").field("path", "loc").endObject().endObject().endObject().endObject().endObject().endObject();
 
         assertAcked(prepareCreate(INDEX).addMapping("item", xContentBuilder));
         ensureYellow();
@@ -802,30 +565,14 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     @Test(expected = MapperParsingException.class)
     public void testThatPrecisionIsRequired() throws Exception {
-        XContentBuilder xContentBuilder = jsonBuilder().startObject()
-                .startObject("item").startObject("properties").startObject("suggest")
-                .field("type", "completion")
-                .startObject("context").startObject("location")
-                .field("type", "geo")
-                .field("path", "loc")
-                .endObject().endObject()
-                .endObject().endObject().endObject()
-                .endObject();
+        XContentBuilder xContentBuilder = jsonBuilder().startObject().startObject("item").startObject("properties").startObject("suggest").field("type", "completion").startObject("context").startObject("location").field("type", "geo").field("path", "loc").endObject().endObject().endObject().endObject().endObject().endObject();
 
         assertAcked(prepareCreate(INDEX).addMapping("item", xContentBuilder));
     }
 
     @Test
     public void testThatLatLonParsingFromSourceWorks() throws Exception {
-        XContentBuilder xContentBuilder = jsonBuilder().startObject()
-                .startObject("mappings").startObject("test").startObject("properties").startObject("suggest_geo")
-                .field("type", "completion")
-                .startObject("context").startObject("location")
-                .field("type", "geo")
-                .field("precision", "1km")
-                .endObject().endObject()
-                .endObject().endObject().endObject()
-                .endObject().endObject();
+        XContentBuilder xContentBuilder = jsonBuilder().startObject().startObject("mappings").startObject("test").startObject("properties").startObject("suggest_geo").field("type", "completion").startObject("context").startObject("location").field("type", "geo").field("precision", "1km").endObject().endObject().endObject().endObject().endObject().endObject().endObject();
 
         assertAcked(prepareCreate("test").setSource(xContentBuilder.bytes()));
 
@@ -853,8 +600,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     public void assertGeoSuggestionsInRange(String location, String suggest, double precision) throws IOException {
         String suggestionName = randomAsciiOfLength(10);
-        CompletionSuggestionBuilder context = SuggestBuilders.completionSuggestion(suggestionName).field(FIELD).text(suggest).size(10)
-                .addGeoLocation("st", location);
+        CompletionSuggestionBuilder context = SuggestBuilders.completionSuggestion(suggestionName).field(FIELD).text(suggest).size(10).addGeoLocation("st", location);
         SuggestRequestBuilder suggestionRequest = client().prepareSuggest(INDEX).addSuggestion(context);
         SuggestResponse suggestResponse = suggestionRequest.execute().actionGet();
 
@@ -868,7 +614,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
                 assertTrue(options.iterator().hasNext());
                 for (CompletionSuggestion.Entry.Option option : options) {
                     String target = option.getPayloadAsString();
-                    assertDistance(location, target, Matchers.lessThanOrEqualTo(precision));                    
+                    assertDistance(location, target, Matchers.lessThanOrEqualTo(precision));
                 }
             }
         }
@@ -876,8 +622,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     public void assertPrefixSuggestions(long prefix, String suggest, String... hits) throws IOException {
         String suggestionName = randomAsciiOfLength(10);
-        CompletionSuggestionBuilder context = SuggestBuilders.completionSuggestion(suggestionName).field(FIELD).text(suggest)
-                .size(hits.length + 1).addCategory("st", Long.toString(prefix));
+        CompletionSuggestionBuilder context = SuggestBuilders.completionSuggestion(suggestionName).field(FIELD).text(suggest).size(hits.length + 1).addCategory("st", Long.toString(prefix));
         SuggestRequestBuilder suggestionRequest = client().prepareSuggest(INDEX).addSuggestion(context);
         SuggestResponse suggestResponse = suggestionRequest.execute().actionGet();
         ArrayList<String> suggestions = new ArrayList<>();
@@ -901,8 +646,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     public void assertContextWithFuzzySuggestions(String[] prefix1, String[] prefix2, String suggest, String... hits) throws IOException {
         String suggestionName = randomAsciiOfLength(10);
-        CompletionSuggestionFuzzyBuilder context = SuggestBuilders.fuzzyCompletionSuggestion(suggestionName).field(FIELD).text(suggest)
-                .size(hits.length + 10).addContextField("st", prefix1).addContextField("nd", prefix2).setFuzziness(Fuzziness.TWO);
+        CompletionSuggestionFuzzyBuilder context = SuggestBuilders.fuzzyCompletionSuggestion(suggestionName).field(FIELD).text(suggest).size(hits.length + 10).addContextField("st", prefix1).addContextField("nd", prefix2).setFuzziness(Fuzziness.TWO);
         SuggestRequestBuilder suggestionRequest = client().prepareSuggest(INDEX).addSuggestion(context);
         SuggestResponse suggestResponse = suggestionRequest.execute().actionGet();
 
@@ -929,8 +673,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     public void assertFieldSuggestions(String value, String suggest, String... hits) throws IOException {
         String suggestionName = randomAsciiOfLength(10);
-        CompletionSuggestionBuilder context = SuggestBuilders.completionSuggestion(suggestionName).field(FIELD).text(suggest).size(10)
-                .addContextField("st", value);
+        CompletionSuggestionBuilder context = SuggestBuilders.completionSuggestion(suggestionName).field(FIELD).text(suggest).size(10).addContextField("st", value);
         SuggestRequestBuilder suggestionRequest = client().prepareSuggest(INDEX).addSuggestion(context);
         SuggestResponse suggestResponse = suggestionRequest.execute().actionGet();
 
@@ -954,8 +697,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     public void assertDoubleFieldSuggestions(String field1, String field2, String suggest, String... hits) throws IOException {
         String suggestionName = randomAsciiOfLength(10);
-        CompletionSuggestionBuilder context = SuggestBuilders.completionSuggestion(suggestionName).field(FIELD).text(suggest).size(10)
-                .addContextField("st", field1).addContextField("nd", field2);
+        CompletionSuggestionBuilder context = SuggestBuilders.completionSuggestion(suggestionName).field(FIELD).text(suggest).size(10).addContextField("st", field1).addContextField("nd", field2);
         SuggestRequestBuilder suggestionRequest = client().prepareSuggest(INDEX).addSuggestion(context);
         SuggestResponse suggestResponse = suggestionRequest.execute().actionGet();
         ArrayList<String> suggestions = new ArrayList<>();
@@ -978,8 +720,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
 
     public void assertMultiContextSuggestions(String value1, String value2, String suggest, String... hits) throws IOException {
         String suggestionName = randomAsciiOfLength(10);
-        CompletionSuggestionBuilder context = SuggestBuilders.completionSuggestion(suggestionName).field(FIELD).text(suggest).size(10)
-                .addContextField("st", value1).addContextField("nd", value2);
+        CompletionSuggestionBuilder context = SuggestBuilders.completionSuggestion(suggestionName).field(FIELD).text(suggest).size(10).addContextField("st", value1).addContextField("nd", value2);
 
         SuggestRequestBuilder suggestionRequest = client().prepareSuggest(INDEX).addSuggestion(context);
         SuggestResponse suggestResponse = suggestionRequest.execute().actionGet();
@@ -1029,8 +770,7 @@ public class ContextSuggestSearchTests extends ElasticsearchIntegrationTest {
         return createMapping(type, "simple", "simple", true, preserveSeparators, true, context);
     }
 
-    private XContentBuilder createMapping(String type, String indexAnalyzer, String searchAnalyzer, boolean payloads, boolean preserveSeparators,
-            boolean preservePositionIncrements, ContextBuilder<?>... contexts) throws IOException {
+    private XContentBuilder createMapping(String type, String indexAnalyzer, String searchAnalyzer, boolean payloads, boolean preserveSeparators, boolean preservePositionIncrements, ContextBuilder<?>... contexts) throws IOException {
         XContentBuilder mapping = jsonBuilder();
         mapping.startObject();
         mapping.startObject(type);

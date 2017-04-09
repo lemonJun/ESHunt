@@ -36,7 +36,7 @@ public class RestTestSectionParser implements RestTestFragmentParser<TestSection
         parser.nextToken();
         testSection.setSkipSection(parseContext.parseSkipSection());
 
-        while ( parser.currentToken() != XContentParser.Token.END_ARRAY) {
+        while (parser.currentToken() != XContentParser.Token.END_ARRAY) {
             parseContext.advanceToFieldName();
             testSection.addExecutableSection(parseContext.parseExecutableSection());
         }

@@ -57,8 +57,7 @@ public class VectorHighlighterTests extends ElasticsearchTestCase {
         assertThat(topDocs.totalHits, equalTo(1));
 
         FastVectorHighlighter highlighter = new FastVectorHighlighter();
-        String fragment = highlighter.getBestFragment(highlighter.getFieldQuery(new TermQuery(new Term("content", "bad"))),
-                reader, topDocs.scoreDocs[0].doc, "content", 30);
+        String fragment = highlighter.getBestFragment(highlighter.getFieldQuery(new TermQuery(new Term("content", "bad"))), reader, topDocs.scoreDocs[0].doc, "content", 30);
         assertThat(fragment, notNullValue());
         assertThat(fragment, equalTo("the big <b>bad</b> dog"));
     }
@@ -83,21 +82,18 @@ public class VectorHighlighterTests extends ElasticsearchTestCase {
 
         PrefixQuery prefixQuery = new PrefixQuery(new Term("content", "ba"));
         assertThat(prefixQuery.getRewriteMethod().getClass().getName(), equalTo(PrefixQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT.getClass().getName()));
-        String fragment = highlighter.getBestFragment(highlighter.getFieldQuery(prefixQuery),
-                reader, topDocs.scoreDocs[0].doc, "content", 30);
+        String fragment = highlighter.getBestFragment(highlighter.getFieldQuery(prefixQuery), reader, topDocs.scoreDocs[0].doc, "content", 30);
         assertThat(fragment, nullValue());
 
         prefixQuery.setRewriteMethod(PrefixQuery.SCORING_BOOLEAN_QUERY_REWRITE);
         Query rewriteQuery = prefixQuery.rewrite(reader);
-        fragment = highlighter.getBestFragment(highlighter.getFieldQuery(rewriteQuery),
-                reader, topDocs.scoreDocs[0].doc, "content", 30);
+        fragment = highlighter.getBestFragment(highlighter.getFieldQuery(rewriteQuery), reader, topDocs.scoreDocs[0].doc, "content", 30);
         assertThat(fragment, notNullValue());
 
         // now check with the custom field query
         prefixQuery = new PrefixQuery(new Term("content", "ba"));
         assertThat(prefixQuery.getRewriteMethod().getClass().getName(), equalTo(PrefixQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT.getClass().getName()));
-        fragment = highlighter.getBestFragment(new CustomFieldQuery(prefixQuery, reader, highlighter),
-                reader, topDocs.scoreDocs[0].doc, "content", 30);
+        fragment = highlighter.getBestFragment(new CustomFieldQuery(prefixQuery, reader, highlighter), reader, topDocs.scoreDocs[0].doc, "content", 30);
         assertThat(fragment, notNullValue());
     }
 
@@ -118,8 +114,7 @@ public class VectorHighlighterTests extends ElasticsearchTestCase {
         assertThat(topDocs.totalHits, equalTo(1));
 
         FastVectorHighlighter highlighter = new FastVectorHighlighter();
-        String fragment = highlighter.getBestFragment(highlighter.getFieldQuery(new TermQuery(new Term("content", "bad"))),
-                reader, topDocs.scoreDocs[0].doc, "content", 30);
+        String fragment = highlighter.getBestFragment(highlighter.getFieldQuery(new TermQuery(new Term("content", "bad"))), reader, topDocs.scoreDocs[0].doc, "content", 30);
         assertThat(fragment, nullValue());
     }
 
@@ -140,8 +135,7 @@ public class VectorHighlighterTests extends ElasticsearchTestCase {
         assertThat(topDocs.totalHits, equalTo(1));
 
         FastVectorHighlighter highlighter = new FastVectorHighlighter();
-        String fragment = highlighter.getBestFragment(highlighter.getFieldQuery(new TermQuery(new Term("content", "bad"))),
-                reader, topDocs.scoreDocs[0].doc, "content", 30);
+        String fragment = highlighter.getBestFragment(highlighter.getFieldQuery(new TermQuery(new Term("content", "bad"))), reader, topDocs.scoreDocs[0].doc, "content", 30);
         assertThat(fragment, nullValue());
     }
 }

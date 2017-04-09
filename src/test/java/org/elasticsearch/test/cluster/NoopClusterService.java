@@ -45,10 +45,7 @@ public class NoopClusterService implements ClusterService {
 
     public NoopClusterService(ClusterState state) {
         if (state.getNodes().size() == 0) {
-            state = ClusterState.builder(state).nodes(
-                    DiscoveryNodes.builder()
-                            .put(new DiscoveryNode("noop_id", DummyTransportAddress.INSTANCE, Version.CURRENT))
-                            .localNodeId("noop_id")).build();
+            state = ClusterState.builder(state).nodes(DiscoveryNodes.builder().put(new DiscoveryNode("noop_id", DummyTransportAddress.INSTANCE, Version.CURRENT)).localNodeId("noop_id")).build();
         }
 
         assert state.getNodes().localNode() != null;

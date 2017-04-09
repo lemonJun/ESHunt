@@ -38,7 +38,7 @@ import static org.hamcrest.Matchers.equalTo;
 public class SearchScanTests extends ElasticsearchIntegrationTest {
 
     @Test
-    @Slow 
+    @Slow
     public void testNarrowingQuery() throws Exception {
         createIndex("test");
         ensureGreen();
@@ -46,31 +46,24 @@ public class SearchScanTests extends ElasticsearchIntegrationTest {
         Set<String> ids = Sets.newHashSet();
         Set<String> expectedIds = Sets.newHashSet();
         IndexRequestBuilder[] builders = new IndexRequestBuilder[scaledRandomIntBetween(50, 100)];
-        for (int i = 0; i < builders.length/2; i++) {
+        for (int i = 0; i < builders.length / 2; i++) {
             expectedIds.add(Integer.toString(i));
-            builders[i] = client().prepareIndex("test", "tweet", Integer.toString(i)).setSource(
-                    jsonBuilder().startObject().field("user", "kimchy1").field("postDate", System.currentTimeMillis()).field("message", "test").endObject());
+            builders[i] = client().prepareIndex("test", "tweet", Integer.toString(i)).setSource(jsonBuilder().startObject().field("user", "kimchy1").field("postDate", System.currentTimeMillis()).field("message", "test").endObject());
         }
 
-        for (int i = builders.length/2; i < builders.length; i++) {
-            builders[i] = client().prepareIndex("test", "tweet", Integer.toString(i)).setSource(
-                    jsonBuilder().startObject().field("user", "kimchy2").field("postDate", System.currentTimeMillis()).field("message", "test").endObject());
+        for (int i = builders.length / 2; i < builders.length; i++) {
+            builders[i] = client().prepareIndex("test", "tweet", Integer.toString(i)).setSource(jsonBuilder().startObject().field("user", "kimchy2").field("postDate", System.currentTimeMillis()).field("message", "test").endObject());
         }
         indexRandom(true, builders);
 
-        SearchResponse searchResponse = client().prepareSearch()
-                .setSearchType(SearchType.SCAN)
-                .setQuery(termQuery("user", "kimchy1"))
-                .setSize(35)
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setSearchType(SearchType.SCAN).setQuery(termQuery("user", "kimchy1")).setSize(35).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
 
-        assertThat(searchResponse.getHits().totalHits(), equalTo((long)builders.length/2));
+        assertThat(searchResponse.getHits().totalHits(), equalTo((long) builders.length / 2));
 
         // start scrolling, until we get not results
         while (true) {
             searchResponse = client().prepareSearchScroll(searchResponse.getScrollId()).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
-            assertThat(searchResponse.getHits().totalHits(), equalTo((long)builders.length/2));
+            assertThat(searchResponse.getHits().totalHits(), equalTo((long) builders.length / 2));
             assertThat(searchResponse.getFailedShards(), equalTo(0));
             for (SearchHit hit : searchResponse.getHits()) {
                 assertThat(hit.id() + "should not exists in the result set", ids.contains(hit.id()), equalTo(false));

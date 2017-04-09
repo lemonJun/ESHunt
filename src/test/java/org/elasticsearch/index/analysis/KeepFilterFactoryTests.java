@@ -38,7 +38,6 @@ public class KeepFilterFactoryTests extends ElasticsearchTokenStreamTestCase {
 
     private static final String RESOURCE = "org/elasticsearch/index/analysis/keep_analysis.json";
 
-
     @Test
     public void testLoadWithoutSettings() {
         AnalysisService analysisService = AnalysisTestsHelper.createAnalysisServiceFromClassPath(RESOURCE);
@@ -48,11 +47,7 @@ public class KeepFilterFactoryTests extends ElasticsearchTokenStreamTestCase {
 
     @Test
     public void testLoadOverConfiguredSettings() {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("index.analysis.filter.broken_keep_filter.type", "keep")
-                .put("index.analysis.filter.broken_keep_filter.keep_words_path", "does/not/exists.txt")
-                .put("index.analysis.filter.broken_keep_filter.keep_words", "[\"Hello\", \"worlD\"]")
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("index.analysis.filter.broken_keep_filter.type", "keep").put("index.analysis.filter.broken_keep_filter.keep_words_path", "does/not/exists.txt").put("index.analysis.filter.broken_keep_filter.keep_words", "[\"Hello\", \"worlD\"]").build();
         try {
             AnalysisTestsHelper.createAnalysisServiceFromSettings(settings);
             Assert.fail("path and array are configured");
@@ -63,10 +58,7 @@ public class KeepFilterFactoryTests extends ElasticsearchTokenStreamTestCase {
 
     @Test
     public void testKeepWordsPathSettings() {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("index.analysis.filter.non_broken_keep_filter.type", "keep")
-                .put("index.analysis.filter.non_broken_keep_filter.keep_words_path", "does/not/exists.txt")
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("index.analysis.filter.non_broken_keep_filter.type", "keep").put("index.analysis.filter.non_broken_keep_filter.keep_words_path", "does/not/exists.txt").build();
         try {
             // test our none existing setup is picked up
             AnalysisTestsHelper.createAnalysisServiceFromSettings(settings);
@@ -75,9 +67,7 @@ public class KeepFilterFactoryTests extends ElasticsearchTokenStreamTestCase {
             assertThat(e.getCause(), instanceOf(FailedToResolveConfigException.class));
         }
 
-        settings = ImmutableSettings.settingsBuilder().put(settings)
-                .put("index.analysis.filter.non_broken_keep_filter.keep_words", new String[]{"test"})
-                .build();
+        settings = ImmutableSettings.settingsBuilder().put(settings).put("index.analysis.filter.non_broken_keep_filter.keep_words", new String[] { "test" }).build();
         try {
             // test our none existing setup is picked up
             AnalysisTestsHelper.createAnalysisServiceFromSettings(settings);
@@ -94,9 +84,9 @@ public class KeepFilterFactoryTests extends ElasticsearchTokenStreamTestCase {
         TokenFilterFactory tokenFilter = analysisService.tokenFilter("my_keep_filter");
         assertThat(tokenFilter, instanceOf(KeepWordFilterFactory.class));
         String source = "hello small world";
-        String[] expected = new String[]{"hello", "world"};
+        String[] expected = new String[] { "hello", "world" };
         Tokenizer tokenizer = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(source));
-        assertTokenStreamContents(tokenFilter.create(tokenizer), expected, new int[]{1, 2});
+        assertTokenStreamContents(tokenFilter.create(tokenizer), expected, new int[] { 1, 2 });
     }
 
     @Test
@@ -105,9 +95,9 @@ public class KeepFilterFactoryTests extends ElasticsearchTokenStreamTestCase {
         TokenFilterFactory tokenFilter = analysisService.tokenFilter("my_case_sensitive_keep_filter");
         assertThat(tokenFilter, instanceOf(KeepWordFilterFactory.class));
         String source = "Hello small world";
-        String[] expected = new String[]{"Hello"};
+        String[] expected = new String[] { "Hello" };
         Tokenizer tokenizer = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(source));
-        assertTokenStreamContents(tokenFilter.create(tokenizer), expected, new int[]{1});
+        assertTokenStreamContents(tokenFilter.create(tokenizer), expected, new int[] { 1 });
     }
 
 }

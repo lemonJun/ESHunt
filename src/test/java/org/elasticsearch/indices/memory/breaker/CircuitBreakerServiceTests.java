@@ -64,15 +64,7 @@ public class CircuitBreakerServiceTests extends ElasticsearchIntegrationTest {
     /** Reset all breaker settings back to their defaults */
     private void reset() {
         logger.info("--> resetting breaker settings");
-        Settings resetSettings = settingsBuilder()
-                .put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_LIMIT_SETTING,
-                        HierarchyCircuitBreakerService.DEFAULT_FIELDDATA_BREAKER_LIMIT)
-                .put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_OVERHEAD_SETTING,
-                        HierarchyCircuitBreakerService.DEFAULT_FIELDDATA_OVERHEAD_CONSTANT)
-                .put(HierarchyCircuitBreakerService.REQUEST_CIRCUIT_BREAKER_LIMIT_SETTING,
-                        HierarchyCircuitBreakerService.DEFAULT_REQUEST_BREAKER_LIMIT)
-                .put(HierarchyCircuitBreakerService.REQUEST_CIRCUIT_BREAKER_OVERHEAD_SETTING, 1.0)
-                .build();
+        Settings resetSettings = settingsBuilder().put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_LIMIT_SETTING, HierarchyCircuitBreakerService.DEFAULT_FIELDDATA_BREAKER_LIMIT).put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_OVERHEAD_SETTING, HierarchyCircuitBreakerService.DEFAULT_FIELDDATA_OVERHEAD_CONSTANT).put(HierarchyCircuitBreakerService.REQUEST_CIRCUIT_BREAKER_LIMIT_SETTING, HierarchyCircuitBreakerService.DEFAULT_REQUEST_BREAKER_LIMIT).put(HierarchyCircuitBreakerService.REQUEST_CIRCUIT_BREAKER_OVERHEAD_SETTING, 1.0).build();
         assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(resetSettings));
     }
 
@@ -130,16 +122,12 @@ public class CircuitBreakerServiceTests extends ElasticsearchIntegrationTest {
         clearFieldData();
 
         // Update circuit breaker settings
-        Settings settings = settingsBuilder()
-                .put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_LIMIT_SETTING, randomRidiculouslySmallLimit())
-                .put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_OVERHEAD_SETTING, 1.05)
-                .build();
+        Settings settings = settingsBuilder().put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_LIMIT_SETTING, randomRidiculouslySmallLimit()).put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_OVERHEAD_SETTING, 1.05).build();
         assertAcked(client.admin().cluster().prepareUpdateSettings().setTransientSettings(settings));
 
         // execute a search that loads field data (sorting on the "test" field)
         // again, this time it should trip the breaker
-        assertFailures(searchRequest, RestStatus.INTERNAL_SERVER_ERROR,
-                containsString("Data too large, data for [test] would be larger than limit of [100/100b]"));
+        assertFailures(searchRequest, RestStatus.INTERNAL_SERVER_ERROR, containsString("Data too large, data for [test] would be larger than limit of [100/100b]"));
 
         NodesStatsResponse stats = client.admin().cluster().prepareNodesStats().setBreaker(true).get();
         int breaks = 0;
@@ -160,8 +148,7 @@ public class CircuitBreakerServiceTests extends ElasticsearchIntegrationTest {
         final Client client = client();
 
         // Create an index where the mappings have a field data filter
-        assertAcked(prepareCreate("ramtest").setSource("{\"mappings\": {\"type\": {\"properties\": {\"test\": " +
-                "{\"type\": \"string\",\"fielddata\": {\"filter\": {\"regex\": {\"pattern\": \"^value.*\"}}}}}}}}"));
+        assertAcked(prepareCreate("ramtest").setSource("{\"mappings\": {\"type\": {\"properties\": {\"test\": " + "{\"type\": \"string\",\"fielddata\": {\"filter\": {\"regex\": {\"pattern\": \"^value.*\"}}}}}}}}"));
 
         ensureGreen(TimeValue.timeValueSeconds(10), "ramtest");
 
@@ -180,17 +167,12 @@ public class CircuitBreakerServiceTests extends ElasticsearchIntegrationTest {
         clearFieldData();
 
         // Update circuit breaker settings
-        Settings settings = settingsBuilder()
-                .put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_LIMIT_SETTING, randomRidiculouslySmallLimit())
-                .put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_OVERHEAD_SETTING, 1.05)
-                .build();
+        Settings settings = settingsBuilder().put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_LIMIT_SETTING, randomRidiculouslySmallLimit()).put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_OVERHEAD_SETTING, 1.05).build();
         assertAcked(client.admin().cluster().prepareUpdateSettings().setTransientSettings(settings));
 
         // execute a search that loads field data (sorting on the "test" field)
         // again, this time it should trip the breaker
-        assertFailures(client.prepareSearch("ramtest").setQuery(matchAllQuery()).addSort("test", SortOrder.DESC),
-                RestStatus.INTERNAL_SERVER_ERROR,
-                containsString("Data too large, data for [test] would be larger than limit of [100/100b]"));
+        assertFailures(client.prepareSearch("ramtest").setQuery(matchAllQuery()).addSort("test", SortOrder.DESC), RestStatus.INTERNAL_SERVER_ERROR, containsString("Data too large, data for [test] would be larger than limit of [100/100b]"));
 
         NodesStatsResponse stats = client.admin().cluster().prepareNodesStats().setBreaker(true).get();
         int breaks = 0;
@@ -223,13 +205,9 @@ public class CircuitBreakerServiceTests extends ElasticsearchIntegrationTest {
         indexRandom(true, reqs);
 
         // We need the request limit beforehand, just from a single node because the limit should always be the same
-        long beforeReqLimit = client.admin().cluster().prepareNodesStats().setBreaker(true).get()
-                .getNodes()[0].getBreaker().getStats(CircuitBreaker.Name.REQUEST).getLimit();
+        long beforeReqLimit = client.admin().cluster().prepareNodesStats().setBreaker(true).get().getNodes()[0].getBreaker().getStats(CircuitBreaker.Name.REQUEST).getLimit();
 
-        Settings resetSettings = settingsBuilder()
-                .put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_LIMIT_SETTING, "10b")
-                .put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_OVERHEAD_SETTING, 1.0)
-                .build();
+        Settings resetSettings = settingsBuilder().put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_LIMIT_SETTING, "10b").put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_OVERHEAD_SETTING, 1.0).build();
         assertAcked(client.admin().cluster().prepareUpdateSettings().setTransientSettings(resetSettings));
 
         // Perform a search to load field data for the "test" field
@@ -238,20 +216,13 @@ public class CircuitBreakerServiceTests extends ElasticsearchIntegrationTest {
             fail("should have thrown an exception");
         } catch (Exception e) {
             String errMsg = "[FIELDDATA] Data too large, data for [test] would be larger than limit of [10/10b]";
-            assertThat("Exception: " + ExceptionsHelper.unwrapCause(e) + " should contain a CircuitBreakingException",
-                    ExceptionsHelper.unwrapCause(e).getMessage().contains(errMsg), equalTo(true));
+            assertThat("Exception: " + ExceptionsHelper.unwrapCause(e) + " should contain a CircuitBreakingException", ExceptionsHelper.unwrapCause(e).getMessage().contains(errMsg), equalTo(true));
         }
 
-        assertFailures(client.prepareSearch("cb-test").setQuery(matchAllQuery()).addSort("test", SortOrder.DESC),
-                RestStatus.INTERNAL_SERVER_ERROR,
-                containsString("Data too large, data for [test] would be larger than limit of [10/10b]"));
+        assertFailures(client.prepareSearch("cb-test").setQuery(matchAllQuery()).addSort("test", SortOrder.DESC), RestStatus.INTERNAL_SERVER_ERROR, containsString("Data too large, data for [test] would be larger than limit of [10/10b]"));
 
         // Adjust settings so the parent breaker will fail, but the fielddata breaker doesn't
-        resetSettings = settingsBuilder()
-                .put(HierarchyCircuitBreakerService.TOTAL_CIRCUIT_BREAKER_LIMIT_SETTING, "15b")
-                .put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_LIMIT_SETTING, "90%")
-                .put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_OVERHEAD_SETTING, 1.0)
-                .build();
+        resetSettings = settingsBuilder().put(HierarchyCircuitBreakerService.TOTAL_CIRCUIT_BREAKER_LIMIT_SETTING, "15b").put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_LIMIT_SETTING, "90%").put(HierarchyCircuitBreakerService.FIELDDATA_CIRCUIT_BREAKER_OVERHEAD_SETTING, 1.0).build();
         client.admin().cluster().prepareUpdateSettings().setTransientSettings(resetSettings).execute().actionGet();
 
         // Perform a search to load field data for the "test" field
@@ -260,8 +231,7 @@ public class CircuitBreakerServiceTests extends ElasticsearchIntegrationTest {
             fail("should have thrown an exception");
         } catch (Exception e) {
             String errMsg = "[PARENT] Data too large, data for [test] would be larger than limit of [15/15b]";
-            assertThat("Exception: " + ExceptionsHelper.unwrapCause(e) + " should contain a CircuitBreakingException",
-                    ExceptionsHelper.unwrapCause(e).getMessage().contains(errMsg), equalTo(true));
+            assertThat("Exception: " + ExceptionsHelper.unwrapCause(e) + " should contain a CircuitBreakingException", ExceptionsHelper.unwrapCause(e).getMessage().contains(errMsg), equalTo(true));
         }
     }
 
@@ -275,9 +245,7 @@ public class CircuitBreakerServiceTests extends ElasticsearchIntegrationTest {
         Client client = client();
 
         // Make request breaker limited to a small amount
-        Settings resetSettings = settingsBuilder()
-                .put(HierarchyCircuitBreakerService.REQUEST_CIRCUIT_BREAKER_LIMIT_SETTING, "10b")
-                .build();
+        Settings resetSettings = settingsBuilder().put(HierarchyCircuitBreakerService.REQUEST_CIRCUIT_BREAKER_LIMIT_SETTING, "10b").build();
         assertAcked(client.admin().cluster().prepareUpdateSettings().setTransientSettings(resetSettings));
 
         // index some different terms so we have some field data for loading
@@ -294,8 +262,7 @@ public class CircuitBreakerServiceTests extends ElasticsearchIntegrationTest {
             fail("aggregation should have tripped the breaker");
         } catch (Exception e) {
             String errMsg = "CircuitBreakingException[[REQUEST] Data too large, data for [<reused_arrays>] would be larger than limit of [10/10b]]";
-            assertThat("Exception: " + ExceptionsHelper.unwrapCause(e) + " should contain a CircuitBreakingException",
-                    ExceptionsHelper.unwrapCause(e).getMessage().contains(errMsg), equalTo(true));
+            assertThat("Exception: " + ExceptionsHelper.unwrapCause(e) + " should contain a CircuitBreakingException", ExceptionsHelper.unwrapCause(e).getMessage().contains(errMsg), equalTo(true));
         }
     }
 
@@ -305,12 +272,9 @@ public class CircuitBreakerServiceTests extends ElasticsearchIntegrationTest {
         assertBusy(new Runnable() {
             @Override
             public void run() {
-                NodesStatsResponse resp = client().admin().cluster().prepareNodesStats()
-                        .clear().setBreaker(true).get(new TimeValue(15, TimeUnit.SECONDS));
+                NodesStatsResponse resp = client().admin().cluster().prepareNodesStats().clear().setBreaker(true).get(new TimeValue(15, TimeUnit.SECONDS));
                 for (NodeStats nStats : resp.getNodes()) {
-                    assertThat("fielddata breaker never reset back to 0",
-                            nStats.getBreaker().getStats(CircuitBreaker.Name.FIELDDATA).getEstimated(),
-                            equalTo(0L));
+                    assertThat("fielddata breaker never reset back to 0", nStats.getBreaker().getStats(CircuitBreaker.Name.FIELDDATA).getEstimated(), equalTo(0L));
                 }
             }
         }, 30, TimeUnit.SECONDS);

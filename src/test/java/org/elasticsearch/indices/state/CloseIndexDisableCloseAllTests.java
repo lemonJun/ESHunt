@@ -35,16 +35,14 @@ import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertAcke
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
-@ClusterScope(scope= Scope.TEST, numDataNodes =2)
+@ClusterScope(scope = Scope.TEST, numDataNodes = 2)
 public class CloseIndexDisableCloseAllTests extends ElasticsearchIntegrationTest {
 
     @Test
     // Combined multiple tests into one, because cluster scope is test.
     // The cluster scope is test b/c we can't clear cluster settings.
     public void testCloseAllRequiresName() {
-        Settings clusterSettings = ImmutableSettings.builder()
-                .put(DestructiveOperations.REQUIRES_NAME, true)
-                .build();
+        Settings clusterSettings = ImmutableSettings.builder().put(DestructiveOperations.REQUIRES_NAME, true).build();
         assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(clusterSettings));
         createIndex("test1", "test2", "test3");
         ClusterHealthResponse healthResponse = client().admin().cluster().prepareHealth().setWaitForGreenStatus().execute().actionGet();

@@ -87,8 +87,7 @@ public class RandomShapeGenerator {
         return createGeometryCollection(r, nearPoint, null, 0);
     }
 
-    public static GeometryCollectionBuilder createGeometryCollectionNear(Random r, Point nearPoint, int size) throws
-            InvalidShapeException {
+    public static GeometryCollectionBuilder createGeometryCollectionNear(Random r, Point nearPoint, int size) throws InvalidShapeException {
         return createGeometryCollection(r, nearPoint, null, size);
     }
 
@@ -96,13 +95,11 @@ public class RandomShapeGenerator {
         return createGeometryCollection(r, null, within, 0);
     }
 
-    public static GeometryCollectionBuilder createGeometryCollectionWithin(Random r, Rectangle within, int size) throws
-            InvalidShapeException {
+    public static GeometryCollectionBuilder createGeometryCollectionWithin(Random r, Rectangle within, int size) throws InvalidShapeException {
         return createGeometryCollection(r, null, within, size);
     }
 
-    protected static GeometryCollectionBuilder createGeometryCollection(Random r, Point nearPoint, Rectangle bounds, int numGeometries)
-            throws InvalidShapeException {
+    protected static GeometryCollectionBuilder createGeometryCollection(Random r, Point nearPoint, Rectangle bounds, int numGeometries) throws InvalidShapeException {
         if (numGeometries <= 0) {
             // cap geometry collection at 4 shapes (to save test time)
             numGeometries = RandomInts.randomIntBetween(r, 2, 5);
@@ -117,7 +114,7 @@ public class RandomShapeGenerator {
         }
 
         GeometryCollectionBuilder gcb = new GeometryCollectionBuilder();
-        for (int i=0; i<numGeometries;) {
+        for (int i = 0; i < numGeometries;) {
             ShapeBuilder builder = createShapeWithin(r, bounds);
             // due to world wrapping, and the possibility for ambiguous polygons, the random shape generation could bail with
             // a null shape. We catch that situation here, and only increment the counter when a valid shape is returned.
@@ -145,8 +142,7 @@ public class RandomShapeGenerator {
      * @param st Create a random shape of the provided type
      * @return the ShapeBuilder for a random shape
      */
-    private static ShapeBuilder createShape(Random r, Point nearPoint, Rectangle within, ShapeType st, boolean validate) throws
-            InvalidShapeException {
+    private static ShapeBuilder createShape(Random r, Point nearPoint, Rectangle within, ShapeType st, boolean validate) throws InvalidShapeException {
 
         if (st == null) {
             st = ShapeType.randomType(r);
@@ -171,21 +167,21 @@ public class RandomShapeGenerator {
                 // (n^2-n)/2 and computing the relation intersection matrix will become NP-Hard
                 int numPoints = RandomInts.randomIntBetween(r, 3, 10);
                 PointCollection pcb = (st == ShapeType.MULTIPOINT) ? new MultiPointBuilder() : new LineStringBuilder();
-                for (int i=0; i<numPoints; ++i) {
+                for (int i = 0; i < numPoints; ++i) {
                     p = xRandomPointIn(r, within);
                     pcb.point(p.getX(), p.getY());
                 }
                 return pcb;
             case MULTILINESTRING:
                 MultiLineStringBuilder mlsb = new MultiLineStringBuilder();
-                for (int i=0; i<RandomInts.randomIntBetween(r, 1, 10); ++i) {
+                for (int i = 0; i < RandomInts.randomIntBetween(r, 1, 10); ++i) {
                     mlsb.linestring((BaseLineStringBuilder) createShape(r, nearPoint, within, ShapeType.LINESTRING, false));
                 }
                 return mlsb;
             case POLYGON:
                 numPoints = RandomInts.randomIntBetween(r, 5, 25);
                 Coordinate[] coordinates = new Coordinate[numPoints];
-                for (int i=0; i<numPoints; ++i) {
+                for (int i = 0; i < numPoints; ++i) {
                     p = (Point) createShape(r, nearPoint, within, ShapeType.POINT, false).build();
                     coordinates[i] = new Coordinate(p.getX(), p.getY());
                 }
@@ -225,11 +221,11 @@ public class RandomShapeGenerator {
     }
 
     protected static Point xRandomPointIn(Random rand, Rectangle r) {
-        double x = r.getMinX() + rand.nextDouble()*r.getWidth();
-        double y = r.getMinY() + rand.nextDouble()*r.getHeight();
+        double x = r.getMinX() + rand.nextDouble() * r.getWidth();
+        double y = r.getMinY() + rand.nextDouble() * r.getHeight();
         x = xNormX(x);
         y = xNormY(y);
-        Point p = ctx.makePoint(x,y);
+        Point p = ctx.makePoint(x, y);
         RandomizedTest.assertEquals(CONTAINS, r.relate(p));
         return p;
     }
@@ -242,11 +238,7 @@ public class RandomShapeGenerator {
         Range xRange = xRandomRange(r, rarely(r) ? 0 : nearP.getX(), Range.xRange(bounds, ctx));
         Range yRange = xRandomRange(r, rarely(r) ? 0 : nearP.getY(), Range.yRange(bounds, ctx));
 
-        return xMakeNormRect(
-                xDivisible(xRange.getMin()*10e3)/10e3,
-                xDivisible(xRange.getMax()*10e3)/10e3,
-                xDivisible(yRange.getMin()*10e3)/10e3,
-                xDivisible(yRange.getMax()*10e3)/10e3);
+        return xMakeNormRect(xDivisible(xRange.getMin() * 10e3) / 10e3, xDivisible(xRange.getMax() * 10e3) / 10e3, xDivisible(yRange.getMin() * 10e3) / 10e3, xDivisible(yRange.getMax() * 10e3) / 10e3);
     }
 
     private static boolean rarely(Random r) {

@@ -130,29 +130,25 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
         Request request = new Request();
         PlainActionFuture<Response> listener = new PlainActionFuture<>();
 
-        ClusterBlocks.Builder block = ClusterBlocks.builder()
-                .addGlobalBlock(new ClusterBlock(1, "non retryable", false, true, RestStatus.SERVICE_UNAVAILABLE, ClusterBlockLevel.ALL));
+        ClusterBlocks.Builder block = ClusterBlocks.builder().addGlobalBlock(new ClusterBlock(1, "non retryable", false, true, RestStatus.SERVICE_UNAVAILABLE, ClusterBlockLevel.ALL));
         clusterService.setState(ClusterState.builder(clusterService.state()).blocks(block));
         TransportShardReplicationOperationAction<Request, Request, Response>.PrimaryPhase primaryPhase = action.new PrimaryPhase(request, listener);
         assertFalse("primary phase should stop execution", primaryPhase.checkBlocks());
         assertListenerThrows("primary phase should fail operation", listener, ClusterBlockException.class);
 
-        block = ClusterBlocks.builder()
-                .addGlobalBlock(new ClusterBlock(1, "retryable", true, true, RestStatus.SERVICE_UNAVAILABLE, ClusterBlockLevel.ALL));
+        block = ClusterBlocks.builder().addGlobalBlock(new ClusterBlock(1, "retryable", true, true, RestStatus.SERVICE_UNAVAILABLE, ClusterBlockLevel.ALL));
         clusterService.setState(ClusterState.builder(clusterService.state()).blocks(block));
         listener = new PlainActionFuture<>();
         primaryPhase = action.new PrimaryPhase(new Request().timeout("5ms"), listener);
         assertFalse("primary phase should stop execution on retryable block", primaryPhase.checkBlocks());
         assertListenerThrows("failed to timeout on retryable block", listener, ClusterBlockException.class);
 
-
         listener = new PlainActionFuture<>();
         primaryPhase = action.new PrimaryPhase(new Request(), listener);
         assertFalse("primary phase should stop execution on retryable block", primaryPhase.checkBlocks());
         assertFalse("primary phase should wait on retryable block", listener.isDone());
 
-        block = ClusterBlocks.builder()
-                .addGlobalBlock(new ClusterBlock(1, "non retryable", false, true, RestStatus.SERVICE_UNAVAILABLE, ClusterBlockLevel.ALL));
+        block = ClusterBlocks.builder().addGlobalBlock(new ClusterBlock(1, "non retryable", false, true, RestStatus.SERVICE_UNAVAILABLE, ClusterBlockLevel.ALL));
         clusterService.setState(ClusterState.builder(clusterService.state()).blocks(block));
         assertListenerThrows("primary phase should fail operation when moving from a retryable block to a non-retryable one", listener, ClusterBlockException.class);
         assertIndexShardUninitialized();
@@ -214,10 +210,7 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
         }
         discoBuilder.localNodeId(newNode(0).id());
         discoBuilder.masterNodeId(newNode(1).id()); // we need a non-local master to test shard failures
-        IndexMetaData indexMetaData = IndexMetaData.builder(index).settings(ImmutableSettings.builder()
-                .put(SETTING_VERSION_CREATED, Version.CURRENT)
-                .put(SETTING_NUMBER_OF_SHARDS, 1).put(SETTING_NUMBER_OF_REPLICAS, numberOfReplicas)
-                .put(SETTING_CREATION_DATE, System.currentTimeMillis())).build();
+        IndexMetaData indexMetaData = IndexMetaData.builder(index).settings(ImmutableSettings.builder().put(SETTING_VERSION_CREATED, Version.CURRENT).put(SETTING_NUMBER_OF_SHARDS, 1).put(SETTING_NUMBER_OF_REPLICAS, numberOfReplicas).put(SETTING_CREATION_DATE, System.currentTimeMillis())).build();
 
         RoutingTable.Builder routing = new RoutingTable.Builder();
         routing.addAsNew(indexMetaData);
@@ -254,8 +247,7 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
             } else {
                 unassignedInfo = new UnassignedInfo(UnassignedInfo.Reason.INDEX_CREATED, null);
             }
-            indexShardRoutingBuilder.addShard(
-                    new ImmutableShardRouting(index, shardId.id(), replicaNode, relocatingNode, null, false, replicaState, 0, unassignedInfo));
+            indexShardRoutingBuilder.addShard(new ImmutableShardRouting(index, shardId.id(), replicaNode, relocatingNode, null, false, replicaState, 0, unassignedInfo));
         }
 
         ClusterState.Builder state = ClusterState.builder(new ClusterName("test"));
@@ -276,8 +268,7 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
         final String index = "test";
         final ShardId shardId = new ShardId(index, 0);
         // no replicas in oder to skip the replication part
-        clusterService.setState(state(index, true,
-                randomBoolean() ? ShardRoutingState.INITIALIZING : ShardRoutingState.UNASSIGNED));
+        clusterService.setState(state(index, true, randomBoolean() ? ShardRoutingState.INITIALIZING : ShardRoutingState.UNASSIGNED));
 
         logger.debug("--> using initial state:\n{}", clusterService.state().prettyPrint());
 
@@ -373,9 +364,7 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
         }
 
         clusterService.setState(state(index, true, ShardRoutingState.STARTED, replicaStates));
-        logger.debug("using consistency level of [{}], assigned shards [{}], total shards [{}]. expecting op to [{}]. using state: \n{}",
-                request.consistencyLevel(), 1 + assignedReplicas, 1 + assignedReplicas + unassignedReplicas, passesWriteConsistency ? "succeed" : "retry",
-                clusterService.state().prettyPrint());
+        logger.debug("using consistency level of [{}], assigned shards [{}], total shards [{}]. expecting op to [{}]. using state: \n{}", request.consistencyLevel(), 1 + assignedReplicas, 1 + assignedReplicas + unassignedReplicas, passesWriteConsistency ? "succeed" : "retry", clusterService.state().prettyPrint());
 
         final IndexShardRoutingTable shardRoutingTable = clusterService.state().routingTable().index(index).shard(shardId.id());
         PlainActionFuture<Response> listener = new PlainActionFuture<>();
@@ -453,7 +442,6 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
         runReplicateTest(shardRoutingTable, assignedReplicas, totalShards);
     }
 
-
     protected void runReplicateTest(IndexShardRoutingTable shardRoutingTable, int assignedReplicas, int totalShards) throws InterruptedException, ExecutionException {
         final ShardRouting primaryShard = shardRoutingTable.primaryShard();
         final ShardIterator shardIt = shardRoutingTable.shardsIt();
@@ -467,10 +455,7 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
         internalRequest.concreteIndex(shardId.index().name());
         Releasable reference = getOrCreateIndexShardOperationsCounter();
         assertIndexShardCounter(2);
-        TransportShardReplicationOperationAction<Request, Request, Response>.ReplicationPhase replicationPhase =
-                action.new ReplicationPhase(shardIt, request,
-                        new Response(), new ClusterStateObserver(clusterService, logger),
-                        primaryShard, internalRequest, listener, reference);
+        TransportShardReplicationOperationAction<Request, Request, Response>.ReplicationPhase replicationPhase = action.new ReplicationPhase(shardIt, request, new Response(), new ClusterStateObserver(clusterService, logger), primaryShard, internalRequest, listener, reference);
 
         assertThat(replicationPhase.totalShards(), equalTo(totalShards));
         assertThat(replicationPhase.pending(), equalTo(assignedReplicas));
@@ -481,8 +466,7 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
 
         for (CapturingTransport.CapturedRequest capturedRequest : capturedRequests) {
             // no duplicate requests
-            TransportShardReplicationOperationAction.ReplicaOperationRequest replicationRequest =
-                    (TransportShardReplicationOperationAction.ReplicaOperationRequest)capturedRequest.request;
+            TransportShardReplicationOperationAction.ReplicaOperationRequest replicationRequest = (TransportShardReplicationOperationAction.ReplicaOperationRequest) capturedRequest.request;
             assertNull(nodesSentTo.put(capturedRequest.node.getId(), replicationRequest));
             // the request is hitting the correct shard
             assertEquals(shardId, replicationRequest.shardId);
@@ -546,7 +530,7 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
                     // get the shard the request was sent to
                     ShardRouting routing = clusterService.state().getRoutingNodes().node(capturedRequest.node.id()).get(request.shardId);
                     // and the shard that was requested to be failed
-                    ShardStateAction.ShardRoutingEntry shardRoutingEntry = (ShardStateAction.ShardRoutingEntry)shardFailedRequest.request;
+                    ShardStateAction.ShardRoutingEntry shardRoutingEntry = (ShardStateAction.ShardRoutingEntry) shardFailedRequest.request;
                     // the shard the request was sent to and the shard to be failed should be the same
                     assertEquals(shardRoutingEntry.getShardRouting(), routing);
                     failures.add(shardFailedRequest);
@@ -577,8 +561,7 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
         final String index = "test";
         final ShardId shardId = new ShardId(index, 0);
         // no replica, we only want to test on primary
-        clusterService.setState(state(index, true,
-                ShardRoutingState.STARTED));
+        clusterService.setState(state(index, true, ShardRoutingState.STARTED));
         logger.debug("--> using initial state:\n{}", clusterService.state().prettyPrint());
         Request request = new Request(shardId).timeout("100ms");
         PlainActionFuture<Response> listener = new PlainActionFuture<>();
@@ -603,7 +586,7 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
         awaitBusy(new Predicate<Object>() {
             @Override
             public boolean apply(@Nullable Object input) {
-                    return (count.get() == 2);
+                return (count.get() == 2);
             }
         });
 
@@ -622,8 +605,7 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
         final String index = "test";
         final ShardId shardId = new ShardId(index, 0);
         // one replica to make sure replication is attempted
-        clusterService.setState(state(index, true,
-                ShardRoutingState.STARTED, ShardRoutingState.STARTED));
+        clusterService.setState(state(index, true, ShardRoutingState.STARTED, ShardRoutingState.STARTED));
         logger.debug("--> using initial state:\n{}", clusterService.state().prettyPrint());
         Request request = new Request(shardId).timeout("100ms");
         PlainActionFuture<Response> listener = new PlainActionFuture<>();
@@ -648,8 +630,7 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
     @Test
     public void testReplicasCounter() throws Exception {
         final ShardId shardId = new ShardId("test", 0);
-        clusterService.setState(state(shardId.index().getName(), true,
-                ShardRoutingState.STARTED, ShardRoutingState.STARTED));
+        clusterService.setState(state(shardId.index().getName(), true, ShardRoutingState.STARTED, ShardRoutingState.STARTED));
         action = new ActionWithDelay(ImmutableSettings.EMPTY, "testActionWithExceptions", transportService, clusterService, threadPool);
         final Action.ReplicaOperationTransportHandler replicaOperationTransportHandler = action.new ReplicaOperationTransportHandler();
         Thread t = new Thread() {
@@ -689,8 +670,7 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
         action = new ActionWithExceptions(ImmutableSettings.EMPTY, "testActionWithExceptions", transportService, clusterService, threadPool);
         final String index = "test";
         final ShardId shardId = new ShardId(index, 0);
-        clusterService.setState(state(index, true,
-                ShardRoutingState.STARTED, ShardRoutingState.STARTED));
+        clusterService.setState(state(index, true, ShardRoutingState.STARTED, ShardRoutingState.STARTED));
         logger.debug("--> using initial state:\n{}", clusterService.state().prettyPrint());
         Request request = new Request(shardId).timeout("100ms");
         PlainActionFuture<Response> listener = new PlainActionFuture<>();
@@ -748,22 +728,15 @@ public class ShardReplicationOperationTests extends ElasticsearchTestCase {
         }
     }
 
-
     static class Response extends ActionResponse {
     }
-
-
 
     class Action extends TransportShardReplicationOperationAction<Request, Request, Response> {
 
         boolean continueOnResolveRequest = true;
 
-        Action(Settings settings, String actionName, TransportService transportService,
-               ClusterService clusterService,
-               ThreadPool threadPool) {
-            super(settings, actionName, transportService, clusterService, null, threadPool,
-                    new ShardStateAction(settings, clusterService, transportService, null, null),
-                    new ActionFilters(new HashSet<ActionFilter>()));
+        Action(Settings settings, String actionName, TransportService transportService, ClusterService clusterService, ThreadPool threadPool) {
+            super(settings, actionName, transportService, clusterService, null, threadPool, new ShardStateAction(settings, clusterService, transportService, null, null), new ActionFilters(new HashSet<ActionFilter>()));
         }
 
         @Override

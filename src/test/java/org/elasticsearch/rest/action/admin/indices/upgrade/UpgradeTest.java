@@ -49,13 +49,12 @@ import java.util.List;
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertAcked;
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertNoFailures;
 
-@ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.TEST)   // test scope since we set cluster wide settings
+@ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.TEST) // test scope since we set cluster wide settings
 public class UpgradeTest extends ElasticsearchBackwardsCompatIntegrationTest {
 
     @BeforeClass
     public static void checkUpgradeVersion() {
-        final boolean luceneVersionMatches = (globalCompatibilityVersion().luceneVersion.major == Version.CURRENT.luceneVersion.major
-                && globalCompatibilityVersion().luceneVersion.minor == Version.CURRENT.luceneVersion.minor);
+        final boolean luceneVersionMatches = (globalCompatibilityVersion().luceneVersion.major == Version.CURRENT.luceneVersion.major && globalCompatibilityVersion().luceneVersion.minor == Version.CURRENT.luceneVersion.minor);
         assumeFalse("lucene versions must be different to run upgrade test", luceneVersionMatches);
     }
 
@@ -79,14 +78,11 @@ public class UpgradeTest extends ElasticsearchBackwardsCompatIntegrationTest {
         for (int i = 0; i < numIndexes; ++i) {
             final String indexName = "test" + i;
             indexNames[i] = indexName;
-            
-            Settings settings = ImmutableSettings.builder()
-                .put("index.routing.allocation.exclude._name", backwardsCluster().newNodePattern())
-                // don't allow any merges so that we can check segments are upgraded
-                // by the upgrader, and not just regular merging
-                .put("index.merge.policy.segments_per_tier", 1000000f)
-                .put(indexSettings())
-                .build();
+
+            Settings settings = ImmutableSettings.builder().put("index.routing.allocation.exclude._name", backwardsCluster().newNodePattern())
+                            // don't allow any merges so that we can check segments are upgraded
+                            // by the upgrader, and not just regular merging
+                            .put("index.merge.policy.segments_per_tier", 1000000f).put(indexSettings()).build();
 
             assertAcked(prepareCreate(indexName).setSettings(settings));
             ensureGreen(indexName);
@@ -112,7 +108,7 @@ public class UpgradeTest extends ElasticsearchBackwardsCompatIntegrationTest {
             } else {
                 assertEquals(0, flush(indexName).getFailedShards());
             }
-            
+
             // index more docs that won't be flushed
             numDocs = scaledRandomIntBetween(100, 1000);
             docs = new ArrayList<>();
@@ -142,14 +138,14 @@ public class UpgradeTest extends ElasticsearchBackwardsCompatIntegrationTest {
         ensureGreen();
         logger.info("--> Nodes upgrade complete");
         logSegmentsState();
-        
+
         assertNotUpgraded(client());
         final String indexToUpgrade = "test" + randomInt(numIndexes - 1);
 
         // This test fires up another node running an older version of ES, but because wire protocol changes across major ES versions, it
         // means we can never generate ancient segments in this test (unless Lucene major version bumps but ES major version does not):
         assertFalse(hasAncientSegments(client(), indexToUpgrade));
-        
+
         logger.info("--> Running upgrade on index " + indexToUpgrade);
         assertNoFailures(client().admin().indices().prepareUpgrade(indexToUpgrade).get());
         awaitBusy(new Predicate<Object>() {
@@ -176,8 +172,7 @@ public class UpgradeTest extends ElasticsearchBackwardsCompatIntegrationTest {
             assertTrue("index " + status.getIndex() + " should not be zero sized", status.getTotalBytes() != 0);
             // TODO: it would be better for this to be strictly greater, but sometimes an extra flush
             // mysteriously happens after the second round of docs are indexed
-            assertTrue("index " + status.getIndex() + " should have recovered some segments from transaction log",
-                       status.getTotalBytes() >= status.getToUpgradeBytes());
+            assertTrue("index " + status.getIndex() + " should have recovered some segments from transaction log", status.getTotalBytes() >= status.getToUpgradeBytes());
             assertTrue("index " + status.getIndex() + " should need upgrading", status.getToUpgradeBytes() != 0);
         }
     }
@@ -187,10 +182,8 @@ public class UpgradeTest extends ElasticsearchBackwardsCompatIntegrationTest {
             assertTrue("index " + status.getIndex() + " should not be zero sized", status.getTotalBytes() != 0);
             // TODO: it would be better for this to be strictly greater, but sometimes an extra flush
             // mysteriously happens after the second round of docs are indexed
-            assertTrue("index " + status.getIndex() + " should not have any ancient segments",
-                       status.getToUpgradeBytesAncient() == 0);
-            assertTrue("index " + status.getIndex() + " should have recovered some segments from transaction log",
-                       status.getTotalBytes() >= status.getToUpgradeBytes());
+            assertTrue("index " + status.getIndex() + " should not have any ancient segments", status.getToUpgradeBytesAncient() == 0);
+            assertTrue("index " + status.getIndex() + " should have recovered some segments from transaction log", status.getTotalBytes() >= status.getToUpgradeBytes());
             assertTrue("index " + status.getIndex() + " should need upgrading", status.getToUpgradeBytes() != 0);
         }
     }
@@ -218,10 +211,9 @@ public class UpgradeTest extends ElasticsearchBackwardsCompatIntegrationTest {
     public static void assertUpgraded(Client client, String... index) throws Exception {
         for (IndexUpgradeStatus status : getUpgradeStatus(client, index)) {
             assertTrue("index " + status.getIndex() + " should not be zero sized", status.getTotalBytes() != 0);
-            assertEquals("index " + status.getIndex() + " should be upgraded",
-                0, status.getToUpgradeBytes());
+            assertEquals("index " + status.getIndex() + " should be upgraded", 0, status.getToUpgradeBytes());
         }
-        
+
         // double check using the segments api that all segments are actually upgraded
         IndicesSegmentResponse segsRsp;
         if (index == null) {
@@ -233,10 +225,8 @@ public class UpgradeTest extends ElasticsearchBackwardsCompatIntegrationTest {
             for (IndexShardSegments shard : indexSegments) {
                 for (ShardSegments segs : shard.getShards()) {
                     for (Segment seg : segs.getSegments()) {
-                        assertEquals("Index " + indexSegments.getIndex() + " has unupgraded segment " + seg.toString(),
-                                     Version.CURRENT.luceneVersion.major, seg.version.major);
-                        assertEquals("Index " + indexSegments.getIndex() + " has unupgraded segment " + seg.toString(),
-                                     Version.CURRENT.luceneVersion.minor, seg.version.minor);
+                        assertEquals("Index " + indexSegments.getIndex() + " has unupgraded segment " + seg.toString(), Version.CURRENT.luceneVersion.major, seg.version.major);
+                        assertEquals("Index " + indexSegments.getIndex() + " has unupgraded segment " + seg.toString(), Version.CURRENT.luceneVersion.minor, seg.version.minor);
                     }
                 }
             }

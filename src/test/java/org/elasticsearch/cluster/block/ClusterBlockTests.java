@@ -47,8 +47,7 @@ public class ClusterBlockTests extends ElasticsearchTestCase {
                 levels.add(randomFrom(ClusterBlockLevel.values()));
             }
 
-            ClusterBlock clusterBlock = new ClusterBlock(randomInt(), "cluster block #" + randomInt(), randomBoolean(),
-                    randomBoolean(), randomFrom(RestStatus.values()), levels);
+            ClusterBlock clusterBlock = new ClusterBlock(randomInt(), "cluster block #" + randomInt(), randomBoolean(), randomBoolean(), randomFrom(RestStatus.values()), levels);
 
             BytesStreamOutput out = new BytesStreamOutput();
             out.setVersion(version);

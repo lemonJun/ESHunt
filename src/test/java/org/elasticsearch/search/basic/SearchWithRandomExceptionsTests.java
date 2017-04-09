@@ -57,24 +57,13 @@ public class SearchWithRandomExceptionsTests extends ElasticsearchIntegrationTes
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal))
-                .put("gateway.type", "local").build();
+        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal)).put("gateway.type", "local").build();
     }
 
     @Test
     @TestLogging("action.search.type:TRACE,index.shard:TRACE")
     public void testRandomDirectoryIOExceptions() throws IOException, InterruptedException, ExecutionException {
-        String mapping = XContentFactory.jsonBuilder().
-                startObject().
-                startObject("type").
-                startObject("properties").
-                startObject("test")
-                .field("type", "string")
-                .field("index", "not_analyzed")
-                .endObject().
-                        endObject().
-                        endObject()
-                .endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("test").field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject().endObject().string();
         final double exceptionRate;
         final double exceptionOnOpenRate;
         if (frequently()) {
@@ -99,12 +88,9 @@ public class SearchWithRandomExceptionsTests extends ElasticsearchIntegrationTes
         int numInitialDocs = 0;
 
         if (createIndexWithoutErrors) {
-            Builder settings = settingsBuilder()
-                    .put("index.number_of_replicas", randomIntBetween(0, 1));
+            Builder settings = settingsBuilder().put("index.number_of_replicas", randomIntBetween(0, 1));
             logger.info("creating index: [test] using settings: [{}]", settings.build().getAsMap());
-            client().admin().indices().prepareCreate("test")
-                    .setSettings(settings)
-                    .addMapping("type", mapping).execute().actionGet();
+            client().admin().indices().prepareCreate("test").setSettings(settings).addMapping("type", mapping).execute().actionGet();
             numInitialDocs = between(10, 100);
             ensureGreen();
             for (int i = 0; i < numInitialDocs; i++) {
@@ -113,23 +99,14 @@ public class SearchWithRandomExceptionsTests extends ElasticsearchIntegrationTes
             client().admin().indices().prepareRefresh("test").execute().get();
             client().admin().indices().prepareFlush("test").setWaitIfOngoing(true).execute().get();
             client().admin().indices().prepareClose("test").execute().get();
-            client().admin().indices().prepareUpdateSettings("test").setSettings(settingsBuilder()
-                    .put(MockDirectoryHelper.RANDOM_IO_EXCEPTION_RATE, exceptionRate)
-                    .put(MockDirectoryHelper.RANDOM_IO_EXCEPTION_RATE_ON_OPEN, exceptionOnOpenRate));
+            client().admin().indices().prepareUpdateSettings("test").setSettings(settingsBuilder().put(MockDirectoryHelper.RANDOM_IO_EXCEPTION_RATE, exceptionRate).put(MockDirectoryHelper.RANDOM_IO_EXCEPTION_RATE_ON_OPEN, exceptionOnOpenRate));
             client().admin().indices().prepareOpen("test").execute().get();
         } else {
-            Builder settings = settingsBuilder()
-                    .put("index.number_of_replicas", randomIntBetween(0, 1))
-                    .put(MockFSDirectoryService.CHECK_INDEX_ON_CLOSE, false)
-                    .put(MockDirectoryHelper.RANDOM_IO_EXCEPTION_RATE, exceptionRate)
-                    .put(MockDirectoryHelper.RANDOM_IO_EXCEPTION_RATE_ON_OPEN, exceptionOnOpenRate); // we cannot expect that the index will be valid
+            Builder settings = settingsBuilder().put("index.number_of_replicas", randomIntBetween(0, 1)).put(MockFSDirectoryService.CHECK_INDEX_ON_CLOSE, false).put(MockDirectoryHelper.RANDOM_IO_EXCEPTION_RATE, exceptionRate).put(MockDirectoryHelper.RANDOM_IO_EXCEPTION_RATE_ON_OPEN, exceptionOnOpenRate); // we cannot expect that the index will be valid
             logger.info("creating index: [test] using settings: [{}]", settings.build().getAsMap());
-            client().admin().indices().prepareCreate("test")
-                    .setSettings(settings)
-                    .addMapping("type", mapping).execute().actionGet();
+            client().admin().indices().prepareCreate("test").setSettings(settings).addMapping("type", mapping).execute().actionGet();
         }
-        ClusterHealthResponse clusterHealthResponse = client().admin().cluster()
-                .health(Requests.clusterHealthRequest().waitForYellowStatus().timeout(TimeValue.timeValueSeconds(5))).get(); // it's OK to timeout here 
+        ClusterHealthResponse clusterHealthResponse = client().admin().cluster().health(Requests.clusterHealthRequest().waitForYellowStatus().timeout(TimeValue.timeValueSeconds(5))).get(); // it's OK to timeout here 
         final int numDocs;
         final boolean expectAllShardsFailed;
         if (clusterHealthResponse.isTimedOut()) {
@@ -170,15 +147,13 @@ public class SearchWithRandomExceptionsTests extends ElasticsearchIntegrationTes
                 int docToQuery = between(0, numDocs - 1);
                 int expectedResults = added[docToQuery] ? 1 : 0;
                 logger.info("Searching for [test:{}]", English.intToEnglish(docToQuery));
-                SearchResponse searchResponse = client().prepareSearch().setTypes("type").setQuery(QueryBuilders.matchQuery("test", English.intToEnglish(docToQuery)))
-                        .setSize(expectedResults).get();
+                SearchResponse searchResponse = client().prepareSearch().setTypes("type").setQuery(QueryBuilders.matchQuery("test", English.intToEnglish(docToQuery))).setSize(expectedResults).get();
                 logger.info("Successful shards: [{}]  numShards: [{}]", searchResponse.getSuccessfulShards(), numShards.numPrimaries);
                 if (searchResponse.getSuccessfulShards() == numShards.numPrimaries && !refreshFailed) {
                     assertResultsAndLogOnFailure(expectedResults, searchResponse);
                 }
                 // check match all
-                searchResponse = client().prepareSearch().setTypes("type").setQuery(QueryBuilders.matchAllQuery())
-                        .setSize(numCreated + numInitialDocs).addSort("_uid", SortOrder.ASC).get();
+                searchResponse = client().prepareSearch().setTypes("type").setQuery(QueryBuilders.matchAllQuery()).setSize(numCreated + numInitialDocs).addSort("_uid", SortOrder.ASC).get();
                 logger.info("Match all Successful shards: [{}]  numShards: [{}]", searchResponse.getSuccessfulShards(), numShards.numPrimaries);
                 if (searchResponse.getSuccessfulShards() == numShards.numPrimaries && !refreshFailed) {
                     assertResultsAndLogOnFailure(numCreated + numInitialDocs, searchResponse);
@@ -195,9 +170,7 @@ public class SearchWithRandomExceptionsTests extends ElasticsearchIntegrationTes
         if (createIndexWithoutErrors) {
             // check the index still contains the records that we indexed without errors
             client().admin().indices().prepareClose("test").execute().get();
-            client().admin().indices().prepareUpdateSettings("test").setSettings(settingsBuilder()
-                    .put(MockDirectoryHelper.RANDOM_IO_EXCEPTION_RATE, 0)
-                    .put(MockDirectoryHelper.RANDOM_IO_EXCEPTION_RATE_ON_OPEN, 0));
+            client().admin().indices().prepareUpdateSettings("test").setSettings(settingsBuilder().put(MockDirectoryHelper.RANDOM_IO_EXCEPTION_RATE, 0).put(MockDirectoryHelper.RANDOM_IO_EXCEPTION_RATE_ON_OPEN, 0));
             client().admin().indices().prepareOpen("test").execute().get();
             ensureGreen();
             SearchResponse searchResponse = client().prepareSearch().setTypes("type").setQuery(QueryBuilders.matchQuery("test", "init")).get();
@@ -212,8 +185,7 @@ public class SearchWithRandomExceptionsTests extends ElasticsearchIntegrationTes
             sb.append(searchResponse.getHits().getTotalHits()).append("] results. expected [").append(expectedResults).append("]");
             String failMsg = sb.toString();
             for (SearchHit hit : searchResponse.getHits().getHits()) {
-                sb.append("\n-> _index: [").append(hit.getIndex()).append("] type [").append(hit.getType())
-                        .append("] id [").append(hit.id()).append("]");
+                sb.append("\n-> _index: [").append(hit.getIndex()).append("] type [").append(hit.getType()).append("] id [").append(hit.id()).append("]");
             }
             logger.warn(sb.toString());
             fail(failMsg);
@@ -222,17 +194,7 @@ public class SearchWithRandomExceptionsTests extends ElasticsearchIntegrationTes
 
     @Test
     public void testRandomExceptions() throws IOException, InterruptedException, ExecutionException {
-        String mapping = XContentFactory.jsonBuilder().
-                startObject().
-                startObject("type").
-                startObject("properties").
-                startObject("test")
-                .field("type", "string")
-                .field("index", "not_analyzed")
-                .endObject().
-                        endObject().
-                        endObject()
-                .endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("test").field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject().endObject().string();
         final double lowLevelRate;
         final double topLevelRate;
         if (frequently()) {
@@ -254,16 +216,9 @@ public class SearchWithRandomExceptionsTests extends ElasticsearchIntegrationTes
             lowLevelRate = 0d;
         }
 
-        Builder settings = settingsBuilder()
-                .put(indexSettings())
-                .put(MockEngineSupport.READER_WRAPPER_TYPE, RandomExceptionDirectoryReaderWrapper.class.getName())
-                .put(EXCEPTION_TOP_LEVEL_RATIO_KEY, topLevelRate)
-                .put(EXCEPTION_LOW_LEVEL_RATIO_KEY, lowLevelRate)
-                .put(MockEngineSupport.WRAP_READER_RATIO, 1.0d);
+        Builder settings = settingsBuilder().put(indexSettings()).put(MockEngineSupport.READER_WRAPPER_TYPE, RandomExceptionDirectoryReaderWrapper.class.getName()).put(EXCEPTION_TOP_LEVEL_RATIO_KEY, topLevelRate).put(EXCEPTION_LOW_LEVEL_RATIO_KEY, lowLevelRate).put(MockEngineSupport.WRAP_READER_RATIO, 1.0d);
         logger.info("creating index: [test] using settings: [{}]", settings.build().getAsMap());
-        assertAcked(prepareCreate("test")
-                .setSettings(settings)
-                .addMapping("type", mapping));
+        assertAcked(prepareCreate("test").setSettings(settings).addMapping("type", mapping));
         ensureSearchable();
         final int numDocs = between(10, 100);
         int numCreated = 0;
@@ -291,8 +246,7 @@ public class SearchWithRandomExceptionsTests extends ElasticsearchIntegrationTes
                 int docToQuery = between(0, numDocs - 1);
                 int expectedResults = added[docToQuery] ? 1 : 0;
                 logger.info("Searching for [test:{}]", English.intToEnglish(docToQuery));
-                SearchResponse searchResponse = client().prepareSearch().setQuery(QueryBuilders.matchQuery("test", English.intToEnglish(docToQuery)))
-                        .setSize(expectedResults).get();
+                SearchResponse searchResponse = client().prepareSearch().setQuery(QueryBuilders.matchQuery("test", English.intToEnglish(docToQuery))).setSize(expectedResults).get();
                 logger.info("Successful shards: [{}]  numShards: [{}]", searchResponse.getSuccessfulShards(), test.numPrimaries);
                 if (searchResponse.getSuccessfulShards() == test.numPrimaries && !refreshFailed) {
                     assertResultsAndLogOnFailure(expectedResults, searchResponse);
@@ -310,10 +264,8 @@ public class SearchWithRandomExceptionsTests extends ElasticsearchIntegrationTes
         }
     }
 
-
     public static final String EXCEPTION_TOP_LEVEL_RATIO_KEY = "index.engine.exception.ratio.top";
     public static final String EXCEPTION_LOW_LEVEL_RATIO_KEY = "index.engine.exception.ratio.low";
-
 
     public static class RandomExceptionDirectoryReaderWrapper extends MockEngineSupport.DirectoryReaderWrapper {
         private final Settings settings;

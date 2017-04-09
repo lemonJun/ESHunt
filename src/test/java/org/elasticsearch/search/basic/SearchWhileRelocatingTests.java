@@ -45,11 +45,11 @@ import static org.hamcrest.Matchers.is;
 
 public class SearchWhileRelocatingTests extends ElasticsearchIntegrationTest {
 
-// @LuceneTestCase.AwaitsFix(bugUrl = "problem with search searching on 1 shard (no replica), " +
-//   "and between getting the cluster state to do the search, and executing it, " +
-//   "the shard has fully relocated (moved from started on one node, to fully started on another node")
-//   ^^ the current impl of the test handles this case gracefully since it can happen with 1 replica as well
-//   we just make sure if we get a partial result without a failure that the postsearch is ok!
+    // @LuceneTestCase.AwaitsFix(bugUrl = "problem with search searching on 1 shard (no replica), " +
+    //   "and between getting the cluster state to do the search, and executing it, " +
+    //   "the shard has fully relocated (moved from started on one node, to fully started on another node")
+    //   ^^ the current impl of the test handles this case gracefully since it can happen with 1 replica as well
+    //   we just make sure if we get a partial result without a failure that the postsearch is ok!
     @Test
     @Nightly
     public void testSearchAndRelocateConcurrently0Replicas() throws Exception {
@@ -69,17 +69,12 @@ public class SearchWhileRelocatingTests extends ElasticsearchIntegrationTest {
 
     private void testSearchAndRelocateConcurrently(final int numberOfReplicas) throws Exception {
         final int numShards = between(1, 20);
-        client().admin().indices().prepareCreate("test")
-                .setSettings(settingsBuilder().put("index.number_of_shards", numShards).put("index.number_of_replicas", numberOfReplicas))
-                .addMapping("type1", "loc", "type=geo_point", "test", "type=string").execute().actionGet();
+        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_shards", numShards).put("index.number_of_replicas", numberOfReplicas)).addMapping("type1", "loc", "type=geo_point", "test", "type=string").execute().actionGet();
         ensureGreen();
         List<IndexRequestBuilder> indexBuilders = new ArrayList<>();
         final int numDocs = between(10, 20);
         for (int i = 0; i < numDocs; i++) {
-            indexBuilders.add(client().prepareIndex("test", "type", Integer.toString(i))
-                    .setSource(
-                            jsonBuilder().startObject().field("test", "value").startObject("loc").field("lat", 11).field("lon", 21)
-                                    .endObject().endObject()));
+            indexBuilders.add(client().prepareIndex("test", "type", Integer.toString(i)).setSource(jsonBuilder().startObject().field("test", "value").startObject("loc").field("lat", 11).field("lon", 21).endObject().endObject()));
         }
         indexRandom(true, indexBuilders.toArray(new IndexRequestBuilder[indexBuilders.size()]));
         assertHitCount(client().prepareSearch().get(), (long) (numDocs));
@@ -105,8 +100,7 @@ public class SearchWhileRelocatingTests extends ElasticsearchIntegrationTest {
                                 assertHitCount(sr, (long) (numDocs));
                                 criticalException = true;
                                 final SearchHits sh = sr.getHits();
-                                assertThat("Expected hits to be the same size the actual hits array", sh.getTotalHits(),
-                                        equalTo((long) (sh.getHits().length)));
+                                assertThat("Expected hits to be the same size the actual hits array", sh.getTotalHits(), equalTo((long) (sh.getHits().length)));
                                 // this is the more critical but that we hit the actual hit array has a different size than the
                                 // actual number of hits.
                             }

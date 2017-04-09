@@ -45,27 +45,18 @@ public class EnableAllocationTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void testClusterEnableNone() {
-        AllocationService strategy = createAllocationService(settingsBuilder()
-                .put(CLUSTER_ROUTING_ALLOCATION_ENABLE, Allocation.NONE.name())
-                .build());
+        AllocationService strategy = createAllocationService(settingsBuilder().put(CLUSTER_ROUTING_ALLOCATION_ENABLE, Allocation.NONE.name()).build());
 
         logger.info("Building initial routing table");
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
         logger.info("--> adding two nodes and do rerouting");
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(newNode("node1"))
-                .put(newNode("node2"))
-        ).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2"))).build();
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
         assertThat(clusterState.routingNodes().shardsWithState(INITIALIZING).size(), equalTo(0));
@@ -74,27 +65,18 @@ public class EnableAllocationTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void testClusterEnableOnlyPrimaries() {
-        AllocationService strategy = createAllocationService(settingsBuilder()
-                .put(CLUSTER_ROUTING_ALLOCATION_ENABLE, Allocation.PRIMARIES.name())
-                .build());
+        AllocationService strategy = createAllocationService(settingsBuilder().put(CLUSTER_ROUTING_ALLOCATION_ENABLE, Allocation.PRIMARIES.name()).build());
 
         logger.info("Building initial routing table");
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
         logger.info("--> adding two nodes do rerouting");
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(newNode("node1"))
-                .put(newNode("node2"))
-        ).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2"))).build();
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
         assertThat(clusterState.routingNodes().shardsWithState(INITIALIZING).size(), equalTo(1));
@@ -108,28 +90,16 @@ public class EnableAllocationTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void testIndexEnableNone() {
-        AllocationService strategy = createAllocationService(settingsBuilder()
-                .build());
+        AllocationService strategy = createAllocationService(settingsBuilder().build());
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("disabled").settings(ImmutableSettings.builder()
-                        .put(INDEX_ROUTING_ALLOCATION_ENABLE, Allocation.NONE.name()))
-                        .numberOfShards(1).numberOfReplicas(1))
-                .put(IndexMetaData.builder("enabled").numberOfShards(1).numberOfReplicas(1))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("disabled").settings(ImmutableSettings.builder().put(INDEX_ROUTING_ALLOCATION_ENABLE, Allocation.NONE.name())).numberOfShards(1).numberOfReplicas(1)).put(IndexMetaData.builder("enabled").numberOfShards(1).numberOfReplicas(1)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("disabled"))
-                .addAsNew(metaData.index("enabled"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("disabled")).addAsNew(metaData.index("enabled")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
         logger.info("--> adding two nodes and do rerouting");
-        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder()
-                .put(newNode("node1"))
-                .put(newNode("node2"))
-        ).build();
+        clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2"))).build();
         routingTable = strategy.reroute(clusterState).routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
         assertThat(clusterState.routingNodes().shardsWithState(INITIALIZING).size(), equalTo(1));

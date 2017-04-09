@@ -41,9 +41,7 @@ public class AssertingSearcher extends Engine.Searcher {
     private final ESLogger logger;
     private final Map<AssertingSearcher, RuntimeException> inFlightSearchers;
 
-    public AssertingSearcher(IndexSearcher indexSearcher, Engine.Searcher wrappedSearcher,
-                             ShardId shardId, Map<AssertingSearcher, RuntimeException> inFlightSearchers,
-                             ESLogger logger) {
+    public AssertingSearcher(IndexSearcher indexSearcher, Engine.Searcher wrappedSearcher, ShardId shardId, Map<AssertingSearcher, RuntimeException> inFlightSearchers, ESLogger logger) {
         super(wrappedSearcher.source(), indexSearcher);
         // we only use the given index searcher here instead of the IS of the wrapped searcher. the IS might be a wrapped searcher
         // with a wrapped reader.

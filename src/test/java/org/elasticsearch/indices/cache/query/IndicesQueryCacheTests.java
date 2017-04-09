@@ -37,27 +37,21 @@ public class IndicesQueryCacheTests extends ElasticsearchIntegrationTest {
 
     // One of the primary purposes of the query cache is to cache aggs results
     public void testCacheAggs() throws Exception {
-        assertAcked(client().admin().indices().prepareCreate("index")
-                .addMapping("type", "f", "type=date")
-                .setSettings(IndicesQueryCache.INDEX_CACHE_QUERY_ENABLED, true).get());
-        indexRandom(true,
-                client().prepareIndex("index", "type").setSource("f", "2014-03-10T00:00:00.000Z"),
-                client().prepareIndex("index", "type").setSource("f", "2014-05-13T00:00:00.000Z"));
+        assertAcked(client().admin().indices().prepareCreate("index").addMapping("type", "f", "type=date").setSettings(IndicesQueryCache.INDEX_CACHE_QUERY_ENABLED, true).get());
+        indexRandom(true, client().prepareIndex("index", "type").setSource("f", "2014-03-10T00:00:00.000Z"), client().prepareIndex("index", "type").setSource("f", "2014-05-13T00:00:00.000Z"));
         ensureSearchable("index");
 
         // This is not a random example: serialization with time zones writes shared strings
         // which used to not work well with the query cache because of the handles stream output
         // see #9500
-        final SearchResponse r1 = client().prepareSearch("index").setSearchType(SearchType.COUNT)
-            .addAggregation(dateHistogram("histo").field("f").preZone("+01:00").minDocCount(0).interval(DateHistogram.Interval.MONTH)).get();
+        final SearchResponse r1 = client().prepareSearch("index").setSearchType(SearchType.COUNT).addAggregation(dateHistogram("histo").field("f").preZone("+01:00").minDocCount(0).interval(DateHistogram.Interval.MONTH)).get();
         assertSearchResponse(r1);
 
         // The cached is actually used
         assertThat(client().admin().indices().prepareStats("index").setQueryCache(true).get().getTotal().getQueryCache().getMemorySizeInBytes(), greaterThan(0l));
 
         for (int i = 0; i < 10; ++i) {
-            final SearchResponse r2 = client().prepareSearch("index").setSearchType(SearchType.COUNT)
-                    .addAggregation(dateHistogram("histo").field("f").preZone("+01:00").minDocCount(0).interval(DateHistogram.Interval.MONTH)).get();
+            final SearchResponse r2 = client().prepareSearch("index").setSearchType(SearchType.COUNT).addAggregation(dateHistogram("histo").field("f").preZone("+01:00").minDocCount(0).interval(DateHistogram.Interval.MONTH)).get();
             assertSearchResponse(r2);
             Histogram h1 = r1.getAggregations().get("histo");
             Histogram h2 = r2.getAggregations().get("histo");

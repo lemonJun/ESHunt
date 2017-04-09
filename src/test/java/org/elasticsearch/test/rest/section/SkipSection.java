@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class SkipSection {
 
-    public static final SkipSection EMPTY = new SkipSection("", Lists.<String>newArrayList(), "");
+    public static final SkipSection EMPTY = new SkipSection("", Lists.<String> newArrayList(), "");
 
     private final String version;
     private final List<String> features;

@@ -31,16 +31,9 @@ public class IndexShardModuleTests extends ElasticsearchTestCase {
     @Test
     public void testDetermineShadowEngineShouldBeUsed() {
         ShardId shardId = new ShardId("myindex", 0);
-        Settings regularSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 2)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                .build();
+        Settings regularSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 2).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1).build();
 
-        Settings shadowSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 2)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                .put(IndexMetaData.SETTING_SHADOW_REPLICAS, true)
-                .build();
+        Settings shadowSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 2).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1).put(IndexMetaData.SETTING_SHADOW_REPLICAS, true).build();
 
         IndexShardModule ism1 = new IndexShardModule(shardId, true, regularSettings);
         IndexShardModule ism2 = new IndexShardModule(shardId, false, regularSettings);

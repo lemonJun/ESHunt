@@ -326,111 +326,41 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
 
         // TODO move settings for random directory etc here into the index based randomized settings.
         if (cluster().size() > 0) {
-            ImmutableSettings.Builder randomSettingsBuilder =
-                    setRandomSettings(getRandom(), ImmutableSettings.builder())
-                            .put(SETTING_INDEX_SEED, getRandom().nextLong());
+            ImmutableSettings.Builder randomSettingsBuilder = setRandomSettings(getRandom(), ImmutableSettings.builder()).put(SETTING_INDEX_SEED, getRandom().nextLong());
 
             if (randomizeNumberOfShardsAndReplicas()) {
-                randomSettingsBuilder.put(SETTING_NUMBER_OF_SHARDS, numberOfShards())
-                        .put(SETTING_NUMBER_OF_REPLICAS, numberOfReplicas());
+                randomSettingsBuilder.put(SETTING_NUMBER_OF_SHARDS, numberOfShards()).put(SETTING_NUMBER_OF_REPLICAS, numberOfReplicas());
             }
             XContentBuilder mappings = null;
             if (frequently() && randomDynamicTemplates()) {
                 mappings = XContentFactory.jsonBuilder().startObject().startObject("_default_");
                 if (randomBoolean()) {
-                    mappings.startObject(IdFieldMapper.NAME)
-                            .field("index", randomFrom("not_analyzed", "no"))
-                            .endObject();
+                    mappings.startObject(IdFieldMapper.NAME).field("index", randomFrom("not_analyzed", "no")).endObject();
                 }
                 if (randomBoolean()) {
-                    mappings.startObject(TypeFieldMapper.NAME)
-                            .field("index", randomFrom("no", "not_analyzed"))
-                            .endObject();
+                    mappings.startObject(TypeFieldMapper.NAME).field("index", randomFrom("no", "not_analyzed")).endObject();
                 }
                 if (randomBoolean()) {
-                    mappings.startObject(TimestampFieldMapper.NAME)
-                            .field("enabled", randomBoolean())
-                            .startObject("fielddata")
-                            .field(FieldDataType.FORMAT_KEY, randomFrom("array", "doc_values"))
-                            .endObject()
-                            .endObject();
+                    mappings.startObject(TimestampFieldMapper.NAME).field("enabled", randomBoolean()).startObject("fielddata").field(FieldDataType.FORMAT_KEY, randomFrom("array", "doc_values")).endObject().endObject();
                 }
                 if (randomBoolean()) {
-                    mappings.startObject(SizeFieldMapper.NAME)
-                            .field("enabled", randomBoolean())
-                            .endObject();
+                    mappings.startObject(SizeFieldMapper.NAME).field("enabled", randomBoolean()).endObject();
                 }
                 if (randomBoolean()) {
-                    mappings.startObject(AllFieldMapper.NAME)
-                            .field("auto_boost", true)
-                            .endObject();
+                    mappings.startObject(AllFieldMapper.NAME).field("auto_boost", true).endObject();
                 }
                 if (randomBoolean()) {
-                    mappings.startObject(SourceFieldMapper.NAME)
-                            .field("compress", randomBoolean())
-                            .endObject();
+                    mappings.startObject(SourceFieldMapper.NAME).field("compress", randomBoolean()).endObject();
                 }
                 if (compatibilityVersion().onOrAfter(Version.V_1_3_0)) {
-                    mappings.startObject(FieldNamesFieldMapper.NAME)
-                            .startObject("fielddata")
-                            .field(FieldDataType.FORMAT_KEY, randomFrom("paged_bytes", "fst", "doc_values"))
-                            .endObject()
-                            .endObject();
+                    mappings.startObject(FieldNamesFieldMapper.NAME).startObject("fielddata").field(FieldDataType.FORMAT_KEY, randomFrom("paged_bytes", "fst", "doc_values")).endObject().endObject();
                 }
-                mappings.startArray("dynamic_templates")
-                        .startObject()
-                        .startObject("template-strings")
-                        .field("match_mapping_type", "string")
-                        .startObject("mapping")
-                        .startObject("fielddata")
-                        .field(FieldDataType.FORMAT_KEY, randomFrom("paged_bytes", "fst")) // unfortunately doc values only work on not_analyzed fields
-                        .field(Loading.KEY, randomLoadingValues())
-                        .endObject()
-                        .endObject()
-                        .endObject()
-                        .endObject()
-                        .startObject()
-                        .startObject("template-longs")
-                        .field("match_mapping_type", "long")
-                        .startObject("mapping")
-                        .startObject("fielddata")
-                        .field(FieldDataType.FORMAT_KEY, randomFrom("array", "doc_values"))
-                        .field(Loading.KEY, randomFrom(Loading.LAZY, Loading.EAGER))
-                        .endObject()
-                        .endObject()
-                        .endObject()
-                        .endObject()
-                        .startObject()
-                        .startObject("template-doubles")
-                        .field("match_mapping_type", "double")
-                        .startObject("mapping")
-                        .startObject("fielddata")
-                        .field(FieldDataType.FORMAT_KEY, randomFrom("array", "doc_values"))
-                        .field(Loading.KEY, randomFrom(Loading.LAZY, Loading.EAGER))
-                        .endObject()
-                        .endObject()
-                        .endObject()
-                        .endObject()
-                        .startObject()
-                        .startObject("template-geo_points")
-                        .field("match_mapping_type", "geo_point")
-                        .startObject("mapping")
-                        .startObject("fielddata")
-                        .field(FieldDataType.FORMAT_KEY, randomFrom("array", "doc_values"))
-                        .field(Loading.KEY, randomFrom(Loading.LAZY, Loading.EAGER))
-                        .endObject()
-                        .endObject()
-                        .endObject()
-                        .endObject()
-                        .endArray();
+                mappings.startArray("dynamic_templates").startObject().startObject("template-strings").field("match_mapping_type", "string").startObject("mapping").startObject("fielddata").field(FieldDataType.FORMAT_KEY, randomFrom("paged_bytes", "fst")) // unfortunately doc values only work on not_analyzed fields
+                                .field(Loading.KEY, randomLoadingValues()).endObject().endObject().endObject().endObject().startObject().startObject("template-longs").field("match_mapping_type", "long").startObject("mapping").startObject("fielddata").field(FieldDataType.FORMAT_KEY, randomFrom("array", "doc_values")).field(Loading.KEY, randomFrom(Loading.LAZY, Loading.EAGER)).endObject().endObject().endObject().endObject().startObject().startObject("template-doubles").field("match_mapping_type", "double").startObject("mapping").startObject("fielddata").field(FieldDataType.FORMAT_KEY, randomFrom("array", "doc_values")).field(Loading.KEY, randomFrom(Loading.LAZY, Loading.EAGER)).endObject().endObject().endObject().endObject().startObject().startObject("template-geo_points").field("match_mapping_type", "geo_point").startObject("mapping").startObject("fielddata").field(FieldDataType.FORMAT_KEY, randomFrom("array", "doc_values")).field(Loading.KEY, randomFrom(Loading.LAZY, Loading.EAGER)).endObject().endObject().endObject().endObject().endArray();
                 mappings.endObject().endObject();
             }
 
-            PutIndexTemplateRequestBuilder putTemplate = client().admin().indices()
-                    .preparePutTemplate("random_index_template")
-                    .setTemplate("*")
-                    .setOrder(0)
-                    .setSettings(randomSettingsBuilder);
+            PutIndexTemplateRequestBuilder putTemplate = client().admin().indices().preparePutTemplate("random_index_template").setTemplate("*").setOrder(0).setSettings(randomSettingsBuilder);
             if (mappings != null) {
                 logger.info("test using _default_ mappings: [{}]", mappings.bytesStream().bytes().toUtf8());
                 putTemplate.addMapping("_default_", mappings);
@@ -462,7 +392,6 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
         if (random.nextBoolean()) {
             builder.put(StoreModule.DISTIBUTOR_KEY, random.nextBoolean() ? StoreModule.LEAST_USED_DISTRIBUTOR : StoreModule.RANDOM_WEIGHT_DISTRIBUTOR);
         }
-
 
         if (random.nextBoolean()) {
             if (random.nextInt(10) == 0) { // do something crazy slow here
@@ -516,8 +445,7 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
 
     private static ImmutableSettings.Builder setRandomMerge(Random random, ImmutableSettings.Builder builder) {
         if (random.nextBoolean()) {
-            builder.put(AbstractMergePolicyProvider.INDEX_COMPOUND_FORMAT,
-                    random.nextBoolean() ? random.nextDouble() : random.nextBoolean());
+            builder.put(AbstractMergePolicyProvider.INDEX_COMPOUND_FORMAT, random.nextBoolean() ? random.nextDouble() : random.nextBoolean());
         }
         Class<? extends MergePolicyProvider<?>> mergePolicy = TieredMergePolicyProvider.class;
         switch (random.nextInt(5)) {
@@ -625,10 +553,8 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
                 if (cluster() != null) {
                     if (currentClusterScope != Scope.TEST) {
                         MetaData metaData = client().admin().cluster().prepareState().execute().actionGet().getState().getMetaData();
-                        assertThat("test leaves persistent cluster metadata behind: " + metaData.persistentSettings().getAsMap(), metaData
-                                .persistentSettings().getAsMap().size(), equalTo(0));
-                        assertThat("test leaves transient cluster metadata behind: " + metaData.transientSettings().getAsMap(), metaData
-                                .transientSettings().getAsMap().size(), equalTo(0));
+                        assertThat("test leaves persistent cluster metadata behind: " + metaData.persistentSettings().getAsMap(), metaData.persistentSettings().getAsMap().size(), equalTo(0));
+                        assertThat("test leaves transient cluster metadata behind: " + metaData.transientSettings().getAsMap(), metaData.transientSettings().getAsMap().size(), equalTo(0));
                     }
                     ensureClusterSizeConsistency();
                     beforeIndexDeletion();
@@ -657,7 +583,7 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
     protected final AfterTestRule.Task afterTestTask() {
         return new AfterTestRule.Task() {
             @Override
-            public void onTestFailed () {
+            public void onTestFailed() {
                 //we can't clear clusters after failure when using suite scoped tests, as we would need to call again
                 //initializeSuiteScope but that is static and can only be called from beforeClass
                 if (runTestScopeLifecycle()) {
@@ -675,7 +601,7 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
             }
 
             @Override
-            public void onTestFinished () {
+            public void onTestFinished() {
                 if (runTestScopeLifecycle()) {
                     if (currentCluster != null) {
                         // this can be null if the test fails due to static initialization ie. missing parameter on the cmd
@@ -694,7 +620,8 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
     /**
      * Allows to execute some additional task after a test is failed, right after we cleared the clusters
      */
-    protected void afterTestFailed() {}
+    protected void afterTestFailed() {
+    }
 
     protected void beforeIndexDeletion() {
         cluster().beforeIndexDeletion();
@@ -771,7 +698,6 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
     protected int numberOfReplicas() {
         return between(minimumNumberOfReplicas(), maximumNumberOfReplicas());
     }
-
 
     public void setDisruptionScheme(ServiceDisruptionScheme scheme) {
         internalCluster().setDisruptionScheme(scheme);
@@ -995,8 +921,7 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
      * @param timeout time out value to set on {@link org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest}
      */
     public ClusterHealthStatus ensureGreen(TimeValue timeout, String... indices) {
-        ClusterHealthResponse actionGet = client().admin().cluster()
-                .health(Requests.clusterHealthRequest(indices).timeout(timeout).waitForGreenStatus().waitForEvents(Priority.LANGUID).waitForRelocatingShards(0)).actionGet();
+        ClusterHealthResponse actionGet = client().admin().cluster().health(Requests.clusterHealthRequest(indices).timeout(timeout).waitForGreenStatus().waitForEvents(Priority.LANGUID).waitForRelocatingShards(0)).actionGet();
         if (actionGet.isTimedOut()) {
             logger.info("ensureGreen timed out, cluster state:\n{}\n{}", client().admin().cluster().prepareState().get().getState().prettyPrint(), client().admin().cluster().preparePendingClusterTasks().get().prettyPrint());
             fail("timed out waiting for green state");
@@ -1022,8 +947,7 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
         if (status != null) {
             request.waitForStatus(status);
         }
-        ClusterHealthResponse actionGet = client().admin().cluster()
-                .health(request).actionGet();
+        ClusterHealthResponse actionGet = client().admin().cluster().health(request).actionGet();
         if (actionGet.isTimedOut()) {
             logger.info("waitForRelocation timed out (status={}), cluster state:\n{}\n{}", status, client().admin().cluster().prepareState().get().getState().prettyPrint(), client().admin().cluster().preparePendingClusterTasks().get().prettyPrint());
             assertThat("timed out waiting for relocation", actionGet.isTimedOut(), equalTo(false));
@@ -1070,8 +994,7 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
      * @return the actual number of docs seen.
      * @throws InterruptedException
      */
-    public long waitForDocs(final long numDocs, int maxWaitTime, TimeUnit maxWaitTimeUnit, final @Nullable BackgroundIndexer indexer)
-            throws InterruptedException {
+    public long waitForDocs(final long numDocs, int maxWaitTime, TimeUnit maxWaitTimeUnit, final @Nullable BackgroundIndexer indexer) throws InterruptedException {
         final AtomicLong lastKnownCount = new AtomicLong(-1);
         long lastStartCount = -1;
         Predicate<Object> testDocs = new Predicate<Object>() {
@@ -1104,23 +1027,19 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
         return lastKnownCount.get();
     }
 
-
     /**
      * Sets the cluster's minimum master node and make sure the response is acknowledge.
      * Note: this doesn't guaranty the new settings is in effect, just that it has been received bu all nodes.
      */
     public void setMinimumMasterNodes(int n) {
-        assertTrue(client().admin().cluster().prepareUpdateSettings().setTransientSettings(
-                settingsBuilder().put(ElectMasterService.DISCOVERY_ZEN_MINIMUM_MASTER_NODES, n))
-                .get().isAcknowledged());
+        assertTrue(client().admin().cluster().prepareUpdateSettings().setTransientSettings(settingsBuilder().put(ElectMasterService.DISCOVERY_ZEN_MINIMUM_MASTER_NODES, n)).get().isAcknowledged());
     }
 
     /**
      * Ensures the cluster has a yellow state via the cluster health API.
      */
     public ClusterHealthStatus ensureYellow(String... indices) {
-        ClusterHealthResponse actionGet = client().admin().cluster()
-                .health(Requests.clusterHealthRequest(indices).waitForRelocatingShards(0).waitForYellowStatus().waitForEvents(Priority.LANGUID)).actionGet();
+        ClusterHealthResponse actionGet = client().admin().cluster().health(Requests.clusterHealthRequest(indices).waitForRelocatingShards(0).waitForYellowStatus().waitForEvents(Priority.LANGUID)).actionGet();
         if (actionGet.isTimedOut()) {
             logger.info("ensureYellow timed out, cluster state:\n{}\n{}", client().admin().cluster().prepareState().get().getState().prettyPrint(), client().admin().cluster().preparePendingClusterTasks().get().prettyPrint());
             assertThat("timed out waiting for yellow", actionGet.isTimedOut(), equalTo(false));
@@ -1141,8 +1060,7 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
      */
     public void logSegmentsState(String... indices) throws Exception {
         IndicesSegmentResponse segsRsp = client().admin().indices().prepareSegments(indices).get();
-        logger.debug("segments {} state: \n{}", indices.length == 0 ? "[_all]" : indices,
-                segsRsp.toXContent(JsonXContent.contentBuilder().prettyPrint(), ToXContent.EMPTY_PARAMS).string());
+        logger.debug("segments {} state: \n{}", indices.length == 0 ? "[_all]" : indices, segsRsp.toXContent(JsonXContent.contentBuilder().prettyPrint(), ToXContent.EMPTY_PARAMS).string());
     }
 
     /**
@@ -1301,7 +1219,6 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
         indexRandom(forceRefresh, dummyDocuments, Arrays.asList(builders));
     }
 
-
     private static final String RANDOM_BOGUS_TYPE = "RANDOM_BOGUS_TYPE______";
 
     /**
@@ -1391,8 +1308,7 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
                 }
             }
         } else {
-            List<List<IndexRequestBuilder>> partition = Lists.partition(builders, Math.min(MAX_BULK_INDEX_REQUEST_SIZE,
-                    Math.max(1, (int) (builders.size() * randomDouble()))));
+            List<List<IndexRequestBuilder>> partition = Lists.partition(builders, Math.min(MAX_BULK_INDEX_REQUEST_SIZE, Math.max(1, (int) (builders.size() * randomDouble()))));
             logger.info("Index [{}] docs async: [{}] bulk: [{}] partitions [{}]", builders.size(), false, true, partition.size());
             for (List<IndexRequestBuilder> segmented : partition) {
                 BulkRequestBuilder bulkBuilder = client().prepareBulk();
@@ -1474,12 +1390,10 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
     private void postIndexAsyncActions(String[] indices, List<CountDownLatch> inFlightAsyncOperations, boolean maybeFlush) throws InterruptedException {
         if (rarely()) {
             if (rarely()) {
-                client().admin().indices().prepareRefresh(indices).setIndicesOptions(IndicesOptions.lenientExpandOpen()).execute(
-                        new LatchedActionListener<RefreshResponse>(newLatch(inFlightAsyncOperations)));
+                client().admin().indices().prepareRefresh(indices).setIndicesOptions(IndicesOptions.lenientExpandOpen()).execute(new LatchedActionListener<RefreshResponse>(newLatch(inFlightAsyncOperations)));
             } else if (maybeFlush && rarely()) {
                 if (randomBoolean()) {
-                    client().admin().indices().prepareFlush(indices).setIndicesOptions(IndicesOptions.lenientExpandOpen()).execute(
-                            new LatchedActionListener<FlushResponse>(newLatch(inFlightAsyncOperations)));
+                    client().admin().indices().prepareFlush(indices).setIndicesOptions(IndicesOptions.lenientExpandOpen()).execute(new LatchedActionListener<FlushResponse>(newLatch(inFlightAsyncOperations)));
                 } else {
                     InternalTestCluster internalTestCluster = null;
                     // get an instance of InternalTestCluster if possible
@@ -1499,13 +1413,11 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
                     }
                     if (internalTestCluster != null) {
                         // try a synced flush on the index
-                        internalTestCluster.getInstance(SyncedFlushService.class).attemptSyncedFlush(indices, IndicesOptions.lenientExpandOpen(),
-                                new LatchedActionListener<IndicesSyncedFlushResult>(newLatch(inFlightAsyncOperations)));
+                        internalTestCluster.getInstance(SyncedFlushService.class).attemptSyncedFlush(indices, IndicesOptions.lenientExpandOpen(), new LatchedActionListener<IndicesSyncedFlushResult>(newLatch(inFlightAsyncOperations)));
                     }
                 }
             } else if (rarely()) {
-                client().admin().indices().prepareOptimize(indices).setIndicesOptions(IndicesOptions.lenientExpandOpen()).setMaxNumSegments(between(1, 10)).setFlush(maybeFlush && randomBoolean()).execute(
-                        new LatchedActionListener<OptimizeResponse>(newLatch(inFlightAsyncOperations)));
+                client().admin().indices().prepareOptimize(indices).setIndicesOptions(IndicesOptions.lenientExpandOpen()).setMaxNumSegments(between(1, 10)).setFlush(maybeFlush && randomBoolean()).execute(new LatchedActionListener<OptimizeResponse>(newLatch(inFlightAsyncOperations)));
             }
         }
         while (inFlightAsyncOperations.size() > MAX_IN_FLIGHT_ASYNC_INDEXES) {
@@ -1535,7 +1447,7 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
      * together with randomly chosen settings like number of nodes etc.
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.TYPE})
+    @Target({ ElementType.TYPE })
     public @interface ClusterScope {
         /**
          * Returns the scope. {@link org.elasticsearch.test.ElasticsearchIntegrationTest.Scope#SUITE} is default.
@@ -1626,8 +1538,7 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
      * Clears the given scroll Ids
      */
     public void clearScroll(String... scrollIds) {
-        ClearScrollResponse clearResponse = client().prepareClearScroll()
-                .setScrollIds(Arrays.asList(scrollIds)).get();
+        ClearScrollResponse clearResponse = client().prepareClearScroll().setScrollIds(Arrays.asList(scrollIds)).get();
         assertThat(clearResponse.isSucceeded(), equalTo(true));
     }
 
@@ -1686,15 +1597,11 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
      */
     protected Settings nodeSettings(int nodeOrdinal) {
         return settingsBuilder()
-                // Default the watermarks to absurdly low to prevent the tests
-                // from failing on nodes without enough disk space
-                .put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_LOW_DISK_WATERMARK, "1b")
-                .put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_HIGH_DISK_WATERMARK, "1b")
-                .put("script.indexed", "on")
-                .put("script.inline", "on")
+                        // Default the watermarks to absurdly low to prevent the tests
+                        // from failing on nodes without enough disk space
+                        .put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_LOW_DISK_WATERMARK, "1b").put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_HIGH_DISK_WATERMARK, "1b").put("script.indexed", "on").put("script.inline", "on")
                         // wait short time for other active shards before actually deleting, default 30s not needed in tests
-                .put(IndicesStore.INDICES_STORE_DELETE_SHARD_TIMEOUT, new TimeValue(1, TimeUnit.SECONDS))
-                .build();
+                        .put(IndicesStore.INDICES_STORE_DELETE_SHARD_TIMEOUT, new TimeValue(1, TimeUnit.SECONDS)).build();
     }
 
     /**
@@ -1748,8 +1655,7 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
         SettingsSource settingsSource = new SettingsSource() {
             @Override
             public Settings node(int nodeOrdinal) {
-                return ImmutableSettings.builder().put(InternalNode.HTTP_ENABLED, false).
-                        put(nodeSettings(nodeOrdinal)).build();
+                return ImmutableSettings.builder().put(InternalNode.HTTP_ENABLED, false).put(nodeSettings(nodeOrdinal)).build();
             }
 
             @Override
@@ -1768,9 +1674,7 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
             maxNumDataNodes = getMaxNumDataNodes();
         }
 
-        return new InternalTestCluster(seed, minNumDataNodes, maxNumDataNodes,
-                clusterName(scope.name(), Integer.toString(CHILD_JVM_ID), seed), settingsSource, getNumClientNodes(),
-                InternalTestCluster.DEFAULT_ENABLE_HTTP_PIPELINING, CHILD_JVM_ID, nodePrefix);
+        return new InternalTestCluster(seed, minNumDataNodes, maxNumDataNodes, clusterName(scope.name(), Integer.toString(CHILD_JVM_ID), seed), settingsSource, getNumClientNodes(), InternalTestCluster.DEFAULT_ENABLE_HTTP_PIPELINING, CHILD_JVM_ID, nodePrefix);
     }
 
     /**
@@ -1939,14 +1843,12 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
         return INSTANCE == null;
     }
 
-
     @Before
     public final void before() throws Exception {
         if (runTestScopeLifecycle()) {
             beforeInternal();
         }
     }
-
 
     @After
     public final void after() throws Exception {
@@ -2014,10 +1916,8 @@ public abstract class ElasticsearchIntegrationTest extends ElasticsearchTestCase
         src.renameTo(dest);
         assertFalse(src.exists());
         assertTrue(dest.exists());
-        ImmutableSettings.Builder builder = ImmutableSettings.builder()
-                .put(settings)
-                .put("gateway.type", "local") // this is important we need to recover from gateway
-                .put("path.data", dataDir.getPath());
+        ImmutableSettings.Builder builder = ImmutableSettings.builder().put(settings).put("gateway.type", "local") // this is important we need to recover from gateway
+                        .put("path.data", dataDir.getPath());
 
         File configDir = new File(indexDir, "config");
         if (configDir.exists()) {

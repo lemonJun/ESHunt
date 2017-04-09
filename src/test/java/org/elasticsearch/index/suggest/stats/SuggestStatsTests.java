@@ -62,14 +62,8 @@ public class SuggestStatsTests extends ElasticsearchIntegrationTest {
         final int shardsIdx2 = Math.max(numNodes - shardsIdx1, randomIntBetween(1, 10));
         final int totalShards = shardsIdx1 + shardsIdx2;
         assertThat(numNodes, lessThanOrEqualTo(totalShards));
-        assertAcked(prepareCreate("test1").setSettings(ImmutableSettings.builder()
-                .put(SETTING_NUMBER_OF_SHARDS, shardsIdx1)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0))
-                .addMapping("type", "f", "type=string"));
-        assertAcked(prepareCreate("test2").setSettings(ImmutableSettings.builder()
-                .put(SETTING_NUMBER_OF_SHARDS, shardsIdx2)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0))
-                .addMapping("type", "f", "type=string"));
+        assertAcked(prepareCreate("test1").setSettings(ImmutableSettings.builder().put(SETTING_NUMBER_OF_SHARDS, shardsIdx1).put(SETTING_NUMBER_OF_REPLICAS, 0)).addMapping("type", "f", "type=string"));
+        assertAcked(prepareCreate("test2").setSettings(ImmutableSettings.builder().put(SETTING_NUMBER_OF_SHARDS, shardsIdx2).put(SETTING_NUMBER_OF_REPLICAS, 0)).addMapping("type", "f", "type=string"));
         assertThat(shardsIdx1 + shardsIdx2, equalTo(numAssignedShards("test1", "test2")));
         assertThat(numAssignedShards("test1", "test2"), greaterThanOrEqualTo(2));
         ensureGreen();
@@ -160,7 +154,6 @@ public class SuggestStatsTests extends ElasticsearchIntegrationTest {
         }
         return nodes;
     }
-
 
     protected int numAssignedShards(String... indices) {
         ClusterState state = client().admin().cluster().prepareState().execute().actionGet().getState();

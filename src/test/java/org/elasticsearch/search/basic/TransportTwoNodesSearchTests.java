@@ -19,8 +19,6 @@
 
 package org.elasticsearch.search.basic;
 
-
-
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import org.elasticsearch.ElasticsearchException;
@@ -73,17 +71,13 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
     private Set<String> prepareData(int numShards) throws Exception {
         Set<String> fullExpectedIds = Sets.newTreeSet();
 
-        ImmutableSettings.Builder settingsBuilder = settingsBuilder()
-                .put(indexSettings())
-                .put("routing.hash.type", "simple");
+        ImmutableSettings.Builder settingsBuilder = settingsBuilder().put(indexSettings()).put("routing.hash.type", "simple");
 
         if (numShards > 0) {
             settingsBuilder.put(SETTING_NUMBER_OF_SHARDS, numShards);
         }
 
-        client().admin().indices().create(createIndexRequest("test")
-                .settings(settingsBuilder))
-                .actionGet();
+        client().admin().indices().create(createIndexRequest("test").settings(settingsBuilder)).actionGet();
 
         ensureGreen();
         for (int i = 0; i < 100; i++) {
@@ -103,23 +97,14 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
         for (int i = 0; i < age; i++) {
             multi.append(" ").append(nameValue);
         }
-        return jsonBuilder().startObject()
-                .field("id", id)
-                .field("nid", Integer.parseInt(id))
-                .field("name", nameValue + id)
-                .field("age", age)
-                .field("multi", multi.toString())
-                .field("_boost", age * 10)
-                .endObject();
+        return jsonBuilder().startObject().field("id", id).field("nid", Integer.parseInt(id)).field("name", nameValue + id).field("age", age).field("multi", multi.toString()).field("_boost", age * 10).endObject();
     }
 
     @Test
     public void testDfsQueryThenFetch() throws Exception {
         prepareData();
 
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("multi", "test"))
-                .from(0).size(60).explain(true);
+        SearchSourceBuilder source = searchSource().query(termQuery("multi", "test")).from(0).size(60).explain(true);
 
         SearchResponse searchResponse = client().search(searchRequest("test").source(source).searchType(DFS_QUERY_THEN_FETCH).scroll(new Scroll(timeValueMinutes(10)))).actionGet();
         assertNoFailures(searchResponse);
@@ -146,9 +131,7 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
     public void testDfsQueryThenFetchWithSort() throws Exception {
         prepareData();
 
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("multi", "test"))
-                .from(0).size(60).explain(true).sort("age", SortOrder.ASC);
+        SearchSourceBuilder source = searchSource().query(termQuery("multi", "test")).from(0).size(60).explain(true).sort("age", SortOrder.ASC);
 
         SearchResponse searchResponse = client().search(searchRequest("test").source(source).searchType(DFS_QUERY_THEN_FETCH).scroll(new Scroll(timeValueMinutes(10)))).actionGet();
         assertNoFailures(searchResponse);
@@ -174,10 +157,8 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
     public void testQueryThenFetch() throws Exception {
         prepareData();
 
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("multi", "test"))
-                .sort("nid", SortOrder.DESC) // we have to sort here to have some ordering with dist scoring
-                .from(0).size(60).explain(true);
+        SearchSourceBuilder source = searchSource().query(termQuery("multi", "test")).sort("nid", SortOrder.DESC) // we have to sort here to have some ordering with dist scoring
+                        .from(0).size(60).explain(true);
 
         SearchResponse searchResponse = client().search(searchRequest("test").source(source).searchType(QUERY_THEN_FETCH).scroll(new Scroll(timeValueMinutes(10)))).actionGet();
         assertNoFailures(searchResponse);
@@ -203,9 +184,7 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
     public void testQueryThenFetchWithFrom() throws Exception {
         Set<String> fullExpectedIds = prepareData();
 
-        SearchSourceBuilder source = searchSource()
-                .query(matchAllQuery())
-                .explain(true);
+        SearchSourceBuilder source = searchSource().query(matchAllQuery()).explain(true);
 
         Set<String> collectedIds = Sets.newTreeSet();
 
@@ -232,9 +211,7 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
     public void testQueryThenFetchWithSort() throws Exception {
         prepareData();
 
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("multi", "test"))
-                .from(0).size(60).explain(true).sort("age", SortOrder.ASC);
+        SearchSourceBuilder source = searchSource().query(termQuery("multi", "test")).from(0).size(60).explain(true).sort("age", SortOrder.ASC);
 
         SearchResponse searchResponse = client().search(searchRequest("test").source(source).searchType(QUERY_THEN_FETCH).scroll(new Scroll(timeValueMinutes(10)))).actionGet();
         assertNoFailures(searchResponse);
@@ -242,7 +219,7 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
         assertThat(searchResponse.getHits().hits().length, equalTo(60));
         for (int i = 0; i < 60; i++) {
             SearchHit hit = searchResponse.getHits().hits()[i];
-//            System.out.println(hit.shard() + ": " +  hit.explanation());
+            //            System.out.println(hit.shard() + ": " +  hit.explanation());
             assertThat(hit.explanation(), notNullValue());
             assertThat("id[" + hit.id() + "]", hit.id(), equalTo(Integer.toString(i)));
         }
@@ -261,9 +238,7 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
     public void testQueryAndFetch() throws Exception {
         prepareData(3);
 
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("multi", "test"))
-                .from(0).size(20).explain(true);
+        SearchSourceBuilder source = searchSource().query(termQuery("multi", "test")).from(0).size(20).explain(true);
 
         Set<String> expectedIds = Sets.newHashSet();
         for (int i = 0; i < 100; i++) {
@@ -276,10 +251,10 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
         assertThat(searchResponse.getHits().hits().length, equalTo(60)); // 20 per shard
         for (int i = 0; i < 60; i++) {
             SearchHit hit = searchResponse.getHits().hits()[i];
-//            System.out.println(hit.shard() + ": " +  hit.explanation());
+            //            System.out.println(hit.shard() + ": " +  hit.explanation());
             assertThat(hit.explanation(), notNullValue());
             // we can't really check here, since its query and fetch, and not controlling distribution
-//            assertThat("id[" + hit.id() + "]", hit.id(), equalTo(Integer.toString(100 - i - 1)));
+            //            assertThat("id[" + hit.id() + "]", hit.id(), equalTo(Integer.toString(100 - i - 1)));
             assertThat("make sure we don't have duplicates", expectedIds.remove(hit.id()), notNullValue());
         }
 
@@ -289,7 +264,7 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
         assertThat(searchResponse.getHits().hits().length, equalTo(40));
         for (int i = 0; i < 40; i++) {
             SearchHit hit = searchResponse.getHits().hits()[i];
-//            assertThat("id[" + hit.id() + "]", hit.id(), equalTo(Integer.toString(100 - 60 - 1 - i)));
+            //            assertThat("id[" + hit.id() + "]", hit.id(), equalTo(Integer.toString(100 - 60 - 1 - i)));
             // we don't do perfect sorting when it comes to scroll with Query+Fetch
             assertThat("make sure we don't have duplicates", expectedIds.remove(hit.id()), notNullValue());
         }
@@ -300,15 +275,12 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
     public void testDfsQueryAndFetch() throws Exception {
         prepareData(3);
 
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("multi", "test"))
-                .from(0).size(20).explain(true);
+        SearchSourceBuilder source = searchSource().query(termQuery("multi", "test")).from(0).size(20).explain(true);
 
         Set<String> expectedIds = Sets.newHashSet();
         for (int i = 0; i < 100; i++) {
             expectedIds.add(Integer.toString(i));
         }
-
 
         SearchResponse searchResponse = client().search(searchRequest("test").source(source).searchType(DFS_QUERY_AND_FETCH).scroll(new Scroll(timeValueMinutes(10)))).actionGet();
         assertNoFailures(searchResponse);
@@ -316,9 +288,9 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
         assertThat(searchResponse.getHits().hits().length, equalTo(60)); // 20 per shard
         for (int i = 0; i < 60; i++) {
             SearchHit hit = searchResponse.getHits().hits()[i];
-//            System.out.println(hit.shard() + ": " +  hit.explanation());
+            //            System.out.println(hit.shard() + ": " +  hit.explanation());
             assertThat(hit.explanation(), notNullValue());
-//            assertThat("id[" + hit.id() + "]", hit.id(), equalTo(Integer.toString(100 - i - 1)));
+            //            assertThat("id[" + hit.id() + "]", hit.id(), equalTo(Integer.toString(100 - i - 1)));
             assertThat("make sure we don't have duplicates", expectedIds.remove(hit.id()), notNullValue());
         }
 
@@ -328,8 +300,8 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
         assertThat(searchResponse.getHits().hits().length, equalTo(40));
         for (int i = 0; i < 40; i++) {
             SearchHit hit = searchResponse.getHits().hits()[i];
-//            System.out.println(hit.shard() + ": " +  hit.explanation());
-//            assertThat("id[" + hit.id() + "]", hit.id(), equalTo(Integer.toString(100 - 60 - 1 - i)));
+            //            System.out.println(hit.shard() + ": " +  hit.explanation());
+            //            assertThat("id[" + hit.id() + "]", hit.id(), equalTo(Integer.toString(100 - 60 - 1 - i)));
             // we don't do perfect sorting when it comes to scroll with Query+Fetch
             assertThat("make sure we don't have duplicates", expectedIds.remove(hit.id()), notNullValue());
         }
@@ -340,11 +312,7 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
     public void testSimpleFacets() throws Exception {
         prepareData();
 
-        SearchSourceBuilder sourceBuilder = searchSource()
-                .query(termQuery("multi", "test"))
-                .from(0).size(20).explain(true)
-                .facet(FacetBuilders.queryFacet("all", termQuery("multi", "test")).global(true))
-                .facet(FacetBuilders.queryFacet("test1", termQuery("name", "test1")));
+        SearchSourceBuilder sourceBuilder = searchSource().query(termQuery("multi", "test")).from(0).size(20).explain(true).facet(FacetBuilders.queryFacet("all", termQuery("multi", "test")).global(true)).facet(FacetBuilders.queryFacet("test1", termQuery("name", "test1")));
 
         SearchResponse searchResponse = client().search(searchRequest("test").source(sourceBuilder)).actionGet();
         assertNoFailures(searchResponse);
@@ -381,9 +349,7 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
         NumShards test = getNumShards("test");
 
         logger.info("Start Testing failed search with wrong from");
-        SearchSourceBuilder source = searchSource()
-                .query(termQuery("multi", "test"))
-                .from(1000).size(20).explain(true);
+        SearchSourceBuilder source = searchSource().query(termQuery("multi", "test")).from(1000).size(20).explain(true);
         SearchResponse response = client().search(searchRequest("test").searchType(DFS_QUERY_AND_FETCH).source(source)).actionGet();
         assertThat(response.getHits().hits().length, equalTo(0));
         assertThat(response.getTotalShards(), equalTo(test.numPrimaries));
@@ -412,11 +378,8 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
         logger.info("Start Testing failed multi search with a wrong query");
 
         MultiSearchResponse response = client().prepareMultiSearch()
-                // Add function score with a bogus score mode
-                .add(client().prepareSearch("test").setQuery(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("nid", 1)).scoreMode("foobar")))
-                .add(client().prepareSearch("test").setQuery(QueryBuilders.termQuery("nid", 2)))
-                .add(client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()))
-                .execute().actionGet();
+                        // Add function score with a bogus score mode
+                        .add(client().prepareSearch("test").setQuery(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("nid", 1)).scoreMode("foobar"))).add(client().prepareSearch("test").setQuery(QueryBuilders.termQuery("nid", 2))).add(client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery())).execute().actionGet();
         assertThat(response.getResponses().length, equalTo(3));
         assertThat(response.getResponses()[0].getFailureMessage(), notNullValue());
 
@@ -429,7 +392,6 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
         logger.info("Done Testing failed search");
     }
 
-
     @Test
     public void testFailedMultiSearchWithWrongQuery_withFunctionScore() throws Exception {
         prepareData();
@@ -437,11 +399,8 @@ public class TransportTwoNodesSearchTests extends ElasticsearchIntegrationTest {
         logger.info("Start Testing failed multi search with a wrong query");
 
         MultiSearchResponse response = client().prepareMultiSearch()
-                // Add custom score query with missing script
-                .add(client().prepareSearch("test").setQuery(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("nid", 1)).add(new ScriptScoreFunctionBuilder())))
-                .add(client().prepareSearch("test").setQuery(QueryBuilders.termQuery("nid", 2)))
-                .add(client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()))
-                .execute().actionGet();
+                        // Add custom score query with missing script
+                        .add(client().prepareSearch("test").setQuery(QueryBuilders.functionScoreQuery(QueryBuilders.termQuery("nid", 1)).add(new ScriptScoreFunctionBuilder()))).add(client().prepareSearch("test").setQuery(QueryBuilders.termQuery("nid", 2))).add(client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery())).execute().actionGet();
         assertThat(response.getResponses().length, equalTo(3));
         assertThat(response.getResponses()[0].getFailureMessage(), notNullValue());
 

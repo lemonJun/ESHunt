@@ -46,10 +46,7 @@ public class SimpleMgetTests extends ElasticsearchIntegrationTest {
 
         client().prepareIndex("test", "test", "1").setSource(jsonBuilder().startObject().field("foo", "bar").endObject()).setRefresh(true).execute().actionGet();
 
-        MultiGetResponse mgetResponse = client().prepareMultiGet()
-                .add(new MultiGetRequest.Item("test", "test", "1"))
-                .add(new MultiGetRequest.Item("nonExistingIndex", "test", "1"))
-                .execute().actionGet();
+        MultiGetResponse mgetResponse = client().prepareMultiGet().add(new MultiGetRequest.Item("test", "test", "1")).add(new MultiGetRequest.Item("nonExistingIndex", "test", "1")).execute().actionGet();
         assertThat(mgetResponse.getResponses().length, is(2));
 
         assertThat(mgetResponse.getResponses()[0].getIndex(), is("test"));
@@ -59,10 +56,7 @@ public class SimpleMgetTests extends ElasticsearchIntegrationTest {
         assertThat(mgetResponse.getResponses()[1].isFailed(), is(true));
         assertThat(mgetResponse.getResponses()[1].getFailure().getMessage(), is("[nonExistingIndex] missing"));
 
-
-        mgetResponse = client().prepareMultiGet()
-                .add(new MultiGetRequest.Item("nonExistingIndex", "test", "1"))
-                .execute().actionGet();
+        mgetResponse = client().prepareMultiGet().add(new MultiGetRequest.Item("nonExistingIndex", "test", "1")).execute().actionGet();
         assertThat(mgetResponse.getResponses().length, is(1));
         assertThat(mgetResponse.getResponses()[0].getIndex(), is("nonExistingIndex"));
         assertThat(mgetResponse.getResponses()[0].isFailed(), is(true));
@@ -72,25 +66,12 @@ public class SimpleMgetTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testThatParentPerDocumentIsSupported() throws Exception {
-        assertAcked(prepareCreate("test").addAlias(new Alias("alias"))
-                .addMapping("test", jsonBuilder()
-                        .startObject()
-                        .startObject("test")
-                        .startObject("_parent")
-                        .field("type", "foo")
-                        .endObject()
-                        .endObject()
-                        .endObject()));
+        assertAcked(prepareCreate("test").addAlias(new Alias("alias")).addMapping("test", jsonBuilder().startObject().startObject("test").startObject("_parent").field("type", "foo").endObject().endObject().endObject()));
         ensureYellow();
 
-        client().prepareIndex("test", "test", "1").setParent("4").setRefresh(true)
-                .setSource(jsonBuilder().startObject().field("foo", "bar").endObject())
-                .execute().actionGet();
+        client().prepareIndex("test", "test", "1").setParent("4").setRefresh(true).setSource(jsonBuilder().startObject().field("foo", "bar").endObject()).execute().actionGet();
 
-        MultiGetResponse mgetResponse = client().prepareMultiGet()
-                .add(new MultiGetRequest.Item(indexOrAlias(), "test", "1").parent("4"))
-                .add(new MultiGetRequest.Item(indexOrAlias(), "test", "1"))
-                .execute().actionGet();
+        MultiGetResponse mgetResponse = client().prepareMultiGet().add(new MultiGetRequest.Item(indexOrAlias(), "test", "1").parent("4")).add(new MultiGetRequest.Item(indexOrAlias(), "test", "1")).execute().actionGet();
 
         assertThat(mgetResponse.getResponses().length, is(2));
         assertThat(mgetResponse.getResponses()[0].isFailed(), is(false));
@@ -106,11 +87,7 @@ public class SimpleMgetTests extends ElasticsearchIntegrationTest {
     public void testThatSourceFilteringIsSupported() throws Exception {
         assertAcked(prepareCreate("test").addAlias(new Alias("alias")));
         ensureYellow();
-        BytesReference sourceBytesRef = jsonBuilder().startObject()
-                .field("field", "1", "2")
-                .startObject("included").field("field", "should be seen").field("hidden_field", "should not be seen").endObject()
-                .field("excluded", "should not be seen")
-                .endObject().bytes();
+        BytesReference sourceBytesRef = jsonBuilder().startObject().field("field", "1", "2").startObject("included").field("field", "should be seen").field("hidden_field", "should not be seen").endObject().field("excluded", "should not be seen").endObject().bytes();
         for (int i = 0; i < 100; i++) {
             client().prepareIndex("test", "type", Integer.toString(i)).setSource(sourceBytesRef).get();
         }
@@ -144,20 +121,12 @@ public class SimpleMgetTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testThatRoutingPerDocumentIsSupported() throws Exception {
-        assertAcked(prepareCreate("test").addAlias(new Alias("alias"))
-                .setSettings(ImmutableSettings.builder()
-                        .put(indexSettings())
-                        .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, between(2, DEFAULT_MAX_NUM_SHARDS))));
+        assertAcked(prepareCreate("test").addAlias(new Alias("alias")).setSettings(ImmutableSettings.builder().put(indexSettings()).put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, between(2, DEFAULT_MAX_NUM_SHARDS))));
         ensureYellow();
 
-        client().prepareIndex("test", "test", "1").setRefresh(true).setRouting("2")
-                .setSource(jsonBuilder().startObject().field("foo", "bar").endObject())
-                .execute().actionGet();
+        client().prepareIndex("test", "test", "1").setRefresh(true).setRouting("2").setSource(jsonBuilder().startObject().field("foo", "bar").endObject()).execute().actionGet();
 
-        MultiGetResponse mgetResponse = client().prepareMultiGet()
-                .add(new MultiGetRequest.Item(indexOrAlias(), "test", "1").routing("2"))
-                .add(new MultiGetRequest.Item(indexOrAlias(), "test", "1"))
-                .execute().actionGet();
+        MultiGetResponse mgetResponse = client().prepareMultiGet().add(new MultiGetRequest.Item(indexOrAlias(), "test", "1").routing("2")).add(new MultiGetRequest.Item(indexOrAlias(), "test", "1")).execute().actionGet();
 
         assertThat(mgetResponse.getResponses().length, is(2));
         assertThat(mgetResponse.getResponses()[0].isFailed(), is(false));

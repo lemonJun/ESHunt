@@ -42,8 +42,7 @@ public class ConcurrentDocumentOperationTests extends ElasticsearchIntegrationTe
     public void concurrentOperationOnSameDocTest() throws Exception {
 
         logger.info("--> create an index with 1 shard and max replicas based on nodes");
-        assertAcked(prepareCreate("test")
-                .setSettings(settingsBuilder().put(indexSettings()).put("index.number_of_shards", 1)));
+        assertAcked(prepareCreate("test").setSettings(settingsBuilder().put(indexSettings()).put("index.number_of_shards", 1)));
 
         logger.info("execute concurrent updates on the same doc");
         int numberOfUpdates = 100;

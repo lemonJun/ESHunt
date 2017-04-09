@@ -29,7 +29,6 @@ import static org.hamcrest.Matchers.equalTo;
 
 public class ClusterHealthTests extends ElasticsearchIntegrationTest {
 
-
     @Test
     public void simpleLocalHealthTest() {
         createIndex("test");

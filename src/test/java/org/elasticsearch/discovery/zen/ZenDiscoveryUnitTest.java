@@ -131,7 +131,6 @@ public class ZenDiscoveryUnitTest extends ElasticsearchTestCase {
         queue.offer(new ProcessClusterState(ClusterState.builder(clusterName).version(4).nodes(nodes2).build(), null));
         queue.offer(new ProcessClusterState(ClusterState.builder(clusterName).version(5).nodes(nodes1).build(), null));
 
-
         assertThat(ZenDiscovery.selectNextStateToProcess(queue), sameInstance(mostRecent.clusterState));
         assertThat(thirdMostRecent.processed, is(true));
         assertThat(secondMostRecent.processed, is(true));

@@ -361,18 +361,18 @@ public abstract class AbstractStringFieldDataTests extends AbstractFieldDataImpl
         IndexFieldData<?> fieldData = getForField("text");
         final Object missingValue;
         switch (randomInt(4)) {
-        case 0:
-            missingValue = "_first";
-            break;
-        case 1:
-            missingValue = "_last";
-            break;
-        case 2:
-            missingValue = new BytesRef(RandomPicks.randomFrom(getRandom(), values));
-            break;
-        default:
-            missingValue = new BytesRef(TestUtil.randomSimpleString(getRandom()));
-            break;
+            case 0:
+                missingValue = "_first";
+                break;
+            case 1:
+                missingValue = "_last";
+                break;
+            case 2:
+                missingValue = new BytesRef(RandomPicks.randomFrom(getRandom(), values));
+                break;
+            default:
+                missingValue = new BytesRef(TestUtil.randomSimpleString(getRandom()));
+                break;
         }
         Filter parentFilter = new TermFilter(new Term("type", "parent"));
         Filter childFilter = new NotFilter(parentFilter);

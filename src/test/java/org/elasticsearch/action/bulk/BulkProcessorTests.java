@@ -56,10 +56,8 @@ public class BulkProcessorTests extends ElasticsearchIntegrationTest {
 
         int numDocs = randomIntBetween(10, 100);
         try (BulkProcessor processor = BulkProcessor.builder(client(), listener).setName("foo")
-                //let's make sure that the bulk action limit trips, one single execution will index all the documents
-                .setConcurrentRequests(randomIntBetween(0, 1)).setBulkActions(numDocs)
-                .setFlushInterval(TimeValue.timeValueHours(24)).setBulkSize(new ByteSizeValue(1, ByteSizeUnit.GB))
-                .build()) {
+                        //let's make sure that the bulk action limit trips, one single execution will index all the documents
+                        .setConcurrentRequests(randomIntBetween(0, 1)).setBulkActions(numDocs).setFlushInterval(TimeValue.timeValueHours(24)).setBulkSize(new ByteSizeValue(1, ByteSizeUnit.GB)).build()) {
 
             MultiGetRequestBuilder multiGetRequestBuilder = indexDocs(client(), processor, numDocs);
 
@@ -81,9 +79,8 @@ public class BulkProcessorTests extends ElasticsearchIntegrationTest {
         int numDocs = randomIntBetween(10, 100);
 
         try (BulkProcessor processor = BulkProcessor.builder(client(), listener).setName("foo")
-                //let's make sure that this bulk won't be automatically flushed
-                .setConcurrentRequests(randomIntBetween(0, 10)).setBulkActions(numDocs + randomIntBetween(1, 100))
-                .setFlushInterval(TimeValue.timeValueHours(24)).setBulkSize(new ByteSizeValue(1, ByteSizeUnit.GB)).build()) {
+                        //let's make sure that this bulk won't be automatically flushed
+                        .setConcurrentRequests(randomIntBetween(0, 10)).setBulkActions(numDocs + randomIntBetween(1, 100)).setFlushInterval(TimeValue.timeValueHours(24)).setBulkSize(new ByteSizeValue(1, ByteSizeUnit.GB)).build()) {
 
             MultiGetRequestBuilder multiGetRequestBuilder = indexDocs(client(), processor, numDocs);
 
@@ -116,10 +113,9 @@ public class BulkProcessorTests extends ElasticsearchIntegrationTest {
 
         MultiGetRequestBuilder multiGetRequestBuilder;
 
-        try (BulkProcessor processor = BulkProcessor.builder(client(), listener)
-                .setConcurrentRequests(concurrentRequests).setBulkActions(bulkActions)
-                //set interval and size to high values
-                .setFlushInterval(TimeValue.timeValueHours(24)).setBulkSize(new ByteSizeValue(1, ByteSizeUnit.GB)).build()) {
+        try (BulkProcessor processor = BulkProcessor.builder(client(), listener).setConcurrentRequests(concurrentRequests).setBulkActions(bulkActions)
+                        //set interval and size to high values
+                        .setFlushInterval(TimeValue.timeValueHours(24)).setBulkSize(new ByteSizeValue(1, ByteSizeUnit.GB)).build()) {
 
             multiGetRequestBuilder = indexDocs(client(), processor, numDocs);
 
@@ -170,10 +166,9 @@ public class BulkProcessorTests extends ElasticsearchIntegrationTest {
 
         BulkProcessorTestListener listener = new BulkProcessorTestListener(latch, closeLatch);
 
-        try (BulkProcessor processor = BulkProcessor.builder(transportClient, listener)
-                .setConcurrentRequests(concurrentRequests).setBulkActions(bulkActions)
-                //set interval and size to high values
-                .setFlushInterval(TimeValue.timeValueHours(24)).setBulkSize(new ByteSizeValue(1, ByteSizeUnit.GB)).build()) {
+        try (BulkProcessor processor = BulkProcessor.builder(transportClient, listener).setConcurrentRequests(concurrentRequests).setBulkActions(bulkActions)
+                        //set interval and size to high values
+                        .setFlushInterval(TimeValue.timeValueHours(24)).setBulkSize(new ByteSizeValue(1, ByteSizeUnit.GB)).build()) {
 
             indexDocs(transportClient, processor, numDocs);
 
@@ -198,11 +193,8 @@ public class BulkProcessorTests extends ElasticsearchIntegrationTest {
 
         int numDocs = randomIntBetween(10, 100);
         BulkProcessor processor = BulkProcessor.builder(client(), listener).setName("foo")
-                //let's make sure that the bulk action limit trips, one single execution will index all the documents
-                .setConcurrentRequests(randomIntBetween(0, 1)).setBulkActions(numDocs)
-                .setFlushInterval(TimeValue.timeValueHours(24)).setBulkSize(new ByteSizeValue(randomIntBetween(1, 10),
-                        (ByteSizeUnit)RandomPicks.randomFrom(getRandom(), ByteSizeUnit.values())))
-                .build();
+                        //let's make sure that the bulk action limit trips, one single execution will index all the documents
+                        .setConcurrentRequests(randomIntBetween(0, 1)).setBulkActions(numDocs).setFlushInterval(TimeValue.timeValueHours(24)).setBulkSize(new ByteSizeValue(randomIntBetween(1, 10), (ByteSizeUnit) RandomPicks.randomFrom(getRandom(), ByteSizeUnit.values()))).build();
 
         MultiGetRequestBuilder multiGetRequestBuilder = indexDocs(client(), processor, numDocs);
         assertThat(processor.isOpen(), is(true));
@@ -226,8 +218,7 @@ public class BulkProcessorTests extends ElasticsearchIntegrationTest {
     @Test
     public void testBulkProcessorConcurrentRequestsReadOnlyIndex() throws Exception {
         createIndex("test-ro");
-        assertAcked(client().admin().indices().prepareUpdateSettings("test-ro")
-                .setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_BLOCKS_WRITE, true)));
+        assertAcked(client().admin().indices().prepareUpdateSettings("test-ro").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_BLOCKS_WRITE, true)));
         ensureGreen();
 
         int bulkActions = randomIntBetween(10, 100);
@@ -245,10 +236,9 @@ public class BulkProcessorTests extends ElasticsearchIntegrationTest {
         MultiGetRequestBuilder multiGetRequestBuilder = client().prepareMultiGet();
         BulkProcessorTestListener listener = new BulkProcessorTestListener(latch, closeLatch);
 
-        try (BulkProcessor processor = BulkProcessor.builder(client(), listener)
-                .setConcurrentRequests(concurrentRequests).setBulkActions(bulkActions)
+        try (BulkProcessor processor = BulkProcessor.builder(client(), listener).setConcurrentRequests(concurrentRequests).setBulkActions(bulkActions)
                         //set interval and size to high values
-                .setFlushInterval(TimeValue.timeValueHours(24)).setBulkSize(new ByteSizeValue(1, ByteSizeUnit.GB)).build()) {
+                        .setFlushInterval(TimeValue.timeValueHours(24)).setBulkSize(new ByteSizeValue(1, ByteSizeUnit.GB)).build()) {
 
             for (int i = 1; i <= numDocs; i++) {
                 if (randomBoolean()) {

@@ -41,8 +41,7 @@ public class GetIndexBackwardsCompatibilityTests extends ElasticsearchBackwardsC
     public void testGetAliases() throws Exception {
         CreateIndexResponse createIndexResponse = prepareCreate("test").addAlias(new Alias("testAlias")).execute().actionGet();
         assertAcked(createIndexResponse);
-        GetIndexResponse getIndexResponse = client().admin().indices().prepareGetIndex().addIndices("test").addFeatures("_aliases")
-                .execute().actionGet();
+        GetIndexResponse getIndexResponse = client().admin().indices().prepareGetIndex().addIndices("test").addFeatures("_aliases").execute().actionGet();
         ImmutableOpenMap<String, ImmutableList<AliasMetaData>> aliasesMap = getIndexResponse.aliases();
         assertThat(aliasesMap, notNullValue());
         assertThat(aliasesMap.size(), equalTo(1));
@@ -58,8 +57,7 @@ public class GetIndexBackwardsCompatibilityTests extends ElasticsearchBackwardsC
     public void testGetMappings() throws Exception {
         CreateIndexResponse createIndexResponse = prepareCreate("test").addMapping("type1", "{\"type1\":{}}").execute().actionGet();
         assertAcked(createIndexResponse);
-        GetIndexResponse getIndexResponse = client().admin().indices().prepareGetIndex().addIndices("test").addFeatures("_mappings")
-                .execute().actionGet();
+        GetIndexResponse getIndexResponse = client().admin().indices().prepareGetIndex().addIndices("test").addFeatures("_mappings").execute().actionGet();
         ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> mappings = getIndexResponse.mappings();
         assertThat(mappings, notNullValue());
         assertThat(mappings.size(), equalTo(1));
@@ -79,8 +77,7 @@ public class GetIndexBackwardsCompatibilityTests extends ElasticsearchBackwardsC
     public void testGetSettings() throws Exception {
         CreateIndexResponse createIndexResponse = prepareCreate("test").setSettings(ImmutableSettings.builder().put("number_of_shards", 1)).execute().actionGet();
         assertAcked(createIndexResponse);
-        GetIndexResponse getIndexResponse = client().admin().indices().prepareGetIndex().addIndices("test").addFeatures("_settings")
-                .execute().actionGet();
+        GetIndexResponse getIndexResponse = client().admin().indices().prepareGetIndex().addIndices("test").addFeatures("_settings").execute().actionGet();
         ImmutableOpenMap<String, Settings> settingsMap = getIndexResponse.settings();
         assertThat(settingsMap, notNullValue());
         assertThat(settingsMap.size(), equalTo(1));
@@ -95,8 +92,7 @@ public class GetIndexBackwardsCompatibilityTests extends ElasticsearchBackwardsC
         ensureYellow("test");
         assertAcked(client().admin().indices().preparePutWarmer("warmer1").setSearchRequest(client().prepareSearch("test")).get());
         ensureYellow("test");
-        GetIndexResponse getIndexResponse = client().admin().indices().prepareGetIndex().addIndices("test").addFeatures("_warmers")
-                .execute().actionGet();
+        GetIndexResponse getIndexResponse = client().admin().indices().prepareGetIndex().addIndices("test").addFeatures("_warmers").execute().actionGet();
         ImmutableOpenMap<String, ImmutableList<Entry>> warmersMap = getIndexResponse.warmers();
         assertThat(warmersMap, notNullValue());
         assertThat(warmersMap.size(), equalTo(1));

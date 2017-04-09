@@ -34,7 +34,6 @@ import static org.elasticsearch.search.aggregations.AggregationBuilders.terms;
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertAcked;
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertSearchResponse;
 
-
 @ElasticsearchIntegrationTest.SuiteScopeTest
 public class AggregationsIntegrationTests extends ElasticsearchIntegrationTest {
 
@@ -63,9 +62,7 @@ public class AggregationsIntegrationTests extends ElasticsearchIntegrationTest {
 
     public void testScroll() {
         final int size = randomIntBetween(1, 4);
-        SearchResponse response = client().prepareSearch("index")
-                .setSize(size).setScroll(new TimeValue(500))
-                .addAggregation(terms("f").field("f")).get();
+        SearchResponse response = client().prepareSearch("index").setSize(size).setScroll(new TimeValue(500)).addAggregation(terms("f").field("f")).get();
         assertSearchResponse(response);
         Aggregations aggregations = response.getAggregations();
         assertNotNull(aggregations);
@@ -74,9 +71,7 @@ public class AggregationsIntegrationTests extends ElasticsearchIntegrationTest {
 
         int total = response.getHits().getHits().length;
         while (response.getHits().hits().length > 0) {
-            response = client().prepareSearchScroll(response.getScrollId())
-                    .setScroll(new TimeValue(500))
-                    .execute().actionGet();
+            response = client().prepareSearchScroll(response.getScrollId()).setScroll(new TimeValue(500)).execute().actionGet();
             assertNull(response.getAggregations());
             total += response.getHits().hits().length;
         }

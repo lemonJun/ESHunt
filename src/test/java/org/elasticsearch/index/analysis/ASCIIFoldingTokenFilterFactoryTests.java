@@ -32,25 +32,20 @@ import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilde
 public class ASCIIFoldingTokenFilterFactoryTests extends ElasticsearchTokenStreamTestCase {
     @Test
     public void testDefault() throws IOException {
-        AnalysisService analysisService = AnalysisTestsHelper.createAnalysisServiceFromSettings(settingsBuilder()
-                .put("index.analysis.filter.my_ascii_folding.type", "asciifolding")
-                .build());
+        AnalysisService analysisService = AnalysisTestsHelper.createAnalysisServiceFromSettings(settingsBuilder().put("index.analysis.filter.my_ascii_folding.type", "asciifolding").build());
         TokenFilterFactory tokenFilter = analysisService.tokenFilter("my_ascii_folding");
         String source = "Ansprüche";
-        String[] expected = new String[]{"Anspruche"};
+        String[] expected = new String[] { "Anspruche" };
         Tokenizer tokenizer = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(source));
         assertTokenStreamContents(tokenFilter.create(tokenizer), expected);
     }
 
     @Test
     public void testPreserveOriginal() throws IOException {
-        AnalysisService analysisService = AnalysisTestsHelper.createAnalysisServiceFromSettings(settingsBuilder()
-                .put("index.analysis.filter.my_ascii_folding.type", "asciifolding")
-                .put("index.analysis.filter.my_ascii_folding.preserve_original", true)
-                .build());
+        AnalysisService analysisService = AnalysisTestsHelper.createAnalysisServiceFromSettings(settingsBuilder().put("index.analysis.filter.my_ascii_folding.type", "asciifolding").put("index.analysis.filter.my_ascii_folding.preserve_original", true).build());
         TokenFilterFactory tokenFilter = analysisService.tokenFilter("my_ascii_folding");
         String source = "Ansprüche";
-        String[] expected = new String[]{"Anspruche", "Ansprüche"};
+        String[] expected = new String[] { "Anspruche", "Ansprüche" };
         Tokenizer tokenizer = new WhitespaceTokenizer(TEST_VERSION_CURRENT, new StringReader(source));
         assertTokenStreamContents(tokenFilter.create(tokenizer), expected);
     }

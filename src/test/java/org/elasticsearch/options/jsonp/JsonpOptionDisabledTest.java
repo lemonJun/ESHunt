@@ -45,24 +45,16 @@ public class JsonpOptionDisabledTest extends ElasticsearchIntegrationTest {
         // false is the default!
         if (randomBoolean()) {
             logger.info("using default jsonp settings (should be false)");
-            return ImmutableSettings.settingsBuilder()
-                    .put(super.nodeSettings(nodeOrdinal))
-                    .put(InternalNode.HTTP_ENABLED, true).build();
+            return ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put(InternalNode.HTTP_ENABLED, true).build();
         }
-        return ImmutableSettings.settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put(InternalNode.HTTP_ENABLED, true)
-                .put(RestController.HTTP_JSON_ENABLE, false)
-                .build();
+        return ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put(InternalNode.HTTP_ENABLED, true).put(RestController.HTTP_JSON_ENABLE, false).build();
     }
 
     // Make sure our response has both the callback as well as our "JSONP is disabled" message. 
     @Test
     public void testThatJSONPisDisabled() throws Exception {
         // Make the HTTP request
-        HttpResponse response = new HttpRequestBuilder(HttpClients.createDefault()).httpTransport(internalCluster().getDataNodeInstance(HttpServerTransport.class))
-                .path("/")
-                .addParam("callback", "DisabledJSONPCallback").execute();
+        HttpResponse response = new HttpRequestBuilder(HttpClients.createDefault()).httpTransport(internalCluster().getDataNodeInstance(HttpServerTransport.class)).path("/").addParam("callback", "DisabledJSONPCallback").execute();
 
         assertThat(response.getHeaders().get("Content-Type"), is("application/javascript"));
         assertThat(response.getBody(), containsString("DisabledJSONPCallback("));

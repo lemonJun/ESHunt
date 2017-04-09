@@ -36,28 +36,10 @@ public class FieldLevelBoostTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testFieldLevelBoost() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("person").startObject("properties")
-                .startObject("str_field").field("type", "string").endObject()
-                .startObject("int_field").field("type", "integer").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("byte_field").field("type", "byte").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("date_field").field("type", "date").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("double_field").field("type", "double").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("float_field").field("type", "float").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("long_field").field("type", "long").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("short_field").field("type", "short").startObject("norms").field("enabled", true).endObject().endObject()
-                .string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("person").startObject("properties").startObject("str_field").field("type", "string").endObject().startObject("int_field").field("type", "integer").startObject("norms").field("enabled", true).endObject().endObject().startObject("byte_field").field("type", "byte").startObject("norms").field("enabled", true).endObject().endObject().startObject("date_field").field("type", "date").startObject("norms").field("enabled", true).endObject().endObject().startObject("double_field").field("type", "double").startObject("norms").field("enabled", true).endObject().endObject().startObject("float_field").field("type", "float").startObject("norms").field("enabled", true).endObject().endObject().startObject("long_field").field("type", "long").startObject("norms").field("enabled", true).endObject().endObject().startObject("short_field").field("type", "short").startObject("norms").field("enabled", true).endObject().endObject().string();
 
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
-        BytesReference json = XContentFactory.jsonBuilder().startObject().field("_id", "1")
-                .startObject("str_field").field("boost", 2.0).field("value", "some name").endObject()
-                .startObject("int_field").field("boost", 3.0).field("value", 10).endObject()
-                .startObject("byte_field").field("boost", 4.0).field("value", 20).endObject()
-                .startObject("date_field").field("boost", 5.0).field("value", "2012-01-10").endObject()
-                .startObject("double_field").field("boost", 6.0).field("value", 30.0).endObject()
-                .startObject("float_field").field("boost", 7.0).field("value", 40.0).endObject()
-                .startObject("long_field").field("boost", 8.0).field("value", 50).endObject()
-                .startObject("short_field").field("boost", 9.0).field("value", 60).endObject()
-                .bytes();
+        BytesReference json = XContentFactory.jsonBuilder().startObject().field("_id", "1").startObject("str_field").field("boost", 2.0).field("value", "some name").endObject().startObject("int_field").field("boost", 3.0).field("value", 10).endObject().startObject("byte_field").field("boost", 4.0).field("value", 20).endObject().startObject("date_field").field("boost", 5.0).field("value", "2012-01-10").endObject().startObject("double_field").field("boost", 6.0).field("value", 30.0).endObject().startObject("float_field").field("boost", 7.0).field("value", 40.0).endObject().startObject("long_field").field("boost", 8.0).field("value", 50).endObject().startObject("short_field").field("boost", 9.0).field("value", 60).endObject().bytes();
         Document doc = docMapper.parse(json).rootDoc();
 
         IndexableField f = doc.getField("str_field");
@@ -87,85 +69,60 @@ public class FieldLevelBoostTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testInvalidFieldLevelBoost() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("person").startObject("properties")
-                .startObject("str_field").field("type", "string").endObject()
-                .startObject("int_field").field("type", "integer").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("byte_field").field("type", "byte").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("date_field").field("type", "date").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("double_field").field("type", "double").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("float_field").field("type", "float").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("long_field").field("type", "long").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("short_field").field("type", "short").startObject("norms").field("enabled", true).endObject().endObject()
-                .string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("person").startObject("properties").startObject("str_field").field("type", "string").endObject().startObject("int_field").field("type", "integer").startObject("norms").field("enabled", true).endObject().endObject().startObject("byte_field").field("type", "byte").startObject("norms").field("enabled", true).endObject().endObject().startObject("date_field").field("type", "date").startObject("norms").field("enabled", true).endObject().endObject().startObject("double_field").field("type", "double").startObject("norms").field("enabled", true).endObject().endObject().startObject("float_field").field("type", "float").startObject("norms").field("enabled", true).endObject().endObject().startObject("long_field").field("type", "long").startObject("norms").field("enabled", true).endObject().endObject().startObject("short_field").field("type", "short").startObject("norms").field("enabled", true).endObject().endObject().string();
 
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
         try {
-            docMapper.parse(XContentFactory.jsonBuilder().startObject()
-                    .field("_id", "1").startObject("str_field").field("foo", "bar")
-                    .endObject().bytes()).rootDoc();
+            docMapper.parse(XContentFactory.jsonBuilder().startObject().field("_id", "1").startObject("str_field").field("foo", "bar").endObject().bytes()).rootDoc();
             fail();
         } catch (MapperParsingException ex) {
             // Expected
         }
 
         try {
-            docMapper.parse(XContentFactory.jsonBuilder().startObject()
-                    .field("_id", "1").startObject("int_field").field("foo", "bar")
-                    .endObject().bytes()).rootDoc();
+            docMapper.parse(XContentFactory.jsonBuilder().startObject().field("_id", "1").startObject("int_field").field("foo", "bar").endObject().bytes()).rootDoc();
             fail();
         } catch (MapperParsingException ex) {
             // Expected
         }
 
         try {
-            docMapper.parse(XContentFactory.jsonBuilder().startObject()
-                    .field("_id", "1").startObject("byte_field").field("foo", "bar")
-                    .endObject().bytes()).rootDoc();
+            docMapper.parse(XContentFactory.jsonBuilder().startObject().field("_id", "1").startObject("byte_field").field("foo", "bar").endObject().bytes()).rootDoc();
             fail();
         } catch (MapperParsingException ex) {
             // Expected
         }
 
         try {
-            docMapper.parse(XContentFactory.jsonBuilder().startObject()
-                    .field("_id", "1").startObject("date_field").field("foo", "bar")
-                    .endObject().bytes()).rootDoc();
+            docMapper.parse(XContentFactory.jsonBuilder().startObject().field("_id", "1").startObject("date_field").field("foo", "bar").endObject().bytes()).rootDoc();
             fail();
         } catch (MapperParsingException ex) {
             // Expected
         }
 
         try {
-            docMapper.parse(XContentFactory.jsonBuilder().startObject()
-                    .field("_id", "1").startObject("double_field").field("foo", "bar")
-                    .endObject().bytes()).rootDoc();
+            docMapper.parse(XContentFactory.jsonBuilder().startObject().field("_id", "1").startObject("double_field").field("foo", "bar").endObject().bytes()).rootDoc();
             fail();
         } catch (MapperParsingException ex) {
             // Expected
         }
 
         try {
-            docMapper.parse(XContentFactory.jsonBuilder().startObject()
-                    .field("_id", "1").startObject("float_field").field("foo", "bar")
-                    .endObject().bytes()).rootDoc();
+            docMapper.parse(XContentFactory.jsonBuilder().startObject().field("_id", "1").startObject("float_field").field("foo", "bar").endObject().bytes()).rootDoc();
             fail();
         } catch (MapperParsingException ex) {
             // Expected
         }
 
         try {
-            docMapper.parse(XContentFactory.jsonBuilder().startObject()
-                    .field("_id", "1").startObject("long_field").field("foo", "bar")
-                    .endObject().bytes()).rootDoc();
+            docMapper.parse(XContentFactory.jsonBuilder().startObject().field("_id", "1").startObject("long_field").field("foo", "bar").endObject().bytes()).rootDoc();
             fail();
         } catch (MapperParsingException ex) {
             // Expected
         }
 
         try {
-            docMapper.parse(XContentFactory.jsonBuilder().startObject()
-                    .field("_id", "1").startObject("short_field").field("foo", "bar")
-                    .endObject().bytes()).rootDoc();
+            docMapper.parse(XContentFactory.jsonBuilder().startObject().field("_id", "1").startObject("short_field").field("foo", "bar").endObject().bytes()).rootDoc();
             fail();
         } catch (MapperParsingException ex) {
             // Expected

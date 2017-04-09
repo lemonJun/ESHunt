@@ -64,9 +64,9 @@ public class ZenFaultDetectionTests extends ElasticsearchTestCase {
         super.setUp();
         threadPool = new ThreadPool(getClass().getName());
         serviceA = build(ImmutableSettings.builder().put("name", "TS_A").build(), version0);
-        nodeA = new DiscoveryNode("TS_A", "TS_A", serviceA.boundAddress().publishAddress(), ImmutableMap.<String, String>of(), version0);
+        nodeA = new DiscoveryNode("TS_A", "TS_A", serviceA.boundAddress().publishAddress(), ImmutableMap.<String, String> of(), version0);
         serviceB = build(ImmutableSettings.builder().put("name", "TS_B").build(), version1);
-        nodeB = new DiscoveryNode("TS_B", "TS_B", serviceB.boundAddress().publishAddress(), ImmutableMap.<String, String>of(), version1);
+        nodeB = new DiscoveryNode("TS_B", "TS_B", serviceB.boundAddress().publishAddress(), ImmutableMap.<String, String> of(), version1);
 
         // wait till all nodes are properly connected and the event has been sent, so tests in this class
         // will not get this callback called on the connections done in this setup
@@ -132,8 +132,7 @@ public class ZenFaultDetectionTests extends ElasticsearchTestCase {
         ImmutableSettings.Builder settings = ImmutableSettings.builder();
         boolean shouldRetry = randomBoolean();
         // make sure we don't ping again after the initial ping
-        settings.put(FaultDetection.SETTING_CONNECT_ON_NETWORK_DISCONNECT, shouldRetry)
-                .put(FaultDetection.SETTING_PING_INTERVAL, "5m");
+        settings.put(FaultDetection.SETTING_CONNECT_ON_NETWORK_DISCONNECT, shouldRetry).put(FaultDetection.SETTING_PING_INTERVAL, "5m");
         ClusterState clusterState = ClusterState.builder(new ClusterName("test")).nodes(buildNodesForA(true)).build();
         NodesFaultDetection nodesFDA = new NodesFaultDetection(settings.build(), threadPool, serviceA, clusterState.getClusterName());
         nodesFDA.setLocalNode(nodeA);
@@ -182,12 +181,10 @@ public class ZenFaultDetectionTests extends ElasticsearchTestCase {
         ImmutableSettings.Builder settings = ImmutableSettings.builder();
         boolean shouldRetry = randomBoolean();
         // make sure we don't ping
-        settings.put(FaultDetection.SETTING_CONNECT_ON_NETWORK_DISCONNECT, shouldRetry)
-                .put(FaultDetection.SETTING_PING_INTERVAL, "5m");
+        settings.put(FaultDetection.SETTING_CONNECT_ON_NETWORK_DISCONNECT, shouldRetry).put(FaultDetection.SETTING_PING_INTERVAL, "5m");
         ClusterName clusterName = new ClusterName(randomAsciiOfLengthBetween(3, 20));
         final ClusterState state = ClusterState.builder(clusterName).nodes(buildNodesForA(false)).build();
-        MasterFaultDetection masterFD = new MasterFaultDetection(settings.build(), threadPool, serviceA, clusterName,
-                new NoopClusterService(state));
+        MasterFaultDetection masterFD = new MasterFaultDetection(settings.build(), threadPool, serviceA, clusterName, new NoopClusterService(state));
         masterFD.start(nodeB, "test");
 
         final String[] failureReason = new String[1];

@@ -56,12 +56,7 @@ public class TransportClientHeadersTests extends AbstractClientHeadersTests {
 
     @Override
     protected Client buildClient(Settings headersSettings, GenericAction[] testedActions) {
-        TransportClient client = new TransportClient(ImmutableSettings.builder()
-                .put("client.transport.sniff", false)
-                .put("node.name", "transport_client_" + this.getTestName())
-                .put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, InternalTransportService.class.getName())
-                .put(HEADER_SETTINGS)
-                .build());
+        TransportClient client = new TransportClient(ImmutableSettings.builder().put("client.transport.sniff", false).put("node.name", "transport_client_" + this.getTestName()).put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, InternalTransportService.class.getName()).put(HEADER_SETTINGS).build());
 
         client.addTransportAddress(address);
         return client;
@@ -69,14 +64,7 @@ public class TransportClientHeadersTests extends AbstractClientHeadersTests {
 
     @Test
     public void testWithSniffing() throws Exception {
-        TransportClient client = new TransportClient(ImmutableSettings.builder()
-                .put("client.transport.sniff", true)
-                .put("cluster.name", "cluster1")
-                .put("node.name", "transport_client_" + this.getTestName() + "_1")
-                .put("client.transport.nodes_sampler_interval", "1s")
-                .put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, InternalTransportService.class.getName())
-                .put(HEADER_SETTINGS)
-                .build());
+        TransportClient client = new TransportClient(ImmutableSettings.builder().put("client.transport.sniff", true).put("cluster.name", "cluster1").put("node.name", "transport_client_" + this.getTestName() + "_1").put("client.transport.nodes_sampler_interval", "1s").put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, InternalTransportService.class.getName()).put(HEADER_SETTINGS).build());
         try {
             client.addTransportAddress(address);
 
@@ -103,7 +91,8 @@ public class TransportClientHeadersTests extends AbstractClientHeadersTests {
             super(settings, transport, threadPool);
         }
 
-        @Override @SuppressWarnings("unchecked")
+        @Override
+        @SuppressWarnings("unchecked")
         public <T extends TransportResponse> void sendRequest(DiscoveryNode node, String action, TransportRequest request, TransportRequestOptions options, TransportResponseHandler<T> handler) {
             if (NodesInfoAction.NAME.equals(action)) {
                 assertHeaders(request);

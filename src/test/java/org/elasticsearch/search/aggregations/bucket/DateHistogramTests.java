@@ -79,21 +79,11 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
     }
 
     private IndexRequestBuilder indexDoc(String idx, DateTime date, int value) throws Exception {
-        return client().prepareIndex(idx, "type").setSource(jsonBuilder()
-                .startObject()
-                .field("date", date)
-                .field("value", value)
-                .startArray("dates").value(date).value(date.plusMonths(1).plusDays(1)).endArray()
-                .endObject());
+        return client().prepareIndex(idx, "type").setSource(jsonBuilder().startObject().field("date", date).field("value", value).startArray("dates").value(date).value(date.plusMonths(1).plusDays(1)).endArray().endObject());
     }
 
     private IndexRequestBuilder indexDoc(int month, int day, int value) throws Exception {
-        return client().prepareIndex("idx", "type").setSource(jsonBuilder()
-                .startObject()
-                .field("value", value)
-                .field("date", date(month, day))
-                .startArray("dates").value(date(month, day)).value(date(month + 1, day + 1)).endArray()
-                .endObject());
+        return client().prepareIndex("idx", "type").setSource(jsonBuilder().startObject().field("value", value).field("date", date(month, day)).startArray("dates").value(date(month, day)).value(date(month + 1, day + 1)).endArray().endObject());
     }
 
     @Override
@@ -104,18 +94,14 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
         prepareCreate("empty_bucket_idx").addMapping("type", "value", "type=integer").execute().actionGet();
         List<IndexRequestBuilder> builders = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
-            builders.add(client().prepareIndex("empty_bucket_idx", "type", ""+i).setSource(jsonBuilder()
-                    .startObject()
-                    .field("value", i*2)
-                    .endObject()));
+            builders.add(client().prepareIndex("empty_bucket_idx", "type", "" + i).setSource(jsonBuilder().startObject().field("value", i * 2).endObject()));
         }
-        builders.addAll(Arrays.asList(
-                indexDoc(1, 2, 1),  // date: Jan 2, dates: Jan 2, Feb 3
-                indexDoc(2, 2, 2),  // date: Feb 2, dates: Feb 2, Mar 3
-                indexDoc(2, 15, 3), // date: Feb 15, dates: Feb 15, Mar 16
-                indexDoc(3, 2, 4),  // date: Mar 2, dates: Mar 2, Apr 3
-                indexDoc(3, 15, 5), // date: Mar 15, dates: Mar 15, Apr 16
-                indexDoc(3, 23, 6))); // date: Mar 23, dates: Mar 23, Apr 24
+        builders.addAll(Arrays.asList(indexDoc(1, 2, 1), // date: Jan 2, dates: Jan 2, Feb 3
+                        indexDoc(2, 2, 2), // date: Feb 2, dates: Feb 2, Mar 3
+                        indexDoc(2, 15, 3), // date: Feb 15, dates: Feb 15, Mar 16
+                        indexDoc(3, 2, 4), // date: Mar 2, dates: Mar 2, Apr 3
+                        indexDoc(3, 15, 5), // date: Mar 15, dates: Mar 15, Apr 16
+                        indexDoc(3, 23, 6))); // date: Mar 23, dates: Mar 23, Apr 24
         indexRandom(true, builders);
         ensureSearchable();
     }
@@ -144,12 +130,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedField() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -179,31 +162,20 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
     public void singleValuedField_WithPostTimeZone() throws Exception {
         SearchResponse response;
         if (randomBoolean()) {
-            response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.DAY).postZone("-01:00"))
-                .execute().actionGet();
+            response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.DAY).postZone("-01:00")).execute().actionGet();
         } else {
 
             // checking post_zone setting as an int
 
-            response = client().prepareSearch("idx")
-                .addAggregation(new AbstractAggregationBuilder("histo", "date_histogram") {
-                    @Override
-                    public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException {
-                        return builder.startObject(getName())
-                                .startObject(type)
-                                    .field("field", "date")
-                                    .field("interval", "1d")
-                                    .field("post_zone", -1)
-                                .endObject()
-                            .endObject();
-                    }
-                })
-                .execute().actionGet();
+            response = client().prepareSearch("idx").addAggregation(new AbstractAggregationBuilder("histo", "date_histogram") {
+                @Override
+                public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException {
+                    return builder.startObject(getName()).startObject(type).field("field", "date").field("interval", "1d").field("post_zone", -1).endObject().endObject();
+                }
+            }).execute().actionGet();
         }
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -249,15 +221,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedField_OrderedByKeyAsc() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo")
-                        .field("date")
-                        .interval(DateHistogram.Interval.MONTH)
-                        .order(DateHistogram.Order.KEY_ASC))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH).order(DateHistogram.Order.KEY_ASC)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -266,22 +232,16 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
         int i = 0;
         for (DateHistogram.Bucket bucket : histo.getBuckets()) {
-            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i+1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
+            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i + 1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
             i++;
         }
     }
 
     @Test
     public void singleValuedField_OrderedByKeyDesc() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo")
-                        .field("date")
-                        .interval(DateHistogram.Interval.MONTH)
-                        .order(DateHistogram.Order.KEY_DESC))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH).order(DateHistogram.Order.KEY_DESC)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -290,22 +250,16 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
         int i = 2;
         for (DateHistogram.Bucket bucket : histo.getBuckets()) {
-            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i+1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
+            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i + 1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
             i--;
         }
     }
 
     @Test
     public void singleValuedField_OrderedByCountAsc() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo")
-                        .field("date")
-                        .interval(DateHistogram.Interval.MONTH)
-                        .order(DateHistogram.Order.COUNT_ASC))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH).order(DateHistogram.Order.COUNT_ASC)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -314,22 +268,16 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
         int i = 0;
         for (DateHistogram.Bucket bucket : histo.getBuckets()) {
-            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i+1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
+            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i + 1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
             i++;
         }
     }
 
     @Test
     public void singleValuedField_OrderedByCountDesc() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo")
-                        .field("date")
-                        .interval(DateHistogram.Interval.MONTH)
-                        .order(DateHistogram.Order.COUNT_DESC))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH).order(DateHistogram.Order.COUNT_DESC)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -338,20 +286,16 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
         int i = 2;
         for (DateHistogram.Bucket bucket : histo.getBuckets()) {
-            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i+1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
+            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i + 1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
             i--;
         }
     }
 
     @Test
     public void singleValuedField_WithSubAggregation() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH)
-                    .subAggregation(sum("sum").field("value")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH).subAggregation(sum("sum").field("value"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -388,13 +332,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedField_WithSubAggregation_Inherited() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH)
-                        .subAggregation(max("max")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH).subAggregation(max("max"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -431,16 +371,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedField_OrderedBySubAggregationAsc() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo")
-                        .field("date")
-                        .interval(DateHistogram.Interval.MONTH)
-                        .order(DateHistogram.Order.aggregation("sum", true))
-                        .subAggregation(max("sum").field("value")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH).order(DateHistogram.Order.aggregation("sum", true)).subAggregation(max("sum").field("value"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -449,23 +382,16 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
         int i = 0;
         for (DateHistogram.Bucket bucket : histo.getBuckets()) {
-            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i+1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
+            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i + 1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
             i++;
         }
     }
 
     @Test
     public void singleValuedField_OrderedBySubAggregationDesc() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo")
-                        .field("date")
-                        .interval(DateHistogram.Interval.MONTH)
-                        .order(DateHistogram.Order.aggregation("sum", false))
-                        .subAggregation(max("sum").field("value")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH).order(DateHistogram.Order.aggregation("sum", false)).subAggregation(max("sum").field("value"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -474,20 +400,14 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
         int i = 2;
         for (DateHistogram.Bucket bucket : histo.getBuckets()) {
-            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i+1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
+            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i + 1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
             i--;
         }
     }
 
     @Test
     public void singleValuedField_OrderedByMultiValuedSubAggregationAsc_Inherited() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo")
-                        .field("date")
-                        .interval(DateHistogram.Interval.MONTH)
-                        .order(DateHistogram.Order.aggregation("stats", "sum", true))
-                        .subAggregation(stats("stats").field("value")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH).order(DateHistogram.Order.aggregation("stats", "sum", true)).subAggregation(stats("stats").field("value"))).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -498,23 +418,16 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
         int i = 0;
         for (DateHistogram.Bucket bucket : histo.getBuckets()) {
-            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i+1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
+            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i + 1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
             i++;
         }
     }
 
     @Test
     public void singleValuedField_OrderedByMultiValuedSubAggregationDesc() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo")
-                        .field("date")
-                        .interval(DateHistogram.Interval.MONTH)
-                        .order(DateHistogram.Order.aggregation("stats", "sum", false))
-                        .subAggregation(stats("stats").field("value")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH).order(DateHistogram.Order.aggregation("stats", "sum", false)).subAggregation(stats("stats").field("value"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -523,22 +436,16 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
         int i = 2;
         for (DateHistogram.Bucket bucket : histo.getBuckets()) {
-            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i+1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
+            assertThat(bucket.getKeyAsNumber().longValue(), equalTo(new DateTime(2012, i + 1, 1, 0, 0, DateTimeZone.UTC).getMillis()));
             i--;
         }
     }
 
     @Test
     public void singleValuedField_WithValueScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo")
-                        .field("date")
-                        .script("new DateTime(_value).plusMonths(1).getMillis()")
-                        .interval(DateHistogram.Interval.MONTH))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").script("new DateTime(_value).plusMonths(1).getMillis()").interval(DateHistogram.Interval.MONTH)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -576,12 +483,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedField() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo").field("dates").interval(DateHistogram.Interval.MONTH))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("dates").interval(DateHistogram.Interval.MONTH)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -615,15 +519,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedField_OrderedByKeyDesc() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo")
-                        .field("dates")
-                        .interval(DateHistogram.Interval.MONTH)
-                        .order(DateHistogram.Order.COUNT_DESC))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("dates").interval(DateHistogram.Interval.MONTH).order(DateHistogram.Order.COUNT_DESC)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -650,7 +548,6 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
         assertThat(bucket.getDocCount(), equalTo(1l));
     }
 
-
     /**
      * The script will change to document date values to the following:
      *
@@ -663,15 +560,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
      */
     @Test
     public void multiValuedField_WithValueScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo")
-                        .field("dates")
-                        .script("new DateTime(_value, DateTimeZone.UTC).plusMonths(1).getMillis()")
-                        .interval(DateHistogram.Interval.MONTH))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("dates").script("new DateTime(_value, DateTimeZone.UTC).plusMonths(1).getMillis()").interval(DateHistogram.Interval.MONTH)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -716,16 +607,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
      */
     @Test
     public void multiValuedField_WithValueScript_WithInheritedSubAggregator() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo")
-                        .field("dates")
-                        .script("new DateTime((long)_value, DateTimeZone.UTC).plusMonths(1).getMillis()")
-                        .interval(DateHistogram.Interval.MONTH)
-                        .subAggregation(max("max")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("dates").script("new DateTime((long)_value, DateTimeZone.UTC).plusMonths(1).getMillis()").interval(DateHistogram.Interval.MONTH).subAggregation(max("max"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -779,12 +663,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
      */
     @Test
     public void script_SingleValue() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo").script("doc['date'].value").interval(DateHistogram.Interval.MONTH))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").script("doc['date'].value").interval(DateHistogram.Interval.MONTH)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -812,15 +693,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void script_SingleValue_WithSubAggregator_Inherited() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo")
-                        .script("doc['date'].value")
-                        .interval(DateHistogram.Interval.MONTH)
-                        .subAggregation(max("max")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").script("doc['date'].value").interval(DateHistogram.Interval.MONTH).subAggregation(max("max"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -857,12 +732,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void script_MultiValued() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo").script("doc['dates'].values").interval(DateHistogram.Interval.MONTH))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").script("doc['dates'].values").interval(DateHistogram.Interval.MONTH)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -894,26 +766,20 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
         assertThat(bucket.getDocCount(), equalTo(3l));
     }
 
-      /*
+    /*
     [ Jan 2, Feb 3]
     [ Feb 2, Mar 3]
     [ Feb 15, Mar 16]
     [ Mar 2, Apr 3]
     [ Mar 15, Apr 16]
     [ Mar 23, Apr 24]
-     */
+    */
 
     @Test
     public void script_MultiValued_WithAggregatorInherited() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo")
-                        .script("doc['dates'].values")
-                        .interval(DateHistogram.Interval.MONTH)
-                        .subAggregation(max("max")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").script("doc['dates'].values").interval(DateHistogram.Interval.MONTH).subAggregation(max("max"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -959,12 +825,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void unmapped() throws Exception {
-        SearchResponse response = client().prepareSearch("idx_unmapped")
-                .addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx_unmapped").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -974,12 +837,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void partiallyUnmapped() throws Exception {
-        SearchResponse response = client().prepareSearch("idx", "idx_unmapped")
-                .addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx", "idx_unmapped").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.MONTH)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -1007,10 +867,7 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void emptyAggregation() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0).subAggregation(dateHistogram("date_histo").interval(1)))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx").setQuery(matchAllQuery()).addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0).subAggregation(dateHistogram("date_histo").interval(1))).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(2l));
         Histogram histo = searchResponse.getAggregations().get("histo");
@@ -1036,14 +893,7 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
         }
         indexRandom(true, reqs);
 
-        SearchResponse response = client().prepareSearch("idx2")
-                .setQuery(matchAllQuery())
-                .addAggregation(dateHistogram("date_histo")
-                        .field("date")
-                        .timeZone("-2:00")
-                        .interval(DateHistogram.Interval.DAY)
-                        .format("yyyy-MM-dd"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx2").setQuery(matchAllQuery()).addAggregation(dateHistogram("date_histo").field("date").timeZone("-2:00").interval(DateHistogram.Interval.DAY).format("yyyy-MM-dd")).execute().actionGet();
 
         assertThat(response.getHits().getTotalHits(), equalTo(5l));
 
@@ -1071,15 +921,7 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
         }
         indexRandom(true, reqs);
 
-        SearchResponse response = client().prepareSearch("idx2")
-                .setQuery(matchAllQuery())
-                .addAggregation(dateHistogram("date_histo")
-                        .field("date")
-                        .timeZone("-2:00")
-                        .interval(DateHistogram.Interval.DAY)
-                        .preZoneAdjustLargeInterval(true)
-                        .format("yyyy-MM-dd'T'HH:mm:ss"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx2").setQuery(matchAllQuery()).addAggregation(dateHistogram("date_histo").field("date").timeZone("-2:00").interval(DateHistogram.Interval.DAY).preZoneAdjustLargeInterval(true).format("yyyy-MM-dd'T'HH:mm:ss")).execute().actionGet();
 
         assertThat(response.getHits().getTotalHits(), equalTo(5l));
 
@@ -1106,10 +948,7 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
         DateTime base = new DateTime(DateTimeZone.UTC).dayOfMonth().roundFloorCopy();
         DateTime baseKey = new DateTime(intervalMillis * (base.getMillis() / intervalMillis), DateTimeZone.UTC);
 
-        prepareCreate("idx2")
-                .setSettings(
-                        ImmutableSettings.builder().put(indexSettings()).put("index.number_of_shards", 1)
-                                .put("index.number_of_replicas", 0)).execute().actionGet();
+        prepareCreate("idx2").setSettings(ImmutableSettings.builder().put(indexSettings()).put("index.number_of_shards", 1).put("index.number_of_replicas", 0)).execute().actionGet();
         int numOfBuckets = randomIntBetween(3, 6);
         int emptyBucketIndex = randomIntBetween(1, numOfBuckets - 2); // should be in the middle
 
@@ -1166,15 +1005,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
         SearchResponse response = null;
         try {
-            response = client().prepareSearch("idx2")
-                    .addAggregation(dateHistogram("histo")
-                            .field("date")
-                            .interval(DateHistogram.Interval.days(interval))
-                            .minDocCount(0)
+            response = client().prepareSearch("idx2").addAggregation(dateHistogram("histo").field("date").interval(DateHistogram.Interval.days(interval)).minDocCount(0)
                             // when explicitly specifying a format, the extended bounds should be defined by the same format
-                            .extendedBounds(format(boundsMin, pattern), format(boundsMax, pattern))
-                            .format(pattern))
-                    .execute().actionGet();
+                            .extendedBounds(format(boundsMin, pattern), format(boundsMax, pattern)).format(pattern)).execute().actionGet();
 
             if (invalidBoundsError) {
                 fail("Expected an exception to be thrown when bounds.min is greater than bounds.max");
@@ -1217,12 +1050,7 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
         }
         indexRandom(true, reqs);
 
-        SearchResponse response = client().prepareSearch("idx2")
-                .setQuery(matchAllQuery())
-                .addAggregation(dateHistogram("date_histo")
-                        .field("date")
-                        .interval(DateHistogram.Interval.DAY))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx2").setQuery(matchAllQuery()).addAggregation(dateHistogram("date_histo").field("date").interval(DateHistogram.Interval.DAY)).execute().actionGet();
 
         assertThat(response.getHits().getTotalHits(), equalTo(5l));
 
@@ -1236,12 +1064,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
     }
 
     public void testIssue6965() {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(dateHistogram("histo").field("date").timeZone("+01:00").interval(DateHistogram.Interval.MONTH).minDocCount(0))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").timeZone("+01:00").interval(DateHistogram.Interval.MONTH).minDocCount(0)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         DateHistogram histo = response.getAggregations().get("histo");
         assertThat(histo, notNullValue());
@@ -1269,14 +1094,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
     public void testDSTBoundaryIssue9491() throws InterruptedException, ExecutionException {
         assertAcked(client().admin().indices().prepareCreate("test9491").addMapping("type", "d", "type=date").get());
-        indexRandom(true,
-                client().prepareIndex("test9491", "type").setSource("d", "2014-10-08T13:00:00Z"),
-                client().prepareIndex("test9491", "type").setSource("d", "2014-11-08T13:00:00Z"));
+        indexRandom(true, client().prepareIndex("test9491", "type").setSource("d", "2014-10-08T13:00:00Z"), client().prepareIndex("test9491", "type").setSource("d", "2014-11-08T13:00:00Z"));
         ensureSearchable("test9491");
-        SearchResponse response = client().prepareSearch("test9491")
-                .addAggregation(dateHistogram("histo").field("d").interval(DateHistogram.Interval.YEAR).preZone("Asia/Jerusalem")
-                .preZoneAdjustLargeInterval(true))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("test9491").addAggregation(dateHistogram("histo").field("d").interval(DateHistogram.Interval.YEAR).preZone("Asia/Jerusalem").preZoneAdjustLargeInterval(true)).execute().actionGet();
         assertSearchResponse(response);
         Histogram histo = response.getAggregations().get("histo");
         assertThat(histo.getBuckets().size(), equalTo(1));
@@ -1286,14 +1106,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
     public void testIssue7673() throws InterruptedException, ExecutionException {
         assertAcked(client().admin().indices().prepareCreate("test7673").addMapping("type", "d", "type=date").get());
-        indexRandom(true,
-                client().prepareIndex("test7673", "type").setSource("d", "2013-07-01T00:00:00Z"),
-                client().prepareIndex("test7673", "type").setSource("d", "2013-09-01T00:00:00Z"));
+        indexRandom(true, client().prepareIndex("test7673", "type").setSource("d", "2013-07-01T00:00:00Z"), client().prepareIndex("test7673", "type").setSource("d", "2013-09-01T00:00:00Z"));
         ensureSearchable("test7673");
-        SearchResponse response = client().prepareSearch("test7673")
-                .addAggregation(dateHistogram("histo").field("d").interval(DateHistogram.Interval.MONTH).postZone("-02:00")
-                .minDocCount(0))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("test7673").addAggregation(dateHistogram("histo").field("d").interval(DateHistogram.Interval.MONTH).postZone("-02:00").minDocCount(0)).execute().actionGet();
         assertSearchResponse(response);
         Histogram histo = response.getAggregations().get("histo");
         assertThat(histo.getBuckets().size(), equalTo(3));
@@ -1307,16 +1122,9 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
 
     public void testIssue8209() throws InterruptedException, ExecutionException {
         assertAcked(client().admin().indices().prepareCreate("test8209").addMapping("type", "d", "type=date").get());
-        indexRandom(true,
-                client().prepareIndex("test8209", "type").setSource("d", "2014-01-01T0:00:00Z"),
-                client().prepareIndex("test8209", "type").setSource("d", "2014-04-01T0:00:00Z"),
-                client().prepareIndex("test8209", "type").setSource("d", "2014-04-30T0:00:00Z"));
+        indexRandom(true, client().prepareIndex("test8209", "type").setSource("d", "2014-01-01T0:00:00Z"), client().prepareIndex("test8209", "type").setSource("d", "2014-04-01T0:00:00Z"), client().prepareIndex("test8209", "type").setSource("d", "2014-04-30T0:00:00Z"));
         ensureSearchable("test8209");
-        SearchResponse response = client().prepareSearch("test8209")
-                .addAggregation(dateHistogram("histo").field("d").interval(DateHistogram.Interval.MONTH).preZone("+01:00")
-                .minDocCount(0)
-                .preZoneAdjustLargeInterval(true))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("test8209").addAggregation(dateHistogram("histo").field("d").interval(DateHistogram.Interval.MONTH).preZone("+01:00").minDocCount(0).preZoneAdjustLargeInterval(true)).execute().actionGet();
         assertSearchResponse(response);
         Histogram histo = response.getAggregations().get("histo");
         assertThat(histo.getBuckets().size(), equalTo(4));
@@ -1335,9 +1143,7 @@ public class DateHistogramTests extends ElasticsearchIntegrationTest {
      */
     public void testExeptionOnNegativerInterval() {
         try {
-            client().prepareSearch("idx")
-                    .addAggregation(dateHistogram("histo").field("date").interval(-TimeUnit.DAYS.toMillis(1)).minDocCount(0)).execute()
-                    .actionGet();
+            client().prepareSearch("idx").addAggregation(dateHistogram("histo").field("date").interval(-TimeUnit.DAYS.toMillis(1)).minDocCount(0)).execute().actionGet();
             fail();
         } catch (SearchPhaseExecutionException e) {
             assertThat(e.getMessage(), containsString("IllegalArgumentException"));

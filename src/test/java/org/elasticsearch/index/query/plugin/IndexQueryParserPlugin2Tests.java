@@ -66,29 +66,13 @@ public class IndexQueryParserPlugin2Tests extends ElasticsearchTestCase {
         queryParserModule.addFilterParser("my", PluginJsonFilterParser.class);
 
         Index index = new Index("test");
-        Injector injector = new ModulesBuilder().add(
-                new CodecModule(settings),
-                new CacheRecyclerModule(settings),
-                new SettingsModule(settings),
-                new ThreadPoolModule(new ThreadPool(settings)),
-                new IndicesQueriesModule(),
-                new ScriptModule(settings),
-                new IndexSettingsModule(index, settings),
-                new IndexCacheModule(settings),
-                new AnalysisModule(settings),
-                new IndexEngineModule(settings),
-                new SimilarityModule(settings),
-                queryParserModule,
-                new IndexNameModule(index),
-                new FunctionScoreModule(),
-                new AbstractModule() {
-                    @Override
-                    protected void configure() {
-                        bind(ClusterService.class).toProvider(Providers.of((ClusterService) null));
-                        bind(CircuitBreakerService.class).to(NoneCircuitBreakerService.class);
-                    }
-                }
-        ).createInjector();
+        Injector injector = new ModulesBuilder().add(new CodecModule(settings), new CacheRecyclerModule(settings), new SettingsModule(settings), new ThreadPoolModule(new ThreadPool(settings)), new IndicesQueriesModule(), new ScriptModule(settings), new IndexSettingsModule(index, settings), new IndexCacheModule(settings), new AnalysisModule(settings), new IndexEngineModule(settings), new SimilarityModule(settings), queryParserModule, new IndexNameModule(index), new FunctionScoreModule(), new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ClusterService.class).toProvider(Providers.of((ClusterService) null));
+                bind(CircuitBreakerService.class).to(NoneCircuitBreakerService.class);
+            }
+        }).createInjector();
 
         IndexQueryParserService indexQueryParserService = injector.getInstance(IndexQueryParserService.class);
 

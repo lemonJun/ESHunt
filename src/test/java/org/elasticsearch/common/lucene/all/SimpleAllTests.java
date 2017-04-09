@@ -63,20 +63,20 @@ public class SimpleAllTests extends ElasticsearchTestCase {
             final String term;
             final float boost;
             switch (i) {
-            case 0:
-                term = "all";
-                boost = 2;
-                break;
-            case 1:
-                term = "your";
-                boost = 1;
-                break;
-            case 2:
-                term = "boosts";
-                boost = 0.5f;
-                break;
-            default:
-                throw new AssertionError();
+                case 0:
+                    term = "all";
+                    boost = 2;
+                    break;
+                case 1:
+                    term = "your";
+                    boost = 1;
+                    break;
+                case 2:
+                    term = "boosts";
+                    boost = 0.5f;
+                    break;
+                default:
+                    throw new AssertionError();
             }
             assertEquals(term, termAtt.toString());
             final BytesRef payload = payloadAtt.getPayload();

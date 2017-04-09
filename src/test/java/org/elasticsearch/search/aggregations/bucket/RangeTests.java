@@ -59,20 +59,14 @@ public class RangeTests extends ElasticsearchIntegrationTest {
         numDocs = randomIntBetween(10, 20);
         List<IndexRequestBuilder> builders = new ArrayList<>();
         for (int i = 0; i < numDocs; i++) {
-            builders.add(client().prepareIndex("idx", "type").setSource(jsonBuilder()
-                    .startObject()
-                    .field(SINGLE_VALUED_FIELD_NAME, i+1)
-                    .startArray(MULTI_VALUED_FIELD_NAME).value(i+1).value(i+2).endArray()
-                    .endObject()));
+            builders.add(client().prepareIndex("idx", "type").setSource(jsonBuilder().startObject().field(SINGLE_VALUED_FIELD_NAME, i + 1).startArray(MULTI_VALUED_FIELD_NAME).value(i + 1).value(i + 2).endArray().endObject()));
         }
         createIndex("idx_unmapped");
         prepareCreate("empty_bucket_idx").addMapping("type", SINGLE_VALUED_FIELD_NAME, "type=integer").execute().actionGet();
         for (int i = 0; i < 2; i++) {
-            builders.add(client().prepareIndex("empty_bucket_idx", "type", "" + i).setSource(jsonBuilder()
-                    .startObject()
-                    // shift sequence by 1, to ensure we have negative values, and value 3 on the edge of the tested ranges
-                    .field(SINGLE_VALUED_FIELD_NAME, i * 2 - 1)
-                    .endObject()));
+            builders.add(client().prepareIndex("empty_bucket_idx", "type", "" + i).setSource(jsonBuilder().startObject()
+                            // shift sequence by 1, to ensure we have negative values, and value 3 on the edge of the tested ranges
+                            .field(SINGLE_VALUED_FIELD_NAME, i * 2 - 1).endObject()));
         }
         indexRandom(true, builders);
         ensureSearchable();
@@ -80,14 +74,7 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void rangeAsSubAggregation() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(terms("terms").field(MULTI_VALUED_FIELD_NAME).size(100)
-                        .collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(
-                        range("range").field(SINGLE_VALUED_FIELD_NAME)
-                            .addUnboundedTo(3)
-                            .addRange(3, 6)
-                            .addUnboundedFrom(6)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(terms("terms").field(MULTI_VALUED_FIELD_NAME).size(100).collectMode(randomFrom(SubAggCollectionMode.values())).subAggregation(range("range").field(SINGLE_VALUED_FIELD_NAME).addUnboundedTo(3).addRange(3, 6).addUnboundedFrom(6))).execute().actionGet();
 
         assertSearchResponse(response);
         Terms terms = response.getAggregations().get("terms");
@@ -137,16 +124,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValueField() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .field(SINGLE_VALUED_FIELD_NAME)
-                        .addUnboundedTo(3)
-                        .addRange(3, 6)
-                        .addUnboundedFrom(6))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").field(SINGLE_VALUED_FIELD_NAME).addUnboundedTo(3).addRange(3, 6).addUnboundedFrom(6)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -183,18 +163,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValueField_WithFormat() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .field(SINGLE_VALUED_FIELD_NAME)
-                        .addUnboundedTo(3)
-                        .addRange(3, 6)
-                        .addUnboundedFrom(6)
-                        .format("#")
-                )
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").field(SINGLE_VALUED_FIELD_NAME).addUnboundedTo(3).addRange(3, 6).addUnboundedFrom(6).format("#")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -231,16 +202,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValueField_WithCustomKey() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .field(SINGLE_VALUED_FIELD_NAME)
-                        .addUnboundedTo("r1", 3)
-                        .addRange("r2", 3, 6)
-                        .addUnboundedFrom("r3", 6))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").field(SINGLE_VALUED_FIELD_NAME).addUnboundedTo("r1", 3).addRange("r2", 3, 6).addUnboundedFrom("r3", 6)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -277,17 +241,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedField_WithSubAggregation() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .field(SINGLE_VALUED_FIELD_NAME)
-                        .addUnboundedTo(3)
-                        .addRange(3, 6)
-                        .addUnboundedFrom(6)
-                        .subAggregation(sum("sum").field(SINGLE_VALUED_FIELD_NAME)))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").field(SINGLE_VALUED_FIELD_NAME).addUnboundedTo(3).addRange(3, 6).addUnboundedFrom(6).subAggregation(sum("sum").field(SINGLE_VALUED_FIELD_NAME))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -337,17 +293,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedField_WithSubAggregation_Inherited() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .field(SINGLE_VALUED_FIELD_NAME)
-                        .addUnboundedTo(3)
-                        .addRange(3, 6)
-                        .addUnboundedFrom(6)
-                        .subAggregation(avg("avg")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").field(SINGLE_VALUED_FIELD_NAME).addUnboundedTo(3).addRange(3, 6).addUnboundedFrom(6).subAggregation(avg("avg"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -397,17 +345,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedField_WithValueScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .field(SINGLE_VALUED_FIELD_NAME)
-                        .script("_value + 1")
-                        .addUnboundedTo(3)
-                        .addRange(3, 6)
-                        .addUnboundedFrom(6))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").field(SINGLE_VALUED_FIELD_NAME).script("_value + 1").addUnboundedTo(3).addRange(3, 6).addUnboundedFrom(6)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -457,16 +397,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedField() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .field(MULTI_VALUED_FIELD_NAME)
-                        .addUnboundedTo(3)
-                        .addRange(3, 6)
-                        .addUnboundedFrom(6))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").field(MULTI_VALUED_FIELD_NAME).addUnboundedTo(3).addRange(3, 6).addUnboundedFrom(6)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -516,17 +449,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedField_WithValueScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .field(MULTI_VALUED_FIELD_NAME)
-                        .script("_value + 1")
-                        .addUnboundedTo(3)
-                        .addRange(3, 6)
-                        .addUnboundedFrom(6))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").field(MULTI_VALUED_FIELD_NAME).script("_value + 1").addUnboundedTo(3).addRange(3, 6).addUnboundedFrom(6)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -572,7 +497,7 @@ public class RangeTests extends ElasticsearchIntegrationTest {
     [9, 10]
     [10, 11]
     [11, 12]
-
+    
     r1: 2
     r2: 3, 3, 4, 4, 5, 5
     r3: 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12
@@ -580,18 +505,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedField_WithValueScript_WithInheritedSubAggregator() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .field(MULTI_VALUED_FIELD_NAME)
-                        .script("_value + 1")
-                        .addUnboundedTo(3)
-                        .addRange(3, 6)
-                        .addUnboundedFrom(6)
-                        .subAggregation(sum("sum")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").field(MULTI_VALUED_FIELD_NAME).script("_value + 1").addUnboundedTo(3).addRange(3, 6).addUnboundedFrom(6).subAggregation(sum("sum"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -609,7 +525,7 @@ public class RangeTests extends ElasticsearchIntegrationTest {
         Sum sum = bucket.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo(2d+3d));
+        assertThat(sum.getValue(), equalTo(2d + 3d));
 
         bucket = range.getBucketByKey("3.0-6.0");
         assertThat(bucket, notNullValue());
@@ -622,7 +538,7 @@ public class RangeTests extends ElasticsearchIntegrationTest {
         sum = bucket.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 2+3+3+4+4+5+5+6));
+        assertThat(sum.getValue(), equalTo((double) 2 + 3 + 3 + 4 + 4 + 5 + 5 + 6));
 
         bucket = range.getBucketByKey("6.0-*");
         assertThat(bucket, notNullValue());
@@ -644,16 +560,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void script_SingleValue() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .script("doc['" + SINGLE_VALUED_FIELD_NAME + "'].value")
-                        .addUnboundedTo(3)
-                        .addRange(3, 6)
-                        .addUnboundedFrom(6))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").script("doc['" + SINGLE_VALUED_FIELD_NAME + "'].value").addUnboundedTo(3).addRange(3, 6).addUnboundedFrom(6)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -690,17 +599,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void script_SingleValue_WithSubAggregator_Inherited() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .script("doc['" + SINGLE_VALUED_FIELD_NAME + "'].value")
-                        .addUnboundedTo(3)
-                        .addRange(3, 6)
-                        .addUnboundedFrom(6)
-                        .subAggregation(avg("avg")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").script("doc['" + SINGLE_VALUED_FIELD_NAME + "'].value").addUnboundedTo(3).addRange(3, 6).addUnboundedFrom(6).subAggregation(avg("avg"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -750,15 +651,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void emptyRange() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .field(MULTI_VALUED_FIELD_NAME)
-                        .addUnboundedTo(-1)
-                        .addUnboundedFrom(1000))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").field(MULTI_VALUED_FIELD_NAME).addUnboundedTo(-1).addUnboundedFrom(1000)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -786,16 +681,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void script_MultiValued() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .script("doc['" + MULTI_VALUED_FIELD_NAME + "'].values")
-                        .addUnboundedTo(3)
-                        .addRange(3, 6)
-                        .addUnboundedFrom(6))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").script("doc['" + MULTI_VALUED_FIELD_NAME + "'].values").addUnboundedTo(3).addRange(3, 6).addUnboundedFrom(6)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -829,7 +717,7 @@ public class RangeTests extends ElasticsearchIntegrationTest {
         assertThat(bucket.getToAsString(), nullValue());
         assertThat(bucket.getDocCount(), equalTo(numDocs - 4l));
     }
-    
+
     /*
     [1, 2]
     [2, 3]
@@ -849,17 +737,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void script_MultiValued_WithAggregatorInherited() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .script("doc['" + MULTI_VALUED_FIELD_NAME + "'].values")
-                        .addUnboundedTo("r1", 3)
-                        .addRange("r2", 3, 6)
-                        .addUnboundedFrom("r3", 6)
-                        .subAggregation(sum("sum")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").script("doc['" + MULTI_VALUED_FIELD_NAME + "'].values").addUnboundedTo("r1", 3).addRange("r2", 3, 6).addUnboundedFrom("r3", 6).subAggregation(sum("sum"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -877,7 +757,7 @@ public class RangeTests extends ElasticsearchIntegrationTest {
         Sum sum = bucket.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 1+2+2+3));
+        assertThat(sum.getValue(), equalTo((double) 1 + 2 + 2 + 3));
 
         bucket = range.getBucketByKey("r2");
         assertThat(bucket, notNullValue());
@@ -890,7 +770,7 @@ public class RangeTests extends ElasticsearchIntegrationTest {
         sum = bucket.getAggregations().get("sum");
         assertThat(sum, notNullValue());
         assertThat(sum.getName(), equalTo("sum"));
-        assertThat(sum.getValue(), equalTo((double) 2+3+3+4+4+5+5+6));
+        assertThat(sum.getValue(), equalTo((double) 2 + 3 + 3 + 4 + 4 + 5 + 5 + 6));
 
         bucket = range.getBucketByKey("r3");
         assertThat(bucket, notNullValue());
@@ -912,16 +792,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void unmapped() throws Exception {
-        SearchResponse response = client().prepareSearch("idx_unmapped")
-                .addAggregation(range("range")
-                        .field(SINGLE_VALUED_FIELD_NAME)
-                        .addUnboundedTo(3)
-                        .addRange(3, 6)
-                        .addUnboundedFrom(6))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx_unmapped").addAggregation(range("range").field(SINGLE_VALUED_FIELD_NAME).addUnboundedTo(3).addRange(3, 6).addUnboundedFrom(6)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -960,16 +833,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
     public void partiallyUnmapped() throws Exception {
         client().admin().cluster().prepareHealth("idx_unmapped").setWaitForYellowStatus().execute().actionGet();
 
-        SearchResponse response = client().prepareSearch("idx", "idx_unmapped")
-                .addAggregation(range("range")
-                        .field(SINGLE_VALUED_FIELD_NAME)
-                        .addUnboundedTo(3)
-                        .addRange(3, 6)
-                        .addUnboundedFrom(6))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx", "idx_unmapped").addAggregation(range("range").field(SINGLE_VALUED_FIELD_NAME).addUnboundedTo(3).addRange(3, 6).addUnboundedFrom(6)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -1006,17 +872,9 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void overlappingRanges() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(range("range")
-                        .field(MULTI_VALUED_FIELD_NAME)
-                        .addUnboundedTo(5)
-                        .addRange(3, 6)
-                        .addRange(4, 5)
-                        .addUnboundedFrom(4))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(range("range").field(MULTI_VALUED_FIELD_NAME).addUnboundedTo(5).addRange(3, 6).addRange(4, 5).addUnboundedFrom(4)).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -1062,11 +920,7 @@ public class RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void emptyAggregation() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(histogram("histo").field(SINGLE_VALUED_FIELD_NAME).interval(1l).minDocCount(0)
-                        .subAggregation(range("range").addRange("0-2", 0.0, 2.0)))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx").setQuery(matchAllQuery()).addAggregation(histogram("histo").field(SINGLE_VALUED_FIELD_NAME).interval(1l).minDocCount(0).subAggregation(range("range").addRange("0-2", 0.0, 2.0))).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(2l));
         Histogram histo = searchResponse.getAggregations().get("histo");

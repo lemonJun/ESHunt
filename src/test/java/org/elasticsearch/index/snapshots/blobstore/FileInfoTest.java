@@ -82,7 +82,7 @@ public class FileInfoTest extends ElasticsearchTestCase {
             String name = "foobar";
             String physicalName = "_foobar";
             String failure = null;
-            long length = Math.max(0,Math.abs(randomLong()));
+            long length = Math.max(0, Math.abs(randomLong()));
             // random corruption
             switch (randomIntBetween(0, 3)) {
                 case 0:

@@ -40,8 +40,8 @@ public class IndexRequestTests extends ElasticsearchTestCase {
         assertThat(IndexRequest.OpType.fromString(indexUpper), equalTo(IndexRequest.OpType.INDEX));
     }
 
-    @Test(expected= ElasticsearchIllegalArgumentException.class)
-    public void testReadBogusString(){
+    @Test(expected = ElasticsearchIllegalArgumentException.class)
+    public void testReadBogusString() {
         String foobar = "foobar";
         IndexRequest.OpType.fromString(foobar);
     }

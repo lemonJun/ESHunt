@@ -52,8 +52,7 @@ public class MatchAssertion extends Assertion {
                 String stringValue = (String) actualValue;
                 String regex = expValue.substring(1, expValue.length() - 1);
                 logger.trace("assert that [{}] matches [{}]", stringValue, regex);
-                assertThat("field [" + getField() + "] was expected to match the provided regex but didn't",
-                        stringValue, matches(regex, Pattern.COMMENTS));
+                assertThat("field [" + getField() + "] was expected to match the provided regex but didn't", stringValue, matches(regex, Pattern.COMMENTS));
                 return;
             }
         }

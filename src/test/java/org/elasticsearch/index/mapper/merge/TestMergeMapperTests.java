@@ -38,16 +38,10 @@ public class TestMergeMapperTests extends ElasticsearchSingleNodeTest {
     @Test
     public void test1Merge() throws Exception {
 
-        String stage1Mapping = XContentFactory.jsonBuilder().startObject().startObject("person").startObject("properties")
-                .startObject("name").field("type", "string").endObject()
-                .endObject().endObject().endObject().string();
+        String stage1Mapping = XContentFactory.jsonBuilder().startObject().startObject("person").startObject("properties").startObject("name").field("type", "string").endObject().endObject().endObject().endObject().string();
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
         DocumentMapper stage1 = parser.parse(stage1Mapping);
-        String stage2Mapping = XContentFactory.jsonBuilder().startObject().startObject("person").startObject("properties")
-                .startObject("name").field("type", "string").endObject()
-                .startObject("age").field("type", "integer").endObject()
-                .startObject("obj1").startObject("properties").startObject("prop1").field("type", "integer").endObject().endObject().endObject()
-                .endObject().endObject().endObject().string();
+        String stage2Mapping = XContentFactory.jsonBuilder().startObject().startObject("person").startObject("properties").startObject("name").field("type", "string").endObject().startObject("age").field("type", "integer").endObject().startObject("obj1").startObject("properties").startObject("prop1").field("type", "integer").endObject().endObject().endObject().endObject().endObject().endObject().string();
         DocumentMapper stage2 = parser.parse(stage2Mapping);
 
         DocumentMapper.MergeResult mergeResult = stage1.merge(stage2, mergeFlags().simulate(true));
@@ -83,13 +77,9 @@ public class TestMergeMapperTests extends ElasticsearchSingleNodeTest {
     @Test
     public void testMergeObjectAndNested() throws Exception {
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
-        String objectMapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                .startObject("obj").field("type", "object").endObject()
-                .endObject().endObject().endObject().string();
+        String objectMapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("obj").field("type", "object").endObject().endObject().endObject().endObject().string();
         DocumentMapper objectMapper = parser.parse(objectMapping);
-        String nestedMapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                .startObject("obj").field("type", "nested").endObject()
-                .endObject().endObject().endObject().string();
+        String nestedMapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("obj").field("type", "nested").endObject().endObject().endObject().endObject().string();
         DocumentMapper nestedMapper = parser.parse(nestedMapping);
 
         DocumentMapper.MergeResult mergeResult = objectMapper.merge(nestedMapper, mergeFlags().simulate(true));
@@ -105,12 +95,8 @@ public class TestMergeMapperTests extends ElasticsearchSingleNodeTest {
     @Test
     public void testMergeSearchAnalyzer() throws Exception {
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
-        String mapping1 = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("field").field("type", "string").field("search_analyzer", "whitespace").endObject().endObject()
-                .endObject().endObject().string();
-        String mapping2 = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("field").field("type", "string").field("search_analyzer", "keyword").endObject().endObject()
-                .endObject().endObject().string();
+        String mapping1 = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", "string").field("search_analyzer", "whitespace").endObject().endObject().endObject().endObject().string();
+        String mapping2 = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", "string").field("search_analyzer", "keyword").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper existing = parser.parse(mapping1);
         DocumentMapper changed = parser.parse(mapping2);
@@ -125,12 +111,8 @@ public class TestMergeMapperTests extends ElasticsearchSingleNodeTest {
     @Test
     public void testNotChangeSearchAnalyzer() throws Exception {
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
-        String mapping1 = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("field").field("type", "string").field("search_analyzer", "whitespace").endObject().endObject()
-                .endObject().endObject().string();
-        String mapping2 = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").startObject("field").field("type", "string").field("postings_format", "Lucene41").endObject().endObject()
-                .endObject().endObject().string();
+        String mapping1 = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", "string").field("search_analyzer", "whitespace").endObject().endObject().endObject().endObject().string();
+        String mapping2 = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", "string").field("postings_format", "Lucene41").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper existing = parser.parse(mapping1);
         DocumentMapper changed = parser.parse(mapping2);

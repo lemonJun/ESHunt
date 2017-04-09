@@ -70,12 +70,12 @@ public class FsAppendBenchmark {
 
     private static final ByteBuffer fill = ByteBuffer.allocateDirect(1);
 
-//    public static long padLogFile(long position, long currentSize, long preAllocSize) throws IOException {
-//        if (position + 4096 >= currentSize) {
-//            currentSize = currentSize + preAllocSize;
-//            fill.position(0);
-//            f.getChannel().write(fill, currentSize - fill.remaining());
-//        }
-//        return currentSize;
-//    }
+    //    public static long padLogFile(long position, long currentSize, long preAllocSize) throws IOException {
+    //        if (position + 4096 >= currentSize) {
+    //            currentSize = currentSize + preAllocSize;
+    //            fill.position(0);
+    //            f.getChannel().write(fill, currentSize - fill.remaining());
+    //        }
+    //        return currentSize;
+    //    }
 }

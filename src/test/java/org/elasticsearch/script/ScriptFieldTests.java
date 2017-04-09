@@ -50,16 +50,10 @@ public class ScriptFieldTests extends ElasticsearchIntegrationTest {
 
     public void testNativeScript() throws InterruptedException, ExecutionException {
 
-        indexRandom(true, client().prepareIndex("test", "type1", "1").setSource("text", "doc1"), client()
-                .prepareIndex("test", "type1", "2").setSource("text", "doc2"),
-                client().prepareIndex("test", "type1", "3").setSource("text", "doc3"), client().prepareIndex("test", "type1", "4")
-                        .setSource("text", "doc4"), client().prepareIndex("test", "type1", "5").setSource("text", "doc5"), client()
-                        .prepareIndex("test", "type1", "6").setSource("text", "doc6"));
+        indexRandom(true, client().prepareIndex("test", "type1", "1").setSource("text", "doc1"), client().prepareIndex("test", "type1", "2").setSource("text", "doc2"), client().prepareIndex("test", "type1", "3").setSource("text", "doc3"), client().prepareIndex("test", "type1", "4").setSource("text", "doc4"), client().prepareIndex("test", "type1", "5").setSource("text", "doc5"), client().prepareIndex("test", "type1", "6").setSource("text", "doc6"));
 
         client().admin().indices().prepareFlush("test").execute().actionGet();
-        SearchResponse sr = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery())
-                .addScriptField("int", "native", "int", null).addScriptField("float", "native", "float", null)
-                .addScriptField("double", "native", "double", null).addScriptField("long", "native", "long", null).execute().actionGet();
+        SearchResponse sr = client().prepareSearch("test").setQuery(QueryBuilders.matchAllQuery()).addScriptField("int", "native", "int", null).addScriptField("float", "native", "float", null).addScriptField("double", "native", "double", null).addScriptField("long", "native", "long", null).execute().actionGet();
         assertThat(sr.getHits().hits().length, equalTo(6));
         for (SearchHit hit : sr.getHits().getHits()) {
             Object result = hit.getFields().get("int").getValues().get(0);

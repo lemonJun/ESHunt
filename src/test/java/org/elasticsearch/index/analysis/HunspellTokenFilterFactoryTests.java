@@ -32,11 +32,7 @@ public class HunspellTokenFilterFactoryTests extends ElasticsearchTestCase {
 
     @Test
     public void testDedup() throws IOException {
-        Settings settings = settingsBuilder()
-                .put("path.conf", getResource("/indices/analyze/conf_dir"))
-                .put("index.analysis.filter.en_US.type", "hunspell")
-                .put("index.analysis.filter.en_US.locale", "en_US")
-                .build();
+        Settings settings = settingsBuilder().put("path.conf", getResource("/indices/analyze/conf_dir")).put("index.analysis.filter.en_US.type", "hunspell").put("index.analysis.filter.en_US.locale", "en_US").build();
 
         AnalysisService analysisService = AnalysisTestsHelper.createAnalysisServiceFromSettings(settings);
         TokenFilterFactory tokenFilter = analysisService.tokenFilter("en_US");
@@ -44,12 +40,7 @@ public class HunspellTokenFilterFactoryTests extends ElasticsearchTestCase {
         HunspellTokenFilterFactory hunspellTokenFilter = (HunspellTokenFilterFactory) tokenFilter;
         assertThat(hunspellTokenFilter.dedup(), is(true));
 
-        settings = settingsBuilder()
-                .put("path.conf", getResource("/indices/analyze/conf_dir"))
-                .put("index.analysis.filter.en_US.type", "hunspell")
-                .put("index.analysis.filter.en_US.dedup", false)
-                .put("index.analysis.filter.en_US.locale", "en_US")
-                .build();
+        settings = settingsBuilder().put("path.conf", getResource("/indices/analyze/conf_dir")).put("index.analysis.filter.en_US.type", "hunspell").put("index.analysis.filter.en_US.dedup", false).put("index.analysis.filter.en_US.locale", "en_US").build();
 
         analysisService = AnalysisTestsHelper.createAnalysisServiceFromSettings(settings);
         tokenFilter = analysisService.tokenFilter("en_US");

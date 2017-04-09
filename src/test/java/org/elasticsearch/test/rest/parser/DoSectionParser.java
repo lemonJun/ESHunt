@@ -61,7 +61,7 @@ public class DoSectionParser implements RestTestFragmentParser<DoSection> {
                                 XContentType bodyContentType = XContentFactory.xContentType(body);
                                 XContentParser bodyParser = XContentFactory.xContent(bodyContentType).createParser(body);
                                 //multiple bodies are supported e.g. in case of bulk provided as a whole string
-                                while(bodyParser.nextToken() != null) {
+                                while (bodyParser.nextToken() != null) {
                                     apiCallSection.addBody(bodyParser.mapOrdered());
                                 }
                             } else {

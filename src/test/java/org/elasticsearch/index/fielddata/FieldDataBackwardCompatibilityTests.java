@@ -33,9 +33,7 @@ public class FieldDataBackwardCompatibilityTests extends ElasticsearchBackwardsC
     public void testDeprecatedFieldDataCaches() throws Exception {
         for (String cache : Arrays.asList(IndexFieldDataService.FIELDDATA_CACHE_VALUE_RESIDENT, IndexFieldDataService.FIELDDATA_CACHE_VALUE_SOFT)) {
             String index = "test" + cache;
-            assertAcked(prepareCreate(index)
-                .setSettings(IndexFieldDataService.FIELDDATA_CACHE_KEY, cache)
-                .get());
+            assertAcked(prepareCreate(index).setSettings(IndexFieldDataService.FIELDDATA_CACHE_KEY, cache).get());
             ensureYellow(index);
             indexRandom(true, client().prepareIndex(index, "type").setSource("f", "g"));
             String message = null;

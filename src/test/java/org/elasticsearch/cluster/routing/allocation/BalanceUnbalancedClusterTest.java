@@ -53,15 +53,10 @@ public class BalanceUnbalancedClusterTest extends CatAllocationTestBase {
     @Override
     protected ClusterState allocateNew(ClusterState state) {
         String index = "tweets-2014-12-29:00";
-        AllocationService strategy = createAllocationService(settingsBuilder()
-                .build());
-        MetaData metaData = MetaData.builder(state.metaData())
-                .put(IndexMetaData.builder(index).numberOfShards(5).numberOfReplicas(1))
-                .build();
+        AllocationService strategy = createAllocationService(settingsBuilder().build());
+        MetaData metaData = MetaData.builder(state.metaData()).put(IndexMetaData.builder(index).numberOfShards(5).numberOfReplicas(1)).build();
 
-        RoutingTable routingTable = RoutingTable.builder(state.routingTable())
-                .addAsNew(metaData.index(index))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder(state.routingTable()).addAsNew(metaData.index(index)).build();
 
         ClusterState clusterState = ClusterState.builder(state).metaData(metaData).routingTable(routingTable).build();
         routingTable = strategy.reroute(clusterState).routingTable();

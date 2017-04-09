@@ -34,7 +34,7 @@ import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilde
 import static org.elasticsearch.test.ElasticsearchIntegrationTest.*;
 import static org.hamcrest.Matchers.instanceOf;
 
-@ClusterScope(scope= Scope.TEST, numDataNodes =0)
+@ClusterScope(scope = Scope.TEST, numDataNodes = 0)
 public class ShardsAllocatorModuleTests extends ElasticsearchIntegrationTest {
 
     public void testLoadDefaultShardsAllocator() throws IOException {
@@ -42,8 +42,7 @@ public class ShardsAllocatorModuleTests extends ElasticsearchIntegrationTest {
     }
 
     public void testLoadByShortKeyShardsAllocator() throws IOException {
-        Settings build = settingsBuilder().put(ShardsAllocatorModule.TYPE_KEY, ShardsAllocatorModule.EVEN_SHARD_COUNT_ALLOCATOR_KEY)
-                .build();
+        Settings build = settingsBuilder().put(ShardsAllocatorModule.TYPE_KEY, ShardsAllocatorModule.EVEN_SHARD_COUNT_ALLOCATOR_KEY).build();
         assertAllocatorInstance(build, EvenShardsCountAllocator.class);
         build = settingsBuilder().put(ShardsAllocatorModule.TYPE_KEY, ShardsAllocatorModule.BALANCED_ALLOCATOR_KEY).build();
         assertAllocatorInstance(build, BalancedShardsAllocator.class);
@@ -53,8 +52,7 @@ public class ShardsAllocatorModuleTests extends ElasticsearchIntegrationTest {
         Settings build = settingsBuilder().put(ShardsAllocatorModule.TYPE_KEY, "EvenShardsCount").build();
         assertAllocatorInstance(build, EvenShardsCountAllocator.class);
 
-        build = settingsBuilder().put(ShardsAllocatorModule.TYPE_KEY,
-                "org.elasticsearch.cluster.routing.allocation.allocator.EvenShardsCountAllocator").build();
+        build = settingsBuilder().put(ShardsAllocatorModule.TYPE_KEY, "org.elasticsearch.cluster.routing.allocation.allocator.EvenShardsCountAllocator").build();
         assertAllocatorInstance(build, EvenShardsCountAllocator.class);
     }
 

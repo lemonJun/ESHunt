@@ -74,7 +74,7 @@ import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertNoFa
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
-@LuceneTestCase.SuppressCodecs({"Lucene3x", "MockFixedIntBlock", "MockVariableIntBlock", "MockSep", "MockRandom", "Lucene40", "Lucene41", "Appending", "Lucene42", "Lucene45", "Lucene46", "Lucene49"})
+@LuceneTestCase.SuppressCodecs({ "Lucene3x", "MockFixedIntBlock", "MockVariableIntBlock", "MockSep", "MockRandom", "Lucene40", "Lucene41", "Appending", "Lucene42", "Lucene45", "Lucene46", "Lucene49" })
 @ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.TEST, numDataNodes = 0)
 public class OldIndexBackwardsCompatibilityTests extends ElasticsearchIntegrationTest {
 
@@ -104,11 +104,10 @@ public class OldIndexBackwardsCompatibilityTests extends ElasticsearchIntegratio
 
     @Override
     public Settings nodeSettings(int ord) {
-        return ImmutableSettings.builder()
-                .put(MergePolicyModule.MERGE_POLICY_TYPE_KEY, NoMergePolicyProvider.class) // disable merging so no segments will be upgraded
-                .put("gateway.type", "local") // this is important we need to recover from gateway
-                .put(RecoverySettings.INDICES_RECOVERY_CONCURRENT_SMALL_FILE_STREAMS, 30) // increase recovery speed for small files
-                .build();
+        return ImmutableSettings.builder().put(MergePolicyModule.MERGE_POLICY_TYPE_KEY, NoMergePolicyProvider.class) // disable merging so no segments will be upgraded
+                        .put("gateway.type", "local") // this is important we need to recover from gateway
+                        .put(RecoverySettings.INDICES_RECOVERY_CONCURRENT_SMALL_FILE_STREAMS, 30) // increase recovery speed for small files
+                        .build();
     }
 
     void setupCluster() throws Exception {
@@ -116,15 +115,11 @@ public class OldIndexBackwardsCompatibilityTests extends ElasticsearchIntegratio
 
         Path baseTempDir = newTempDir(LifecycleScope.SUITE).toPath();
         // start single data path node
-        ImmutableSettings.Builder nodeSettings = ImmutableSettings.builder()
-            .put("path.data", baseTempDir.resolve("single-path").toAbsolutePath())
-            .put("node.master", false); // workaround for dangling index loading issue when node is master
+        ImmutableSettings.Builder nodeSettings = ImmutableSettings.builder().put("path.data", baseTempDir.resolve("single-path").toAbsolutePath()).put("node.master", false); // workaround for dangling index loading issue when node is master
         ListenableFuture<String> singleDataPathNode = internalCluster().startNodeAsync(nodeSettings.build());
 
         // start multi data path node
-        nodeSettings = ImmutableSettings.builder()
-            .put("path.data", baseTempDir.resolve("multi-path1").toAbsolutePath() + "," + baseTempDir.resolve("multi-path2").toAbsolutePath())
-            .put("node.master", false); // workaround for dangling index loading issue when node is master
+        nodeSettings = ImmutableSettings.builder().put("path.data", baseTempDir.resolve("multi-path1").toAbsolutePath() + "," + baseTempDir.resolve("multi-path2").toAbsolutePath()).put("node.master", false); // workaround for dangling index loading issue when node is master
         ListenableFuture<String> multiDataPathNode = internalCluster().startNodeAsync(nodeSettings.build());
 
         // find single data path dir
@@ -138,8 +133,7 @@ public class OldIndexBackwardsCompatibilityTests extends ElasticsearchIntegratio
         // find multi data path dirs
         nodePaths = internalCluster().getInstance(NodeEnvironment.class, multiDataPathNode.get()).nodeDataPaths();
         assertEquals(2, nodePaths.length);
-        multiDataPath = new Path[] {nodePaths[0].resolve(NodeEnvironment.INDICES_FOLDER),
-                                   nodePaths[1].resolve(NodeEnvironment.INDICES_FOLDER)};
+        multiDataPath = new Path[] { nodePaths[0].resolve(NodeEnvironment.INDICES_FOLDER), nodePaths[1].resolve(NodeEnvironment.INDICES_FOLDER) };
         assertFalse(Files.exists(multiDataPath[0]));
         assertFalse(Files.exists(multiDataPath[1]));
         Files.createDirectories(multiDataPath[0]);
@@ -231,7 +225,7 @@ public class OldIndexBackwardsCompatibilityTests extends ElasticsearchIntegratio
             if (Modifier.isStatic(field.getModifiers()) && field.getType() == Version.class) {
                 Version v = (Version) field.get(Version.class);
                 if (v.snapshot()) {
-                    continue;  // snapshots are unreleased, so there is no backcompat yet
+                    continue; // snapshots are unreleased, so there is no backcompat yet
                 }
                 if (v.onOrBefore(Version.V_0_20_0_RC1)) {
                     continue; // we can only test back one major lucene version
@@ -296,8 +290,7 @@ public class OldIndexBackwardsCompatibilityTests extends ElasticsearchIntegratio
     }
 
     boolean isLatestLuceneVersion(Version version) {
-        return version.luceneVersion.major == Version.CURRENT.luceneVersion.major &&
-                version.luceneVersion.minor == Version.CURRENT.luceneVersion.minor;
+        return version.luceneVersion.major == Version.CURRENT.luceneVersion.major && version.luceneVersion.minor == Version.CURRENT.luceneVersion.minor;
     }
 
     void assertIndexSanity(String indexName) {
@@ -349,9 +342,7 @@ public class OldIndexBackwardsCompatibilityTests extends ElasticsearchIntegratio
     }
 
     void assertRealtimeGetWorks(String indexName) {
-        assertAcked(client().admin().indices().prepareUpdateSettings(indexName).setSettings(ImmutableSettings.builder()
-                .put("refresh_interval", -1)
-                .build()));
+        assertAcked(client().admin().indices().prepareUpdateSettings(indexName).setSettings(ImmutableSettings.builder().put("refresh_interval", -1).build()));
         SearchRequestBuilder searchReq = client().prepareSearch(indexName).setQuery(QueryBuilders.matchAllQuery());
         SearchHit hit = searchReq.get().getHits().getAt(0);
         String docId = hit.getId();
@@ -361,18 +352,14 @@ public class OldIndexBackwardsCompatibilityTests extends ElasticsearchIntegratio
         Map<String, Object> source = getRsp.getSourceAsMap();
         assertThat(source, Matchers.hasKey("foo"));
 
-        assertAcked(client().admin().indices().prepareUpdateSettings(indexName).setSettings(ImmutableSettings.builder()
-                .put("refresh_interval", EngineConfig.DEFAULT_REFRESH_INTERVAL)
-                .build()));
+        assertAcked(client().admin().indices().prepareUpdateSettings(indexName).setSettings(ImmutableSettings.builder().put("refresh_interval", EngineConfig.DEFAULT_REFRESH_INTERVAL).build()));
     }
 
     void assertNewReplicasWork(String indexName) throws Exception {
         final int numReplicas = 1;
         final long startTime = System.currentTimeMillis();
         logger.debug("--> creating [{}] replicas for index [{}]", numReplicas, indexName);
-        assertAcked(client().admin().indices().prepareUpdateSettings(indexName).setSettings(ImmutableSettings.builder()
-                        .put("number_of_replicas", numReplicas)
-        ).execute().actionGet());
+        assertAcked(client().admin().indices().prepareUpdateSettings(indexName).setSettings(ImmutableSettings.builder().put("number_of_replicas", numReplicas)).execute().actionGet());
         ensureGreen(TimeValue.timeValueMinutes(2), indexName);
         logger.debug("--> index [{}] is green, took [{}]", indexName, TimeValue.timeValueMillis(System.currentTimeMillis() - startTime));
         logger.debug("--> recovery status:\n{}", XContentHelper.toString(client().admin().indices().prepareRecoveries(indexName).get()));

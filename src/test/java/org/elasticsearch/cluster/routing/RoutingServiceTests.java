@@ -82,13 +82,8 @@ public class RoutingServiceTests extends ElasticsearchAllocationTestCase {
     @Test
     public void testNoDelayedUnassigned() throws Exception {
         AllocationService allocation = createAllocationService();
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").settings(ImmutableSettings.builder().put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, "0"))
-                        .numberOfShards(1).numberOfReplicas(1))
-                .build();
-        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT)
-                .metaData(metaData)
-                .routingTable(RoutingTable.builder().addAsNew(metaData.index("test"))).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").settings(ImmutableSettings.builder().put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, "0")).numberOfShards(1).numberOfReplicas(1)).build();
+        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsNew(metaData.index("test"))).build();
         clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2")).localNodeId("node1").masterNodeId("node1")).build();
         clusterState = ClusterState.builder(clusterState).routingResult(allocation.reroute(clusterState)).build();
         // starting primaries
@@ -112,13 +107,8 @@ public class RoutingServiceTests extends ElasticsearchAllocationTestCase {
     @TestLogging("_root:DEBUG")
     public void testDelayedUnassignedScheduleReroute() throws Exception {
         AllocationService allocation = createAllocationService();
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").settings(ImmutableSettings.builder().put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, "100ms"))
-                        .numberOfShards(1).numberOfReplicas(1))
-                .build();
-        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT)
-                .metaData(metaData)
-                .routingTable(RoutingTable.builder().addAsNew(metaData.index("test"))).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").settings(ImmutableSettings.builder().put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, "100ms")).numberOfShards(1).numberOfReplicas(1)).build();
+        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsNew(metaData.index("test"))).build();
         clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2")).localNodeId("node1").masterNodeId("node1")).build();
         clusterState = ClusterState.builder(clusterState).routingResult(allocation.reroute(clusterState)).build();
         // starting primaries
@@ -155,21 +145,10 @@ public class RoutingServiceTests extends ElasticsearchAllocationTestCase {
 
         try {
             DelayedShardsMockGatewayAllocator mockGatewayAllocator = new DelayedShardsMockGatewayAllocator();
-            AllocationService allocation = new AllocationService(ImmutableSettings.EMPTY,
-                    randomAllocationDeciders(ImmutableSettings.EMPTY, new NodeSettingsService(ImmutableSettings.EMPTY), getRandom()),
-                    new ShardsAllocators(ImmutableSettings.EMPTY, mockGatewayAllocator, new BalancedShardsAllocator(ImmutableSettings.EMPTY)), EmptyClusterInfoService.getInstance());
+            AllocationService allocation = new AllocationService(ImmutableSettings.EMPTY, randomAllocationDeciders(ImmutableSettings.EMPTY, new NodeSettingsService(ImmutableSettings.EMPTY), getRandom()), new ShardsAllocators(ImmutableSettings.EMPTY, mockGatewayAllocator, new BalancedShardsAllocator(ImmutableSettings.EMPTY)), EmptyClusterInfoService.getInstance());
 
-            MetaData metaData = MetaData.builder()
-                    .put(IndexMetaData.builder("short_delay").settings(ImmutableSettings.builder().put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, "100ms"))
-                            .numberOfShards(1).numberOfReplicas(1))
-                    .put(IndexMetaData.builder("long_delay").settings(ImmutableSettings.builder().put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, "10s"))
-                            .numberOfShards(1).numberOfReplicas(1))
-                    .build();
-            ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData)
-                    .routingTable(RoutingTable.builder().addAsNew(metaData.index("short_delay")).addAsNew(metaData.index("long_delay")).build())
-                    .nodes(DiscoveryNodes.builder()
-                    .put(newNode("node0", ImmutableMap.of("data", Boolean.FALSE.toString()))).localNodeId("node0").masterNodeId("node0")
-                    .put(newNode("node1")).put(newNode("node2")).put(newNode("node3")).put(newNode("node4"))).build();
+            MetaData metaData = MetaData.builder().put(IndexMetaData.builder("short_delay").settings(ImmutableSettings.builder().put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, "100ms")).numberOfShards(1).numberOfReplicas(1)).put(IndexMetaData.builder("long_delay").settings(ImmutableSettings.builder().put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, "10s")).numberOfShards(1).numberOfReplicas(1)).build();
+            ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsNew(metaData.index("short_delay")).addAsNew(metaData.index("long_delay")).build()).nodes(DiscoveryNodes.builder().put(newNode("node0", ImmutableMap.of("data", Boolean.FALSE.toString()))).localNodeId("node0").masterNodeId("node0").put(newNode("node1")).put(newNode("node2")).put(newNode("node3")).put(newNode("node4"))).build();
             // allocate shards
             clusterState = ClusterState.builder(clusterState).routingResult(allocation.reroute(clusterState)).build();
             // start primaries
@@ -242,7 +221,7 @@ public class RoutingServiceTests extends ElasticsearchAllocationTestCase {
             });
             // instead of clusterService calling clusterChanged, we call it directly here
             routingService.clusterChanged(new ClusterChangedEvent("test", newState, prevState));
-             // cluster service should have updated state and called routingService with clusterChanged
+            // cluster service should have updated state and called routingService with clusterChanged
             latch.await();
             // verify the registration has been set to the delay of longDelayReplica/longDelayUnassignedReplica
             assertThat(routingService.getRegisteredNextDelaySetting(), equalTo(10000L));
@@ -258,13 +237,8 @@ public class RoutingServiceTests extends ElasticsearchAllocationTestCase {
     @Test
     public void testDelayedUnassignedDoesNotRerouteForNegativeDelays() throws Exception {
         AllocationService allocation = createAllocationService();
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").settings(ImmutableSettings.builder().put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, "100ms"))
-                        .numberOfShards(1).numberOfReplicas(1))
-                .build();
-        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT)
-                .metaData(metaData)
-                .routingTable(RoutingTable.builder().addAsNew(metaData.index("test"))).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").settings(ImmutableSettings.builder().put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, "100ms")).numberOfShards(1).numberOfReplicas(1)).build();
+        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsNew(metaData.index("test"))).build();
         clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2")).localNodeId("node1").masterNodeId("node1")).build();
         clusterState = ClusterState.builder(clusterState).routingResult(allocation.reroute(clusterState)).build();
         // starting primaries
@@ -323,10 +297,12 @@ public class RoutingServiceTests extends ElasticsearchAllocationTestCase {
         volatile List<ShardRouting> delayedShards = Collections.emptyList();
 
         @Override
-        public void applyStartedShards(StartedRerouteAllocation allocation) {}
+        public void applyStartedShards(StartedRerouteAllocation allocation) {
+        }
 
         @Override
-        public void applyFailedShards(FailedRerouteAllocation allocation) {}
+        public void applyFailedShards(FailedRerouteAllocation allocation) {
+        }
 
         /**
          * Explicitly set which shards should be delayed in the next allocateUnassigned calls

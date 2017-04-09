@@ -31,29 +31,11 @@ public class CustomBoostMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testCustomBoostValues() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties")
-                .startObject("s_field").field("type", "string").endObject()
-                .startObject("l_field").field("type", "long").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("i_field").field("type", "integer").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("sh_field").field("type", "short").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("b_field").field("type", "byte").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("d_field").field("type", "double").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("f_field").field("type", "float").startObject("norms").field("enabled", true).endObject().endObject()
-                .startObject("date_field").field("type", "date").startObject("norms").field("enabled", true).endObject().endObject()
-                .endObject().endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("s_field").field("type", "string").endObject().startObject("l_field").field("type", "long").startObject("norms").field("enabled", true).endObject().endObject().startObject("i_field").field("type", "integer").startObject("norms").field("enabled", true).endObject().endObject().startObject("sh_field").field("type", "short").startObject("norms").field("enabled", true).endObject().endObject().startObject("b_field").field("type", "byte").startObject("norms").field("enabled", true).endObject().endObject().startObject("d_field").field("type", "double").startObject("norms").field("enabled", true).endObject().endObject().startObject("f_field").field("type", "float").startObject("norms").field("enabled", true).endObject().endObject().startObject("date_field").field("type", "date").startObject("norms").field("enabled", true).endObject().endObject().endObject().endObject().endObject().string();
 
         DocumentMapper mapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = mapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .startObject("s_field").field("value", "s_value").field("boost", 2.0f).endObject()
-                .startObject("l_field").field("value", 1l).field("boost", 3.0f).endObject()
-                .startObject("i_field").field("value", 1).field("boost", 4.0f).endObject()
-                .startObject("sh_field").field("value", 1).field("boost", 5.0f).endObject()
-                .startObject("b_field").field("value", 1).field("boost", 6.0f).endObject()
-                .startObject("d_field").field("value", 1).field("boost", 7.0f).endObject()
-                .startObject("f_field").field("value", 1).field("boost", 8.0f).endObject()
-                .startObject("date_field").field("value", "20100101").field("boost", 9.0f).endObject()
-                .endObject().bytes());
+        ParsedDocument doc = mapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().startObject("s_field").field("value", "s_value").field("boost", 2.0f).endObject().startObject("l_field").field("value", 1l).field("boost", 3.0f).endObject().startObject("i_field").field("value", 1).field("boost", 4.0f).endObject().startObject("sh_field").field("value", 1).field("boost", 5.0f).endObject().startObject("b_field").field("value", 1).field("boost", 6.0f).endObject().startObject("d_field").field("value", 1).field("boost", 7.0f).endObject().startObject("f_field").field("value", 1).field("boost", 8.0f).endObject().startObject("date_field").field("value", "20100101").field("boost", 9.0f).endObject().endObject().bytes());
 
         assertThat(doc.rootDoc().getField("s_field").boost(), equalTo(2.0f));
         assertThat(doc.rootDoc().getField("l_field").boost(), equalTo(3.0f));

@@ -79,10 +79,7 @@ public class RestClient implements Closeable {
 
         String version = null;
         for (InetSocketAddress address : addresses) {
-            RestResponse restResponse = new RestResponse(new HttpRequestBuilder(httpClient).addHeaders(headers)
-                    .host(address.getHostName()).port(address.getPort())
-                    .path(restApi.getPaths().get(0))
-                    .method(restApi.getMethods().get(0)).execute());
+            RestResponse restResponse = new RestResponse(new HttpRequestBuilder(httpClient).addHeaders(headers).host(address.getHostName()).port(address.getPort()).path(restApi.getPaths().get(0)).method(restApi.getMethods().get(0)).execute());
             checkStatusCode(restResponse);
 
             Object latestVersion = restResponse.evaluate("version.number");
@@ -121,7 +118,7 @@ public class RestClient implements Closeable {
             if (Strings.hasLength(ignoreString)) {
                 try {
                     ignores.add(Integer.valueOf(ignoreString));
-                } catch(NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new IllegalArgumentException("ignore value should be a number, found [" + ignoreString + "] instead");
                 }
             }

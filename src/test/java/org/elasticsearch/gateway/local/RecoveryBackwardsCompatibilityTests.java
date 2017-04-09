@@ -47,13 +47,8 @@ import static org.hamcrest.Matchers.*;
 @ElasticsearchIntegrationTest.ClusterScope(numDataNodes = 0, scope = ElasticsearchIntegrationTest.Scope.TEST, numClientNodes = 0, transportClientRatio = 0.0)
 public class RecoveryBackwardsCompatibilityTests extends ElasticsearchBackwardsCompatIntegrationTest {
 
-
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("action.admin.cluster.node.shutdown.delay", "10ms")
-                .put("gateway.recover_after_nodes", 2)
-                .put(BalancedShardsAllocator.SETTING_THRESHOLD, 100.0f).build(); // use less aggressive settings
+        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal)).put("action.admin.cluster.node.shutdown.delay", "10ms").put("gateway.recover_after_nodes", 2).put(BalancedShardsAllocator.SETTING_THRESHOLD, 100.0f).build(); // use less aggressive settings
     }
 
     protected int minExternalNodes() {
@@ -63,7 +58,6 @@ public class RecoveryBackwardsCompatibilityTests extends ElasticsearchBackwardsC
     protected int maxExternalNodes() {
         return 3;
     }
-
 
     @Test
     @LuceneTestCase.Slow

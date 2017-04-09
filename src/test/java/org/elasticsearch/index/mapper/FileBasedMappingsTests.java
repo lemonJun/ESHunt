@@ -53,37 +53,14 @@ public class FileBasedMappingsTests extends ElasticsearchTestCase {
             defaultMappings.getParentFile().mkdirs();
 
             try (XContentBuilder builder = new XContentBuilder(JsonXContent.jsonXContent, new FileOutputStream(indexMappings))) {
-                builder.startObject()
-                        .startObject("type")
-                            .startObject("properties")
-                                .startObject("f")
-                                    .field("type", "string")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                    .endObject();
+                builder.startObject().startObject("type").startObject("properties").startObject("f").field("type", "string").endObject().endObject().endObject().endObject();
             }
 
             try (XContentBuilder builder = new XContentBuilder(JsonXContent.jsonXContent, new FileOutputStream(defaultMappings))) {
-                builder.startObject()
-                        .startObject("type")
-                            .startObject("properties")
-                                .startObject("g")
-                                    .field("type", "string")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                    .endObject();
+                builder.startObject().startObject("type").startObject("properties").startObject("g").field("type", "string").endObject().endObject().endObject().endObject();
             }
 
-            Settings settings = ImmutableSettings.builder()
-                    .put(ClusterName.SETTING, NAME)
-                    .put("node.name", NAME)
-                    .put("path.conf", configDir.getAbsolutePath())
-                    .put("http.enabled", false)
-                    .put("index.store.type", "ram")
-                    .put("gateway.type", "none")
-                    .build();
+            Settings settings = ImmutableSettings.builder().put(ClusterName.SETTING, NAME).put("node.name", NAME).put("path.conf", configDir.getAbsolutePath()).put("http.enabled", false).put("index.store.type", "ram").put("gateway.type", "none").build();
 
             try (Node node = NodeBuilder.nodeBuilder().local(true).data(true).settings(settings).node()) {
 

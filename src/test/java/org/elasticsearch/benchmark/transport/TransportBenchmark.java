@@ -68,9 +68,7 @@ public class TransportBenchmark {
         final AtomicLong idGenerator = new AtomicLong();
         final Type type = Type.NETTY;
 
-
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().build();
 
         final ThreadPool serverThreadPool = new ThreadPool("server");
         final TransportService serverTransportService = new TransportService(type.newTransport(settings, serverThreadPool), serverThreadPool).start();
@@ -122,7 +120,6 @@ public class TransportBenchmark {
                 }
             }).txGet();
         }
-
 
         Thread[] clients = new Thread[NUMBER_OF_CLIENTS];
         final CountDownLatch latch = new CountDownLatch(NUMBER_OF_CLIENTS * NUMBER_OF_ITERATIONS);

@@ -18,7 +18,6 @@
  */
 package org.elasticsearch.search.aggregations.bucket;
 
-
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.mapper.ip.IpFieldMapper;
@@ -52,17 +51,12 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
     @Override
     public void setupSuiteScopeCluster() throws Exception {
         {
-            assertAcked(prepareCreate("idx")
-                    .addMapping("type", "ip", "type=ip", "ips", "type=ip"));
+            assertAcked(prepareCreate("idx").addMapping("type", "ip", "type=ip", "ips", "type=ip"));
             IndexRequestBuilder[] builders = new IndexRequestBuilder[255]; // TODO randomize the size?
             // TODO randomize the values in the docs?
             for (int i = 0; i < builders.length; i++) {
-                builders[i] = client().prepareIndex("idx", "type").setSource(jsonBuilder()
-                        .startObject()
-                        .field("ip", "10.0.0." + (i))
-                        .startArray("ips").value("10.0.0." + i).value("10.0.0." + (i + 1)).endArray()
-                        .field("value", (i < 100 ? 1 : i < 200 ? 2 : 3))        // 100 1's, 100 2's, and 55 3's
-                        .endObject());
+                builders[i] = client().prepareIndex("idx", "type").setSource(jsonBuilder().startObject().field("ip", "10.0.0." + (i)).startArray("ips").value("10.0.0." + i).value("10.0.0." + (i + 1)).endArray().field("value", (i < 100 ? 1 : i < 200 ? 2 : 3)) // 100 1's, 100 2's, and 55 3's
+                                .endObject());
             }
             indexRandom(true, builders);
             createIndex("idx_unmapped");
@@ -71,38 +65,21 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
             assertAcked(prepareCreate("empty_bucket_idx").addMapping("type", "value", "type=integer", "ip", "type=ip"));
             List<IndexRequestBuilder> builders = new ArrayList<>();
             for (int i = 0; i < 2; i++) {
-                builders.add(client().prepareIndex("empty_bucket_idx", "type", "" + i).setSource(jsonBuilder()
-                        .startObject()
-                        .field("value", i * 2)
-                        .field("ip", "10.0.0.5")
-                        .endObject()));
+                builders.add(client().prepareIndex("empty_bucket_idx", "type", "" + i).setSource(jsonBuilder().startObject().field("value", i * 2).field("ip", "10.0.0.5").endObject()));
             }
             indexRandom(true, builders.toArray(new IndexRequestBuilder[builders.size()]));
         }
         {
-            assertAcked(prepareCreate("range_idx")
-                    .addMapping("type", "ip", "type=ip", "ips", "type=ip"));
+            assertAcked(prepareCreate("range_idx").addMapping("type", "ip", "type=ip", "ips", "type=ip"));
             IndexRequestBuilder[] builders = new IndexRequestBuilder[4];
 
-            builders[0] = client().prepareIndex("range_idx", "type").setSource(jsonBuilder()
-                    .startObject()
-                    .field("ip", "0.0.0.0")
-                    .endObject());
+            builders[0] = client().prepareIndex("range_idx", "type").setSource(jsonBuilder().startObject().field("ip", "0.0.0.0").endObject());
 
-            builders[1] = client().prepareIndex("range_idx", "type").setSource(jsonBuilder()
-                    .startObject()
-                    .field("ip", "0.0.0.255")
-                    .endObject());
+            builders[1] = client().prepareIndex("range_idx", "type").setSource(jsonBuilder().startObject().field("ip", "0.0.0.255").endObject());
 
-            builders[2] = client().prepareIndex("range_idx", "type").setSource(jsonBuilder()
-                    .startObject()
-                    .field("ip", "255.255.255.0")
-                    .endObject());
+            builders[2] = client().prepareIndex("range_idx", "type").setSource(jsonBuilder().startObject().field("ip", "255.255.255.0").endObject());
 
-            builders[3] = client().prepareIndex("range_idx", "type").setSource(jsonBuilder()
-                    .startObject()
-                    .field("ip", "255.255.255.255")
-                    .endObject());
+            builders[3] = client().prepareIndex("range_idx", "type").setSource(jsonBuilder().startObject().field("ip", "255.255.255.255").endObject());
 
             indexRandom(true, builders);
         }
@@ -111,16 +88,9 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValueField() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(ipRange("range")
-                        .field("ip")
-                        .addUnboundedTo("10.0.0.100")
-                        .addRange("10.0.0.100", "10.0.0.200")
-                        .addUnboundedFrom("10.0.0.200"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(ipRange("range").field("ip").addUnboundedTo("10.0.0.100").addRange("10.0.0.100", "10.0.0.200").addUnboundedFrom("10.0.0.200")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -157,15 +127,9 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValueField_WithMaskRange() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(ipRange("range")
-                        .field("ip")
-                        .addMaskRange("10.0.0.0/25")
-                        .addMaskRange("10.0.0.128/25"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(ipRange("range").field("ip").addMaskRange("10.0.0.0/25").addMaskRange("10.0.0.128/25")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -193,16 +157,9 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValueField_WithCustomKey() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(ipRange("range")
-                        .field("ip")
-                        .addUnboundedTo("r1", "10.0.0.100")
-                        .addRange("r2", "10.0.0.100", "10.0.0.200")
-                        .addUnboundedFrom("r3", "10.0.0.200"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(ipRange("range").field("ip").addUnboundedTo("r1", "10.0.0.100").addRange("r2", "10.0.0.100", "10.0.0.200").addUnboundedFrom("r3", "10.0.0.200")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -239,17 +196,9 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedField_WithSubAggregation() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(ipRange("range")
-                        .field("ip")
-                        .addUnboundedTo("10.0.0.100")
-                        .addRange("10.0.0.100", "10.0.0.200")
-                        .addUnboundedFrom("10.0.0.200")
-                        .subAggregation(sum("sum").field("value")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(ipRange("range").field("ip").addUnboundedTo("10.0.0.100").addRange("10.0.0.100", "10.0.0.200").addUnboundedFrom("10.0.0.200").subAggregation(sum("sum").field("value"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -290,22 +239,14 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
         assertThat(bucket.getDocCount(), equalTo(55l));
         sum = bucket.getAggregations().get("sum");
         assertThat(sum, notNullValue());
-        assertThat(sum.getValue(), equalTo((double) 55*3));
+        assertThat(sum.getValue(), equalTo((double) 55 * 3));
     }
 
     @Test
     public void singleValuedField_WithSubAggregation_Inherited() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(ipRange("range")
-                        .field("ip")
-                        .addUnboundedTo("10.0.0.100")
-                        .addRange("10.0.0.100", "10.0.0.200")
-                        .addUnboundedFrom("10.0.0.200")
-                        .subAggregation(max("max")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(ipRange("range").field("ip").addUnboundedTo("10.0.0.100").addRange("10.0.0.100", "10.0.0.200").addUnboundedFrom("10.0.0.200").subAggregation(max("max"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -351,17 +292,9 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedField_WithValueScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(ipRange("range")
-                        .field("ip")
-                        .script("_value")
-                        .addUnboundedTo("10.0.0.100")
-                        .addRange("10.0.0.100", "10.0.0.200")
-                        .addUnboundedFrom("10.0.0.200"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(ipRange("range").field("ip").script("_value").addUnboundedTo("10.0.0.100").addRange("10.0.0.100", "10.0.0.200").addUnboundedFrom("10.0.0.200")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -415,16 +348,9 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedField() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(ipRange("range")
-                        .field("ips")
-                        .addUnboundedTo("10.0.0.100")
-                        .addRange("10.0.0.100", "10.0.0.200")
-                        .addUnboundedFrom("10.0.0.200"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(ipRange("range").field("ips").addUnboundedTo("10.0.0.100").addRange("10.0.0.100", "10.0.0.200").addUnboundedFrom("10.0.0.200")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -461,17 +387,9 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedField_WithValueScript() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(ipRange("range")
-                        .field("ips")
-                        .script("_value")
-                        .addUnboundedTo("10.0.0.100")
-                        .addRange("10.0.0.100", "10.0.0.200")
-                        .addUnboundedFrom("10.0.0.200"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(ipRange("range").field("ips").script("_value").addUnboundedTo("10.0.0.100").addRange("10.0.0.100", "10.0.0.200").addUnboundedFrom("10.0.0.200")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -508,18 +426,9 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedField_WithValueScript_WithInheritedSubAggregator() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(ipRange("range")
-                        .field("ips")
-                        .script("_value")
-                        .addUnboundedTo("10.0.0.100")
-                        .addRange("10.0.0.100", "10.0.0.200")
-                        .addUnboundedFrom("10.0.0.200")
-                        .subAggregation(max("max")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(ipRange("range").field("ips").script("_value").addUnboundedTo("10.0.0.100").addRange("10.0.0.100", "10.0.0.200").addUnboundedFrom("10.0.0.200").subAggregation(max("max"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -565,16 +474,9 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void script_SingleValue() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(ipRange("range")
-                        .script("doc['ip'].value")
-                        .addUnboundedTo("10.0.0.100")
-                        .addRange("10.0.0.100", "10.0.0.200")
-                        .addUnboundedFrom("10.0.0.200"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(ipRange("range").script("doc['ip'].value").addUnboundedTo("10.0.0.100").addRange("10.0.0.100", "10.0.0.200").addUnboundedFrom("10.0.0.200")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -611,17 +513,9 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void script_SingleValue_WithSubAggregator_Inherited() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(ipRange("range")
-                        .script("doc['ip'].value")
-                        .addUnboundedTo("10.0.0.100")
-                        .addRange("10.0.0.100", "10.0.0.200")
-                        .addUnboundedFrom("10.0.0.200")
-                        .subAggregation(max("max")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(ipRange("range").script("doc['ip'].value").addUnboundedTo("10.0.0.100").addRange("10.0.0.100", "10.0.0.200").addUnboundedFrom("10.0.0.200").subAggregation(max("max"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -667,16 +561,9 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void script_MultiValued() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(ipRange("range")
-                        .script("doc['ips'].values")
-                        .addUnboundedTo("10.0.0.100")
-                        .addRange("10.0.0.100", "10.0.0.200")
-                        .addUnboundedFrom("10.0.0.200"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(ipRange("range").script("doc['ips'].values").addUnboundedTo("10.0.0.100").addRange("10.0.0.100", "10.0.0.200").addUnboundedFrom("10.0.0.200")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -713,17 +600,9 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void script_MultiValued_WithAggregatorInherited() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(ipRange("range")
-                        .script("doc['ips'].values")
-                        .addUnboundedTo("10.0.0.100")
-                        .addRange("10.0.0.100", "10.0.0.200")
-                        .addUnboundedFrom("10.0.0.200")
-                        .subAggregation(max("max")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(ipRange("range").script("doc['ips'].values").addUnboundedTo("10.0.0.100").addRange("10.0.0.100", "10.0.0.200").addUnboundedFrom("10.0.0.200").subAggregation(max("max"))).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -769,16 +648,9 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void unmapped() throws Exception {
-        SearchResponse response = client().prepareSearch("idx_unmapped")
-                .addAggregation(ipRange("range")
-                        .field("ip")
-                        .addUnboundedTo("10.0.0.100")
-                        .addRange("10.0.0.100", "10.0.0.200")
-                        .addUnboundedFrom("10.0.0.200"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx_unmapped").addAggregation(ipRange("range").field("ip").addUnboundedTo("10.0.0.100").addRange("10.0.0.100", "10.0.0.200").addUnboundedFrom("10.0.0.200")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -815,16 +687,9 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void partiallyUnmapped() throws Exception {
-        SearchResponse response = client().prepareSearch("idx", "idx_unmapped")
-                .addAggregation(ipRange("range")
-                        .field("ip")
-                        .addUnboundedTo("10.0.0.100")
-                        .addRange("10.0.0.100", "10.0.0.200")
-                        .addUnboundedFrom("10.0.0.200"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx", "idx_unmapped").addAggregation(ipRange("range").field("ip").addUnboundedTo("10.0.0.100").addRange("10.0.0.100", "10.0.0.200").addUnboundedFrom("10.0.0.200")).execute().actionGet();
 
         assertSearchResponse(response);
-
 
         IPv4Range range = response.getAggregations().get("range");
         assertThat(range, notNullValue());
@@ -861,11 +726,7 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void emptyAggregation() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0)
-                        .subAggregation(ipRange("ip_range").field("ip").addRange("r1", "10.0.0.1", "10.0.0.10")))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx").setQuery(matchAllQuery()).addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0).subAggregation(ipRange("ip_range").field("ip").addRange("r1", "10.0.0.1", "10.0.0.10"))).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(2l));
         Histogram histo = searchResponse.getAggregations().get("histo");
@@ -887,11 +748,7 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void mask0() {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(ipRange("range")
-                        .field("ip")
-                        .addMaskRange("0.0.0.0/0"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(ipRange("range").field("ip").addMaskRange("0.0.0.0/0")).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -909,15 +766,10 @@ public class IPv4RangeTests extends ElasticsearchIntegrationTest {
         assertEquals(255l, bucket.getDocCount());
     }
 
-
     @Test
     public void mask0SpecialIps() {
 
-        SearchResponse response = client().prepareSearch("range_idx")
-                .addAggregation(ipRange("range")
-                        .field("ip")
-                        .addMaskRange("0.0.0.0/0"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("range_idx").addAggregation(ipRange("range").field("ip").addMaskRange("0.0.0.0/0")).execute().actionGet();
 
         assertSearchResponse(response);
 

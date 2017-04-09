@@ -68,9 +68,7 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
 
         numDocs = randomIntBetween(10, 100);
         for (int i = 0; i < numDocs; i++) {
-            builders.add(client().prepareIndex("idx", "type", "" + i).setSource(
-                    jsonBuilder().startObject().field("value", randomAsciiOfLengthBetween(5, 15))
-                    .field("l_value", i).endObject()));
+            builders.add(client().prepareIndex("idx", "type", "" + i).setSource(jsonBuilder().startObject().field("value", randomAsciiOfLengthBetween(5, 15)).field("l_value", i).endObject()));
         }
         indexRandom(true, builders);
 
@@ -85,42 +83,31 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
         prepareCreate("empty_bucket_idx").addMapping("type", "value", "type=integer").execute().actionGet();
         builders = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
-            builders.add(client().prepareIndex("empty_bucket_idx", "type", "" + i).setSource(
-                    jsonBuilder().startObject().field("value", i * 2).endObject()));
+            builders.add(client().prepareIndex("empty_bucket_idx", "type", "" + i).setSource(jsonBuilder().startObject().field("value", i * 2).endObject()));
         }
 
         PutIndexedScriptResponse indexScriptResponse = client().preparePutIndexedScript(GroovyScriptEngineService.NAME, "initScript_indexed", "{\"script\":\"vars.multiplier = 3\"}").get();
         assertThat(indexScriptResponse.isCreated(), equalTo(true));
         indexScriptResponse = client().preparePutIndexedScript(GroovyScriptEngineService.NAME, "mapScript_indexed", "{\"script\":\"_agg.add(vars.multiplier)\"}").get();
         assertThat(indexScriptResponse.isCreated(), equalTo(true));
-        indexScriptResponse = client().preparePutIndexedScript(GroovyScriptEngineService.NAME, "combineScript_indexed",
-                "{\"script\":\"newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation\"}")
-                .get();
+        indexScriptResponse = client().preparePutIndexedScript(GroovyScriptEngineService.NAME, "combineScript_indexed", "{\"script\":\"newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation\"}").get();
         assertThat(indexScriptResponse.isCreated(), equalTo(true));
-        indexScriptResponse = client().preparePutIndexedScript(
-                "groovy",
-                "reduceScript_indexed",
-                "{\"script\":\"newaggregation = []; sum = 0;for (agg in _aggs) { for (a in agg) { sum += a} }; newaggregation.add(sum); return newaggregation\"}")
-                .get();
+        indexScriptResponse = client().preparePutIndexedScript("groovy", "reduceScript_indexed", "{\"script\":\"newaggregation = []; sum = 0;for (agg in _aggs) { for (a in agg) { sum += a} }; newaggregation.add(sum); return newaggregation\"}").get();
         assertThat(indexScriptResponse.isCreated(), equalTo(true));
-        
+
         indexRandom(true, builders);
         ensureSearchable();
     }
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("path.conf", getResource("/org/elasticsearch/search/aggregations/metrics/scripted/conf"))
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("path.conf", getResource("/org/elasticsearch/search/aggregations/metrics/scripted/conf")).build();
         return settings;
     }
 
     @Test
     public void testMap() {
-        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery())
-                .addAggregation(scriptedMetric("scripted").mapScript("_agg['count'] = 1")).execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(scriptedMetric("scripted").mapScript("_agg['count'] = 1")).execute().actionGet();
         assertSearchResponse(response);
         assertThat(response.getHits().getTotalHits(), equalTo(numDocs));
 
@@ -156,8 +143,7 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
         Map<String, Object> params = new HashMap<>();
         params.put("_agg", new ArrayList<>());
 
-        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery())
-                .addAggregation(scriptedMetric("scripted").params(params).mapScript("_agg.add(1)")).execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(scriptedMetric("scripted").params(params).mapScript("_agg.add(1)")).execute().actionGet();
         assertSearchResponse(response);
         assertThat(response.getHits().getTotalHits(), equalTo(numDocs));
 
@@ -194,12 +180,7 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
         params.put("_agg", new ArrayList<>());
         params.put("vars", varsMap);
 
-        SearchResponse response = client()
-                .prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(
-                        scriptedMetric("scripted").params(params).initScript("vars.multiplier = 3")
-                                .mapScript("_agg.add(vars.multiplier)")).execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(scriptedMetric("scripted").params(params).initScript("vars.multiplier = 3").mapScript("_agg.add(vars.multiplier)")).execute().actionGet();
         assertSearchResponse(response);
         assertThat(response.getHits().getTotalHits(), equalTo(numDocs));
 
@@ -236,16 +217,7 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
         params.put("_agg", new ArrayList<>());
         params.put("vars", varsMap);
 
-        SearchResponse response = client()
-                .prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(
-                        scriptedMetric("scripted")
-                                .params(params)
-                                .mapScript("_agg.add(1)")
-                                .combineScript(
-                                        "newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(scriptedMetric("scripted").params(params).mapScript("_agg.add(1)").combineScript("newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation")).execute().actionGet();
         assertSearchResponse(response);
         assertThat(response.getHits().getTotalHits(), equalTo(numDocs));
 
@@ -285,17 +257,7 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
         params.put("_agg", new ArrayList<>());
         params.put("vars", varsMap);
 
-        SearchResponse response = client()
-                .prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(
-                        scriptedMetric("scripted")
-                                .params(params)
-                                .initScript("vars.multiplier = 3")
-                                .mapScript("_agg.add(vars.multiplier)")
-                                .combineScript(
-                                        "newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(scriptedMetric("scripted").params(params).initScript("vars.multiplier = 3").mapScript("_agg.add(vars.multiplier)").combineScript("newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation")).execute().actionGet();
         assertSearchResponse(response);
         assertThat(response.getHits().getTotalHits(), equalTo(numDocs));
 
@@ -335,19 +297,7 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
         params.put("_agg", new ArrayList<>());
         params.put("vars", varsMap);
 
-        SearchResponse response = client()
-                .prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(
-                        scriptedMetric("scripted")
-                                .params(params)
-                                .initScript("vars.multiplier = 3")
-                                .mapScript("_agg.add(vars.multiplier)")
-                                .combineScript(
-                                        "newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation")
-                                .reduceScript(
-                                        "newaggregation = []; sum = 0;for (aggregation in _aggs) { for (a in aggregation) { sum += a} }; newaggregation.add(sum); return newaggregation"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(scriptedMetric("scripted").params(params).initScript("vars.multiplier = 3").mapScript("_agg.add(vars.multiplier)").combineScript("newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation").reduceScript("newaggregation = []; sum = 0;for (aggregation in _aggs) { for (a in aggregation) { sum += a} }; newaggregation.add(sum); return newaggregation")).execute().actionGet();
         assertSearchResponse(response);
         assertThat(response.getHits().getTotalHits(), equalTo(numDocs));
 
@@ -374,18 +324,7 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
         params.put("_agg", new ArrayList<>());
         params.put("vars", varsMap);
 
-        SearchResponse response = client()
-                .prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(
-                        scriptedMetric("scripted")
-                                .params(params)
-                                .mapScript("_agg.add(vars.multiplier)")
-                                .combineScript(
-                                        "newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation")
-                                .reduceScript(
-                                        "newaggregation = []; sum = 0;for (aggregation in _aggs) { for (a in aggregation) { sum += a} }; newaggregation.add(sum); return newaggregation"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(scriptedMetric("scripted").params(params).mapScript("_agg.add(vars.multiplier)").combineScript("newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation").reduceScript("newaggregation = []; sum = 0;for (aggregation in _aggs) { for (a in aggregation) { sum += a} }; newaggregation.add(sum); return newaggregation")).execute().actionGet();
         assertSearchResponse(response);
         assertThat(response.getHits().getTotalHits(), equalTo(numDocs));
 
@@ -412,17 +351,7 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
         params.put("_agg", new ArrayList<>());
         params.put("vars", varsMap);
 
-        SearchResponse response = client()
-                .prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(
-                        scriptedMetric("scripted")
-                                .params(params)
-                                .initScript("vars.multiplier = 3")
-                                .mapScript("_agg.add(vars.multiplier)")
-                                .reduceScript(
-                                        "newaggregation = []; sum = 0;for (aggregation in _aggs) { for (a in aggregation) { sum += a} }; newaggregation.add(sum); return newaggregation"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(scriptedMetric("scripted").params(params).initScript("vars.multiplier = 3").mapScript("_agg.add(vars.multiplier)").reduceScript("newaggregation = []; sum = 0;for (aggregation in _aggs) { for (a in aggregation) { sum += a} }; newaggregation.add(sum); return newaggregation")).execute().actionGet();
         assertSearchResponse(response);
         assertThat(response.getHits().getTotalHits(), equalTo(numDocs));
 
@@ -449,16 +378,7 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
         params.put("_agg", new ArrayList<>());
         params.put("vars", varsMap);
 
-        SearchResponse response = client()
-                .prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(
-                        scriptedMetric("scripted")
-                                .params(params)
-                                .mapScript("_agg.add(vars.multiplier)")
-                                .reduceScript(
-                                        "newaggregation = []; sum = 0;for (aggregation in _aggs) { for (a in aggregation) { sum += a} }; newaggregation.add(sum); return newaggregation"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(scriptedMetric("scripted").params(params).mapScript("_agg.add(vars.multiplier)").reduceScript("newaggregation = []; sum = 0;for (aggregation in _aggs) { for (a in aggregation) { sum += a} }; newaggregation.add(sum); return newaggregation")).execute().actionGet();
         assertSearchResponse(response);
         assertThat(response.getHits().getTotalHits(), equalTo(numDocs));
 
@@ -487,20 +407,7 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
         Map<String, Object> reduceParams = new HashMap<>();
         reduceParams.put("multiplier", 4);
 
-        SearchResponse response = client()
-                .prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(
-                        scriptedMetric("scripted")
-                                .params(params)
-                                .reduceParams(reduceParams)
-                                .initScript("vars.multiplier = 3")
-                                .mapScript("_agg.add(vars.multiplier)")
-                                .combineScript(
-                                        "newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation")
-                                .reduceScript(
-                                        "newaggregation = []; sum = 0;for (aggregation in _aggs) { for (a in aggregation) { sum += a} }; newaggregation.add(sum * multiplier); return newaggregation"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(scriptedMetric("scripted").params(params).reduceParams(reduceParams).initScript("vars.multiplier = 3").mapScript("_agg.add(vars.multiplier)").combineScript("newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation").reduceScript("newaggregation = []; sum = 0;for (aggregation in _aggs) { for (a in aggregation) { sum += a} }; newaggregation.add(sum * multiplier); return newaggregation")).execute().actionGet();
         assertSearchResponse(response);
         assertThat(response.getHits().getTotalHits(), equalTo(numDocs));
 
@@ -527,13 +434,7 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
         params.put("_agg", new ArrayList<>());
         params.put("vars", varsMap);
 
-        SearchResponse response = client()
-                .prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(
-                        scriptedMetric("scripted").params(params).initScriptId("initScript_indexed")
-                                .mapScriptId("mapScript_indexed").combineScriptId("combineScript_indexed").reduceScriptId("reduceScript_indexed"))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(scriptedMetric("scripted").params(params).initScriptId("initScript_indexed").mapScriptId("mapScript_indexed").combineScriptId("combineScript_indexed").reduceScriptId("reduceScript_indexed")).execute().actionGet();
         assertSearchResponse(response);
         assertThat(response.getHits().getTotalHits(), equalTo(numDocs));
 
@@ -561,12 +462,7 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
         params.put("_agg", new ArrayList<>());
         params.put("vars", varsMap);
 
-        SearchResponse response = client()
-                .prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(
-                        scriptedMetric("scripted").params(params).initScriptFile("init_script").mapScriptFile("map_script")
-                                .combineScriptFile("combine_script").reduceScriptFile("reduce_script")).execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(scriptedMetric("scripted").params(params).initScriptFile("init_script").mapScriptFile("map_script").combineScriptFile("combine_script").reduceScriptFile("reduce_script")).execute().actionGet();
         assertSearchResponse(response);
         assertThat(response.getHits().getTotalHits(), equalTo(numDocs));
 
@@ -593,23 +489,7 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
         params.put("_agg", new ArrayList<>());
         params.put("vars", varsMap);
 
-        SearchResponse response = client()
-                .prepareSearch("idx")
-                .setQuery(matchAllQuery()).setSize(1000)
-                .addAggregation(
-                        histogram("histo")
-                                .field("l_value")
-                                .interval(1)
-                                .subAggregation(
-                                        scriptedMetric("scripted")
-                                                .params(params)
-                                                .initScript("vars.multiplier = 3")
-                                                .mapScript("_agg.add(vars.multiplier)")
-                                                .combineScript(
-                                                        "newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation")
-                                                .reduceScript(
-                                                        "newaggregation = []; sum = 0;for (aggregation in _aggs) { for (a in aggregation) { sum += a} }; newaggregation.add(sum); return newaggregation")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").setQuery(matchAllQuery()).setSize(1000).addAggregation(histogram("histo").field("l_value").interval(1).subAggregation(scriptedMetric("scripted").params(params).initScript("vars.multiplier = 3").mapScript("_agg.add(vars.multiplier)").combineScript("newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation").reduceScript("newaggregation = []; sum = 0;for (aggregation in _aggs) { for (a in aggregation) { sum += a} }; newaggregation.add(sum); return newaggregation"))).execute().actionGet();
         assertSearchResponse(response);
         assertThat(response.getHits().getTotalHits(), equalTo(numDocs));
         Aggregation aggregation = response.getAggregations().get("histo");
@@ -649,19 +529,7 @@ public class ScriptedMetricTests extends ElasticsearchIntegrationTest {
         params.put("_agg", new ArrayList<>());
         params.put("vars", varsMap);
 
-        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0)
-                        .subAggregation(
-                        scriptedMetric("scripted")
-                                .params(params)
-                                .initScript("vars.multiplier = 3")
-                                .mapScript("_agg.add(vars.multiplier)")
-                                .combineScript(
-                                        "newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation")
-                                .reduceScript(
-                                        "newaggregation = []; sum = 0;for (aggregation in _aggs) { for (a in aggregation) { sum += a} }; newaggregation.add(sum); return newaggregation")))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx").setQuery(matchAllQuery()).addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0).subAggregation(scriptedMetric("scripted").params(params).initScript("vars.multiplier = 3").mapScript("_agg.add(vars.multiplier)").combineScript("newaggregation = []; sum = 0;for (a in _agg) { sum += a}; newaggregation.add(sum); return newaggregation").reduceScript("newaggregation = []; sum = 0;for (aggregation in _aggs) { for (a in aggregation) { sum += a} }; newaggregation.add(sum); return newaggregation"))).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(2l));
         Histogram histo = searchResponse.getAggregations().get("histo");

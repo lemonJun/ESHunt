@@ -138,10 +138,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, InterceptingTransportService.class.getName())
-                .build();
+        return ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, InterceptingTransportService.class.getName()).build();
     }
 
     @Before
@@ -189,7 +186,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testIndex() {
-        String[] indexShardActions = new String[]{IndexAction.NAME, IndexAction.NAME + "[r]"};
+        String[] indexShardActions = new String[] { IndexAction.NAME, IndexAction.NAME + "[r]" };
         interceptTransportActions(indexShardActions);
 
         IndexRequest indexRequest = new IndexRequest(randomIndexOrAlias(), "type", "id").source("field", "value");
@@ -201,7 +198,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testDelete() {
-        String[] deleteShardActions = new String[]{DeleteAction.NAME, DeleteAction.NAME + "[r]"};
+        String[] deleteShardActions = new String[] { DeleteAction.NAME, DeleteAction.NAME + "[r]" };
         interceptTransportActions(deleteShardActions);
 
         DeleteRequest deleteRequest = new DeleteRequest(randomIndexOrAlias(), "type", "id");
@@ -214,7 +211,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
     @Test
     public void testUpdate() {
         //update action goes to the primary, index op gets executed locally, then replicated
-        String[] updateShardActions = new String[]{UpdateAction.NAME, IndexAction.NAME + "[r]"};
+        String[] updateShardActions = new String[] { UpdateAction.NAME, IndexAction.NAME + "[r]" };
         interceptTransportActions(updateShardActions);
 
         String indexOrAlias = randomIndexOrAlias();
@@ -230,7 +227,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
     @Test
     public void testUpdateUpsert() {
         //update action goes to the primary, index op gets executed locally, then replicated
-        String[] updateShardActions = new String[]{UpdateAction.NAME, IndexAction.NAME + "[r]"};
+        String[] updateShardActions = new String[] { UpdateAction.NAME, IndexAction.NAME + "[r]" };
         interceptTransportActions(updateShardActions);
 
         String indexOrAlias = randomIndexOrAlias();
@@ -245,7 +242,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
     @Test
     public void testUpdateDelete() {
         //update action goes to the primary, delete op gets executed locally, then replicated
-        String[] updateShardActions = new String[]{UpdateAction.NAME, DeleteAction.NAME + "[r]"};
+        String[] updateShardActions = new String[] { UpdateAction.NAME, DeleteAction.NAME + "[r]" };
         interceptTransportActions(updateShardActions);
 
         String indexOrAlias = randomIndexOrAlias();
@@ -260,7 +257,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testDeleteByQuery() {
-        String[] deleteByQueryShardActions = new String[]{DeleteByQueryAction.NAME + "[s]", DeleteByQueryAction.NAME + "[s][r]"};
+        String[] deleteByQueryShardActions = new String[] { DeleteByQueryAction.NAME + "[s]", DeleteByQueryAction.NAME + "[s][r]" };
         interceptTransportActions(deleteByQueryShardActions);
 
         DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(randomIndicesOrAliases()).source(new QuerySourceBuilder().setQuery(QueryBuilders.matchAllQuery()));
@@ -272,7 +269,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testBulk() {
-        String[] bulkShardActions = new String[]{BulkAction.NAME + "[s]", BulkAction.NAME + "[s][r]"};
+        String[] bulkShardActions = new String[] { BulkAction.NAME + "[s]", BulkAction.NAME + "[s][r]" };
         interceptTransportActions(bulkShardActions);
 
         List<String> indices = new ArrayList<>();
@@ -525,7 +522,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
         String percolateShardAction = PercolateAction.NAME + "[s]";
         interceptTransportActions(percolateShardAction);
 
-        client().prepareIndex("test-get", "type", "1").setSource("field","value").get();
+        client().prepareIndex("test-get", "type", "1").setSource("field", "value").get();
 
         PercolateRequest percolateRequest = new PercolateRequest().indices(randomIndicesOrAliases()).documentType("type");
         if (randomBoolean()) {
@@ -660,8 +657,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testSearchQueryThenFetch() throws Exception {
-        interceptTransportActions(SearchServiceTransportAction.QUERY_ACTION_NAME,
-                SearchServiceTransportAction.FETCH_ID_ACTION_NAME, SearchServiceTransportAction.FREE_CONTEXT_ACTION_NAME);
+        interceptTransportActions(SearchServiceTransportAction.QUERY_ACTION_NAME, SearchServiceTransportAction.FETCH_ID_ACTION_NAME, SearchServiceTransportAction.FREE_CONTEXT_ACTION_NAME);
 
         String[] randomIndicesOrAliases = randomIndicesOrAliases();
         for (int i = 0; i < randomIndicesOrAliases.length; i++) {
@@ -682,8 +678,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testSearchDfsQueryThenFetch() throws Exception {
-        interceptTransportActions(SearchServiceTransportAction.DFS_ACTION_NAME, SearchServiceTransportAction.QUERY_ID_ACTION_NAME,
-                SearchServiceTransportAction.FETCH_ID_ACTION_NAME, SearchServiceTransportAction.FREE_CONTEXT_ACTION_NAME);
+        interceptTransportActions(SearchServiceTransportAction.DFS_ACTION_NAME, SearchServiceTransportAction.QUERY_ID_ACTION_NAME, SearchServiceTransportAction.FETCH_ID_ACTION_NAME, SearchServiceTransportAction.FREE_CONTEXT_ACTION_NAME);
 
         String[] randomIndicesOrAliases = randomIndicesOrAliases();
         for (int i = 0; i < randomIndicesOrAliases.length; i++) {
@@ -697,16 +692,14 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
         assertThat(searchResponse.getHits().totalHits(), greaterThan(0l));
 
         clearInterceptedActions();
-        assertSameIndices(searchRequest, SearchServiceTransportAction.DFS_ACTION_NAME, SearchServiceTransportAction.QUERY_ID_ACTION_NAME,
-                SearchServiceTransportAction.FETCH_ID_ACTION_NAME);
+        assertSameIndices(searchRequest, SearchServiceTransportAction.DFS_ACTION_NAME, SearchServiceTransportAction.QUERY_ID_ACTION_NAME, SearchServiceTransportAction.FETCH_ID_ACTION_NAME);
         //free context messages are not necessarily sent, but if they are, check their indices
         assertSameIndicesOptionalRequests(searchRequest, SearchServiceTransportAction.FREE_CONTEXT_ACTION_NAME);
     }
 
     @Test
     public void testSearchQueryAndFetch() throws Exception {
-        interceptTransportActions(SearchServiceTransportAction.QUERY_FETCH_ACTION_NAME,
-                SearchServiceTransportAction.FREE_CONTEXT_ACTION_NAME);
+        interceptTransportActions(SearchServiceTransportAction.QUERY_FETCH_ACTION_NAME, SearchServiceTransportAction.FREE_CONTEXT_ACTION_NAME);
 
         String[] randomIndicesOrAliases = randomIndicesOrAliases();
         for (int i = 0; i < randomIndicesOrAliases.length; i++) {
@@ -727,8 +720,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testSearchDfsQueryAndFetch() throws Exception {
-        interceptTransportActions(SearchServiceTransportAction.QUERY_QUERY_FETCH_ACTION_NAME,
-                SearchServiceTransportAction.FREE_CONTEXT_ACTION_NAME);
+        interceptTransportActions(SearchServiceTransportAction.QUERY_QUERY_FETCH_ACTION_NAME, SearchServiceTransportAction.FREE_CONTEXT_ACTION_NAME);
 
         String[] randomIndicesOrAliases = randomIndicesOrAliases();
         for (int i = 0; i < randomIndicesOrAliases.length; i++) {
@@ -770,8 +762,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testMoreLikeThis() {
-        interceptTransportActions(GetAction.NAME + "[s]", SearchServiceTransportAction.QUERY_ACTION_NAME,
-                SearchServiceTransportAction.FETCH_ID_ACTION_NAME, SearchServiceTransportAction.FREE_CONTEXT_ACTION_NAME);
+        interceptTransportActions(GetAction.NAME + "[s]", SearchServiceTransportAction.QUERY_ACTION_NAME, SearchServiceTransportAction.FETCH_ID_ACTION_NAME, SearchServiceTransportAction.FREE_CONTEXT_ACTION_NAME);
 
         String[] randomIndicesOrAliases = randomIndicesOrAliases();
         for (int i = 0; i < randomIndicesOrAliases.length; i++) {
@@ -780,16 +771,15 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
         refresh();
 
         assertAcked(prepareCreate("test-get").addAlias(new Alias("alias-get")));
-        client().prepareIndex("test-get", "type", "1").setSource("field","value").get();
+        client().prepareIndex("test-get", "type", "1").setSource("field", "value").get();
         String indexGet = randomBoolean() ? "test-get" : "alias-get";
 
-        MoreLikeThisRequest moreLikeThisRequest = new MoreLikeThisRequest(indexGet).type("type").id("1")
-                .searchIndices(randomIndicesOrAliases());
+        MoreLikeThisRequest moreLikeThisRequest = new MoreLikeThisRequest(indexGet).type("type").id("1").searchIndices(randomIndicesOrAliases());
         internalCluster().clientNodeClient().moreLikeThis(moreLikeThisRequest).actionGet();
 
         clearInterceptedActions();
         //get might end up being executed locally, only optionally over the transport
-        assertSameIndicesOptionalRequests(new String[]{indexGet}, GetAction.NAME + "[s]");
+        assertSameIndicesOptionalRequests(new String[] { indexGet }, GetAction.NAME + "[s]");
         //query might end up being executed locally as well, only optionally over the transport
         assertSameIndicesOptionalRequests(moreLikeThisRequest.searchIndices(), SearchServiceTransportAction.QUERY_ACTION_NAME);
         //free context messages are not necessarily sent through the transport, but if they are, check their indices
@@ -812,8 +802,8 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
             }
             for (TransportRequest internalRequest : requests) {
                 assertThat(internalRequest, instanceOf(IndicesRequest.class));
-                assertThat(internalRequest.getClass().getName(), ((IndicesRequest)internalRequest).indices(), equalTo(originalRequest.indices()));
-                assertThat(((IndicesRequest)internalRequest).indicesOptions(), equalTo(originalRequest.indicesOptions()));
+                assertThat(internalRequest.getClass().getName(), ((IndicesRequest) internalRequest).indices(), equalTo(originalRequest.indices()));
+                assertThat(((IndicesRequest) internalRequest).indicesOptions(), equalTo(originalRequest.indicesOptions()));
             }
         }
     }
@@ -830,7 +820,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
             }
             for (TransportRequest internalRequest : requests) {
                 assertThat(internalRequest, instanceOf(IndicesRequest.class));
-                assertThat(internalRequest.getClass().getName(), ((IndicesRequest)internalRequest).indices(), equalTo(indices));
+                assertThat(internalRequest.getClass().getName(), ((IndicesRequest) internalRequest).indices(), equalTo(indices));
             }
         }
     }
@@ -884,7 +874,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
     private static void assertAllRequestsHaveBeenConsumed() {
         Iterable<TransportService> transportServices = internalCluster().getInstances(TransportService.class);
         for (TransportService transportService : transportServices) {
-            assertThat(((InterceptingTransportService)transportService).requests.entrySet(), emptyIterable());
+            assertThat(((InterceptingTransportService) transportService).requests.entrySet(), emptyIterable());
         }
     }
 
@@ -894,7 +884,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
             ((InterceptingTransportService) transportService).clearInterceptedActions();
         }
     }
-    
+
     private static void interceptTransportActions(String... actions) {
         Iterable<TransportService> transportServices = internalCluster().getInstances(TransportService.class);
         for (TransportService transportService : transportServices) {
@@ -921,8 +911,7 @@ public class IndicesRequestTests extends ElasticsearchIntegrationTest {
         private final Map<String, List<TransportRequest>> requests = new HashMap<>();
 
         @Inject
-        public InterceptingTransportService(Settings settings, Transport transport, ThreadPool threadPool,
-                                            NodeSettingsService nodeSettingsService, @ClusterDynamicSettings DynamicSettings dynamicSettings) {
+        public InterceptingTransportService(Settings settings, Transport transport, ThreadPool threadPool, NodeSettingsService nodeSettingsService, @ClusterDynamicSettings DynamicSettings dynamicSettings) {
             super(settings, transport, threadPool);
         }
 

@@ -42,11 +42,7 @@ public class CustomScriptContextTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal))
-                .put("plugin.types", CustomScriptContextPlugin.class.getName())
-                .put("script." + PLUGIN_NAME + "_custom_globally_disabled_op", "off")
-                .put("script.engine.expression.inline." + PLUGIN_NAME + "_custom_exp_disabled_op", "off")
-                        .build();
+        return ImmutableSettings.builder().put(super.nodeSettings(nodeOrdinal)).put("plugin.types", CustomScriptContextPlugin.class.getName()).put("script." + PLUGIN_NAME + "_custom_globally_disabled_op", "off").put("script.engine.expression.inline." + PLUGIN_NAME + "_custom_exp_disabled_op", "off").build();
     }
 
     @Test
@@ -57,7 +53,7 @@ public class CustomScriptContextTests extends ElasticsearchIntegrationTest {
                 try {
                     scriptService.compile(lang, "test", scriptType, new ScriptContext.Plugin(PLUGIN_NAME, "custom_globally_disabled_op"));
                     fail("script compilation should have been rejected");
-                } catch(ScriptException e) {
+                } catch (ScriptException e) {
                     assertThat(e.getMessage(), containsString("scripts of type [" + scriptType + "], operation [" + PLUGIN_NAME + "_custom_globally_disabled_op] and lang [" + lang + "] are disabled"));
                 }
             }
@@ -66,7 +62,7 @@ public class CustomScriptContextTests extends ElasticsearchIntegrationTest {
         try {
             scriptService.compile("expression", "1", ScriptService.ScriptType.INLINE, new ScriptContext.Plugin(PLUGIN_NAME, "custom_exp_disabled_op"));
             fail("script compilation should have been rejected");
-        } catch(ScriptException e) {
+        } catch (ScriptException e) {
             assertThat(e.getMessage(), containsString("scripts of type [inline], operation [" + PLUGIN_NAME + "_custom_exp_disabled_op] and lang [expression] are disabled"));
         }
 
@@ -88,7 +84,7 @@ public class CustomScriptContextTests extends ElasticsearchIntegrationTest {
         try {
             scriptService.compile(randomFrom(LANG_SET.toArray(new String[LANG_SET.size()])), "test", randomFrom(ScriptService.ScriptType.values()), new ScriptContext.Plugin("test", "unknown"));
             fail("script compilation should have been rejected");
-        } catch(ElasticsearchIllegalArgumentException e) {
+        } catch (ElasticsearchIllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("script context [test_unknown] not supported"));
         }
     }
@@ -104,7 +100,7 @@ public class CustomScriptContextTests extends ElasticsearchIntegrationTest {
                 }
             });
             fail("script compilation should have been rejected");
-        } catch(ElasticsearchIllegalArgumentException e) {
+        } catch (ElasticsearchIllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("script context [test] not supported"));
         }
     }

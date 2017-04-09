@@ -176,7 +176,8 @@ public class MulticastZenPingTests extends ElasticsearchTestCase {
             Thread.sleep(100);
         } finally {
             Loggers.getLogger(MulticastZenPing.class).setLevel("INFO");
-            if (multicastSocket != null) multicastSocket.close();
+            if (multicastSocket != null)
+                multicastSocket.close();
             zenPingA.close();
             terminate(threadPool);
         }

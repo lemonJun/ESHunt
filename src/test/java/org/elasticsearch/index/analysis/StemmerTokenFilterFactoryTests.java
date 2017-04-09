@@ -47,13 +47,7 @@ public class StemmerTokenFilterFactoryTests extends ElasticsearchTokenStreamTest
         for (int i = 0; i < iters; i++) {
 
             Version v = ElasticsearchTestCase.randomVersion(random());
-            Settings settings = ImmutableSettings.settingsBuilder()
-                    .put("index.analysis.filter.my_english.type", "stemmer")
-                    .put("index.analysis.filter.my_english.language", "english")
-                    .put("index.analysis.analyzer.my_english.tokenizer","whitespace")
-                    .put("index.analysis.analyzer.my_english.filter","my_english")
-                    .put(SETTING_VERSION_CREATED,v)
-                    .build();
+            Settings settings = ImmutableSettings.settingsBuilder().put("index.analysis.filter.my_english.type", "stemmer").put("index.analysis.filter.my_english.language", "english").put("index.analysis.analyzer.my_english.tokenizer", "whitespace").put("index.analysis.analyzer.my_english.filter", "my_english").put(SETTING_VERSION_CREATED, v).build();
 
             AnalysisService analysisService = AnalysisTestsHelper.createAnalysisServiceFromSettings(settings);
             TokenFilterFactory tokenFilter = analysisService.tokenFilter("my_english");
@@ -63,10 +57,10 @@ public class StemmerTokenFilterFactoryTests extends ElasticsearchTokenStreamTest
 
             if (v.onOrAfter(Version.V_1_3_0)) {
                 assertThat(create, instanceOf(PorterStemFilter.class));
-                assertAnalyzesTo(analyzer, "consolingly", new String[]{"consolingli"});
+                assertAnalyzesTo(analyzer, "consolingly", new String[] { "consolingli" });
             } else {
                 assertThat(create, instanceOf(SnowballFilter.class));
-                assertAnalyzesTo(analyzer, "consolingly", new String[]{"consol"});
+                assertAnalyzesTo(analyzer, "consolingly", new String[] { "consol" });
             }
         }
 
@@ -78,13 +72,7 @@ public class StemmerTokenFilterFactoryTests extends ElasticsearchTokenStreamTest
         for (int i = 0; i < iters; i++) {
 
             Version v = ElasticsearchTestCase.randomVersion(random());
-            Settings settings = ImmutableSettings.settingsBuilder()
-                    .put("index.analysis.filter.my_porter2.type", "stemmer")
-                    .put("index.analysis.filter.my_porter2.language", "porter2")
-                    .put("index.analysis.analyzer.my_porter2.tokenizer","whitespace")
-                    .put("index.analysis.analyzer.my_porter2.filter","my_porter2")
-                    .put(SETTING_VERSION_CREATED,v)
-                    .build();
+            Settings settings = ImmutableSettings.settingsBuilder().put("index.analysis.filter.my_porter2.type", "stemmer").put("index.analysis.filter.my_porter2.language", "porter2").put("index.analysis.analyzer.my_porter2.tokenizer", "whitespace").put("index.analysis.analyzer.my_porter2.filter", "my_porter2").put(SETTING_VERSION_CREATED, v).build();
 
             AnalysisService analysisService = AnalysisTestsHelper.createAnalysisServiceFromSettings(settings);
             TokenFilterFactory tokenFilter = analysisService.tokenFilter("my_porter2");
@@ -94,9 +82,9 @@ public class StemmerTokenFilterFactoryTests extends ElasticsearchTokenStreamTest
             assertThat(create, instanceOf(SnowballFilter.class));
 
             if (v.onOrAfter(Version.V_1_3_0)) {
-                assertAnalyzesTo(analyzer, "possibly", new String[]{"possibl"});
+                assertAnalyzesTo(analyzer, "possibly", new String[] { "possibl" });
             } else {
-                assertAnalyzesTo(analyzer, "possibly", new String[]{"possibli"});
+                assertAnalyzesTo(analyzer, "possibly", new String[] { "possibli" });
             }
         }
 

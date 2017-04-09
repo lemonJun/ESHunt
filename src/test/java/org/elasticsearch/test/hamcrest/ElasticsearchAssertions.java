@@ -157,8 +157,7 @@ public class ElasticsearchAssertions {
     }
 
     public static String formatShardStatus(BroadcastOperationResponse response) {
-        String msg = " Total shards: " + response.getTotalShards() + " Successful shards: " + response.getSuccessfulShards() + " & "
-                + response.getFailedShards() + " shard failures:";
+        String msg = " Total shards: " + response.getTotalShards() + " Successful shards: " + response.getSuccessfulShards() + " & " + response.getFailedShards() + " shard failures:";
         for (ShardOperationFailedException failure : response.getShardFailures()) {
             msg += "\n " + failure.toString();
         }
@@ -166,8 +165,7 @@ public class ElasticsearchAssertions {
     }
 
     public static String formatShardStatus(SearchResponse response) {
-        String msg = " Total shards: " + response.getTotalShards() + " Successful shards: " + response.getSuccessfulShards() + " & "
-                + response.getFailedShards() + " shard failures:";
+        String msg = " Total shards: " + response.getTotalShards() + " Successful shards: " + response.getSuccessfulShards() + " & " + response.getFailedShards() + " shard failures:";
         for (ShardSearchFailure failure : response.getShardFailures()) {
             msg += "\n " + failure.toString();
         }
@@ -179,8 +177,7 @@ public class ElasticsearchAssertions {
      */
     public static void assertHitCount(SearchResponse searchResponse, long expectedHitCount) {
         if (searchResponse.getHits().totalHits() != expectedHitCount) {
-            fail("Hit count is " + searchResponse.getHits().totalHits() + " but " + expectedHitCount + " was expected. "
-                    + formatShardStatus(searchResponse));
+            fail("Hit count is " + searchResponse.getHits().totalHits() + " but " + expectedHitCount + " was expected. " + formatShardStatus(searchResponse));
         }
         assertVersionSerializable(searchResponse);
     }
@@ -194,12 +191,9 @@ public class ElasticsearchAssertions {
 
         Set<String> idsSet = new HashSet<>(Arrays.asList(ids));
         for (SearchHit hit : searchResponse.getHits()) {
-            assertThat("id [" + hit.getId() + "] was found in search results but wasn't expected (type [" + hit.getType() + "], index [" + hit.index() + "])"
-                            + shardStatus, idsSet.remove(hit.getId()),
-                    equalTo(true));
+            assertThat("id [" + hit.getId() + "] was found in search results but wasn't expected (type [" + hit.getType() + "], index [" + hit.index() + "])" + shardStatus, idsSet.remove(hit.getId()), equalTo(true));
         }
-        assertThat("Some expected ids were not found in search results: " + Arrays.toString(idsSet.toArray(new String[idsSet.size()])) + "."
-                + shardStatus, idsSet.size(), equalTo(0));
+        assertThat("Some expected ids were not found in search results: " + Arrays.toString(idsSet.toArray(new String[idsSet.size()])) + "." + shardStatus, idsSet.size(), equalTo(0));
         assertVersionSerializable(searchResponse);
     }
 
@@ -279,20 +273,17 @@ public class ElasticsearchAssertions {
     }
 
     public static void assertNoFailures(SearchResponse searchResponse) {
-        assertThat("Unexpected ShardFailures: " + Arrays.toString(searchResponse.getShardFailures()),
-                searchResponse.getShardFailures().length, equalTo(0));
+        assertThat("Unexpected ShardFailures: " + Arrays.toString(searchResponse.getShardFailures()), searchResponse.getShardFailures().length, equalTo(0));
         assertVersionSerializable(searchResponse);
     }
 
     public static void assertFailures(SearchResponse searchResponse) {
-        assertThat("Expected at least one shard failure, got none",
-                searchResponse.getShardFailures().length, greaterThan(0));
+        assertThat("Expected at least one shard failure, got none", searchResponse.getShardFailures().length, greaterThan(0));
         assertVersionSerializable(searchResponse);
     }
 
     public static void assertNoFailures(BulkResponse response) {
-        assertThat("Unexpected ShardFailures: " + response.buildFailureMessage(),
-                response.hasFailures(), is(false));
+        assertThat("Unexpected ShardFailures: " + response.buildFailureMessage(), response.hasFailures(), is(false));
         assertVersionSerializable(response);
     }
 
@@ -326,15 +317,13 @@ public class ElasticsearchAssertions {
 
     public static void assertAllSuccessful(BroadcastOperationResponse response) {
         assertNoFailures(response);
-        assertThat("Expected all shards successful but got successful [" + response.getSuccessfulShards() + "] total [" + response.getTotalShards() + "]",
-                response.getTotalShards(), equalTo(response.getSuccessfulShards()));
+        assertThat("Expected all shards successful but got successful [" + response.getSuccessfulShards() + "] total [" + response.getTotalShards() + "]", response.getTotalShards(), equalTo(response.getSuccessfulShards()));
         assertVersionSerializable(response);
     }
 
     public static void assertAllSuccessful(SearchResponse response) {
         assertNoFailures(response);
-        assertThat("Expected all shards successful but got successful [" + response.getSuccessfulShards() + "] total [" + response.getTotalShards() + "]",
-                response.getTotalShards(), equalTo(response.getSuccessfulShards()));
+        assertThat("Expected all shards successful but got successful [" + response.getSuccessfulShards() + "] total [" + response.getTotalShards() + "]", response.getTotalShards(), equalTo(response.getSuccessfulShards()));
         assertVersionSerializable(response);
     }
 
@@ -562,7 +551,6 @@ public class ElasticsearchAssertions {
             extraInfo += " with status [" + status + "]";
         }
 
-
         try {
             future.actionGet();
             fail = true;
@@ -648,8 +636,7 @@ public class ElasticsearchAssertions {
 
     }
 
-    private static Streamable tryCreateNewInstance(Streamable streamable) throws NoSuchMethodException, InstantiationException,
-            IllegalAccessException, InvocationTargetException {
+    private static Streamable tryCreateNewInstance(Streamable streamable) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         try {
             Class<? extends Streamable> clazz = streamable.getClass();
             Constructor<? extends Streamable> constructor = clazz.getDeclaredConstructor();
@@ -740,13 +727,7 @@ public class ElasticsearchAssertions {
         }
     }
 
-    public static void assertNodeContainsPlugins(NodesInfoResponse response, String nodeId,
-                                                 List<String> expectedJvmPluginNames,
-                                                 List<String> expectedJvmPluginDescriptions,
-                                                 List<String> expectedJvmVersions,
-                                                 List<String> expectedSitePluginNames,
-                                                 List<String> expectedSitePluginDescriptions,
-                                                 List<String> expectedSiteVersions) {
+    public static void assertNodeContainsPlugins(NodesInfoResponse response, String nodeId, List<String> expectedJvmPluginNames, List<String> expectedJvmPluginDescriptions, List<String> expectedJvmVersions, List<String> expectedSitePluginNames, List<String> expectedSitePluginDescriptions, List<String> expectedSiteVersions) {
 
         Assert.assertThat(response.getNodesMap().get(nodeId), notNullValue());
 
@@ -768,10 +749,7 @@ public class ElasticsearchAssertions {
             Assert.assertThat(jvmPluginVersions, hasItem(pluginVersion));
         }
 
-        FluentIterable<String> jvmUrls = FluentIterable.from(plugins.getInfos())
-                .filter(Predicates.and(jvmPluginPredicate, Predicates.not(sitePluginPredicate)))
-                .filter(isNull())
-                .transform(urlFunction);
+        FluentIterable<String> jvmUrls = FluentIterable.from(plugins.getInfos()).filter(Predicates.and(jvmPluginPredicate, Predicates.not(sitePluginPredicate))).filter(isNull()).transform(urlFunction);
         Assert.assertThat(Iterables.size(jvmUrls), is(0));
 
         List<String> sitePluginNames = FluentIterable.from(plugins.getInfos()).filter(sitePluginPredicate).transform(nameFunction).toList();
@@ -788,7 +766,6 @@ public class ElasticsearchAssertions {
 
         List<String> sitePluginUrls = FluentIterable.from(plugins.getInfos()).filter(sitePluginPredicate).transform(urlFunction).toList();
         Assert.assertThat(sitePluginUrls, not(contains(nullValue())));
-
 
         List<String> sitePluginVersions = FluentIterable.from(plugins.getInfos()).filter(sitePluginPredicate).transform(versionFunction).toList();
         Assert.assertThat(sitePluginVersions.isEmpty(), is(expectedSiteVersions.isEmpty()));

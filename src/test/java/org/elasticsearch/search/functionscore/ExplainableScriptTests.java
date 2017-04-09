@@ -61,10 +61,7 @@ public class ExplainableScriptTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("plugin.types", ExplainableScriptPlugin.class.getName())
-                .build();
+        return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("plugin.types", ExplainableScriptPlugin.class.getName()).build();
     }
 
     @Test
@@ -72,14 +69,12 @@ public class ExplainableScriptTests extends ElasticsearchIntegrationTest {
 
         List<IndexRequestBuilder> indexRequests = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
-            indexRequests.add(client().prepareIndex("test", "type").setId(Integer.toString(i)).setSource(
-                    jsonBuilder().startObject().field("number_field", i).field("text", "text").endObject()));
+            indexRequests.add(client().prepareIndex("test", "type").setId(Integer.toString(i)).setSource(jsonBuilder().startObject().field("number_field", i).field("text", "text").endObject()));
         }
         indexRandom(true, true, indexRequests);
         client().admin().indices().prepareRefresh().execute().actionGet();
         ensureYellow();
-        SearchResponse response = client().search(searchRequest().searchType(SearchType.QUERY_THEN_FETCH).source(
-                searchSource().explain(true).query(functionScoreQuery(termQuery("text", "text")).add(scriptFunction("native_explainable_script", "native")).boostMode("replace")))).actionGet();
+        SearchResponse response = client().search(searchRequest().searchType(SearchType.QUERY_THEN_FETCH).source(searchSource().explain(true).query(functionScoreQuery(termQuery("text", "text")).add(scriptFunction("native_explainable_script", "native")).boostMode("replace")))).actionGet();
 
         ElasticsearchAssertions.assertNoFailures(response);
         SearchHits hits = response.getHits();

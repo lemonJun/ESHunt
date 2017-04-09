@@ -45,7 +45,6 @@ public abstract class NetworkPartition implements ServiceDisruptionScheme {
     protected volatile InternalTestCluster cluster;
     protected volatile boolean activeDisruption = false;
 
-
     public NetworkPartition(Random random) {
         this.random = new Random(random.nextLong());
         nodesSideOne = new HashSet<>();
@@ -66,7 +65,6 @@ public abstract class NetworkPartition implements ServiceDisruptionScheme {
         this.nodesSideTwo.addAll(nodesSideTwo);
         autoExpand = false;
     }
-
 
     public List<String> getNodesSideOne() {
         return ImmutableList.copyOf(nodesSideOne);
@@ -114,10 +112,7 @@ public abstract class NetworkPartition implements ServiceDisruptionScheme {
     }
 
     protected void ensureNodeCount(InternalTestCluster cluster) {
-        assertFalse("cluster failed to form after disruption was healed", cluster.client().admin().cluster().prepareHealth()
-                .setWaitForNodes("" + cluster.size())
-                .setWaitForRelocatingShards(0)
-                .get().isTimedOut());
+        assertFalse("cluster failed to form after disruption was healed", cluster.client().admin().cluster().prepareHealth().setWaitForNodes("" + cluster.size()).setWaitForRelocatingShards(0).get().isTimedOut());
     }
 
     @Override
@@ -164,7 +159,6 @@ public abstract class NetworkPartition implements ServiceDisruptionScheme {
 
     protected abstract String getPartitionDescription();
 
-
     protected DiscoveryNode discoveryNode(String node) {
         return cluster.getInstance(Discovery.class, node).localNode();
     }
@@ -187,7 +181,6 @@ public abstract class NetworkPartition implements ServiceDisruptionScheme {
         }
     }
 
-
     @Override
     public synchronized void stopDisrupting() {
         if (nodesSideOne.size() == 0 || nodesSideTwo.size() == 0 || !activeDisruption) {
@@ -206,12 +199,9 @@ public abstract class NetworkPartition implements ServiceDisruptionScheme {
         activeDisruption = false;
     }
 
-    abstract void applyDisruption(DiscoveryNode node1, MockTransportService transportService1,
-                                  DiscoveryNode node2, MockTransportService transportService2);
+    abstract void applyDisruption(DiscoveryNode node1, MockTransportService transportService1, DiscoveryNode node2, MockTransportService transportService2);
 
-
-    protected void removeDisruption(DiscoveryNode node1, MockTransportService transportService1,
-                                    DiscoveryNode node2, MockTransportService transportService2) {
+    protected void removeDisruption(DiscoveryNode node1, MockTransportService transportService1, DiscoveryNode node2, MockTransportService transportService2) {
         transportService1.clearRule(node2);
         transportService2.clearRule(node1);
     }

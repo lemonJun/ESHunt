@@ -41,14 +41,7 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 public class SingleThreadIndexingStress {
 
     public static void main(String[] args) throws Exception {
-        Settings settings = settingsBuilder()
-                .put("index.refresh_interval", "1s")
-                .put("index.merge.async", true)
-                .put("index.translog.flush_threshold_ops", 5000)
-                .put("gateway.type", "none")
-                .put(SETTING_NUMBER_OF_SHARDS, 2)
-                .put(SETTING_NUMBER_OF_REPLICAS, 1)
-                .build();
+        Settings settings = settingsBuilder().put("index.refresh_interval", "1s").put("index.merge.async", true).put("index.translog.flush_threshold_ops", 5000).put("gateway.type", "none").put(SETTING_NUMBER_OF_SHARDS, 2).put(SETTING_NUMBER_OF_REPLICAS, 1).build();
 
         Node[] nodes = new Node[1];
         for (int i = 0; i < nodes.length; i++) {
@@ -69,9 +62,8 @@ public class SingleThreadIndexingStress {
         System.out.println("Indexing [" + COUNT + "] ...");
         int i = 1;
         for (; i <= COUNT; i++) {
-//            client1.admin().cluster().preparePingSingle("test", "type1", Integer.toString(i)).execute().actionGet();
-            client1.prepareIndex("test", "type1").setId(Integer.toString(i % ID_RANGE)).setSource(source(Integer.toString(i), "test" + i))
-                    .setCreate(false).execute().actionGet();
+            //            client1.admin().cluster().preparePingSingle("test", "type1", Integer.toString(i)).execute().actionGet();
+            client1.prepareIndex("test", "type1").setId(Integer.toString(i % ID_RANGE)).setSource(source(Integer.toString(i), "test" + i)).setCreate(false).execute().actionGet();
             if ((i % 10000) == 0) {
                 System.out.println("Indexed " + i + " took " + stopWatch.stop().lastTaskTime());
                 stopWatch.start();
@@ -91,19 +83,17 @@ public class SingleThreadIndexingStress {
 
     private static XContentBuilder source(String id, String nameValue) throws IOException {
         long time = System.currentTimeMillis();
-        return jsonBuilder().startObject()
-                .field("id", id)
-//                .field("numeric1", time)
-//                .field("numeric2", time)
-//                .field("numeric3", time)
-//                .field("numeric4", time)
-//                .field("numeric5", time)
-//                .field("numeric6", time)
-//                .field("numeric7", time)
-//                .field("numeric8", time)
-//                .field("numeric9", time)
-//                .field("numeric10", time)
-                .field("name", nameValue)
-                .endObject();
+        return jsonBuilder().startObject().field("id", id)
+                        //                .field("numeric1", time)
+                        //                .field("numeric2", time)
+                        //                .field("numeric3", time)
+                        //                .field("numeric4", time)
+                        //                .field("numeric5", time)
+                        //                .field("numeric6", time)
+                        //                .field("numeric7", time)
+                        //                .field("numeric8", time)
+                        //                .field("numeric9", time)
+                        //                .field("numeric10", time)
+                        .field("name", nameValue).endObject();
     }
 }

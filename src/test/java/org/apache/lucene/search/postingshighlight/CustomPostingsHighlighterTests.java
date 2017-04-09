@@ -39,7 +39,7 @@ import java.util.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 
-@LuceneTestCase.SuppressCodecs({"MockFixedIntBlock", "MockVariableIntBlock", "MockSep", "MockRandom", "Lucene3x"})
+@LuceneTestCase.SuppressCodecs({ "MockFixedIntBlock", "MockVariableIntBlock", "MockSep", "MockRandom", "Lucene3x" })
 public class CustomPostingsHighlighterTests extends ElasticsearchLuceneTestCase {
 
     @Test
@@ -77,7 +77,6 @@ public class CustomPostingsHighlighterTests extends ElasticsearchLuceneTestCase 
         fieldValues.add(secondValue);
         fieldValues.add(thirdValue);
 
-
         IndexSearcher searcher = newSearcher(ir);
 
         Query query = new TermQuery(new Term("body", "highlighting"));
@@ -102,7 +101,6 @@ public class CustomPostingsHighlighterTests extends ElasticsearchLuceneTestCase 
         snippets = highlighter.highlightDoc("body", queryTerms, searcher, docId, 5);
         assertThat(snippets.length, equalTo(1));
         assertThat(snippets[0].getText(), equalTo("This is the third value to test <b>highlighting</b> with postings."));
-
 
         //let's try without whole break iterator as well, to prove that highlighting works the same when working per value (not optimized though)
         highlighter = new CustomPostingsHighlighter(new CustomPassageFormatter("<b>", "</b>", new DefaultEncoder()), fieldValues, false, Integer.MAX_VALUE - 1, 0);
@@ -167,12 +165,10 @@ public class CustomPostingsHighlighterTests extends ElasticsearchLuceneTestCase 
         IndexReader ir = iw.getReader();
         iw.close();
 
-
         String firstHlValue = "Just a test1 <b>highlighting</b> from postings highlighter.";
         String secondHlValue = "This is the second <b>highlighting</b> value to perform <b>highlighting</b> on a longer text that gets scored lower.";
         String thirdHlValue = "This is <b>highlighting</b> the third short <b>highlighting</b> value.";
         String fourthHlValue = "Just a test4 <b>highlighting</b> from postings highlighter.";
-
 
         IndexSearcher searcher = newSearcher(ir);
         Query query = new TermQuery(new Term("body", "highlighting"));
@@ -190,7 +186,7 @@ public class CustomPostingsHighlighterTests extends ElasticsearchLuceneTestCase 
         fieldValues.add(fourthValue);
 
         boolean mergeValues = true;
-        CustomPostingsHighlighter highlighter = new CustomPostingsHighlighter(new CustomPassageFormatter("<b>", "</b>", new DefaultEncoder()), fieldValues, mergeValues, Integer.MAX_VALUE-1, 0);
+        CustomPostingsHighlighter highlighter = new CustomPostingsHighlighter(new CustomPassageFormatter("<b>", "</b>", new DefaultEncoder()), fieldValues, mergeValues, Integer.MAX_VALUE - 1, 0);
         Snippet[] snippets = highlighter.highlightDoc("body", queryTerms, searcher, docId, 5);
 
         assertThat(snippets.length, equalTo(4));
@@ -200,10 +196,9 @@ public class CustomPostingsHighlighterTests extends ElasticsearchLuceneTestCase 
         assertThat(snippets[2].getText(), equalTo(thirdHlValue));
         assertThat(snippets[3].getText(), equalTo(fourthHlValue));
 
-
         //Let's highlight each separate value and check how the snippets are scored
         mergeValues = false;
-        highlighter = new CustomPostingsHighlighter(new CustomPassageFormatter("<b>", "</b>", new DefaultEncoder()), fieldValues, mergeValues, Integer.MAX_VALUE-1, 0);
+        highlighter = new CustomPostingsHighlighter(new CustomPassageFormatter("<b>", "</b>", new DefaultEncoder()), fieldValues, mergeValues, Integer.MAX_VALUE - 1, 0);
         List<Snippet> snippets2 = new ArrayList<>();
         for (int i = 0; i < fieldValues.size(); i++) {
             snippets2.addAll(Arrays.asList(highlighter.highlightDoc("body", queryTerms, searcher, docId, 5)));
@@ -215,10 +210,10 @@ public class CustomPostingsHighlighterTests extends ElasticsearchLuceneTestCase 
         assertThat(snippets2.get(2).getText(), equalTo(thirdHlValue));
         assertThat(snippets2.get(3).getText(), equalTo(fourthHlValue));
 
-        Comparator <Snippet> comparator = new Comparator<Snippet>() {
+        Comparator<Snippet> comparator = new Comparator<Snippet>() {
             @Override
             public int compare(Snippet o1, Snippet o2) {
-                return (int)Math.signum(o1.getScore() - o2.getScore());
+                return (int) Math.signum(o1.getScore() - o2.getScore());
             }
         };
 
@@ -282,12 +277,10 @@ public class CustomPostingsHighlighterTests extends ElasticsearchLuceneTestCase 
         IndexReader ir = iw.getReader();
         iw.close();
 
-
         String firstHlValue = "Just a test1 <b>highlighting</b> from postings highlighter.";
         String secondHlValue = "This is the second <b>highlighting</b> value to perform <b>highlighting</b> on a longer text that gets scored lower.";
         String thirdHlValue = "This is <b>highlighting</b> the third short <b>highlighting</b> value.";
         String fourthHlValue = "Just a test4 <b>highlighting</b> from postings highlighter.";
-
 
         IndexSearcher searcher = newSearcher(ir);
         Query query = new TermQuery(new Term("body", "highlighting"));
@@ -305,7 +298,7 @@ public class CustomPostingsHighlighterTests extends ElasticsearchLuceneTestCase 
         fieldValues.add(fourthValue);
 
         boolean mergeValues = true;
-        CustomPostingsHighlighter highlighter = new CustomPostingsHighlighter(new CustomPassageFormatter("<b>", "</b>", new DefaultEncoder()), fieldValues, mergeValues, Integer.MAX_VALUE-1, 0);
+        CustomPostingsHighlighter highlighter = new CustomPostingsHighlighter(new CustomPassageFormatter("<b>", "</b>", new DefaultEncoder()), fieldValues, mergeValues, Integer.MAX_VALUE - 1, 0);
         Snippet[] snippets = highlighter.highlightDoc("body", queryTerms, searcher, docId, 5);
 
         assertThat(snippets.length, equalTo(4));
@@ -314,7 +307,6 @@ public class CustomPostingsHighlighterTests extends ElasticsearchLuceneTestCase 
         assertThat(snippets[1].getText(), equalTo(secondHlValue));
         assertThat(snippets[2].getText(), equalTo(thirdHlValue));
         assertThat(snippets[3].getText(), equalTo(fourthHlValue));
-
 
         //testing now our fork / normal postings highlighter, which merges multiple values together using the paragraph separator
         XPostingsHighlighter highlighter2 = new XPostingsHighlighter(Integer.MAX_VALUE - 1) {
@@ -329,11 +321,11 @@ public class CustomPostingsHighlighterTests extends ElasticsearchLuceneTestCase 
             }
         };
 
-        Map<String, Object[]> highlightMap = highlighter2.highlightFieldsAsObjects(new String[]{"body"}, query, searcher, new int[]{docId}, new int[]{5});
+        Map<String, Object[]> highlightMap = highlighter2.highlightFieldsAsObjects(new String[] { "body" }, query, searcher, new int[] { docId }, new int[] { 5 });
         Object[] objects = highlightMap.get("body");
         assertThat(objects, notNullValue());
         assertThat(objects.length, equalTo(1));
-        Snippet[] normalSnippets = (Snippet[])objects[0];
+        Snippet[] normalSnippets = (Snippet[]) objects[0];
 
         assertThat(normalSnippets.length, equalTo(4));
 
@@ -341,7 +333,6 @@ public class CustomPostingsHighlighterTests extends ElasticsearchLuceneTestCase 
         assertThat(normalSnippets[1].getText(), equalTo(secondHlValue));
         assertThat(normalSnippets[2].getText(), equalTo(thirdHlValue));
         assertThat(normalSnippets[3].getText(), equalTo(fourthHlValue));
-
 
         for (int i = 0; i < normalSnippets.length; i++) {
             Snippet normalSnippet = snippets[0];
@@ -396,7 +387,6 @@ public class CustomPostingsHighlighterTests extends ElasticsearchLuceneTestCase 
         BytesRef[] filteredQueryTerms = filterTerms(queryTerms, "body", requireFieldMatch);
         Snippet[] snippets = highlighter.highlightDoc("body", filteredQueryTerms, searcher, docId, 5);
         assertThat(snippets.length, equalTo(0));
-
 
         highlighter = new CustomPostingsHighlighter(passageFormatter, values, true, Integer.MAX_VALUE - 1, 0);
         //one snippet without require field match, just passing in the query terms with no filtering on our side
@@ -478,7 +468,7 @@ public class CustomPostingsHighlighterTests extends ElasticsearchLuceneTestCase 
 
         BytesRef terms[] = new BytesRef[fieldTerms.size()];
         int termUpto = 0;
-        for(Term term : fieldTerms) {
+        for (Term term : fieldTerms) {
             terms[termUpto++] = term.bytes();
         }
 

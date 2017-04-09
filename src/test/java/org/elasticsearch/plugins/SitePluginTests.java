@@ -47,16 +47,11 @@ import static org.hamcrest.Matchers.containsString;
 @ClusterScope(scope = Scope.SUITE, numDataNodes = 1)
 public class SitePluginTests extends ElasticsearchIntegrationTest {
 
-
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
         try {
             File pluginDir = new File(SitePluginTests.class.getResource("/org/elasticsearch/plugins").toURI());
-            return settingsBuilder()
-                    .put(super.nodeSettings(nodeOrdinal))
-                    .put("path.plugins", pluginDir.getAbsolutePath())
-                    .put("force.http.enabled", true)
-                    .build();
+            return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("path.plugins", pluginDir.getAbsolutePath()).put("force.http.enabled", true).build();
         } catch (URISyntaxException ex) {
             throw new RuntimeException(ex);
         }

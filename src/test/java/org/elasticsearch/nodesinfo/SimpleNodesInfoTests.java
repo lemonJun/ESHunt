@@ -48,7 +48,7 @@ import static org.hamcrest.Matchers.*;
 /**
  *
  */
-@ClusterScope(scope= Scope.TEST, numDataNodes =0)
+@ClusterScope(scope = Scope.TEST, numDataNodes = 0)
 public class SimpleNodesInfoTests extends ElasticsearchIntegrationTest {
 
     static final class Fields {
@@ -56,7 +56,6 @@ public class SimpleNodesInfoTests extends ElasticsearchIntegrationTest {
         static final String SITE_PLUGIN_DESCRIPTION = "This is a description for a dummy test site plugin.";
         static final String SITE_PLUGIN_VERSION = "0.0.7-BOND-SITE";
     }
-
 
     @Test
     public void testNodesInfos() throws Exception {
@@ -117,9 +116,9 @@ public class SimpleNodesInfoTests extends ElasticsearchIntegrationTest {
         // The second has one site plugin with a es-plugin.properties file (description and version)
         String server2NodeId = startNodeWithPlugins(2);
         // The third has one java plugin
-        String server3NodeId = startNodeWithPlugins(3,TestPlugin.class.getName());
+        String server3NodeId = startNodeWithPlugins(3, TestPlugin.class.getName());
         // The fourth has one java plugin and one site plugin
-        String server4NodeId = startNodeWithPlugins(4,TestNoVersionPlugin.class.getName());
+        String server4NodeId = startNodeWithPlugins(4, TestNoVersionPlugin.class.getName());
 
         ClusterHealthResponse clusterHealth = client().admin().cluster().health(clusterHealthRequest().waitForNodes("4")).actionGet();
         logger.info("--> done cluster_health, status " + clusterHealth.getStatus());
@@ -127,36 +126,26 @@ public class SimpleNodesInfoTests extends ElasticsearchIntegrationTest {
         NodesInfoResponse response = client().admin().cluster().prepareNodesInfo().clear().setPlugins(true).execute().actionGet();
         logger.info("--> full json answer, status " + response.toString());
 
-        ElasticsearchAssertions.assertNodeContainsPlugins(response, server1NodeId,
-                Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST, // No JVM Plugin
-                Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);// No Site Plugin
+        ElasticsearchAssertions.assertNodeContainsPlugins(response, server1NodeId, Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST, // No JVM Plugin
+                        Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);// No Site Plugin
 
-        ElasticsearchAssertions.assertNodeContainsPlugins(response, server2NodeId,
-                Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST, // No JVM Plugin
-                Lists.newArrayList(Fields.SITE_PLUGIN),                                 // Site Plugin
-                Lists.newArrayList(Fields.SITE_PLUGIN_DESCRIPTION),
-                Lists.newArrayList(Fields.SITE_PLUGIN_VERSION));
+        ElasticsearchAssertions.assertNodeContainsPlugins(response, server2NodeId, Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST, // No JVM Plugin
+                        Lists.newArrayList(Fields.SITE_PLUGIN), // Site Plugin
+                        Lists.newArrayList(Fields.SITE_PLUGIN_DESCRIPTION), Lists.newArrayList(Fields.SITE_PLUGIN_VERSION));
 
-        ElasticsearchAssertions.assertNodeContainsPlugins(response, server3NodeId,
-                Lists.newArrayList(TestPlugin.Fields.NAME),                             // JVM Plugin
-                Lists.newArrayList(TestPlugin.Fields.DESCRIPTION),
-                Lists.newArrayList(PluginInfo.VERSION_NOT_AVAILABLE),
-                Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);// No site Plugin
+        ElasticsearchAssertions.assertNodeContainsPlugins(response, server3NodeId, Lists.newArrayList(TestPlugin.Fields.NAME), // JVM Plugin
+                        Lists.newArrayList(TestPlugin.Fields.DESCRIPTION), Lists.newArrayList(PluginInfo.VERSION_NOT_AVAILABLE), Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);// No site Plugin
 
-        ElasticsearchAssertions.assertNodeContainsPlugins(response, server4NodeId,
-                Lists.newArrayList(TestNoVersionPlugin.Fields.NAME),                    // JVM Plugin
-                Lists.newArrayList(TestNoVersionPlugin.Fields.DESCRIPTION),
-                Lists.newArrayList(PluginInfo.VERSION_NOT_AVAILABLE),
-                Lists.newArrayList(Fields.SITE_PLUGIN, TestNoVersionPlugin.Fields.NAME),// Site Plugin
-                Lists.newArrayList(PluginInfo.DESCRIPTION_NOT_AVAILABLE),
-                Lists.newArrayList(PluginInfo.VERSION_NOT_AVAILABLE));
+        ElasticsearchAssertions.assertNodeContainsPlugins(response, server4NodeId, Lists.newArrayList(TestNoVersionPlugin.Fields.NAME), // JVM Plugin
+                        Lists.newArrayList(TestNoVersionPlugin.Fields.DESCRIPTION), Lists.newArrayList(PluginInfo.VERSION_NOT_AVAILABLE), Lists.newArrayList(Fields.SITE_PLUGIN, TestNoVersionPlugin.Fields.NAME), // Site Plugin
+                        Lists.newArrayList(PluginInfo.DESCRIPTION_NOT_AVAILABLE), Lists.newArrayList(PluginInfo.VERSION_NOT_AVAILABLE));
     }
 
-    public static String startNodeWithPlugins(int nodeId, String ... pluginClassNames) throws URISyntaxException {
+    public static String startNodeWithPlugins(int nodeId, String... pluginClassNames) throws URISyntaxException {
         return startNodeWithPlugins(ImmutableSettings.EMPTY, "/org/elasticsearch/nodesinfo/node" + Integer.toString(nodeId) + "/", pluginClassNames);
     }
 
-    public static String startNodeWithPlugins(Settings nodeSettings, String pluginDir, String ... pluginClassNames) throws URISyntaxException {
+    public static String startNodeWithPlugins(Settings nodeSettings, String pluginDir, String... pluginClassNames) throws URISyntaxException {
         URL resource = SimpleNodesInfoTests.class.getResource(pluginDir);
         ImmutableSettings.Builder settings = settingsBuilder();
         settings.put(nodeSettings);
@@ -175,6 +164,5 @@ public class SimpleNodesInfoTests extends ElasticsearchIntegrationTest {
 
         return internalCluster().getInstance(ClusterService.class, nodeName).state().nodes().localNodeId();
     }
-
 
 }

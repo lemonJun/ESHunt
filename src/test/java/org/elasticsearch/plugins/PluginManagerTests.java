@@ -58,10 +58,7 @@ import static org.hamcrest.Matchers.*;
 
 @ClusterScope(scope = Scope.TEST, numDataNodes = 0, transportClientRatio = 0.0)
 public class PluginManagerTests extends ElasticsearchIntegrationTest {
-    private static final Settings SETTINGS = ImmutableSettings.settingsBuilder()
-            .put("discovery.zen.ping.multicast.enabled", false)
-            .put("force.http.enabled", true)
-            .build();
+    private static final Settings SETTINGS = ImmutableSettings.settingsBuilder().put("discovery.zen.ping.multicast.enabled", false).put("force.http.enabled", true).build();
     private static final String PLUGIN_DIR = "plugins";
 
     @After
@@ -94,8 +91,7 @@ public class PluginManagerTests extends ElasticsearchIntegrationTest {
     @Test
     public void testLocalPluginInstallWithBinAndConfig() throws Exception {
         String pluginName = "plugin-test";
-        Tuple<Settings, Environment> initialSettings = InternalSettingsPreparer.prepareSettings(
-                ImmutableSettings.settingsBuilder().build(), false);
+        Tuple<Settings, Environment> initialSettings = InternalSettingsPreparer.prepareSettings(ImmutableSettings.settingsBuilder().build(), false);
         Environment env = initialSettings.v2();
         File binDir = new File(env.homeFile(), "bin");
         if (!binDir.exists() && !FileSystemUtils.mkdirs(binDir)) {
@@ -134,8 +130,7 @@ public class PluginManagerTests extends ElasticsearchIntegrationTest {
     @Test
     public void testLocalPluginInstallWithBinAndConfigInAlreadyExistingConfigDir_7890() throws Exception {
         String pluginName = "plugin-test";
-        Tuple<Settings, Environment> initialSettings = InternalSettingsPreparer.prepareSettings(
-                ImmutableSettings.settingsBuilder().build(), false);
+        Tuple<Settings, Environment> initialSettings = InternalSettingsPreparer.prepareSettings(ImmutableSettings.settingsBuilder().build(), false);
         Environment env = initialSettings.v2();
 
         File configDir = env.configFile();
@@ -214,8 +209,7 @@ public class PluginManagerTests extends ElasticsearchIntegrationTest {
     @Test
     public void testLocalPluginInstallWithBinOnly_7152() throws Exception {
         String pluginName = "plugin-test";
-        Tuple<Settings, Environment> initialSettings = InternalSettingsPreparer.prepareSettings(
-                ImmutableSettings.settingsBuilder().build(), false);
+        Tuple<Settings, Environment> initialSettings = InternalSettingsPreparer.prepareSettings(ImmutableSettings.settingsBuilder().build(), false);
         Environment env = initialSettings.v2();
         File binDir = new File(env.homeFile(), "bin");
         if (!binDir.exists() && !FileSystemUtils.mkdirs(binDir)) {
@@ -278,8 +272,7 @@ public class PluginManagerTests extends ElasticsearchIntegrationTest {
     }
 
     private static PluginManager pluginManager(String pluginUrl) {
-        Tuple<Settings, Environment> initialSettings = InternalSettingsPreparer.prepareSettings(
-                ImmutableSettings.settingsBuilder().build(), false);
+        Tuple<Settings, Environment> initialSettings = InternalSettingsPreparer.prepareSettings(ImmutableSettings.settingsBuilder().build(), false);
         return pluginManager(pluginUrl, initialSettings);
     }
 
@@ -338,7 +331,6 @@ public class PluginManagerTests extends ElasticsearchIntegrationTest {
             }
         }, 5, TimeUnit.SECONDS), equalTo(true));
 
-
         //checking now that the plugin is available
         HttpResponse response = getHttpRequestBuilder().method("GET").path("/_plugin/" + pluginName + "/").execute();
         assertThat(response, notNullValue());
@@ -360,7 +352,6 @@ public class PluginManagerTests extends ElasticsearchIntegrationTest {
     public void testInstallPluginNull() throws IOException {
         pluginManager(null).downloadAndExtract("plugin-test");
     }
-
 
     @Test
     public void testInstallPlugin() throws IOException {
@@ -385,7 +376,6 @@ public class PluginManagerTests extends ElasticsearchIntegrationTest {
         String pluginDir = PLUGIN_DIR.concat("/plugin-site/_site");
         assertFileExists(new File(pluginDir));
     }
-
 
     private void singlePluginInstallAndRemove(String pluginShortName, String pluginCoordinates) throws IOException {
         logger.info("--> trying to download and install [{}]", pluginShortName);
@@ -507,13 +497,11 @@ public class PluginManagerTests extends ElasticsearchIntegrationTest {
     private void runTestWithForbiddenName(String name) throws IOException {
         try {
             pluginManager(null).removePlugin(name);
-            fail("this plugin name [" + name +
-                    "] should not be allowed");
+            fail("this plugin name [" + name + "] should not be allowed");
         } catch (ElasticsearchIllegalArgumentException e) {
             // We expect that error
         }
     }
-
 
     /**
      * Retrieve a URL string that represents the resource with the given {@code resourceName}.

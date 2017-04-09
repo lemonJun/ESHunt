@@ -37,26 +37,21 @@ import org.elasticsearch.indices.analysis.IndicesAnalysisService;
 public class AnalysisTestsHelper {
 
     public static AnalysisService createAnalysisServiceFromClassPath(String resource) {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .loadFromClasspath(resource).build();
+        Settings settings = ImmutableSettings.settingsBuilder().loadFromClasspath(resource).build();
 
         return createAnalysisServiceFromSettings(settings);
     }
 
-    public static AnalysisService createAnalysisServiceFromSettings(
-            Settings settings) {
+    public static AnalysisService createAnalysisServiceFromSettings(Settings settings) {
         Index index = new Index("test");
         if (settings.get(IndexMetaData.SETTING_VERSION_CREATED) == null) {
             settings = ImmutableSettings.builder().put(settings).put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).build();
         }
-        Injector parentInjector = new ModulesBuilder().add(new SettingsModule(settings),
-                new EnvironmentModule(new Environment(settings)), new IndicesAnalysisModule()).createInjector();
+        Injector parentInjector = new ModulesBuilder().add(new SettingsModule(settings), new EnvironmentModule(new Environment(settings)), new IndicesAnalysisModule()).createInjector();
 
-        AnalysisModule analysisModule = new AnalysisModule(settings,
-                parentInjector.getInstance(IndicesAnalysisService.class));
+        AnalysisModule analysisModule = new AnalysisModule(settings, parentInjector.getInstance(IndicesAnalysisService.class));
 
-        Injector injector = new ModulesBuilder().add(new IndexSettingsModule(index, settings),
-                new IndexNameModule(index), analysisModule).createChildInjector(parentInjector);
+        Injector injector = new ModulesBuilder().add(new IndexSettingsModule(index, settings), new IndexNameModule(index), analysisModule).createChildInjector(parentInjector);
 
         return injector.getInstance(AnalysisService.class);
     }

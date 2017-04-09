@@ -37,24 +37,23 @@ import static org.hamcrest.Matchers.equalTo;
 
 /**
  */
-@ClusterScope(scope= Scope.SUITE, numDataNodes =2)
+@ClusterScope(scope = Scope.SUITE, numDataNodes = 2)
 public class ClusterSearchShardsTests extends ElasticsearchIntegrationTest {
-    
+
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        switch(nodeOrdinal) {
-        case 1:
-            return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("node.tag", "B").build();
-        case 0:
-            return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("node.tag", "A").build();
+        switch (nodeOrdinal) {
+            case 1:
+                return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("node.tag", "B").build();
+            case 0:
+                return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("node.tag", "A").build();
         }
         return super.nodeSettings(nodeOrdinal);
     }
 
     @Test
     public void testSingleShardAllocation() throws Exception {
-        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder()
-                .put("index.number_of_shards", "1").put("index.number_of_replicas", 0).put("index.routing.allocation.include.tag", "A")).execute().actionGet();
+        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_shards", "1").put("index.number_of_replicas", 0).put("index.routing.allocation.include.tag", "A")).execute().actionGet();
         ensureGreen();
         ClusterSearchShardsResponse response = client().admin().cluster().prepareSearchShards("test").execute().actionGet();
         assertThat(response.getGroups().length, equalTo(1));
@@ -76,8 +75,7 @@ public class ClusterSearchShardsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testMultipleShardsSingleNodeAllocation() throws Exception {
-        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder()
-                .put("index.number_of_shards", "4").put("index.number_of_replicas", 0).put("index.routing.allocation.include.tag", "A")).execute().actionGet();
+        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_shards", "4").put("index.number_of_replicas", 0).put("index.routing.allocation.include.tag", "A")).execute().actionGet();
         ensureGreen();
 
         ClusterSearchShardsResponse response = client().admin().cluster().prepareSearchShards("test").execute().actionGet();
@@ -96,14 +94,9 @@ public class ClusterSearchShardsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testMultipleIndicesAllocation() throws Exception {
-        client().admin().indices().prepareCreate("test1").setSettings(settingsBuilder()
-                .put("index.number_of_shards", "4").put("index.number_of_replicas", 1)).execute().actionGet();
-        client().admin().indices().prepareCreate("test2").setSettings(settingsBuilder()
-                .put("index.number_of_shards", "4").put("index.number_of_replicas", 1)).execute().actionGet();
-        client().admin().indices().prepareAliases()
-                .addAliasAction(AliasAction.newAddAliasAction("test1", "routing_alias").routing("ABC"))
-                .addAliasAction(AliasAction.newAddAliasAction("test2", "routing_alias").routing("EFG"))
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test1").setSettings(settingsBuilder().put("index.number_of_shards", "4").put("index.number_of_replicas", 1)).execute().actionGet();
+        client().admin().indices().prepareCreate("test2").setSettings(settingsBuilder().put("index.number_of_shards", "4").put("index.number_of_replicas", 1)).execute().actionGet();
+        client().admin().indices().prepareAliases().addAliasAction(AliasAction.newAddAliasAction("test1", "routing_alias").routing("ABC")).addAliasAction(AliasAction.newAddAliasAction("test2", "routing_alias").routing("EFG")).execute().actionGet();
         client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().execute().actionGet();
 
         ClusterSearchShardsResponse response = client().admin().cluster().prepareSearchShards("routing_alias").execute().actionGet();

@@ -48,9 +48,7 @@ public class ClusterAllocationRerouteBenchmark {
         final int numReplicas = 2;
         final int numberOfNodes = 30;
         final int numberOfTags = 2;
-        AllocationService strategy = ElasticsearchAllocationTestCase.createAllocationService(ImmutableSettings.builder()
-                .put("cluster.routing.allocation.awareness.attributes", "tag")
-                .build(), new Random(1));
+        AllocationService strategy = ElasticsearchAllocationTestCase.createAllocationService(ImmutableSettings.builder().put("cluster.routing.allocation.awareness.attributes", "tag").build(), new Random(1));
 
         MetaData.Builder mb = MetaData.builder();
         for (int i = 1; i <= numIndices; i++) {
@@ -64,7 +62,7 @@ public class ClusterAllocationRerouteBenchmark {
         RoutingTable routingTable = rb.build();
         DiscoveryNodes.Builder nb = DiscoveryNodes.builder();
         for (int i = 1; i <= numberOfNodes; i++) {
-            nb.put(ElasticsearchAllocationTestCase.newNode("node" + i, numberOfTags == 0 ? ImmutableMap.<String, String>of() : ImmutableMap.of("tag", "tag_" + (i % numberOfTags))));
+            nb.put(ElasticsearchAllocationTestCase.newNode("node" + i, numberOfTags == 0 ? ImmutableMap.<String, String> of() : ImmutableMap.of("tag", "tag_" + (i % numberOfTags))));
         }
         ClusterState initialClusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).nodes(nb).build();
 

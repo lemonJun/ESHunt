@@ -32,39 +32,23 @@ public class CompoundTypesTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testStringType() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("field1").field("type", "string").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "string").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper defaultMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field1", "value1")
-                .field("field2", "value2")
-                .bytes());
+        ParsedDocument doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field1", "value1").field("field2", "value2").bytes());
 
         assertThat(doc.rootDoc().get("field1"), equalTo("value1"));
         assertThat((double) doc.rootDoc().getField("field1").boost(), closeTo(1.0d, 0.000001d));
         assertThat(doc.rootDoc().get("field2"), equalTo("value2"));
 
-        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .startObject("field1").field("value", "value1").field("boost", 2.0f).endObject()
-                .field("field2", "value2")
-                .bytes());
+        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().startObject("field1").field("value", "value1").field("boost", 2.0f).endObject().field("field2", "value2").bytes());
 
         assertThat(doc.rootDoc().get("field1"), equalTo("value1"));
         assertThat((double) doc.rootDoc().getField("field1").boost(), closeTo(2.0d, 0.000001d));
         assertThat(doc.rootDoc().get("field2"), equalTo("value2"));
 
-        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field1", "value1")
-                .field("field2", "value2")
-                .bytes());
+        doc = defaultMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field1", "value1").field("field2", "value2").bytes());
 
         assertThat(doc.rootDoc().get("field1"), equalTo("value1"));
         assertThat((double) doc.rootDoc().getField("field1").boost(), closeTo(1.0d, 0.000001d));

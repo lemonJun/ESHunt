@@ -38,7 +38,7 @@ public class SnapshotRequestsTests extends ElasticsearchTestCase {
 
         XContentBuilder builder = jsonBuilder().startObject();
 
-        if(randomBoolean()) {
+        if (randomBoolean()) {
             builder.field("indices", "foo,bar,baz");
         } else {
             builder.startArray("indices");
@@ -80,17 +80,16 @@ public class SnapshotRequestsTests extends ElasticsearchTestCase {
 
         byte[] bytes = builder.endObject().bytes().toBytes();
 
-
         request.source(bytes);
 
         assertEquals("test-repo", request.repository());
         assertEquals("test-snap", request.snapshot());
-        assertArrayEquals(request.indices(), new String[]{"foo", "bar", "baz"});
+        assertArrayEquals(request.indices(), new String[] { "foo", "bar", "baz" });
         assertEquals("rename-from", request.renamePattern());
         assertEquals("rename-to", request.renameReplacement());
         assertEquals(partial, request.partial());
         assertEquals("val1", request.settings().get("set1"));
-        assertArrayEquals(request.ignoreIndexSettings(), new String[]{"set2", "set3"});
+        assertArrayEquals(request.ignoreIndexSettings(), new String[] { "set2", "set3" });
 
     }
 
@@ -101,7 +100,7 @@ public class SnapshotRequestsTests extends ElasticsearchTestCase {
 
         XContentBuilder builder = jsonBuilder().startObject();
 
-        if(randomBoolean()) {
+        if (randomBoolean()) {
             builder.field("indices", "foo,bar,baz");
         } else {
             builder.startArray("indices");
@@ -141,12 +140,11 @@ public class SnapshotRequestsTests extends ElasticsearchTestCase {
 
         byte[] bytes = builder.endObject().bytes().toBytes();
 
-
         request.source(bytes);
 
         assertEquals("test-repo", request.repository());
         assertEquals("test-snap", request.snapshot());
-        assertArrayEquals(request.indices(), new String[]{"foo", "bar", "baz"});
+        assertArrayEquals(request.indices(), new String[] { "foo", "bar", "baz" });
         assertEquals(partial, request.partial());
         assertEquals("val1", request.settings().get("set1"));
     }

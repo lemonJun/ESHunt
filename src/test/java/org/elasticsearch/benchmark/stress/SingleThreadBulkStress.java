@@ -52,14 +52,7 @@ public class SingleThreadBulkStress {
         int replicaCount = Integer.parseInt(System.getProperty("es.replica", "1"));
         boolean autoGenerateId = true;
 
-        Settings settings = settingsBuilder()
-                .put("index.refresh_interval", "1s")
-                .put("index.merge.async", true)
-                .put("index.translog.flush_threshold_ops", 5000)
-                .put("gateway.type", "none")
-                .put(SETTING_NUMBER_OF_SHARDS, shardsCount)
-                .put(SETTING_NUMBER_OF_REPLICAS, replicaCount)
-                .build();
+        Settings settings = settingsBuilder().put("index.refresh_interval", "1s").put("index.merge.async", true).put("index.translog.flush_threshold_ops", 5000).put("gateway.type", "none").put(SETTING_NUMBER_OF_SHARDS, shardsCount).put(SETTING_NUMBER_OF_REPLICAS, replicaCount).build();
 
         Node[] nodes = new Node[1];
         for (int i = 0; i < nodes.length; i++) {
@@ -72,16 +65,9 @@ public class SingleThreadBulkStress {
         Client client1 = client.client();
 
         Thread.sleep(1000);
-        client1.admin().indices().prepareCreate("test").setSettings(settings).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("_source").field("enabled", false).endObject()
-                .startObject("_all").field("enabled", false).endObject()
-                .startObject("_type").field("index", "no").endObject()
-                .startObject("_id").field("index", "no").endObject()
-                .startObject("properties")
-                .startObject("field").field("type", "string").field("index", "not_analyzed").field("omit_norms", true).endObject()
-//                .startObject("field").field("index", "analyzed").field("omit_norms", false).endObject()
-                .endObject()
-                .endObject().endObject()).execute().actionGet();
+        client1.admin().indices().prepareCreate("test").setSettings(settings).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_source").field("enabled", false).endObject().startObject("_all").field("enabled", false).endObject().startObject("_type").field("index", "no").endObject().startObject("_id").field("index", "no").endObject().startObject("properties").startObject("field").field("type", "string").field("index", "not_analyzed").field("omit_norms", true).endObject()
+                        //                .startObject("field").field("index", "analyzed").field("omit_norms", false).endObject()
+                        .endObject().endObject().endObject()).execute().actionGet();
         Thread.sleep(5000);
 
         StopWatch stopWatch = new StopWatch().start();

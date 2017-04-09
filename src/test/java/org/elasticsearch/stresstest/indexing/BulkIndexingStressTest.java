@@ -42,8 +42,8 @@ public class BulkIndexingStressTest {
 
         final Settings nodeSettings = ImmutableSettings.settingsBuilder().put("index.number_of_shards", 2).build();
 
-//            ESLogger logger = Loggers.getLogger("org.elasticsearch");
-//            logger.setLevel("DEBUG");
+        //            ESLogger logger = Loggers.getLogger("org.elasticsearch");
+        //            logger.setLevel("DEBUG");
         Node[] nodes = new Node[NUMBER_OF_NODES];
         for (int i = 0; i < nodes.length; i++) {
             nodes[i] = NodeBuilder.nodeBuilder().settings(nodeSettings).node();

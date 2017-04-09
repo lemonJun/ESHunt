@@ -49,15 +49,9 @@ public class InternalEngineMergeTests extends ElasticsearchIntegrationTest {
     @Test
     @Slow
     public void testMergesHappening() throws InterruptedException, IOException, ExecutionException {
-        final int numOfShards = randomIntBetween(1,5);
+        final int numOfShards = randomIntBetween(1, 5);
         // some settings to keep num segments low
-        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, numOfShards)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)
-                .put(LogDocMergePolicyProvider.MIN_MERGE_DOCS_KEY, 10)
-                .put(LogDocMergePolicyProvider.MERGE_FACTORY_KEY, 5)
-                .put(LogByteSizeMergePolicy.DEFAULT_MIN_MERGE_MB, 0.5)
-                .build()));
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, numOfShards).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0).put(LogDocMergePolicyProvider.MIN_MERGE_DOCS_KEY, 10).put(LogDocMergePolicyProvider.MERGE_FACTORY_KEY, 5).put(LogByteSizeMergePolicy.DEFAULT_MIN_MERGE_MB, 0.5).build()));
         long id = 0;
         final int rounds = scaledRandomIntBetween(50, 300);
         logger.info("Starting rounds [{}] ", rounds);

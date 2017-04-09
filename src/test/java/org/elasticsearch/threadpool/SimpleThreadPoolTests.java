@@ -84,15 +84,7 @@ public class SimpleThreadPoolTests extends ElasticsearchIntegrationTest {
         int numDocs = randomIntBetween(2, 100);
         IndexRequestBuilder[] builders = new IndexRequestBuilder[numDocs];
         for (int i = 0; i < numDocs; ++i) {
-            builders[i] = client().prepareIndex("idx", "type").setSource(jsonBuilder()
-                    .startObject()
-                    .field("str_value", "s" + i)
-                    .field("str_values", new String[]{"s" + (i * 2), "s" + (i * 2 + 1)})
-                    .field("l_value", i)
-                    .field("l_values", new int[]{i * 2, i * 2 + 1})
-                    .field("d_value", i)
-                    .field("d_values", new double[]{i * 2, i * 2 + 1})
-                    .endObject());
+            builders[i] = client().prepareIndex("idx", "type").setSource(jsonBuilder().startObject().field("str_value", "s" + i).field("str_values", new String[] { "s" + (i * 2), "s" + (i * 2 + 1) }).field("l_value", i).field("l_values", new int[] { i * 2, i * 2 + 1 }).field("d_value", i).field("d_values", new double[] { i * 2, i * 2 + 1 }).endObject());
         }
         indexRandom(true, builders);
         int numSearches = randomIntBetween(2, 100);
@@ -113,15 +105,10 @@ public class SimpleThreadPoolTests extends ElasticsearchIntegrationTest {
         for (String threadName : threadNames) {
             // ignore some shared threads we know that are created within the same VM, like the shared discovery one
             // or the ones that are occasionally come up from ElasticsearchSingleNodeTest
-            if (threadName.contains("[" + MulticastChannel.SHARED_CHANNEL_NAME + "]")
-                    || threadName.contains("[" + ElasticsearchSingleNodeTest.nodeName() + "]")
-                    || threadName.contains("Keep-Alive-Timer")) {
+            if (threadName.contains("[" + MulticastChannel.SHARED_CHANNEL_NAME + "]") || threadName.contains("[" + ElasticsearchSingleNodeTest.nodeName() + "]") || threadName.contains("Keep-Alive-Timer")) {
                 continue;
             }
-            String nodePrefix = "(" + Pattern.quote(InternalTestCluster.TRANSPORT_CLIENT_PREFIX) + ")?(" +
-                    Pattern.quote(ElasticsearchIntegrationTest.SUITE_CLUSTER_NODE_PREFIX) + "|" +
-                    Pattern.quote(ElasticsearchIntegrationTest.TEST_CLUSTER_NODE_PREFIX) + "|" +
-                    Pattern.quote(TribeTests.SECOND_CLUSTER_NODE_PREFIX) + ")";
+            String nodePrefix = "(" + Pattern.quote(InternalTestCluster.TRANSPORT_CLIENT_PREFIX) + ")?(" + Pattern.quote(ElasticsearchIntegrationTest.SUITE_CLUSTER_NODE_PREFIX) + "|" + Pattern.quote(ElasticsearchIntegrationTest.TEST_CLUSTER_NODE_PREFIX) + "|" + Pattern.quote(TribeTests.SECOND_CLUSTER_NODE_PREFIX) + ")";
             assertThat(threadName, RegexMatcher.matches("\\[" + nodePrefix + "\\d+\\]"));
         }
     }
@@ -194,16 +181,14 @@ public class SimpleThreadPoolTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testThreadPoolLeakingThreadsWithTribeNode() {
-        Settings settings = ImmutableSettings.builder()
-                .put("node.name", "thread_pool_leaking_threads_tribe_node")
-                .put("tribe.t1.cluster.name", "non_existing_cluster")
+        Settings settings = ImmutableSettings.builder().put("node.name", "thread_pool_leaking_threads_tribe_node").put("tribe.t1.cluster.name", "non_existing_cluster")
                         //trigger initialization failure of one of the tribes (doesn't require starting the node)
-                .put("tribe.t1.plugin.mandatory", "non_existing").build();
+                        .put("tribe.t1.plugin.mandatory", "non_existing").build();
 
         try {
             NodeBuilder.nodeBuilder().settings(settings).build();
             fail("The node startup is supposed to fail");
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             //all good
             assertThat(t.getMessage(), containsString("mandatory plugins [non_existing]"));
         }

@@ -154,7 +154,6 @@ public class SimpleAllMapperTests extends ElasticsearchSingleNodeTest {
         assertThat(field.tokenStream(docMapper.mappers().indexAnalyzer(), null), Matchers.not(Matchers.instanceOf(AllTokenStream.class)));
     }
 
-
     @Test
     public void testSimpleAllMappersWithReparse() throws Exception {
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
@@ -282,11 +281,7 @@ public class SimpleAllMapperTests extends ElasticsearchSingleNodeTest {
         // reparse it
         DocumentMapper builtDocMapper = parser.parse(builtMapping);
 
-        byte[] json = jsonBuilder().startObject()
-                .field("foo", "bar")
-                .field("_id", 1)
-                .field("foobar", "foobar")
-                .endObject().bytes().toBytes();
+        byte[] json = jsonBuilder().startObject().field("foo", "bar").field("_id", 1).field("foobar", "foobar").endObject().bytes().toBytes();
         Document doc = builtDocMapper.parse(new BytesArray(json)).rootDoc();
         AllField field = (AllField) doc.getField("_all");
         if (enabled) {
@@ -312,19 +307,19 @@ public class SimpleAllMapperTests extends ElasticsearchSingleNodeTest {
         Term term = new Term("foo", "bar");
         Query query = builtDocMapper.allFieldMapper().queryStringTermQuery(term);
         if (autoBoost) {
-            assertThat(query, equalTo((Query)new AllTermQuery(term)));
+            assertThat(query, equalTo((Query) new AllTermQuery(term)));
         } else {
-            assertThat(query, equalTo((Query)new TermQuery(term)));
+            assertThat(query, equalTo((Query) new TermQuery(term)));
         }
         if (similarity == null || similarity.equals("TF/IDF")) {
             assertThat(builtDocMapper.allFieldMapper().similarity(), nullValue());
-        }   else {
+        } else {
             assertThat(similarity, equalTo(builtDocMapper.allFieldMapper().similarity().name()));
         }
         assertThat(builtMapping.contains("fielddata"), is(fieldData));
         if (allDefault) {
             BytesStreamOutput bytesStreamOutput = new BytesStreamOutput(0);
-            XContentBuilder b =  new XContentBuilder(XContentType.JSON.xContent(), bytesStreamOutput);
+            XContentBuilder b = new XContentBuilder(XContentType.JSON.xContent(), bytesStreamOutput);
             XContentBuilder xContentBuilder = builtDocMapper.allFieldMapper().toXContent(b, ToXContent.EMPTY_PARAMS);
             xContentBuilder.flush();
             assertThat(bytesStreamOutput.size(), equalTo(0));
@@ -338,13 +333,7 @@ public class SimpleAllMapperTests extends ElasticsearchSingleNodeTest {
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
         XContentBuilder builder = XContentFactory.jsonBuilder();
-        builder.startObject()
-                .field("_id", "1")
-                .field("foo")
-                    .startObject()
-                        .field("bar", "Elasticsearch rules!")
-                    .endObject()
-                .endObject();
+        builder.startObject().field("_id", "1").field("foo").startObject().field("bar", "Elasticsearch rules!").endObject().endObject();
 
         Document doc = docMapper.parse(builder.bytes()).rootDoc();
         AllField field = (AllField) doc.getField("_all");
@@ -358,13 +347,7 @@ public class SimpleAllMapperTests extends ElasticsearchSingleNodeTest {
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
         XContentBuilder builder = XContentFactory.jsonBuilder();
-        builder.startObject()
-                .field("_id", "1")
-                .field("foo")
-                .startObject()
-                .field("bar", "Elasticsearch rules!")
-                .endObject()
-                .endObject();
+        builder.startObject().field("_id", "1").field("foo").startObject().field("bar", "Elasticsearch rules!").endObject().endObject();
 
         Document doc = docMapper.parse(builder.bytes()).rootDoc();
         AllField field = (AllField) doc.getField("_all");
@@ -426,9 +409,9 @@ public class SimpleAllMapperTests extends ElasticsearchSingleNodeTest {
         rootTypes.put("numeric_detection", "true");
         rootTypes.put("dynamic_templates", "[]");
         for (String key : rootTypes.keySet()) {
-            mapping += "\"" + key+ "\"" + ":" + rootTypes.get(key) + ",\n";
+            mapping += "\"" + key + "\"" + ":" + rootTypes.get(key) + ",\n";
         }
-        mapping += "\"properties\":{}}" ;
+        mapping += "\"properties\":{}}";
         createIndex("test").mapperService().documentMapperParser().parse("test", mapping);
     }
 }

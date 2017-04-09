@@ -48,7 +48,7 @@ public class ArrayUtilsTests extends ElasticsearchTestCase {
                     value = Math.random() * 10;
                     array[i] = value + ((randomFreq(0.5) ? 1 : -1) * Math.random() * tolerance);
 
-                } else {                    // sometimes we'll have NaN in the array
+                } else { // sometimes we'll have NaN in the array
                     value = Double.NaN;
                     array[i] = value;
                 }

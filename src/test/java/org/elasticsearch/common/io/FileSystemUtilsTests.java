@@ -115,7 +115,6 @@ public class FileSystemUtilsTests extends ElasticsearchTestCase {
         assertFileContent(dest, "dir/subdir/file5.txt", "version1");
     }
 
-
     /**
      * Check that a file contains a given String
      * @param dir root dir for file

@@ -55,43 +55,9 @@ public class RestApiParserFailingTests extends ElasticsearchTestCase {
     }
 
     // see params section is broken, an inside param is missing
-    private static final String BROKEN_SPEC_PARAMS = "{\n" +
-            "  \"ping\": {" +
-            "    \"documentation\": \"http://www.elasticsearch.org/guide/\"," +
-            "    \"methods\": [\"HEAD\"]," +
-            "    \"url\": {" +
-            "      \"path\": \"/\"," +
-            "      \"paths\": [\"/\"]," +
-            "      \"parts\": {" +
-            "      }," +
-            "      \"params\": {" +
-            "        \"type\" : \"boolean\",\n" +
-            "        \"description\" : \"Whether specified concrete indices should be ignored when unavailable (missing or closed)\"\n" +
-            "      }" +
-            "    }," +
-            "    \"body\": null" +
-            "  }" +
-            "}";
+    private static final String BROKEN_SPEC_PARAMS = "{\n" + "  \"ping\": {" + "    \"documentation\": \"http://www.elasticsearch.org/guide/\"," + "    \"methods\": [\"HEAD\"]," + "    \"url\": {" + "      \"path\": \"/\"," + "      \"paths\": [\"/\"]," + "      \"parts\": {" + "      }," + "      \"params\": {" + "        \"type\" : \"boolean\",\n" + "        \"description\" : \"Whether specified concrete indices should be ignored when unavailable (missing or closed)\"\n" + "      }" + "    }," + "    \"body\": null" + "  }" + "}";
 
     // see parts section is broken, an inside param is missing
-    private static final String BROKEN_SPEC_PARTS = "{\n" +
-            "  \"ping\": {" +
-            "    \"documentation\": \"http://www.elasticsearch.org/guide/\"," +
-            "    \"methods\": [\"HEAD\"]," +
-            "    \"url\": {" +
-            "      \"path\": \"/\"," +
-            "      \"paths\": [\"/\"]," +
-            "      \"parts\": {" +
-            "          \"type\" : \"boolean\",\n" +
-            "      }," +
-            "      \"params\": {\n" +
-            "        \"ignore_unavailable\": {\n" +
-            "          \"type\" : \"boolean\",\n" +
-            "          \"description\" : \"Whether specified concrete indices should be ignored when unavailable (missing or closed)\"\n" +
-            "        } \n" +
-            "    }," +
-            "    \"body\": null" +
-            "  }" +
-            "}";
+    private static final String BROKEN_SPEC_PARTS = "{\n" + "  \"ping\": {" + "    \"documentation\": \"http://www.elasticsearch.org/guide/\"," + "    \"methods\": [\"HEAD\"]," + "    \"url\": {" + "      \"path\": \"/\"," + "      \"paths\": [\"/\"]," + "      \"parts\": {" + "          \"type\" : \"boolean\",\n" + "      }," + "      \"params\": {\n" + "        \"ignore_unavailable\": {\n" + "          \"type\" : \"boolean\",\n" + "          \"description\" : \"Whether specified concrete indices should be ignored when unavailable (missing or closed)\"\n" + "        } \n" + "    }," + "    \"body\": null" + "  }" + "}";
 
 }

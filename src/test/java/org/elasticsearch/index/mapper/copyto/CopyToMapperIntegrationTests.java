@@ -38,32 +38,20 @@ import static org.hamcrest.Matchers.equalTo;
  */
 public class CopyToMapperIntegrationTests extends ElasticsearchIntegrationTest {
 
-
     @Test
     public void testDynamicTemplateCopyTo() throws Exception {
-        assertAcked(
-                client().admin().indices().prepareCreate("test-idx")
-                        .addMapping("doc", createDynamicTemplateMapping())
-        );
+        assertAcked(client().admin().indices().prepareCreate("test-idx").addMapping("doc", createDynamicTemplateMapping()));
 
         int recordCount = between(1, 200);
 
         for (int i = 0; i < recordCount * 2; i++) {
-            client().prepareIndex("test-idx", "doc", Integer.toString(i))
-                    .setSource("test_field", "test " + i, "even", i % 2 == 0)
-                    .get();
+            client().prepareIndex("test-idx", "doc", Integer.toString(i)).setSource("test_field", "test " + i, "even", i % 2 == 0).get();
         }
         client().admin().indices().prepareRefresh("test-idx").execute().actionGet();
 
         SubAggCollectionMode aggCollectionMode = randomFrom(SubAggCollectionMode.values());
-        
-        SearchResponse response = client().prepareSearch("test-idx")
-                .setQuery(QueryBuilders.termQuery("even", true))
-                .addAggregation(AggregationBuilders.terms("test").field("test_field").size(recordCount * 2)
-                        .collectMode(aggCollectionMode))
-                .addAggregation(AggregationBuilders.terms("test_raw").field("test_field_raw").size(recordCount * 2)
-                        .collectMode(aggCollectionMode))
-                .execute().actionGet();
+
+        SearchResponse response = client().prepareSearch("test-idx").setQuery(QueryBuilders.termQuery("even", true)).addAggregation(AggregationBuilders.terms("test").field("test_field").size(recordCount * 2).collectMode(aggCollectionMode)).addAggregation(AggregationBuilders.terms("test_raw").field("test_field_raw").size(recordCount * 2).collectMode(aggCollectionMode)).execute().actionGet();
 
         assertThat(response.getHits().totalHits(), equalTo((long) recordCount));
 
@@ -72,24 +60,14 @@ public class CopyToMapperIntegrationTests extends ElasticsearchIntegrationTest {
 
     }
 
-
     private XContentBuilder createDynamicTemplateMapping() throws IOException {
-        return XContentFactory.jsonBuilder().startObject().startObject("doc")
-                .startArray("dynamic_templates")
+        return XContentFactory.jsonBuilder().startObject().startObject("doc").startArray("dynamic_templates")
 
-                .startObject().startObject("template_raw")
-                .field("match", "*_raw")
-                .field("match_mapping_type", "string")
-                .startObject("mapping").field("type", "string").field("index", "not_analyzed").endObject()
-                .endObject().endObject()
+                        .startObject().startObject("template_raw").field("match", "*_raw").field("match_mapping_type", "string").startObject("mapping").field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject()
 
-                .startObject().startObject("template_all")
-                .field("match", "*")
-                .field("match_mapping_type", "string")
-                .startObject("mapping").field("type", "string").field("copy_to", "{name}_raw").endObject()
-                .endObject().endObject()
+                        .startObject().startObject("template_all").field("match", "*").field("match_mapping_type", "string").startObject("mapping").field("type", "string").field("copy_to", "{name}_raw").endObject().endObject().endObject()
 
-                .endArray();
+                        .endArray();
     }
 
 }

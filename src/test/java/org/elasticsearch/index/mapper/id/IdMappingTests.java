@@ -38,32 +38,21 @@ public class IdMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void simpleIdTests() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").endObject().endObject().string();
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = docMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .endObject()
-                .bytes());
+        ParsedDocument doc = docMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().endObject().bytes());
 
         assertThat(doc.rootDoc().get(UidFieldMapper.NAME), notNullValue());
         assertThat(doc.rootDoc().get(IdFieldMapper.NAME), nullValue());
 
         try {
-            docMapper.parse("type", null, XContentFactory.jsonBuilder()
-                    .startObject()
-                    .endObject()
-                    .bytes());
+            docMapper.parse("type", null, XContentFactory.jsonBuilder().startObject().endObject().bytes());
             fail();
         } catch (MapperParsingException e) {
         }
 
-        doc = docMapper.parse("type", null, XContentFactory.jsonBuilder()
-                .startObject()
-                .field("_id", 1)
-                .endObject()
-                .bytes());
+        doc = docMapper.parse("type", null, XContentFactory.jsonBuilder().startObject().field("_id", 1).endObject().bytes());
 
         assertThat(doc.rootDoc().get(UidFieldMapper.NAME), notNullValue());
         assertThat(doc.rootDoc().get(IdFieldMapper.NAME), nullValue());
@@ -71,24 +60,15 @@ public class IdMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testIdIndexed() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_id").field("index", "not_analyzed").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_id").field("index", "not_analyzed").endObject().endObject().endObject().string();
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = docMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .endObject()
-                .bytes());
+        ParsedDocument doc = docMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().endObject().bytes());
 
         assertThat(doc.rootDoc().get(UidFieldMapper.NAME), notNullValue());
         assertThat(doc.rootDoc().get(IdFieldMapper.NAME), notNullValue());
 
-        doc = docMapper.parse("type", null, XContentFactory.jsonBuilder()
-                .startObject()
-                .field("_id", 1)
-                .endObject()
-                .bytes());
+        doc = docMapper.parse("type", null, XContentFactory.jsonBuilder().startObject().field("_id", 1).endObject().bytes());
 
         assertThat(doc.rootDoc().get(UidFieldMapper.NAME), notNullValue());
         assertThat(doc.rootDoc().get(IdFieldMapper.NAME), notNullValue());
@@ -96,9 +76,7 @@ public class IdMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
     public void testIdPath() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_id").field("path", "my_path").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_id").field("path", "my_path").endObject().endObject().endObject().string();
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
         // serialize the id mapping
@@ -107,9 +85,7 @@ public class IdMappingTests extends ElasticsearchSingleNodeTest {
         builder.endObject();
         String serialized_id_mapping = builder.string();
 
-        String expected_id_mapping = XContentFactory.jsonBuilder().startObject()
-                .startObject("_id").field("path", "my_path").endObject()
-                .endObject().string();
+        String expected_id_mapping = XContentFactory.jsonBuilder().startObject().startObject("_id").field("path", "my_path").endObject().endObject().string();
 
         assertThat(serialized_id_mapping, equalTo(expected_id_mapping));
     }

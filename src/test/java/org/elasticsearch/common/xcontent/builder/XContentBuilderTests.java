@@ -175,7 +175,7 @@ public class XContentBuilderTests extends ElasticsearchTestCase {
     @Test
     public void testByteConversion() throws Exception {
         XContentBuilder builder = XContentFactory.contentBuilder(XContentType.JSON);
-        builder.startObject().field("test_name", (Byte)(byte)120).endObject();
+        builder.startObject().field("test_name", (Byte) (byte) 120).endObject();
         assertThat(builder.bytes().toUtf8(), equalTo("{\"test_name\":120}"));
     }
 
@@ -209,10 +209,7 @@ public class XContentBuilderTests extends ElasticsearchTestCase {
     @Test
     public void testCopyCurrentStructure() throws Exception {
         XContentBuilder builder = XContentFactory.contentBuilder(XContentType.JSON);
-        builder.startObject()
-                .field("test", "test field")
-                .startObject("filter")
-                .startObject("terms");
+        builder.startObject().field("test", "test field").startObject("filter").startObject("terms");
 
         // up to 20k random terms
         int numTerms = randomInt(20000) + 1;

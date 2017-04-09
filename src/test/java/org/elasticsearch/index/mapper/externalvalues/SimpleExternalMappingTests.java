@@ -36,26 +36,12 @@ public class SimpleExternalMappingTests extends ElasticsearchSingleNodeLuceneTes
     @Test
     public void testExternalValues() throws Exception {
         MapperService mapperService = createIndex("test").mapperService();
-        mapperService.documentMapperParser().putRootTypeParser(ExternalRootMapper.CONTENT_TYPE,
-                new ExternalRootMapper.TypeParser());
-        mapperService.documentMapperParser().putTypeParser(RegisterExternalTypes.EXTERNAL,
-                new ExternalMapper.TypeParser(RegisterExternalTypes.EXTERNAL, "foo"));
+        mapperService.documentMapperParser().putRootTypeParser(ExternalRootMapper.CONTENT_TYPE, new ExternalRootMapper.TypeParser());
+        mapperService.documentMapperParser().putTypeParser(RegisterExternalTypes.EXTERNAL, new ExternalMapper.TypeParser(RegisterExternalTypes.EXTERNAL, "foo"));
 
-        DocumentMapper documentMapper = mapperService.documentMapperParser().parse(
-                XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject(ExternalRootMapper.CONTENT_TYPE)
-                .endObject()
-                .startObject("properties")
-                    .startObject("field").field("type", "external").endObject()
-                .endObject()
-            .endObject().endObject().string()
-        );
+        DocumentMapper documentMapper = mapperService.documentMapperParser().parse(XContentFactory.jsonBuilder().startObject().startObject("type").startObject(ExternalRootMapper.CONTENT_TYPE).endObject().startObject("properties").startObject("field").field("type", "external").endObject().endObject().endObject().endObject().string());
 
-        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                    .field("field", "1234")
-                .endObject()
-                .bytes());
+        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "1234").endObject().bytes());
 
         assertThat(doc.rootDoc().getField("field.bool"), notNullValue());
         assertThat(doc.rootDoc().getField("field.bool").stringValue(), is("T"));
@@ -75,35 +61,11 @@ public class SimpleExternalMappingTests extends ElasticsearchSingleNodeLuceneTes
     @Test
     public void testExternalValuesWithMultifield() throws Exception {
         MapperService mapperService = createIndex("test").mapperService();
-        mapperService.documentMapperParser().putTypeParser(RegisterExternalTypes.EXTERNAL,
-                new ExternalMapper.TypeParser(RegisterExternalTypes.EXTERNAL, "foo"));
+        mapperService.documentMapperParser().putTypeParser(RegisterExternalTypes.EXTERNAL, new ExternalMapper.TypeParser(RegisterExternalTypes.EXTERNAL, "foo"));
 
-        DocumentMapper documentMapper = mapperService.documentMapperParser().parse(
-                XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties")
-                .startObject("field")
-                    .field("type", RegisterExternalTypes.EXTERNAL)
-                    .startObject("fields")
-                        .startObject("field")
-                            .field("type", "string")
-                            .field("stored", "yes")
-                            .startObject("fields")
-                                .startObject("raw")
-                                    .field("type", "string")
-                                    .field("index", "not_analyzed")
-                                    .field("stored", "yes")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                .endObject()
-                .endObject().endObject().endObject()
-                .string());
+        DocumentMapper documentMapper = mapperService.documentMapperParser().parse(XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", RegisterExternalTypes.EXTERNAL).startObject("fields").startObject("field").field("type", "string").field("stored", "yes").startObject("fields").startObject("raw").field("type", "string").field("index", "not_analyzed").field("stored", "yes").endObject().endObject().endObject().endObject().endObject().endObject().endObject().endObject().string());
 
-        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                    .field("field", "1234")
-                .endObject()
-                .bytes());
+        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "1234").endObject().bytes());
 
         assertThat(doc.rootDoc().getField("field.bool"), notNullValue());
         assertThat(doc.rootDoc().getField("field.bool").stringValue(), is("T"));
@@ -124,40 +86,12 @@ public class SimpleExternalMappingTests extends ElasticsearchSingleNodeLuceneTes
     public void testExternalValuesWithMultifieldTwoLevels() throws Exception {
         MapperService mapperService = createIndex("test").mapperService();
 
-        mapperService.documentMapperParser().putTypeParser(RegisterExternalTypes.EXTERNAL,
-                new ExternalMapper.TypeParser(RegisterExternalTypes.EXTERNAL, "foo"));
-        mapperService.documentMapperParser().putTypeParser(RegisterExternalTypes.EXTERNAL_BIS,
-                new ExternalMapper.TypeParser(RegisterExternalTypes.EXTERNAL_BIS, "bar"));
+        mapperService.documentMapperParser().putTypeParser(RegisterExternalTypes.EXTERNAL, new ExternalMapper.TypeParser(RegisterExternalTypes.EXTERNAL, "foo"));
+        mapperService.documentMapperParser().putTypeParser(RegisterExternalTypes.EXTERNAL_BIS, new ExternalMapper.TypeParser(RegisterExternalTypes.EXTERNAL_BIS, "bar"));
 
-        DocumentMapper documentMapper = mapperService.documentMapperParser().parse(
-                XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties")
-                .startObject("field")
-                    .field("type", RegisterExternalTypes.EXTERNAL)
-                    .startObject("fields")
-                        .startObject("field")
-                            .field("type", "string")
-                            .startObject("fields")
-                                .startObject("generated")
-                                    .field("type", RegisterExternalTypes.EXTERNAL_BIS)
-                                .endObject()
-                                .startObject("raw")
-                                    .field("type", "string")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                        .startObject("raw")
-                            .field("type", "string")
-                        .endObject()
-                    .endObject()
-                .endObject()
-                .endObject().endObject().endObject()
-                .string());
+        DocumentMapper documentMapper = mapperService.documentMapperParser().parse(XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field").field("type", RegisterExternalTypes.EXTERNAL).startObject("fields").startObject("field").field("type", "string").startObject("fields").startObject("generated").field("type", RegisterExternalTypes.EXTERNAL_BIS).endObject().startObject("raw").field("type", "string").endObject().endObject().endObject().startObject("raw").field("type", "string").endObject().endObject().endObject().endObject().endObject().endObject().string());
 
-        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field", "1234")
-                .endObject()
-                .bytes());
+        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field", "1234").endObject().bytes());
 
         assertThat(doc.rootDoc().getField("field.bool"), notNullValue());
         assertThat(doc.rootDoc().getField("field.bool").stringValue(), is("T"));

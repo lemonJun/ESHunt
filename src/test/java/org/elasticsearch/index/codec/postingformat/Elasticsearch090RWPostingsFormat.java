@@ -47,8 +47,8 @@ public class Elasticsearch090RWPostingsFormat extends Elasticsearch090PostingsFo
         final BloomFilteredFieldsConsumer fieldsConsumer = new BloomFilterPostingsFormat(delegate, BloomFilter.Factory.DEFAULT) {
             @Override
             public BloomFilteredFieldsConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
-                return new BloomFilteredFieldsConsumer(delegate.fieldsConsumer(state), state,delegate);
-            } 
+                return new BloomFilteredFieldsConsumer(delegate.fieldsConsumer(state), state, delegate);
+            }
         }.fieldsConsumer(state);
         return new FieldsConsumer() {
 

@@ -89,7 +89,7 @@ public class StreamsTests extends ElasticsearchTestCase {
         String result = copyToString(in);
         assertThat(result, equalTo(content));
     }
-    
+
     @Test
     public void testBytesStreamInput() throws IOException {
         byte stuff[] = new byte[] { 0, 1, 2, 3 };

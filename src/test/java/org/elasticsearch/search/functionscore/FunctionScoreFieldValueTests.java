@@ -39,21 +39,7 @@ public class FunctionScoreFieldValueTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testFieldValueFactor() throws IOException {
-        assertAcked(prepareCreate("test").addMapping(
-                "type1",
-                jsonBuilder()
-                        .startObject()
-                        .startObject("type1")
-                        .startObject("properties")
-                        .startObject("test")
-                        .field("type", randomFrom(new String[]{"short", "float", "long", "integer", "double"}))
-                        .endObject()
-                        .startObject("body")
-                        .field("type", "string")
-                        .endObject()
-                        .endObject()
-                        .endObject()
-                        .endObject()).get());
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("test").field("type", randomFrom(new String[] { "short", "float", "long", "integer", "double" })).endObject().startObject("body").field("type", "string").endObject().endObject().endObject().endObject()).get());
         ensureYellow();
 
         client().prepareIndex("test", "type1", "1").setSource("test", 5, "body", "foo").get();
@@ -63,54 +49,32 @@ public class FunctionScoreFieldValueTests extends ElasticsearchIntegrationTest {
         refresh();
 
         // document 2 scores higher because 17 > 5
-        SearchResponse response = client().prepareSearch("test")
-                .setExplain(randomBoolean())
-                .setQuery(functionScoreQuery(simpleQueryStringQuery("foo"), fieldValueFactorFunction("test")))
-                .get();
+        SearchResponse response = client().prepareSearch("test").setExplain(randomBoolean()).setQuery(functionScoreQuery(simpleQueryStringQuery("foo"), fieldValueFactorFunction("test"))).get();
         assertOrderedSearchHits(response, "2", "1");
 
         // try again, but this time explicitly use the do-nothing modifier
-        response = client().prepareSearch("test")
-                .setExplain(randomBoolean())
-                .setQuery(functionScoreQuery(simpleQueryStringQuery("foo"),
-                        fieldValueFactorFunction("test").modifier(FieldValueFactorFunction.Modifier.NONE)))
-                .get();
+        response = client().prepareSearch("test").setExplain(randomBoolean()).setQuery(functionScoreQuery(simpleQueryStringQuery("foo"), fieldValueFactorFunction("test").modifier(FieldValueFactorFunction.Modifier.NONE))).get();
         assertOrderedSearchHits(response, "2", "1");
 
         // document 1 scores higher because 1/5 > 1/17
-        response = client().prepareSearch("test")
-                .setExplain(randomBoolean())
-                .setQuery(functionScoreQuery(simpleQueryStringQuery("foo"),
-                        fieldValueFactorFunction("test").modifier(FieldValueFactorFunction.Modifier.RECIPROCAL)))
-                .get();
+        response = client().prepareSearch("test").setExplain(randomBoolean()).setQuery(functionScoreQuery(simpleQueryStringQuery("foo"), fieldValueFactorFunction("test").modifier(FieldValueFactorFunction.Modifier.RECIPROCAL))).get();
         assertOrderedSearchHits(response, "1", "2");
 
         // doc 3 doesn't have a "test" field, so an exception will be thrown
         try {
-            response = client().prepareSearch("test")
-                    .setExplain(randomBoolean())
-                    .setQuery(functionScoreQuery(matchAllQuery(), fieldValueFactorFunction("test")))
-                    .get();
+            response = client().prepareSearch("test").setExplain(randomBoolean()).setQuery(functionScoreQuery(matchAllQuery(), fieldValueFactorFunction("test"))).get();
             assertFailures(response);
         } catch (SearchPhaseExecutionException e) {
             // We are expecting an exception, because 3 has no field
         }
 
         // doc 3 doesn't have a "test" field but we're defaulting it to 100 so it should be last
-        response = client().prepareSearch("test")
-                .setExplain(randomBoolean())
-                .setQuery(functionScoreQuery(matchAllQuery(),
-                        fieldValueFactorFunction("test").modifier(FieldValueFactorFunction.Modifier.RECIPROCAL).missing(100)))
-                .get();
+        response = client().prepareSearch("test").setExplain(randomBoolean()).setQuery(functionScoreQuery(matchAllQuery(), fieldValueFactorFunction("test").modifier(FieldValueFactorFunction.Modifier.RECIPROCAL).missing(100))).get();
         assertOrderedSearchHits(response, "1", "2", "3");
 
         // n divided by 0 is infinity, which should provoke an exception.
         try {
-            response = client().prepareSearch("test")
-                    .setExplain(randomBoolean())
-                    .setQuery(functionScoreQuery(simpleQueryStringQuery("foo"),
-                            fieldValueFactorFunction("test").modifier(FieldValueFactorFunction.Modifier.RECIPROCAL).factor(0)))
-                    .get();
+            response = client().prepareSearch("test").setExplain(randomBoolean()).setQuery(functionScoreQuery(simpleQueryStringQuery("foo"), fieldValueFactorFunction("test").modifier(FieldValueFactorFunction.Modifier.RECIPROCAL).factor(0))).get();
             assertFailures(response);
         } catch (SearchPhaseExecutionException e) {
             // This is fine, the query will throw an exception if executed
@@ -119,30 +83,12 @@ public class FunctionScoreFieldValueTests extends ElasticsearchIntegrationTest {
 
         // don't permit an array of factors
         try {
-          String querySource = "{" +
-            "\"query\": {" +
-            "  \"function_score\": {" +
-            "    \"query\": {" +
-            "      \"match\": {\"name\": \"foo\"}" +
-            "      }," +
-            "      \"functions\": [" +
-            "        {" +
-            "          \"field_value_factor\": {" +
-            "            \"field\": \"test\"," +
-            "            \"factor\": [1.2,2]" +
-            "          }" +
-            "        }" +
-            "      ]" +
-            "    }" +
-            "  }" +
-            "}";
-          response = client().prepareSearch("test")
-          .setSource(querySource)
-          .get();
-          assertFailures(response);
+            String querySource = "{" + "\"query\": {" + "  \"function_score\": {" + "    \"query\": {" + "      \"match\": {\"name\": \"foo\"}" + "      }," + "      \"functions\": [" + "        {" + "          \"field_value_factor\": {" + "            \"field\": \"test\"," + "            \"factor\": [1.2,2]" + "          }" + "        }" + "      ]" + "    }" + "  }" + "}";
+            response = client().prepareSearch("test").setSource(querySource).get();
+            assertFailures(response);
         } catch (SearchPhaseExecutionException e) {
-          // This is fine, the query will throw an exception if executed
-          // locally, instead of just having failures
+            // This is fine, the query will throw an exception if executed
+            // locally, instead of just having failures
         }
 
     }

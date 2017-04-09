@@ -55,20 +55,7 @@ public class FunctionScoreBackwardCompatibilityTests extends ElasticsearchBackwa
     @TestLogging("org.elasticsearch.index.gateway.local:TRACE")
     public void testSimpleFunctionScoreParsingWorks() throws IOException, ExecutionException, InterruptedException {
 
-        assertAcked(prepareCreate("test").addMapping(
-                "type1",
-                jsonBuilder().startObject()
-                        .startObject("type1")
-                        .startObject("properties")
-                        .startObject("text")
-                        .field("type", "string")
-                        .endObject()
-                        .startObject("loc")
-                        .field("type", "geo_point")
-                        .endObject()
-                        .endObject()
-                        .endObject()
-                        .endObject()));
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("text").field("type", "string").endObject().startObject("loc").field("type", "geo_point").endObject().endObject().endObject().endObject()));
         ensureYellow();
 
         int numDocs = 10;
@@ -76,16 +63,7 @@ public class FunctionScoreBackwardCompatibilityTests extends ElasticsearchBackwa
         List<IndexRequestBuilder> indexBuilders = new ArrayList<>();
         for (int i = 0; i < numDocs; i++) {
             String id = Integer.toString(i);
-            indexBuilders.add(client().prepareIndex()
-                    .setType("type1").setId(id).setIndex("test")
-                    .setSource(
-                            jsonBuilder().startObject()
-                                    .field("text", "value " + (i < 5 ? "boosted" : ""))
-                                    .startObject("loc")
-                                    .field("lat", 10 + i)
-                                    .field("lon", 20)
-                                    .endObject()
-                                    .endObject()));
+            indexBuilders.add(client().prepareIndex().setType("type1").setId(id).setIndex("test").setSource(jsonBuilder().startObject().field("text", "value " + (i < 5 ? "boosted" : "")).startObject("loc").field("lat", 10 + i).field("lon", 20).endObject().endObject()));
             ids[i] = id;
         }
         indexRandom(true, indexBuilders);
@@ -125,14 +103,7 @@ public class FunctionScoreBackwardCompatibilityTests extends ElasticsearchBackwa
     }
 
     private void checkFunctionScoreStillWorks(String... ids) throws ExecutionException, InterruptedException, IOException {
-        SearchResponse response = client().search(
-                searchRequest().source(
-                        searchSource().query(
-                                functionScoreQuery(termFilter("text", "value"))
-                                        .add(gaussDecayFunction("loc", new GeoPoint(10, 20), "1000km"))
-                                        .add(scriptFunction("_index['text']['value'].tf()"))
-                                        .add(termFilter("text", "boosted"), factorFunction(5))
-                        ))).actionGet();
+        SearchResponse response = client().search(searchRequest().source(searchSource().query(functionScoreQuery(termFilter("text", "value")).add(gaussDecayFunction("loc", new GeoPoint(10, 20), "1000km")).add(scriptFunction("_index['text']['value'].tf()")).add(termFilter("text", "boosted"), factorFunction(5))))).actionGet();
         assertSearchResponse(response);
         assertOrderedSearchHits(response, ids);
     }

@@ -38,14 +38,14 @@ import static org.hamcrest.Matchers.nullValue;
  */
 public class JsonVsSmileTests extends ElasticsearchTestCase {
 
-//    @Test public void testBinarySmileField() throws Exception {
-//        JsonGenerator gen = new SmileFactory().createJsonGenerator(new ByteArrayOutputStream());
-////        JsonGenerator gen = new JsonFactory().createJsonGenerator(new ByteArrayOutputStream(), JsonEncoding.UTF8);
-//        gen.writeStartObject();
-//        gen.writeFieldName("field1");
-//        gen.writeBinary(new byte[]{1, 2, 3});
-//        gen.writeEndObject();
-//    }
+    //    @Test public void testBinarySmileField() throws Exception {
+    //        JsonGenerator gen = new SmileFactory().createJsonGenerator(new ByteArrayOutputStream());
+    ////        JsonGenerator gen = new JsonFactory().createJsonGenerator(new ByteArrayOutputStream(), JsonEncoding.UTF8);
+    //        gen.writeStartObject();
+    //        gen.writeFieldName("field1");
+    //        gen.writeBinary(new byte[]{1, 2, 3});
+    //        gen.writeEndObject();
+    //    }
 
     @Test
     public void compareParsingTokens() throws IOException {

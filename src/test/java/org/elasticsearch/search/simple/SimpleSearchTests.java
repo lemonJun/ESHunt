@@ -65,12 +65,7 @@ public class SimpleSearchTests extends ElasticsearchIntegrationTest {
     @Test
     public void testSearchRandomPreference() throws InterruptedException, ExecutionException {
         createIndex("test");
-        indexRandom(true, client().prepareIndex("test", "type", "1").setSource("field", "value"),
-                client().prepareIndex("test", "type", "2").setSource("field", "value"),
-                client().prepareIndex("test", "type", "3").setSource("field", "value"),
-                client().prepareIndex("test", "type", "4").setSource("field", "value"),
-                client().prepareIndex("test", "type", "5").setSource("field", "value"),
-                client().prepareIndex("test", "type", "6").setSource("field", "value"));
+        indexRandom(true, client().prepareIndex("test", "type", "1").setSource("field", "value"), client().prepareIndex("test", "type", "2").setSource("field", "value"), client().prepareIndex("test", "type", "3").setSource("field", "value"), client().prepareIndex("test", "type", "4").setSource("field", "value"), client().prepareIndex("test", "type", "5").setSource("field", "value"), client().prepareIndex("test", "type", "6").setSource("field", "value"));
 
         int iters = scaledRandomIntBetween(10, 20);
         for (int i = 0; i < iters; i++) {
@@ -90,18 +85,11 @@ public class SimpleSearchTests extends ElasticsearchIntegrationTest {
     public void simpleIpTests() throws Exception {
         createIndex("test");
 
-        client().admin().indices().preparePutMapping("test").setType("type1")
-                .setSource(XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                        .startObject("from").field("type", "ip").endObject()
-                        .startObject("to").field("type", "ip").endObject()
-                        .endObject().endObject().endObject())
-                .execute().actionGet();
+        client().admin().indices().preparePutMapping("test").setType("type1").setSource(XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("from").field("type", "ip").endObject().startObject("to").field("type", "ip").endObject().endObject().endObject().endObject()).execute().actionGet();
 
         client().prepareIndex("test", "type1", "1").setSource("from", "192.168.0.5", "to", "192.168.0.10").setRefresh(true).execute().actionGet();
 
-        SearchResponse search = client().prepareSearch()
-                .setQuery(boolQuery().must(rangeQuery("from").lt("192.168.0.7")).must(rangeQuery("to").gt("192.168.0.7")))
-                .execute().actionGet();
+        SearchResponse search = client().prepareSearch().setQuery(boolQuery().must(rangeQuery("from").lt("192.168.0.7")).must(rangeQuery("to").gt("192.168.0.7"))).execute().actionGet();
 
         assertHitCount(search, 1l);
     }
@@ -142,9 +130,7 @@ public class SimpleSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void simpleDateRangeWithUpperInclusiveDisabledTests() throws Exception {
-        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.settingsBuilder()
-                .put(indexSettings())
-                .put("index.mapping.date.round_ceil", false)));
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.settingsBuilder().put(indexSettings()).put("index.mapping.date.round_ceil", false)));
         client().prepareIndex("test", "type1", "1").setSource("field", "2010-01-05T02:00").execute().actionGet();
         client().prepareIndex("test", "type1", "2").setSource("field", "2010-01-06T02:00").execute().actionGet();
         ensureGreen();
@@ -157,7 +143,8 @@ public class SimpleSearchTests extends ElasticsearchIntegrationTest {
         assertHitCount(searchResponse, 1l);
     }
 
-    @Test @TestLogging("action.search.type:TRACE,action.admin.indices.refresh:TRACE")
+    @Test
+    @TestLogging("action.search.type:TRACE,action.admin.indices.refresh:TRACE")
     public void simpleDateMathTests() throws Exception {
         createIndex("test");
         client().prepareIndex("test", "type1", "1").setSource("field", "2010-01-05T02:00").execute().actionGet();
@@ -171,23 +158,11 @@ public class SimpleSearchTests extends ElasticsearchIntegrationTest {
         searchResponse = client().prepareSearch("test").setQuery(QueryBuilders.queryStringQuery("field:[2010-01-03||+2d TO 2010-01-04||+2d]")).execute().actionGet();
         assertHitCount(searchResponse, 2l);
     }
-    
+
     @Test
     public void localDependentDateTests() throws Exception {
         assumeFalse("Locals are buggy on JDK9EA", Constants.JRE_IS_MINIMUM_JAVA9);
-        assertAcked(prepareCreate("test")
-                .addMapping("type1",
-                        jsonBuilder().startObject()
-                                .startObject("type1")
-                                .startObject("properties")
-                                .startObject("date_field")
-                                .field("type", "date")
-                                .field("format", "E, d MMM yyyy HH:mm:ss Z")
-                                .field("locale", "de")
-                                .endObject()
-                                .endObject()
-                                .endObject()
-                                .endObject()));
+        assertAcked(prepareCreate("test").addMapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("date_field").field("type", "date").field("format", "E, d MMM yyyy HH:mm:ss Z").field("locale", "de").endObject().endObject().endObject().endObject()));
         ensureGreen();
         for (int i = 0; i < 10; i++) {
             client().prepareIndex("test", "type1", "" + i).setSource("date_field", "Mi, 06 Dez 2000 02:55:00 -0800").execute().actionGet();
@@ -196,15 +171,10 @@ public class SimpleSearchTests extends ElasticsearchIntegrationTest {
 
         refresh();
         for (int i = 0; i < 10; i++) {
-            SearchResponse searchResponse = client().prepareSearch("test")
-                    .setQuery(QueryBuilders.rangeQuery("date_field").gte("Di, 05 Dez 2000 02:55:00 -0800").lte("Do, 07 Dez 2000 00:00:00 -0800"))
-                    .execute().actionGet();
+            SearchResponse searchResponse = client().prepareSearch("test").setQuery(QueryBuilders.rangeQuery("date_field").gte("Di, 05 Dez 2000 02:55:00 -0800").lte("Do, 07 Dez 2000 00:00:00 -0800")).execute().actionGet();
             assertHitCount(searchResponse, 10l);
 
-
-            searchResponse = client().prepareSearch("test")
-                    .setQuery(QueryBuilders.rangeQuery("date_field").gte("Di, 05 Dez 2000 02:55:00 -0800").lte("Fr, 08 Dez 2000 00:00:00 -0800"))
-                    .execute().actionGet();
+            searchResponse = client().prepareSearch("test").setQuery(QueryBuilders.rangeQuery("date_field").gte("Di, 05 Dez 2000 02:55:00 -0800").lte("Fr, 08 Dez 2000 00:00:00 -0800")).execute().actionGet();
             assertHitCount(searchResponse, 20l);
 
         }
@@ -212,38 +182,32 @@ public class SimpleSearchTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void simpleTerminateAfterCountTests() throws Exception {
-        prepareCreate("test").setSettings(
-                SETTING_NUMBER_OF_SHARDS, 1,
-                SETTING_NUMBER_OF_REPLICAS, 0).get();
+        prepareCreate("test").setSettings(SETTING_NUMBER_OF_SHARDS, 1, SETTING_NUMBER_OF_REPLICAS, 0).get();
         ensureGreen();
         int max = randomIntBetween(3, 29);
         List<IndexRequestBuilder> docbuilders = new ArrayList<>(max);
 
         for (int i = 1; i <= max; i++) {
             String id = String.valueOf(i);
-            docbuilders.add(client().prepareIndex("test", "type1", id).setSource("field", "2010-01-"+ id +"T02:00"));
+            docbuilders.add(client().prepareIndex("test", "type1", id).setSource("field", "2010-01-" + id + "T02:00"));
         }
 
         indexRandom(true, docbuilders);
         ensureGreen();
         refresh();
 
-        String upperBound = "2010-01-" + String.valueOf(max+1) + "||+2d";
+        String upperBound = "2010-01-" + String.valueOf(max + 1) + "||+2d";
         String lowerBound = "2009-12-01||+2d";
 
         SearchResponse searchResponse;
 
         for (int i = 1; i <= max; i++) {
-            searchResponse = client().prepareSearch("test")
-                    .setQuery(QueryBuilders.rangeQuery("field").gte(lowerBound).lte(upperBound))
-                    .setTerminateAfter(i).execute().actionGet();
-            assertHitCount(searchResponse, (long)i);
+            searchResponse = client().prepareSearch("test").setQuery(QueryBuilders.rangeQuery("field").gte(lowerBound).lte(upperBound)).setTerminateAfter(i).execute().actionGet();
+            assertHitCount(searchResponse, (long) i);
             assertTrue(searchResponse.isTerminatedEarly());
         }
 
-        searchResponse = client().prepareSearch("test")
-                .setQuery(QueryBuilders.rangeQuery("field").gte(lowerBound).lte(upperBound))
-                .setTerminateAfter(2 * max).execute().actionGet();
+        searchResponse = client().prepareSearch("test").setQuery(QueryBuilders.rangeQuery("field").gte(lowerBound).lte(upperBound)).setTerminateAfter(2 * max).execute().actionGet();
 
         assertHitCount(searchResponse, max);
         assertFalse(searchResponse.isTerminatedEarly());

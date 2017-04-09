@@ -76,7 +76,6 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
 
     private ClusterDiscoveryConfiguration discoveryConfig;
 
-
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
         return discoveryConfig.node(nodeOrdinal);
@@ -117,7 +116,6 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
         return nodes;
     }
 
-
     private List<String> startUnicastCluster(int numberOfNodes, @Nullable int[] unicastHostsOrdinals, int minimumMasterNode) throws ExecutionException, InterruptedException {
         configureUnicastCluster(numberOfNodes, unicastHostsOrdinals, minimumMasterNode);
         List<String> nodes = internalCluster().startNodesAsync(numberOfNodes).get();
@@ -134,15 +132,13 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
         return nodes;
     }
 
-    final static Settings DEFAULT_SETTINGS = ImmutableSettings.builder()
-            .put(FaultDetection.SETTING_PING_TIMEOUT, "1s") // for hitting simulated network failures quickly
-            .put(FaultDetection.SETTING_PING_RETRIES, "1") // for hitting simulated network failures quickly
-            .put("discovery.zen.join_timeout", "10s")  // still long to induce failures but to long so test won't time out
-            .put(DiscoverySettings.PUBLISH_TIMEOUT, "1s") // <-- for hitting simulated network failures quickly
-            .put("http.enabled", false) // just to make test quicker
-            .put("gateway.local.list_timeout", "10s") // still long to induce failures but to long so test won't time out
-            .put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, MockTransportService.class.getName())
-            .build();
+    final static Settings DEFAULT_SETTINGS = ImmutableSettings.builder().put(FaultDetection.SETTING_PING_TIMEOUT, "1s") // for hitting simulated network failures quickly
+                    .put(FaultDetection.SETTING_PING_RETRIES, "1") // for hitting simulated network failures quickly
+                    .put("discovery.zen.join_timeout", "10s") // still long to induce failures but to long so test won't time out
+                    .put(DiscoverySettings.PUBLISH_TIMEOUT, "1s") // <-- for hitting simulated network failures quickly
+                    .put("http.enabled", false) // just to make test quicker
+                    .put("gateway.local.list_timeout", "10s") // still long to induce failures but to long so test won't time out
+                    .put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, MockTransportService.class.getName()).build();
 
     private void configureCluster(int numberOfNodes, int minimumMasterNode) throws ExecutionException, InterruptedException {
         if (randomBoolean()) {
@@ -158,10 +154,7 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
             minimumMasterNode = numberOfNodes / 2 + 1;
         }
         // TODO: Rarely use default settings form some of these
-        Settings settings = ImmutableSettings.builder()
-                .put(DEFAULT_SETTINGS)
-                .put(ElectMasterService.DISCOVERY_ZEN_MINIMUM_MASTER_NODES, minimumMasterNode)
-                .build();
+        Settings settings = ImmutableSettings.builder().put(DEFAULT_SETTINGS).put(ElectMasterService.DISCOVERY_ZEN_MINIMUM_MASTER_NODES, minimumMasterNode).build();
 
         if (discoveryConfig == null) {
             discoveryConfig = new ClusterDiscoveryConfiguration(numberOfNodes, settings);
@@ -173,10 +166,7 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
             minimumMasterNode = numberOfNodes / 2 + 1;
         }
         // TODO: Rarely use default settings form some of these
-        Settings nodeSettings = ImmutableSettings.builder()
-                .put(DEFAULT_SETTINGS)
-                .put(ElectMasterService.DISCOVERY_ZEN_MINIMUM_MASTER_NODES, minimumMasterNode)
-                .build();
+        Settings nodeSettings = ImmutableSettings.builder().put(DEFAULT_SETTINGS).put(ElectMasterService.DISCOVERY_ZEN_MINIMUM_MASTER_NODES, minimumMasterNode).build();
 
         if (discoveryConfig == null) {
             if (unicastHostsOrdinals == null) {
@@ -186,7 +176,6 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
             }
         }
     }
-
 
     /**
      * Test that no split brain occurs under partial network partition. See https://github.com/elasticsearch/elasticsearch/issues/2488
@@ -206,7 +195,6 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
         Set<String> nonMasters = new HashSet<>(nodes);
         nonMasters.remove(masterNode);
         final String unluckyNode = randomFrom(nonMasters.toArray(Strings.EMPTY_ARRAY));
-
 
         // Simulate a network issue between the unlucky node and elected master node in both directions.
 
@@ -231,7 +219,6 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
         // master since m_m_n of 2 could never be satisfied.
         assertMaster(masterNode, nodes);
     }
-
 
     /** Verify that nodes fault detection works after master (re) election */
     @Test
@@ -266,10 +253,7 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
         startCluster(3);
 
         // Makes sure that the get request can be executed on each node locally:
-        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder()
-                        .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                        .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 2)
-        ));
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 2)));
 
         // Everything is stable now, it is now time to simulate evil...
         // but first make sure we have no initializing shards and all is green
@@ -284,13 +268,11 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
         // Simulate a network issue between the unlucky node and the rest of the cluster.
         networkPartition.startDisrupting();
 
-
         // The unlucky node must report *no* master node, since it can't connect to master and in fact it should
         // continuously ping until network failures have been resolved. However
         // It may a take a bit before the node detects it has been cut off from the elected master
         logger.info("waiting for isolated node [{}] to have no master", isolatedNode);
         assertNoMaster(isolatedNode, DiscoverySettings.NO_MASTER_BLOCK_WRITES, TimeValue.timeValueSeconds(10));
-
 
         logger.info("wait until elected master has been removed and a new 2 node cluster was from (via [{}])", isolatedNode);
         ensureStableCluster(2, nonIsolatedNode);
@@ -305,11 +287,9 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
                 success = false;
             }
             if (!success) {
-                fail("node [" + node + "] has no master or has blocks, despite of being on the right side of the partition. State dump:\n"
-                        + nodeState.prettyPrint());
+                fail("node [" + node + "] has no master or has blocks, despite of being on the right side of the partition. State dump:\n" + nodeState.prettyPrint());
             }
         }
-
 
         networkPartition.stopDisrupting();
 
@@ -317,12 +297,9 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
         ensureStableCluster(3, new TimeValue(DISRUPTION_HEALING_OVERHEAD.millis() + networkPartition.expectedTimeToHeal().millis()));
 
         logger.info("Verify no master block with {} set to {}", DiscoverySettings.NO_MASTER_BLOCK, "all");
-        client().admin().cluster().prepareUpdateSettings()
-                .setTransientSettings(ImmutableSettings.builder().put(DiscoverySettings.NO_MASTER_BLOCK, "all"))
-                .get();
+        client().admin().cluster().prepareUpdateSettings().setTransientSettings(ImmutableSettings.builder().put(DiscoverySettings.NO_MASTER_BLOCK, "all")).get();
 
         networkPartition.startDisrupting();
-
 
         // The unlucky node must report *no* master node, since it can't connect to master and in fact it should
         // continuously ping until network failures have been resolved. However
@@ -345,11 +322,7 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
     public void testIsolateMasterAndVerifyClusterStateConsensus() throws Exception {
         final List<String> nodes = startCluster(3);
 
-        assertAcked(prepareCreate("test")
-                .setSettings(ImmutableSettings.builder()
-                                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1 + randomInt(2))
-                                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, randomInt(2))
-                ));
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1 + randomInt(2)).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, randomInt(2))));
 
         ensureGreen();
         String isolatedNode = internalCluster().getMasterName();
@@ -395,9 +368,7 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
                     fail("different routing");
                 }
             } catch (AssertionError t) {
-                fail("failed comparing cluster state: " + t.getMessage() + "\n" +
-                        "--- cluster state of node [" + nodes.get(0) + "]: ---\n" + state.prettyPrint() +
-                        "\n--- cluster state [" + node + "]: ---\n" + nodeState.prettyPrint());
+                fail("failed comparing cluster state: " + t.getMessage() + "\n" + "--- cluster state of node [" + nodes.get(0) + "]: ---\n" + state.prettyPrint() + "\n--- cluster state [" + node + "]: ---\n" + nodeState.prettyPrint());
             }
 
         }
@@ -436,8 +407,7 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
 
         // restore GC
         masterNodeDisruption.stopDisrupting();
-        ensureStableCluster(3, new TimeValue(DISRUPTION_HEALING_OVERHEAD.millis() + masterNodeDisruption.expectedTimeToHeal().millis()), false,
-                oldNonMasterNodes.get(0));
+        ensureStableCluster(3, new TimeValue(DISRUPTION_HEALING_OVERHEAD.millis() + masterNodeDisruption.expectedTimeToHeal().millis()), false, oldNonMasterNodes.get(0));
 
         // make sure all nodes agree on master
         String newMaster = internalCluster().getMasterName();
@@ -545,7 +515,6 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
             }
         });
 
-
         assertThat(masters.size(), equalTo(2));
         for (Map.Entry<String, List<Tuple<String, String>>> entry : masters.entrySet()) {
             String nodeName = entry.getKey();
@@ -568,12 +537,7 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
     public void testRejoinDocumentExistsInAllShardCopies() throws Exception {
         List<String> nodes = startCluster(3);
 
-        assertAcked(prepareCreate("test")
-                .setSettings(ImmutableSettings.builder()
-                                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 2)
-                )
-                .get());
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 2)).get());
         ensureGreen("test");
 
         nodes = new ArrayList<>(nodes);
@@ -586,14 +550,11 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
         ensureStableCluster(2, notIsolatedNode);
         assertFalse(client(notIsolatedNode).admin().cluster().prepareHealth("test").setWaitForYellowStatus().get().isTimedOut());
 
-
         IndexResponse indexResponse = internalCluster().client(notIsolatedNode).prepareIndex("test", "type").setSource("field", "value").get();
         assertThat(indexResponse.getVersion(), equalTo(1l));
 
         logger.info("Verifying if document exists via node[" + notIsolatedNode + "]");
-        GetResponse getResponse = internalCluster().client(notIsolatedNode).prepareGet("test", "type", indexResponse.getId())
-                .setPreference("_local")
-                .get();
+        GetResponse getResponse = internalCluster().client(notIsolatedNode).prepareGet("test", "type", indexResponse.getId()).setPreference("_local").get();
         assertThat(getResponse.isExists(), is(true));
         assertThat(getResponse.getVersion(), equalTo(1l));
         assertThat(getResponse.getId(), equalTo(indexResponse.getId()));
@@ -605,9 +566,7 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
 
         for (String node : nodes) {
             logger.info("Verifying if document exists after isolating node[" + isolatedNode + "] via node[" + node + "]");
-            getResponse = internalCluster().client(node).prepareGet("test", "type", indexResponse.getId())
-                    .setPreference("_local")
-                    .get();
+            getResponse = internalCluster().client(node).prepareGet("test", "type", indexResponse.getId()).setPreference("_local").get();
             assertThat(getResponse.isExists(), is(true));
             assertThat(getResponse.getVersion(), equalTo(1l));
             assertThat(getResponse.getId(), equalTo(indexResponse.getId()));
@@ -621,7 +580,7 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
      */
     @Test
     public void unicastSinglePingResponseContainsMaster() throws Exception {
-        List<String> nodes = startUnicastCluster(4, new int[]{0}, -1);
+        List<String> nodes = startUnicastCluster(4, new int[] { 0 }, -1);
         // Figure out what is the elected master node
         final String masterNode = internalCluster().getMasterName();
         logger.info("---> legit elected master node=" + masterNode);
@@ -658,7 +617,7 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
     @Test
     @TestLogging("discovery.zen:TRACE,cluster.service:TRACE")
     public void isolatedUnicastNodes() throws Exception {
-        List<String> nodes = startUnicastCluster(4, new int[]{0}, -1);
+        List<String> nodes = startUnicastCluster(4, new int[] { 0 }, -1);
         // Figure out what is the elected master node
         final String unicastTarget = nodes.get(0);
 
@@ -690,7 +649,6 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
         // Wait until the master node sees all 3 nodes again.
         ensureStableCluster(4);
     }
-
 
     /** Test cluster join with issues in cluster state publishing * */
     @Test
@@ -738,7 +696,6 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
         ensureStableCluster(2);
     }
 
-
     @Test
     public void testClusterFormingWithASlowNode() throws Exception {
         configureCluster(3, 2);
@@ -746,11 +703,7 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
         SlowClusterStateProcessing disruption = new SlowClusterStateProcessing(getRandom(), 0, 0, 1000, 2000);
 
         // don't wait for initial state, wat want to add the disruption while the cluster is forming..
-        internalCluster().startNodesAsync(3,
-                ImmutableSettings.builder()
-                        .put(DiscoveryService.SETTING_INITIAL_STATE_TIMEOUT, "1ms")
-                        .put(DiscoverySettings.PUBLISH_TIMEOUT, "3s")
-                        .build()).get();
+        internalCluster().startNodesAsync(3, ImmutableSettings.builder().put(DiscoveryService.SETTING_INITIAL_STATE_TIMEOUT, "1ms").put(DiscoverySettings.PUBLISH_TIMEOUT, "3s").build()).get();
 
         logger.info("applying disruption while cluster is forming ...");
 
@@ -799,7 +752,6 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
         ensureStableCluster(3);
     }
 
-
     protected NetworkPartition addRandomPartition() {
         NetworkPartition partition;
         if (randomBoolean()) {
@@ -832,12 +784,7 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
     }
 
     private ServiceDisruptionScheme addRandomDisruptionScheme() {
-        List<ServiceDisruptionScheme> list = Arrays.asList(
-                new NetworkUnresponsivePartition(getRandom()),
-                new NetworkDelaysPartition(getRandom()),
-                new NetworkDisconnectPartition(getRandom()),
-                new SlowClusterStateProcessing(getRandom())
-        );
+        List<ServiceDisruptionScheme> list = Arrays.asList(new NetworkUnresponsivePartition(getRandom()), new NetworkDelaysPartition(getRandom()), new NetworkDisconnectPartition(getRandom()), new SlowClusterStateProcessing(getRandom()));
         Collections.shuffle(list);
         setDisruptionScheme(list.get(0));
         return list.get(0);
@@ -860,17 +807,10 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
             viaNode = randomFrom(internalCluster().getNodeNames());
         }
         logger.debug("ensuring cluster is stable with [{}] nodes. access node: [{}]. timeout: [{}]", nodeCount, viaNode, timeValue);
-        ClusterHealthResponse clusterHealthResponse = client(viaNode).admin().cluster().prepareHealth()
-                .setWaitForEvents(Priority.LANGUID)
-                .setWaitForNodes(Integer.toString(nodeCount))
-                .setTimeout(timeValue)
-                .setWaitForRelocatingShards(0)
-                .setLocal(local)
-                .get();
+        ClusterHealthResponse clusterHealthResponse = client(viaNode).admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForNodes(Integer.toString(nodeCount)).setTimeout(timeValue).setWaitForRelocatingShards(0).setLocal(local).get();
         if (clusterHealthResponse.isTimedOut()) {
             ClusterStateResponse stateResponse = client(viaNode).admin().cluster().prepareState().get();
-            fail("failed to reach a stable cluster of [" + nodeCount + "] nodes. Tried via [" + viaNode + "]. last cluster state:\n"
-                    + stateResponse.getState().prettyPrint());
+            fail("failed to reach a stable cluster of [" + nodeCount + "] nodes. Tried via [" + viaNode + "]. last cluster state:\n" + stateResponse.getState().prettyPrint());
         }
         assertThat(clusterHealthResponse.isTimedOut(), is(false));
     }
@@ -887,7 +827,8 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
         assertNoMaster(node, null, maxWaitTime);
     }
 
-    private void assertNoMaster(final String node, @Nullable final ClusterBlock expectedBlocks, TimeValue maxWaitTime) throws Exception {
+    private void assertNoMaster(final String node, @Nullable
+    final ClusterBlock expectedBlocks, TimeValue maxWaitTime) throws Exception {
         assertBusy(new Runnable() {
             @Override
             public void run() {
@@ -912,8 +853,7 @@ public class DiscoveryWithServiceDisruptionsTests extends ElasticsearchIntegrati
                     masterNode = state.nodes().masterNode().name();
                 }
                 logger.trace("[{}] master is [{}]", node, state.nodes().masterNode());
-                assertThat("node [" + node + "] still has [" + masterNode + "] as master",
-                        oldMasterNode, not(equalTo(masterNode)));
+                assertThat("node [" + node + "] still has [" + masterNode + "] as master", oldMasterNode, not(equalTo(masterNode)));
             }
         }, 10, TimeUnit.SECONDS);
     }

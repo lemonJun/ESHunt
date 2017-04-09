@@ -63,43 +63,26 @@ public class ZenDiscoveryTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testChangeRejoinOnMasterOptionIsDynamic() throws Exception {
-        Settings nodeSettings = ImmutableSettings.settingsBuilder()
-                .put("discovery.type", "zen") // <-- To override the local setting if set externally
-                .build();
+        Settings nodeSettings = ImmutableSettings.settingsBuilder().put("discovery.type", "zen") // <-- To override the local setting if set externally
+                        .build();
         String nodeName = internalCluster().startNode(nodeSettings);
         ZenDiscovery zenDiscovery = (ZenDiscovery) internalCluster().getInstance(Discovery.class, nodeName);
         assertThat(zenDiscovery.isRejoinOnMasterGone(), is(true));
 
-        client().admin().cluster().prepareUpdateSettings()
-                .setTransientSettings(ImmutableSettings.builder().put(ZenDiscovery.SETTING_REJOIN_ON_MASTER_GONE, false))
-                .get();
+        client().admin().cluster().prepareUpdateSettings().setTransientSettings(ImmutableSettings.builder().put(ZenDiscovery.SETTING_REJOIN_ON_MASTER_GONE, false)).get();
 
         assertThat(zenDiscovery.isRejoinOnMasterGone(), is(false));
     }
 
     @Test
     public void testNoShardRelocationsOccurWhenElectedMasterNodeFails() throws Exception {
-        Settings defaultSettings = ImmutableSettings.builder()
-                .put(FaultDetection.SETTING_PING_TIMEOUT, "1s")
-                .put(FaultDetection.SETTING_PING_RETRIES, "1")
-                .put("discovery.type", "zen")
-                .build();
+        Settings defaultSettings = ImmutableSettings.builder().put(FaultDetection.SETTING_PING_TIMEOUT, "1s").put(FaultDetection.SETTING_PING_RETRIES, "1").put("discovery.type", "zen").build();
 
-        Settings masterNodeSettings = ImmutableSettings.builder()
-                .put("node.data", false)
-                .put(defaultSettings)
-                .build();
+        Settings masterNodeSettings = ImmutableSettings.builder().put("node.data", false).put(defaultSettings).build();
         internalCluster().startNodesAsync(2, masterNodeSettings).get();
-        Settings dateNodeSettings = ImmutableSettings.builder()
-                .put("node.master", false)
-                .put(defaultSettings)
-                .build();
+        Settings dateNodeSettings = ImmutableSettings.builder().put("node.master", false).put(defaultSettings).build();
         internalCluster().startNodesAsync(2, dateNodeSettings).get();
-        ClusterHealthResponse clusterHealthResponse = client().admin().cluster().prepareHealth()
-                .setWaitForEvents(Priority.LANGUID)
-                .setWaitForNodes("4")
-                .setWaitForRelocatingShards(0)
-                .get();
+        ClusterHealthResponse clusterHealthResponse = client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForNodes("4").setWaitForRelocatingShards(0).get();
         assertThat(clusterHealthResponse.isTimedOut(), is(false));
 
         createIndex("test");
@@ -127,21 +110,11 @@ public class ZenDiscoveryTests extends ElasticsearchIntegrationTest {
     @Test
     @TestLogging(value = "action.admin.cluster.health:TRACE")
     public void testNodeFailuresAreProcessedOnce() throws ExecutionException, InterruptedException, IOException {
-        Settings defaultSettings = ImmutableSettings.builder()
-                .put(FaultDetection.SETTING_PING_TIMEOUT, "1s")
-                .put(FaultDetection.SETTING_PING_RETRIES, "1")
-                .put("discovery.type", "zen")
-                .build();
+        Settings defaultSettings = ImmutableSettings.builder().put(FaultDetection.SETTING_PING_TIMEOUT, "1s").put(FaultDetection.SETTING_PING_RETRIES, "1").put("discovery.type", "zen").build();
 
-        Settings masterNodeSettings = ImmutableSettings.builder()
-                .put("node.data", false)
-                .put(defaultSettings)
-                .build();
+        Settings masterNodeSettings = ImmutableSettings.builder().put("node.data", false).put(defaultSettings).build();
         String master = internalCluster().startNode(masterNodeSettings);
-        Settings dateNodeSettings = ImmutableSettings.builder()
-                .put("node.master", false)
-                .put(defaultSettings)
-                .build();
+        Settings dateNodeSettings = ImmutableSettings.builder().put("node.master", false).put(defaultSettings).build();
         internalCluster().startNodesAsync(2, dateNodeSettings).get();
         client().admin().cluster().prepareHealth().setWaitForNodes("3").get();
 
@@ -171,9 +144,7 @@ public class ZenDiscoveryTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testNodeRejectsClusterStateWithWrongMasterNode() throws Exception {
-        Settings settings = ImmutableSettings.builder()
-                .put("discovery.type", "zen")
-                .build();
+        Settings settings = ImmutableSettings.builder().put("discovery.type", "zen").build();
         List<String> nodeNames = internalCluster().startNodesAsync(2, settings).get();
         client().admin().cluster().prepareHealth().setWaitForNodes("2").get();
 
@@ -190,8 +161,7 @@ public class ZenDiscoveryTests extends ElasticsearchIntegrationTest {
         }
         assert node != null;
 
-        DiscoveryNodes.Builder nodes = DiscoveryNodes.builder(state.nodes())
-                .put(new DiscoveryNode("abc", new LocalTransportAddress("abc"), Version.CURRENT)).masterNodeId("abc");
+        DiscoveryNodes.Builder nodes = DiscoveryNodes.builder(state.nodes()).put(new DiscoveryNode("abc", new LocalTransportAddress("abc"), Version.CURRENT)).masterNodeId("abc");
         ClusterState.Builder builder = ClusterState.builder(state);
         builder.nodes(nodes);
         BytesStreamOutput bStream = new BytesStreamOutput();

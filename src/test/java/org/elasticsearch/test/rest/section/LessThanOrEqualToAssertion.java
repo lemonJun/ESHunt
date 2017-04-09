@@ -32,7 +32,7 @@ import static org.junit.Assert.fail;
  *
  *   - lte:     { fields._ttl: 0 }
  */
-public class LessThanOrEqualToAssertion  extends Assertion {
+public class LessThanOrEqualToAssertion extends Assertion {
 
     private static final ESLogger logger = Loggers.getLogger(LessThanOrEqualToAssertion.class);
 

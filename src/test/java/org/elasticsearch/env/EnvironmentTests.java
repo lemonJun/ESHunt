@@ -39,10 +39,7 @@ public class EnvironmentTests extends ElasticsearchTestCase {
     }
 
     public Environment newEnvironment(Settings settings) throws IOException {
-        Settings build = ImmutableSettings.builder()
-                .put(settings)
-                .put("path.home", newTempDir().getAbsolutePath())
-                .putArray("path.data", "data").build();
+        Settings build = ImmutableSettings.builder().put(settings).put("path.home", newTempDir().getAbsolutePath()).putArray("path.data", "data").build();
         return new Environment(build);
     }
 
@@ -58,7 +55,6 @@ public class EnvironmentTests extends ElasticsearchTestCase {
         assertThat(environment.resolveRepoFile("/test/repos/../repo1"), nullValue());
         assertThat(environment.resolveRepoFile("/test/repos/../repos/repo1"), notNullValue());
         assertThat(environment.resolveRepoFile("/somethingeles/repos/repo1"), nullValue());
-
 
         assertThat(environment.resolveRepoURL(new URL("file:///test/repos/repo1")), notNullValue());
         assertThat(environment.resolveRepoURL(new URL("file:/test/repos/repo1")), notNullValue());

@@ -31,14 +31,11 @@ import org.elasticsearch.test.ElasticsearchIntegrationTest;
 import org.junit.Test;
 
 @ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.TEST)
-public class ScriptIndexSettingsTest extends ElasticsearchIntegrationTest{
-
+public class ScriptIndexSettingsTest extends ElasticsearchIntegrationTest {
 
     @Test
     public void testScriptIndexSettings() {
-        PutIndexedScriptResponse putIndexedScriptResponse =
-                client().preparePutIndexedScript().setId("foobar").setScriptLang("groovy").setSource("{ \"script\": 1 }")
-                        .get();
+        PutIndexedScriptResponse putIndexedScriptResponse = client().preparePutIndexedScript().setId("foobar").setScriptLang("groovy").setSource("{ \"script\": 1 }").get();
         assertTrue(putIndexedScriptResponse.isCreated());
         ensureGreen();
 
@@ -47,21 +44,16 @@ public class ScriptIndexSettingsTest extends ElasticsearchIntegrationTest{
         index[0] = ScriptService.SCRIPT_INDEX;
         existsRequest.indices(index);
 
-
         IndicesExistsResponse existsResponse = cluster().client().admin().indices().exists(existsRequest).actionGet();
         assertTrue(existsResponse.isExists());
 
         GetSettingsRequest settingsRequest = new GetSettingsRequest();
         settingsRequest.indices(ScriptService.SCRIPT_INDEX);
         settingsRequest.indicesOptions(IndicesOptions.strictExpandOpen());
-        GetSettingsResponse settingsResponse = client()
-                .admin()
-                .indices()
-                .getSettings(settingsRequest)
-                .actionGet();
+        GetSettingsResponse settingsResponse = client().admin().indices().getSettings(settingsRequest).actionGet();
 
-        String numberOfShards = settingsResponse.getSetting(ScriptService.SCRIPT_INDEX,"index.number_of_shards");
-        String numberOfReplicas = settingsResponse.getSetting(ScriptService.SCRIPT_INDEX,"index.auto_expand_replicas");
+        String numberOfShards = settingsResponse.getSetting(ScriptService.SCRIPT_INDEX, "index.number_of_shards");
+        String numberOfReplicas = settingsResponse.getSetting(ScriptService.SCRIPT_INDEX, "index.auto_expand_replicas");
 
         assertEquals("Number of shards should be 1", "1", numberOfShards);
         assertEquals("Auto expand replicas should be 0-all", "0-all", numberOfReplicas);
@@ -69,21 +61,17 @@ public class ScriptIndexSettingsTest extends ElasticsearchIntegrationTest{
 
     @Test
     public void testDeleteScriptIndex() {
-        PutIndexedScriptResponse putIndexedScriptResponse =
-                client().preparePutIndexedScript().setId("foobar").setScriptLang("groovy").setSource("{ \"script\": 1 }")
-                        .get();
+        PutIndexedScriptResponse putIndexedScriptResponse = client().preparePutIndexedScript().setId("foobar").setScriptLang("groovy").setSource("{ \"script\": 1 }").get();
         assertTrue(putIndexedScriptResponse.isCreated());
         DeleteIndexResponse deleteResponse = client().admin().indices().prepareDelete(ScriptService.SCRIPT_INDEX).get();
         assertTrue(deleteResponse.isAcknowledged());
         ensureGreen();
         try {
-            GetIndexedScriptResponse response = client().prepareGetIndexedScript("groovy","foobar").get();
+            GetIndexedScriptResponse response = client().prepareGetIndexedScript("groovy", "foobar").get();
             assertTrue(false); //This should not happen
         } catch (IndexMissingException ime) {
             assertTrue(true);
         }
     }
-
-
 
 }

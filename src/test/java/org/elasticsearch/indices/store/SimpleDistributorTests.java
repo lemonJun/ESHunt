@@ -123,31 +123,15 @@ public class SimpleDistributorTests extends ElasticsearchIntegrationTest {
 
     private void createIndexWithStoreType(String index, IndexStoreModule.Type storeType, String distributor) {
         cluster().wipeIndices(index);
-        client().admin().indices().prepareCreate(index)
-                .setSettings(settingsBuilder()
-                        .put("index.store.distributor", distributor)
-                        .put("index.store.type", storeType.name())
-                        .put("index.number_of_replicas", 0)
-                        .put("index.number_of_shards", 1)
-                )
-                .execute().actionGet();
+        client().admin().indices().prepareCreate(index).setSettings(settingsBuilder().put("index.store.distributor", distributor).put("index.store.type", storeType.name()).put("index.number_of_replicas", 0).put("index.number_of_shards", 1)).execute().actionGet();
         assertThat(client().admin().cluster().prepareHealth("test").setWaitForGreenStatus().execute().actionGet().isTimedOut(), equalTo(false));
     }
 
     private void createIndexWithoutRateLimitingStoreType(String index, IndexStoreModule.Type storeType, String distributor) {
         cluster().wipeIndices(index);
-        client().admin().indices().prepareCreate(index)
-                .setSettings(settingsBuilder()
-                        .put("index.store.distributor", distributor)
-                        .put("index.store.type", storeType)
-                        .put("index.store.throttle.type", "none")
-                        .put("index.number_of_replicas", 0)
-                        .put("index.number_of_shards", 1)
-                )
-                .execute().actionGet();
+        client().admin().indices().prepareCreate(index).setSettings(settingsBuilder().put("index.store.distributor", distributor).put("index.store.type", storeType).put("index.store.throttle.type", "none").put("index.number_of_replicas", 0).put("index.number_of_shards", 1)).execute().actionGet();
         assertThat(client().admin().cluster().prepareHealth("test").setWaitForGreenStatus().execute().actionGet().isTimedOut(), equalTo(false));
     }
-
 
     private File[] dataPaths() {
         Set<String> nodes = internalCluster().nodesInclude("test");

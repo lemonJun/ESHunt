@@ -48,13 +48,9 @@ public class SingleShardOneReplicaRoutingTests extends ElasticsearchAllocationTe
 
         logger.info("Building initial routing table");
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
@@ -107,7 +103,6 @@ public class SingleShardOneReplicaRoutingTests extends ElasticsearchAllocationTe
         // backup shards are initializing as well, we make sure that they recover from primary *started* shards in the IndicesClusterStateService
         assertThat(routingTable.index("test").shard(0).replicaShards().get(0).state(), equalTo(INITIALIZING));
         assertThat(routingTable.index("test").shard(0).replicaShards().get(0).currentNodeId(), equalTo("node2"));
-
 
         logger.info("Reroute, nothing should change");
         prevRoutingTable = routingTable;

@@ -83,9 +83,9 @@ public class KeyedLockTests extends ElasticsearchTestCase {
         try {
             connectionLock.acquire(name);
         } finally {
-           connectionLock.release(name);
-           connectionLock.globalLock().lock();
-           connectionLock.globalLock().unlock();
+            connectionLock.release(name);
+            connectionLock.globalLock().lock();
+            connectionLock.globalLock().unlock();
         }
     }
 
@@ -111,8 +111,7 @@ public class KeyedLockTests extends ElasticsearchTestCase {
         ConcurrentHashMap<String, Integer> counter;
         ConcurrentHashMap<String, AtomicInteger> safeCounter;
 
-        public AcquireAndReleaseThread(CountDownLatch startLatch, KeyedLock<String> connectionLock, String[] names,
-                ConcurrentHashMap<String, Integer> counter, ConcurrentHashMap<String, AtomicInteger> safeCounter) {
+        public AcquireAndReleaseThread(CountDownLatch startLatch, KeyedLock<String> connectionLock, String[] names, ConcurrentHashMap<String, Integer> counter, ConcurrentHashMap<String, AtomicInteger> safeCounter) {
             this.startLatch = startLatch;
             this.connectionLock = connectionLock;
             this.names = names;

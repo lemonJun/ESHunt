@@ -65,36 +65,24 @@ public class FiltersTests extends ElasticsearchIntegrationTest {
         numTag1Docs = randomIntBetween(1, numDocs - 1);
         List<IndexRequestBuilder> builders = new ArrayList<>();
         for (int i = 0; i < numTag1Docs; i++) {
-            XContentBuilder source = jsonBuilder()
-                    .startObject()
-                    .field("value", i + 1)
-                    .field("tag", "tag1")
-                    .endObject();
-            builders.add(client().prepareIndex("idx", "type", ""+i).setSource(source));
+            XContentBuilder source = jsonBuilder().startObject().field("value", i + 1).field("tag", "tag1").endObject();
+            builders.add(client().prepareIndex("idx", "type", "" + i).setSource(source));
             if (randomBoolean()) {
                 // randomly index the document twice so that we have deleted docs that match the filter
-                builders.add(client().prepareIndex("idx", "type", ""+i).setSource(source));
+                builders.add(client().prepareIndex("idx", "type", "" + i).setSource(source));
             }
         }
         for (int i = numTag1Docs; i < numDocs; i++) {
             numTag2Docs++;
-            XContentBuilder source = jsonBuilder()
-                    .startObject()
-                    .field("value", i)
-                    .field("tag", "tag2")
-                    .field("name", "name" + i)
-                    .endObject();
-            builders.add(client().prepareIndex("idx", "type", ""+i).setSource(source));
+            XContentBuilder source = jsonBuilder().startObject().field("value", i).field("tag", "tag2").field("name", "name" + i).endObject();
+            builders.add(client().prepareIndex("idx", "type", "" + i).setSource(source));
             if (randomBoolean()) {
-                builders.add(client().prepareIndex("idx", "type", ""+i).setSource(source));
+                builders.add(client().prepareIndex("idx", "type", "" + i).setSource(source));
             }
         }
         prepareCreate("empty_bucket_idx").addMapping("type", "value", "type=integer").execute().actionGet();
         for (int i = 0; i < 2; i++) {
-            builders.add(client().prepareIndex("empty_bucket_idx", "type", ""+i).setSource(jsonBuilder()
-                    .startObject()
-                    .field("value", i*2)
-                    .endObject()));
+            builders.add(client().prepareIndex("empty_bucket_idx", "type", "" + i).setSource(jsonBuilder().startObject().field("value", i * 2).endObject()));
         }
         indexRandom(true, builders);
         ensureSearchable();
@@ -102,12 +90,7 @@ public class FiltersTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void simple() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(
-                        filters("tags")
-                                .filter("tag1", termFilter("tag", "tag1"))
-                                .filter("tag2", termFilter("tag", "tag2")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(filters("tags").filter("tag1", termFilter("tag", "tag1")).filter("tag2", termFilter("tag", "tag2"))).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -131,9 +114,7 @@ public class FiltersTests extends ElasticsearchIntegrationTest {
     @Test
     public void emptyFilterDeclarations() throws Exception {
         FilterBuilder emptyFilter = new AndFilterBuilder();
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(filters("tags").filter("all", emptyFilter).filter("tag1", termFilter("tag", "tag1"))).execute()
-                .actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(filters("tags").filter("all", emptyFilter).filter("tag1", termFilter("tag", "tag1"))).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -149,13 +130,7 @@ public class FiltersTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void withSubAggregation() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(
-                        filters("tags")
-                                .filter("tag1", termFilter("tag", "tag1"))
-                                .filter("tag2", termFilter("tag", "tag2"))
-                                .subAggregation(avg("avg_value").field("value")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(filters("tags").filter("tag1", termFilter("tag", "tag1")).filter("tag2", termFilter("tag", "tag2")).subAggregation(avg("avg_value").field("value"))).execute().actionGet();
 
         assertSearchResponse(response);
 
@@ -196,17 +171,9 @@ public class FiltersTests extends ElasticsearchIntegrationTest {
     public void withContextBasedSubAggregation() throws Exception {
 
         try {
-            client().prepareSearch("idx")
-                    .addAggregation(
-                            filters("tags")
-                                    .filter("tag1", termFilter("tag", "tag1"))
-                                    .filter("tag2", termFilter("tag", "tag2"))
-                                    .subAggregation(avg("avg_value"))
-                    )
-                    .execute().actionGet();
+            client().prepareSearch("idx").addAggregation(filters("tags").filter("tag1", termFilter("tag", "tag1")).filter("tag2", termFilter("tag", "tag2")).subAggregation(avg("avg_value"))).execute().actionGet();
 
-            fail("expected execution to fail - an attempt to have a context based numeric sub-aggregation, but there is not value source" +
-                    "context which the sub-aggregation can inherit");
+            fail("expected execution to fail - an attempt to have a context based numeric sub-aggregation, but there is not value source" + "context which the sub-aggregation can inherit");
 
         } catch (ElasticsearchException ese) {
         }
@@ -214,11 +181,7 @@ public class FiltersTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void emptyAggregation() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0)
-                        .subAggregation(filters("filters").filter("all", matchAllFilter())))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("empty_bucket_idx").setQuery(matchAllQuery()).addAggregation(histogram("histo").field("value").interval(1l).minDocCount(0).subAggregation(filters("filters").filter("all", matchAllFilter()))).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(2l));
         Histogram histo = searchResponse.getAggregations().get("histo");
@@ -233,15 +196,10 @@ public class FiltersTests extends ElasticsearchIntegrationTest {
         assertThat(all.getKey(), equalTo("all"));
         assertThat(all.getDocCount(), is(0l));
     }
-    
+
     @Test
     public void simple_nonKeyed() throws Exception {
-        SearchResponse response = client().prepareSearch("idx")
-                .addAggregation(
-                        filters("tags")
-                                .filter(termFilter("tag", "tag1"))
-                                .filter(termFilter("tag", "tag2")))
-                .execute().actionGet();
+        SearchResponse response = client().prepareSearch("idx").addAggregation(filters("tags").filter(termFilter("tag", "tag1")).filter(termFilter("tag", "tag2"))).execute().actionGet();
 
         assertSearchResponse(response);
 

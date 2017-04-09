@@ -42,30 +42,24 @@ public class PercolatorBackwardsCompatibilityTests extends ElasticsearchIntegrat
     @Test
     public void testPercolatorUpgrading() throws Exception {
         // Simulates an index created on an node before 1.4.0 where the field resolution isn't strict.
-        assertAcked(prepareCreate("test")
-                .setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_VERSION_CREATED, Version.V_1_3_0).put(indexSettings())));
+        assertAcked(prepareCreate("test").setSettings(ImmutableSettings.builder().put(IndexMetaData.SETTING_VERSION_CREATED, Version.V_1_3_0).put(indexSettings())));
         ensureGreen();
         int numDocs = randomIntBetween(100, 150);
         IndexRequestBuilder[] docs = new IndexRequestBuilder[numDocs];
         for (int i = 0; i < numDocs; i++) {
-            docs[i] = client().prepareIndex("test", PercolatorService.TYPE_NAME)
-                    .setSource(jsonBuilder().startObject().field("query", termQuery("field1", "value")).endObject());
+            docs[i] = client().prepareIndex("test", PercolatorService.TYPE_NAME).setSource(jsonBuilder().startObject().field("query", termQuery("field1", "value")).endObject());
         }
         indexRandom(true, docs);
-        PercolateResponse response = client().preparePercolate().setIndices("test").setDocumentType("type")
-                .setPercolateDoc(new PercolateSourceBuilder.DocBuilder().setDoc("field1", "value"))
-                .get();
+        PercolateResponse response = client().preparePercolate().setIndices("test").setDocumentType("type").setPercolateDoc(new PercolateSourceBuilder.DocBuilder().setDoc("field1", "value")).get();
         assertMatchCount(response, (long) numDocs);
 
         // After upgrade indices, indices created before the upgrade allow that queries refer to fields not available in mapping
-        client().prepareIndex("test", PercolatorService.TYPE_NAME)
-                .setSource(jsonBuilder().startObject().field("query", termQuery("field2", "value")).endObject()).get();
+        client().prepareIndex("test", PercolatorService.TYPE_NAME).setSource(jsonBuilder().startObject().field("query", termQuery("field2", "value")).endObject()).get();
 
         // However on new indices, the field resolution is strict, no queries with unmapped fields are allowed
         createIndex("test2");
         try {
-            client().prepareIndex("test2", PercolatorService.TYPE_NAME)
-                    .setSource(jsonBuilder().startObject().field("query", termQuery("field1", "value")).endObject()).get();
+            client().prepareIndex("test2", PercolatorService.TYPE_NAME).setSource(jsonBuilder().startObject().field("query", termQuery("field1", "value")).endObject()).get();
             fail();
         } catch (PercolatorException e) {
             e.printStackTrace();

@@ -43,8 +43,7 @@ public class IndicesLifecycleListenerSingleNodeTests extends ElasticsearchSingle
     public void testCloseDeleteCallback() throws Throwable {
 
         final AtomicInteger counter = new AtomicInteger(1);
-        assertAcked(client().admin().indices().prepareCreate("test")
-                .setSettings(SETTING_NUMBER_OF_SHARDS, 1, SETTING_NUMBER_OF_REPLICAS, 0));
+        assertAcked(client().admin().indices().prepareCreate("test").setSettings(SETTING_NUMBER_OF_SHARDS, 1, SETTING_NUMBER_OF_REPLICAS, 0));
         ensureGreen();
         getInstanceFromNode(IndicesLifecycle.class).addListener(new IndicesLifecycle.Listener() {
             @Override
@@ -66,7 +65,7 @@ public class IndicesLifecycleListenerSingleNodeTests extends ElasticsearchSingle
             }
 
             @Override
-              public void beforeIndexDeleted(IndexService indexService) {
+            public void beforeIndexDeleted(IndexService indexService) {
                 assertEquals(counter.get(), 2);
                 counter.incrementAndGet();
             }
@@ -86,5 +85,5 @@ public class IndicesLifecycleListenerSingleNodeTests extends ElasticsearchSingle
         assertAcked(client().admin().indices().prepareDelete("test").get());
         assertEquals(7, counter.get());
     }
-    
+
 }

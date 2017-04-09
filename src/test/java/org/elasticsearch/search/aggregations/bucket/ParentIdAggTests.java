@@ -34,18 +34,11 @@ import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertSear
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 
-
 public class ParentIdAggTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testParentIdAggregation() throws IOException {
-        XContentBuilder mapping = jsonBuilder().startObject()
-                .startObject("childtype")
-                .startObject("_parent")
-                .field("type", "parenttype")
-                .field("store", true)
-                .endObject()
-                .endObject();
+        XContentBuilder mapping = jsonBuilder().startObject().startObject("childtype").startObject("_parent").field("type", "parenttype").field("store", true).endObject().endObject();
         assertAcked(prepareCreate("testidx").addMapping("childtype", mapping));
         client().prepareIndex("testidx", "childtype").setSource(jsonBuilder().startObject().field("num", 1).endObject()).setParent("p1").get();
         client().prepareIndex("testidx", "childtype").setSource(jsonBuilder().startObject().field("num", 2).endObject()).setParent("p1").get();

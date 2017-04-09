@@ -75,27 +75,14 @@ public class SimpleRecoveryLocalGatewayTests extends ElasticsearchIntegrationTes
 
         internalCluster().startNode(settingsBuilder().build());
 
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("appAccountIds").field("type", "string").endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("appAccountIds").field("type", "string").endObject().endObject().endObject().endObject().string();
         assertAcked(prepareCreate("test").addMapping("type1", mapping));
 
-
-        client().prepareIndex("test", "type1", "10990239").setSource(jsonBuilder().startObject()
-                .field("_id", "10990239")
-                .startArray("appAccountIds").value(14).value(179).endArray().endObject()).execute().actionGet();
-        client().prepareIndex("test", "type1", "10990473").setSource(jsonBuilder().startObject()
-                .field("_id", "10990473")
-                .startArray("appAccountIds").value(14).endArray().endObject()).execute().actionGet();
-        client().prepareIndex("test", "type1", "10990513").setSource(jsonBuilder().startObject()
-                .field("_id", "10990513")
-                .startArray("appAccountIds").value(14).value(179).endArray().endObject()).execute().actionGet();
-        client().prepareIndex("test", "type1", "10990695").setSource(jsonBuilder().startObject()
-                .field("_id", "10990695")
-                .startArray("appAccountIds").value(14).endArray().endObject()).execute().actionGet();
-        client().prepareIndex("test", "type1", "11026351").setSource(jsonBuilder().startObject()
-                .field("_id", "11026351")
-                .startArray("appAccountIds").value(14).endArray().endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "10990239").setSource(jsonBuilder().startObject().field("_id", "10990239").startArray("appAccountIds").value(14).value(179).endArray().endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "10990473").setSource(jsonBuilder().startObject().field("_id", "10990473").startArray("appAccountIds").value(14).endArray().endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "10990513").setSource(jsonBuilder().startObject().field("_id", "10990513").startArray("appAccountIds").value(14).value(179).endArray().endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "10990695").setSource(jsonBuilder().startObject().field("_id", "10990695").startArray("appAccountIds").value(14).endArray().endObject()).execute().actionGet();
+        client().prepareIndex("test", "type1", "11026351").setSource(jsonBuilder().startObject().field("_id", "11026351").startArray("appAccountIds").value(14).endArray().endObject()).execute().actionGet();
 
         refresh();
         assertHitCount(client().prepareCount().setQuery(termQuery("appAccountIds", 179)).execute().actionGet(), 2);
@@ -122,15 +109,10 @@ public class SimpleRecoveryLocalGatewayTests extends ElasticsearchIntegrationTes
     @Slow
     public void testSingleNodeNoFlush() throws Exception {
         internalCluster().startNode(settingsBuilder().build());
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("properties").startObject("field").field("type", "string").endObject().startObject("num").field("type", "integer").endObject().endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field").field("type", "string").endObject().startObject("num").field("type", "integer").endObject().endObject().endObject().endObject().string();
         // note: default replica settings are tied to #data nodes-1 which is 0 here. We can do with 1 in this test.
         int numberOfShards = numberOfShards();
-        assertAcked(prepareCreate("test").setSettings(
-                SETTING_NUMBER_OF_SHARDS, numberOfShards(),
-                SETTING_NUMBER_OF_REPLICAS, randomIntBetween(0, 1),
-                LocalIndexShardGateway.SYNC_INTERVAL, "5s" //fsync is expensive and we are replaying a lot of docs during translog replay - make sure we dont' get a random 0 here causing sync on every operation
+        assertAcked(prepareCreate("test").setSettings(SETTING_NUMBER_OF_SHARDS, numberOfShards(), SETTING_NUMBER_OF_REPLICAS, randomIntBetween(0, 1), LocalIndexShardGateway.SYNC_INTERVAL, "5s" //fsync is expensive and we are replaying a lot of docs during translog replay - make sure we dont' get a random 0 here causing sync on every operation
         ).addMapping("type1", mapping));
 
         int value1Docs;
@@ -148,18 +130,13 @@ public class SimpleRecoveryLocalGatewayTests extends ElasticsearchIntegrationTes
             value2Docs = 1;
         }
 
-
         for (int i = 0; i < 1 + randomInt(100); i++) {
             for (int id = 0; id < Math.max(value1Docs, value2Docs); id++) {
                 if (id < value1Docs) {
-                    index("test", "type1", "1_" + id,
-                            jsonBuilder().startObject().field("field", "value1").startArray("num").value(14).value(179).endArray().endObject()
-                    );
+                    index("test", "type1", "1_" + id, jsonBuilder().startObject().field("field", "value1").startArray("num").value(14).value(179).endArray().endObject());
                 }
                 if (id < value2Docs) {
-                    index("test", "type1", "2_" + id,
-                            jsonBuilder().startObject().field("field", "value2").startArray("num").value(14).endArray().endObject()
-                    );
+                    index("test", "type1", "2_" + id, jsonBuilder().startObject().field("field", "value2").startArray("num").value(14).endArray().endObject());
                 }
             }
 
@@ -192,7 +169,6 @@ public class SimpleRecoveryLocalGatewayTests extends ElasticsearchIntegrationTes
 
         internalCluster().fullRestart();
 
-
         logger.info("Running Cluster Health (wait for the shards to startup)");
         ensureYellow();
 
@@ -203,7 +179,6 @@ public class SimpleRecoveryLocalGatewayTests extends ElasticsearchIntegrationTes
             assertHitCount(client().prepareCount().setQuery(termQuery("num", 179)).get(), value1Docs);
         }
     }
-
 
     @Test
     @Slow
@@ -318,17 +293,8 @@ public class SimpleRecoveryLocalGatewayTests extends ElasticsearchIntegrationTes
                     }
 
                     logger.info("--> add some metadata, additional type and template");
-                    client.admin().indices().preparePutMapping("test").setType("type2")
-                            .setSource(jsonBuilder().startObject().startObject("type2").startObject("_source").field("enabled", false).endObject().endObject().endObject())
-                            .execute().actionGet();
-                    client.admin().indices().preparePutTemplate("template_1")
-                            .setTemplate("te*")
-                            .setOrder(0)
-                            .addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties")
-                                    .startObject("field1").field("type", "string").field("store", "yes").endObject()
-                                    .startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject()
-                                    .endObject().endObject().endObject())
-                            .execute().actionGet();
+                    client.admin().indices().preparePutMapping("test").setType("type2").setSource(jsonBuilder().startObject().startObject("type2").startObject("_source").field("enabled", false).endObject().endObject().endObject()).execute().actionGet();
+                    client.admin().indices().preparePutTemplate("template_1").setTemplate("te*").setOrder(0).addMapping("type1", XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("field1").field("type", "string").field("store", "yes").endObject().startObject("field2").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().endObject().endObject().endObject()).execute().actionGet();
                     client.admin().indices().prepareAliases().addAlias("test", "test_alias", FilterBuilders.termFilter("field", "value")).execute().actionGet();
                     logger.info("--> starting two nodes back, verifying we got the latest version");
                 }
@@ -356,12 +322,7 @@ public class SimpleRecoveryLocalGatewayTests extends ElasticsearchIntegrationTes
     @Test
     @Slow
     public void testReusePeerRecovery() throws Exception {
-        final Settings settings = settingsBuilder()
-                .put("action.admin.cluster.node.shutdown.delay", "10ms")
-                .put(MockFSDirectoryService.CHECK_INDEX_ON_CLOSE, false)
-                .put("gateway.recover_after_nodes", 4)
-                .put(ThrottlingAllocationDecider.CLUSTER_ROUTING_ALLOCATION_CONCURRENT_RECOVERIES, 4)
-                .put(MockDirectoryHelper.CRASH_INDEX, false).build();
+        final Settings settings = settingsBuilder().put("action.admin.cluster.node.shutdown.delay", "10ms").put(MockFSDirectoryService.CHECK_INDEX_ON_CLOSE, false).put("gateway.recover_after_nodes", 4).put(ThrottlingAllocationDecider.CLUSTER_ROUTING_ALLOCATION_CONCURRENT_RECOVERIES, 4).put(MockDirectoryHelper.CRASH_INDEX, false).build();
 
         internalCluster().startNodesAsync(4, settings).get();
 
@@ -379,17 +340,13 @@ public class SimpleRecoveryLocalGatewayTests extends ElasticsearchIntegrationTes
         ensureGreen();
         client().admin().indices().prepareOptimize("test").setMaxNumSegments(100).get(); // just wait for merges
         client().admin().indices().prepareFlush().setWaitIfOngoing(true).setForce(true).get();
-        client().admin().cluster().prepareUpdateSettings()
-                .setPersistentSettings(settingsBuilder().put(BalancedShardsAllocator.SETTING_THRESHOLD, 100.0f)).get();
+        client().admin().cluster().prepareUpdateSettings().setPersistentSettings(settingsBuilder().put(BalancedShardsAllocator.SETTING_THRESHOLD, 100.0f)).get();
         boolean useSyncIds = randomBoolean();
         if (useSyncIds == false) {
 
             logger.info("--> disabling allocation while the cluster is shut down");
             // Disable allocations while we are closing nodes
-            client().admin().cluster().prepareUpdateSettings()
-                    .setTransientSettings(settingsBuilder()
-                            .put(EnableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ENABLE, EnableAllocationDecider.Allocation.NONE))
-                    .get();
+            client().admin().cluster().prepareUpdateSettings().setTransientSettings(settingsBuilder().put(EnableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ENABLE, EnableAllocationDecider.Allocation.NONE)).get();
             logger.info("--> full cluster restart");
             internalCluster().fullRestart();
 
@@ -403,10 +360,7 @@ public class SimpleRecoveryLocalGatewayTests extends ElasticsearchIntegrationTes
 
         logger.info("--> disabling allocation while the cluster is shut down", useSyncIds ? "" : " a second time");
         // Disable allocations while we are closing nodes
-        client().admin().cluster().prepareUpdateSettings()
-                .setTransientSettings(settingsBuilder()
-                        .put(EnableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ENABLE, EnableAllocationDecider.Allocation.NONE))
-                .get();
+        client().admin().cluster().prepareUpdateSettings().setTransientSettings(settingsBuilder().put(EnableAllocationDecider.CLUSTER_ROUTING_ALLOCATION_ENABLE, EnableAllocationDecider.Allocation.NONE)).get();
         logger.info("--> full cluster restart");
         internalCluster().fullRestart();
 
@@ -420,9 +374,7 @@ public class SimpleRecoveryLocalGatewayTests extends ElasticsearchIntegrationTes
         for (ShardRecoveryResponse response : recoveryResponse.shardResponses().get("test")) {
             RecoveryState recoveryState = response.recoveryState();
             if (!recoveryState.getPrimary() && (useSyncIds == false)) {
-                logger.info("--> replica shard {} recovered from {} to {}, recovered {}, reuse {}",
-                        response.getShardId(), recoveryState.getSourceNode().name(), recoveryState.getTargetNode().name(),
-                        recoveryState.getIndex().recoveredBytes(), recoveryState.getIndex().reusedBytes());
+                logger.info("--> replica shard {} recovered from {} to {}, recovered {}, reuse {}", response.getShardId(), recoveryState.getSourceNode().name(), recoveryState.getTargetNode().name(), recoveryState.getIndex().recoveredBytes(), recoveryState.getIndex().reusedBytes());
                 assertThat("no bytes should be recovered", recoveryState.getIndex().recoveredBytes(), equalTo(0l));
                 assertThat("data should have been reused", recoveryState.getIndex().reusedBytes(), greaterThan(0l));
                 assertThat("all bytes should be reused", recoveryState.getIndex().reusedBytes(), equalTo(recoveryState.getIndex().totalBytes()));
@@ -431,9 +383,7 @@ public class SimpleRecoveryLocalGatewayTests extends ElasticsearchIntegrationTes
                 assertThat("> 0 files should be reused", recoveryState.getIndex().reusedFileCount(), greaterThan(0));
             } else {
                 if (useSyncIds && !recoveryState.getPrimary()) {
-                    logger.info("--> replica shard {} recovered from {} to {} using sync id, recovered {}, reuse {}",
-                            response.getShardId(), recoveryState.getSourceNode().name(), recoveryState.getTargetNode().name(),
-                            recoveryState.getIndex().recoveredBytes(), recoveryState.getIndex().reusedBytes());
+                    logger.info("--> replica shard {} recovered from {} to {} using sync id, recovered {}, reuse {}", response.getShardId(), recoveryState.getSourceNode().name(), recoveryState.getTargetNode().name(), recoveryState.getIndex().recoveredBytes(), recoveryState.getIndex().reusedBytes());
                 }
                 assertThat(recoveryState.getIndex().recoveredBytes(), equalTo(0l));
                 assertThat(recoveryState.getIndex().reusedBytes(), equalTo(recoveryState.getIndex().totalBytes()));

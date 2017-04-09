@@ -57,7 +57,7 @@ public class DistributorInTheWildTest extends ThreadedIndexingAndSearchingTestCa
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        useNonNrtReaders  = random().nextBoolean();
+        useNonNrtReaders = random().nextBoolean();
     }
 
     @Override
@@ -119,7 +119,7 @@ public class DistributorInTheWildTest extends ThreadedIndexingAndSearchingTestCa
     }
 
     private Set<String> getOpenDeletedFiles(Directory dir) throws IOException {
-        if (random().nextBoolean() && dir instanceof  MockDirectoryWrapper) {
+        if (random().nextBoolean() && dir instanceof MockDirectoryWrapper) {
             return ((MockDirectoryWrapper) dir).getOpenDeletedFiles();
         }
         DistributorDirectory d = DirectoryUtils.getLeaf(dir, DistributorDirectory.class, null);
@@ -135,14 +135,16 @@ public class DistributorInTheWildTest extends ThreadedIndexingAndSearchingTestCa
     @Override
     protected Directory getDirectory(Directory in) {
         assert in instanceof MockDirectoryWrapper;
-        if (!useNonNrtReaders) ((MockDirectoryWrapper) in).setAssertNoDeleteOpenFile(true);
+        if (!useNonNrtReaders)
+            ((MockDirectoryWrapper) in).setAssertNoDeleteOpenFile(true);
 
         Directory[] directories = new Directory[1 + random().nextInt(5)];
         directories[0] = in;
         for (int i = 1; i < directories.length; i++) {
             final File tempDir = createTempDir(getTestName());
             directories[i] = newMockFSDirectory(tempDir); // some subclasses rely on this being MDW
-            if (!useNonNrtReaders) ((MockDirectoryWrapper) directories[i]).setAssertNoDeleteOpenFile(true);
+            if (!useNonNrtReaders)
+                ((MockDirectoryWrapper) directories[i]).setAssertNoDeleteOpenFile(true);
         }
         for (Directory dir : directories) {
             ((MockDirectoryWrapper) dir).setCheckIndexOnClose(false);

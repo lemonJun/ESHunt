@@ -101,28 +101,17 @@ public class TribeTests extends ElasticsearchIntegrationTest {
     }
 
     private void setupTribeNode(Settings settings) {
-        ImmutableMap<String,String> asMap = internalCluster().getDefaultSettings().getAsMap();
+        ImmutableMap<String, String> asMap = internalCluster().getDefaultSettings().getAsMap();
         ImmutableSettings.Builder tribe1Defaults = ImmutableSettings.builder();
         ImmutableSettings.Builder tribe2Defaults = ImmutableSettings.builder();
         for (Map.Entry<String, String> entry : asMap.entrySet()) {
             tribe1Defaults.put("tribe.t1." + entry.getKey(), entry.getValue());
             tribe2Defaults.put("tribe.t2." + entry.getKey(), entry.getValue());
         }
-        Settings merged = ImmutableSettings.builder()
-                .put("tribe.t1.cluster.name", internalCluster().getClusterName())
-                .put("tribe.t2.cluster.name", cluster2.getClusterName())
-                .put("tribe.blocks.write", false)
-                .put("tribe.blocks.read", false)
-                .put(settings)
-                .put(tribe1Defaults.build())
-                .put(tribe2Defaults.build())
-                .put(internalCluster().getDefaultSettings())
-                .put("node.name", "tribe_node") // make sure we can identify threads from this node
-                .build();
+        Settings merged = ImmutableSettings.builder().put("tribe.t1.cluster.name", internalCluster().getClusterName()).put("tribe.t2.cluster.name", cluster2.getClusterName()).put("tribe.blocks.write", false).put("tribe.blocks.read", false).put(settings).put(tribe1Defaults.build()).put(tribe2Defaults.build()).put(internalCluster().getDefaultSettings()).put("node.name", "tribe_node") // make sure we can identify threads from this node
+                        .build();
 
-        tribeNode = NodeBuilder.nodeBuilder()
-                .settings(merged)
-                .node();
+        tribeNode = NodeBuilder.nodeBuilder().settings(merged).node();
         tribeClient = tribeNode.client();
     }
 
@@ -132,11 +121,7 @@ public class TribeTests extends ElasticsearchIntegrationTest {
         internalCluster().client().admin().indices().prepareCreate("test1").get();
         assertAcked(cluster2.client().admin().indices().prepareCreate("test2"));
 
-
-        setupTribeNode(ImmutableSettings.builder()
-                .put("tribe.blocks.write", true)
-                .put("tribe.blocks.metadata", true)
-                .build());
+        setupTribeNode(ImmutableSettings.builder().put("tribe.blocks.write", true).put("tribe.blocks.metadata", true).build());
 
         logger.info("wait till tribe has the same nodes as the 2 clusters");
         awaitSameNodeCounts();
@@ -172,9 +157,7 @@ public class TribeTests extends ElasticsearchIntegrationTest {
         assertAcked(cluster2.client().admin().indices().prepareCreate("test2"));
         assertAcked(cluster2.client().admin().indices().prepareCreate("block_test2"));
 
-        setupTribeNode(ImmutableSettings.builder()
-                .put("tribe.blocks.write.indices", "block_*")
-                .build());
+        setupTribeNode(ImmutableSettings.builder().put("tribe.blocks.write.indices", "block_*").build());
         logger.info("wait till tribe has the same nodes as the 2 clusters");
         awaitSameNodeCounts();
         // wait till the tribe node connected to the cluster, by checking if the index exists in the cluster state
@@ -206,9 +189,7 @@ public class TribeTests extends ElasticsearchIntegrationTest {
         assertAcked(cluster().client().admin().indices().prepareCreate("test1"));
         assertAcked(cluster2.client().admin().indices().prepareCreate("test2"));
 
-        setupTribeNode(ImmutableSettings.builder()
-                .put("tribe.on_conflict", "drop")
-                .build());
+        setupTribeNode(ImmutableSettings.builder().put("tribe.on_conflict", "drop").build());
 
         logger.info("wait till tribe has the same nodes as the 2 clusters");
         awaitSameNodeCounts();
@@ -236,9 +217,7 @@ public class TribeTests extends ElasticsearchIntegrationTest {
         assertAcked(internalCluster().client().admin().indices().prepareCreate("test1"));
         assertAcked(cluster2.client().admin().indices().prepareCreate("test2"));
 
-        setupTribeNode(ImmutableSettings.builder()
-                .put("tribe.on_conflict", "prefer_" + tribe)
-                .build());
+        setupTribeNode(ImmutableSettings.builder().put("tribe.on_conflict", "prefer_" + tribe).build());
         logger.info("wait till tribe has the same nodes as the 2 clusters");
         awaitSameNodeCounts();
         // wait till the tribe node connected to the cluster, by checking if the index exists in the cluster state
@@ -256,7 +235,6 @@ public class TribeTests extends ElasticsearchIntegrationTest {
         logger.info("create 2 indices, test1 on t1, and test2 on t2");
         assertAcked(internalCluster().client().admin().indices().prepareCreate("test1"));
         assertAcked(cluster2.client().admin().indices().prepareCreate("test2"));
-
 
         // wait till the tribe node connected to the cluster, by checking if the index exists in the cluster state
         logger.info("wait till test1 and test2 exists in the tribe node state");
@@ -284,12 +262,10 @@ public class TribeTests extends ElasticsearchIntegrationTest {
             }
         });
 
-
         logger.info("write to another type");
         tribeClient.prepareIndex("test1", "type2", "1").setSource("field1", "value1").get();
         tribeClient.prepareIndex("test2", "type2", "1").setSource("field1", "value1").get();
         assertNoFailures(tribeClient.admin().indices().prepareRefresh().get());
-
 
         logger.info("verify they are there");
         assertHitCount(tribeClient.prepareCount().get(), 4l);
@@ -388,8 +364,7 @@ public class TribeTests extends ElasticsearchIntegrationTest {
     }
 
     private void ensureGreen(TestCluster testCluster) {
-        ClusterHealthResponse actionGet = testCluster.client().admin().cluster()
-                .health(Requests.clusterHealthRequest().waitForGreenStatus().waitForEvents(Priority.LANGUID).waitForRelocatingShards(0)).actionGet();
+        ClusterHealthResponse actionGet = testCluster.client().admin().cluster().health(Requests.clusterHealthRequest().waitForGreenStatus().waitForEvents(Priority.LANGUID).waitForRelocatingShards(0)).actionGet();
         if (actionGet.isTimedOut()) {
             logger.info("ensureGreen timed out, cluster state:\n{}\n{}", testCluster.client().admin().cluster().prepareState().get().getState().prettyPrint(), testCluster.client().admin().cluster().preparePendingClusterTasks().get().prettyPrint());
             assertThat("timed out waiting for green state", actionGet.isTimedOut(), equalTo(false));

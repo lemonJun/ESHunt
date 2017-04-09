@@ -128,7 +128,6 @@ public class CompositeTestCluster extends TestCluster {
         return upgradeAllNodes(ImmutableSettings.EMPTY);
     }
 
-
     /**
      * Upgrades all external running nodes to a node from the version running the tests.
      * All nodes are shut down before the first upgrade happens.
@@ -166,7 +165,6 @@ public class CompositeTestCluster extends TestCluster {
         }
         return false;
     }
-
 
     /**
      * Returns the a simple pattern that matches all "new" nodes in the cluster.
@@ -215,7 +213,6 @@ public class CompositeTestCluster extends TestCluster {
         externalNodes.add(baseExternalNode.start(client, cluster.getDefaultSettings(), NODE_PREFIX + ordinal, cluster.getClusterName(), ordinal));
     }
 
-
     @Override
     public synchronized Client client() {
         return client;
@@ -253,11 +250,9 @@ public class CompositeTestCluster extends TestCluster {
     @Override
     public void ensureEstimatedStats() {
         if (size() > 0) {
-            NodesStatsResponse nodeStats = client().admin().cluster().prepareNodesStats()
-                    .clear().setBreaker(true).execute().actionGet();
+            NodesStatsResponse nodeStats = client().admin().cluster().prepareNodesStats().clear().setBreaker(true).execute().actionGet();
             for (NodeStats stats : nodeStats.getNodes()) {
-                assertThat("Fielddata breaker not reset to 0 on node: " + stats.getNode(),
-                        stats.getBreaker().getStats(CircuitBreaker.Name.FIELDDATA).getEstimated(), equalTo(0L));
+                assertThat("Fielddata breaker not reset to 0 on node: " + stats.getNode(), stats.getBreaker().getStats(CircuitBreaker.Name.FIELDDATA).getEstimated(), equalTo(0L));
             }
             // CompositeTestCluster does not check the request breaker,
             // because checking it requires a network request, which in

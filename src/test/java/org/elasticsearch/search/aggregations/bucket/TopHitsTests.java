@@ -77,89 +77,23 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
     public void setupSuiteScopeCluster() throws Exception {
         createIndex("idx");
         createIndex("empty");
-        assertAcked(prepareCreate("articles").addMapping("article", jsonBuilder().startObject().startObject("article").startObject("properties")
-                .startObject("comments")
-                    .field("type", "nested")
-                    .startObject("properties")
-                        .startObject("date")
-                            .field("type", "long")
-                        .endObject()
-                        .startObject("message")
-                            .field("type", "string")
-                            .field("store", true)
-                            .field("term_vector", "with_positions_offsets")
-                            .field("index_options", "offsets")
-                            .endObject()
-                        .startObject("reviewers")
-                            .field("type", "nested")
-                            .startObject("properties")
-                                .startObject("name")
-                                    .field("type", "string")
-                                    .field("index", "not_analyzed")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                .endObject()
-                .endObject().endObject().endObject()));
+        assertAcked(prepareCreate("articles").addMapping("article", jsonBuilder().startObject().startObject("article").startObject("properties").startObject("comments").field("type", "nested").startObject("properties").startObject("date").field("type", "long").endObject().startObject("message").field("type", "string").field("store", true).field("term_vector", "with_positions_offsets").field("index_options", "offsets").endObject().startObject("reviewers").field("type", "nested").startObject("properties").startObject("name").field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject().endObject().endObject().endObject().endObject().endObject()));
         ensureGreen("idx", "empty", "articles");
 
         List<IndexRequestBuilder> builders = new ArrayList<>();
         for (int i = 0; i < 50; i++) {
-            builders.add(client().prepareIndex("idx", "type", Integer.toString(i)).setSource(jsonBuilder()
-                    .startObject()
-                    .field(TERMS_AGGS_FIELD, "val" + (i / 10))
-                    .field(SORT_FIELD, i + 1)
-                    .field("text", "some text to entertain")
-                    .field("field1", 5)
-                    .endObject()));
+            builders.add(client().prepareIndex("idx", "type", Integer.toString(i)).setSource(jsonBuilder().startObject().field(TERMS_AGGS_FIELD, "val" + (i / 10)).field(SORT_FIELD, i + 1).field("text", "some text to entertain").field("field1", 5).endObject()));
         }
 
-        builders.add(client().prepareIndex("idx", "field-collapsing", "1").setSource(jsonBuilder()
-                .startObject()
-                .field("group", "a")
-                .field("text", "term x y z b")
-                .endObject()));
-        builders.add(client().prepareIndex("idx", "field-collapsing", "2").setSource(jsonBuilder()
-                .startObject()
-                .field("group", "a")
-                .field("text", "term x y z n rare")
-                .endObject()));
-        builders.add(client().prepareIndex("idx", "field-collapsing", "3").setSource(jsonBuilder()
-                .startObject()
-                .field("group", "b")
-                .field("text", "x y z term")
-                .endObject()));
-        builders.add(client().prepareIndex("idx", "field-collapsing", "4").setSource(jsonBuilder()
-                .startObject()
-                .field("group", "b")
-                .field("text", "x y term")
-                .endObject()));
-        builders.add(client().prepareIndex("idx", "field-collapsing", "5").setSource(jsonBuilder()
-                .startObject()
-                .field("group", "b")
-                .field("text", "x term")
-                .endObject()));
-        builders.add(client().prepareIndex("idx", "field-collapsing", "6").setSource(jsonBuilder()
-                .startObject()
-                .field("group", "b")
-                .field("text", "term rare")
-                .endObject()));
-        builders.add(client().prepareIndex("idx", "field-collapsing", "7").setSource(jsonBuilder()
-                .startObject()
-                .field("group", "c")
-                .field("text", "x y z term")
-                .endObject()));
-        builders.add(client().prepareIndex("idx", "field-collapsing", "8").setSource(jsonBuilder()
-                .startObject()
-                .field("group", "c")
-                .field("text", "x y term b")
-                .endObject()));
-        builders.add(client().prepareIndex("idx", "field-collapsing", "9").setSource(jsonBuilder()
-                .startObject()
-                .field("group", "c")
-                .field("text", "rare x term")
-                .endObject()));
+        builders.add(client().prepareIndex("idx", "field-collapsing", "1").setSource(jsonBuilder().startObject().field("group", "a").field("text", "term x y z b").endObject()));
+        builders.add(client().prepareIndex("idx", "field-collapsing", "2").setSource(jsonBuilder().startObject().field("group", "a").field("text", "term x y z n rare").endObject()));
+        builders.add(client().prepareIndex("idx", "field-collapsing", "3").setSource(jsonBuilder().startObject().field("group", "b").field("text", "x y z term").endObject()));
+        builders.add(client().prepareIndex("idx", "field-collapsing", "4").setSource(jsonBuilder().startObject().field("group", "b").field("text", "x y term").endObject()));
+        builders.add(client().prepareIndex("idx", "field-collapsing", "5").setSource(jsonBuilder().startObject().field("group", "b").field("text", "x term").endObject()));
+        builders.add(client().prepareIndex("idx", "field-collapsing", "6").setSource(jsonBuilder().startObject().field("group", "b").field("text", "term rare").endObject()));
+        builders.add(client().prepareIndex("idx", "field-collapsing", "7").setSource(jsonBuilder().startObject().field("group", "c").field("text", "x y z term").endObject()));
+        builders.add(client().prepareIndex("idx", "field-collapsing", "8").setSource(jsonBuilder().startObject().field("group", "c").field("text", "x y term b").endObject()));
+        builders.add(client().prepareIndex("idx", "field-collapsing", "9").setSource(jsonBuilder().startObject().field("group", "c").field("text", "rare x term").endObject()));
 
         numArticles = scaledRandomIntBetween(10, 100);
         numArticles -= (numArticles % 5);
@@ -172,44 +106,11 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
             }
             builder.endArray().endObject();
 
-            builders.add(
-                    client().prepareIndex("articles", "article").setCreate(true).setSource(builder)
-            );
+            builders.add(client().prepareIndex("articles", "article").setCreate(true).setSource(builder));
         }
 
-        builders.add(
-                client().prepareIndex("articles", "article", "1")
-                        .setSource(jsonBuilder().startObject().field("title", "title 1").field("body", "some text").startArray("comments")
-                                .startObject()
-                                    .field("user", "a").field("date", 1l).field("message", "some comment")
-                                    .startArray("reviewers")
-                                        .startObject().field("name", "user a").endObject()
-                                        .startObject().field("name", "user b").endObject()
-                                        .startObject().field("name", "user c").endObject()
-                                    .endArray()
-                                .endObject()
-                                .startObject()
-                                    .field("user", "b").field("date", 2l).field("message", "some other comment")
-                                    .startArray("reviewers")
-                                        .startObject().field("name", "user c").endObject()
-                                        .startObject().field("name", "user d").endObject()
-                                        .startObject().field("name", "user e").endObject()
-                                    .endArray()
-                                .endObject()
-                                .endArray().endObject())
-        );
-        builders.add(
-                client().prepareIndex("articles", "article", "2")
-                        .setSource(jsonBuilder().startObject().field("title", "title 2").field("body", "some different text").startArray("comments")
-                                .startObject()
-                                    .field("user", "b").field("date", 3l).field("message", "some comment")
-                                    .startArray("reviewers")
-                                        .startObject().field("name", "user f").endObject()
-                                    .endArray()
-                                .endObject()
-                                .startObject().field("user", "c").field("date", 4l).field("message", "some other comment").endObject()
-                                .endArray().endObject())
-        );
+        builders.add(client().prepareIndex("articles", "article", "1").setSource(jsonBuilder().startObject().field("title", "title 1").field("body", "some text").startArray("comments").startObject().field("user", "a").field("date", 1l).field("message", "some comment").startArray("reviewers").startObject().field("name", "user a").endObject().startObject().field("name", "user b").endObject().startObject().field("name", "user c").endObject().endArray().endObject().startObject().field("user", "b").field("date", 2l).field("message", "some other comment").startArray("reviewers").startObject().field("name", "user c").endObject().startObject().field("name", "user d").endObject().startObject().field("name", "user e").endObject().endArray().endObject().endArray().endObject()));
+        builders.add(client().prepareIndex("articles", "article", "2").setSource(jsonBuilder().startObject().field("title", "title 2").field("body", "some different text").startArray("comments").startObject().field("user", "b").field("date", 3l).field("message", "some comment").startArray("reviewers").startObject().field("name", "user f").endObject().endArray().endObject().startObject().field("user", "c").field("date", 4l).field("message", "some other comment").endObject().endArray().endObject()));
 
         indexRandom(true, builders);
         ensureSearchable();
@@ -221,15 +122,7 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testBasics() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(terms("terms")
-                        .executionHint(randomExecutionHint())
-                        .field(TERMS_AGGS_FIELD)
-                        .subAggregation(
-                                topHits("hits").addSort(SortBuilders.fieldSort(SORT_FIELD).order(SortOrder.DESC))
-                        )
-                )
-                .get();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(TERMS_AGGS_FIELD).subAggregation(topHits("hits").addSort(SortBuilders.fieldSort(SORT_FIELD).order(SortOrder.DESC)))).get();
 
         assertSearchResponse(response);
 
@@ -261,26 +154,10 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
     public void testPagination() throws Exception {
         int size = randomIntBetween(1, 10);
         int from = randomIntBetween(0, 10);
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(terms("terms")
-                                .executionHint(randomExecutionHint())
-                                .field(TERMS_AGGS_FIELD)
-                                .subAggregation(
-                                        topHits("hits").addSort(SortBuilders.fieldSort(SORT_FIELD).order(SortOrder.DESC))
-                                                .setFrom(from)
-                                                .setSize(size)
-                                )
-                )
-                .get();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(TERMS_AGGS_FIELD).subAggregation(topHits("hits").addSort(SortBuilders.fieldSort(SORT_FIELD).order(SortOrder.DESC)).setFrom(from).setSize(size))).get();
         assertSearchResponse(response);
 
-        SearchResponse control = client().prepareSearch("idx")
-                .setTypes("type")
-                .setFrom(from)
-                .setSize(size)
-                .setPostFilter(FilterBuilders.termFilter(TERMS_AGGS_FIELD, "val0"))
-                .addSort(SORT_FIELD, SortOrder.DESC)
-                .get();
+        SearchResponse control = client().prepareSearch("idx").setTypes("type").setFrom(from).setSize(size).setPostFilter(FilterBuilders.termFilter(TERMS_AGGS_FIELD, "val0")).addSort(SORT_FIELD, SortOrder.DESC).get();
         assertSearchResponse(control);
         SearchHits controlHits = control.getHits();
 
@@ -305,19 +182,7 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testSortByBucket() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .addAggregation(terms("terms")
-                                .executionHint(randomExecutionHint())
-                                .field(TERMS_AGGS_FIELD)
-                                .order(Terms.Order.aggregation("max_sort", false))
-                                .subAggregation(
-                                        topHits("hits").addSort(SortBuilders.fieldSort(SORT_FIELD).order(SortOrder.DESC)).setTrackScores(true)
-                                )
-                                .subAggregation(
-                                        max("max_sort").field(SORT_FIELD)
-                                )
-                )
-                .get();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(TERMS_AGGS_FIELD).order(Terms.Order.aggregation("max_sort", false)).subAggregation(topHits("hits").addSort(SortBuilders.fieldSort(SORT_FIELD).order(SortOrder.DESC)).setTrackScores(true)).subAggregation(max("max_sort").field(SORT_FIELD))).get();
         assertSearchResponse(response);
 
         Terms terms = response.getAggregations().get("terms");
@@ -345,21 +210,7 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testFieldCollapsing() throws Exception {
-        SearchResponse response = client().prepareSearch("idx").setTypes("field-collapsing")
-                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .setQuery(matchQuery("text", "term rare"))
-                .addAggregation(terms("terms")
-                                .executionHint(randomExecutionHint())
-                                .field("group")
-                                .order(Terms.Order.aggregation("max_score", false))
-                                .subAggregation(
-                                        topHits("hits").setSize(1)
-                                )
-                                .subAggregation(
-                                        max("max_score").script("_score.doubleValue()")
-                                )
-                )
-                .get();
+        SearchResponse response = client().prepareSearch("idx").setTypes("field-collapsing").setSearchType(SearchType.DFS_QUERY_THEN_FETCH).setQuery(matchQuery("text", "term rare")).addAggregation(terms("terms").executionHint(randomExecutionHint()).field("group").order(Terms.Order.aggregation("max_score", false)).subAggregation(topHits("hits").setSize(1)).subAggregation(max("max_score").script("_score.doubleValue()"))).get();
         assertSearchResponse(response);
 
         Terms terms = response.getAggregations().get("terms");
@@ -395,22 +246,7 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testFetchFeatures() {
-        SearchResponse response = client().prepareSearch("idx").setTypes("type")
-                .setQuery(matchQuery("text", "text").queryName("test"))
-                .addAggregation(terms("terms")
-                                .executionHint(randomExecutionHint())
-                                .field(TERMS_AGGS_FIELD)
-                                .subAggregation(
-                                        topHits("hits").setSize(1)
-                                            .addHighlightedField("text")
-                                            .setExplain(true)
-                                            .addFieldDataField("field1")
-                                            .addScriptField("script", "doc['field1'].value")
-                                            .setFetchSource("text", null)
-                                            .setVersion(true)
-                                )
-                )
-                .get();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").setQuery(matchQuery("text", "text").queryName("test")).addAggregation(terms("terms").executionHint(randomExecutionHint()).field(TERMS_AGGS_FIELD).subAggregation(topHits("hits").setSize(1).addHighlightedField("text").setExplain(true).addFieldDataField("field1").addScriptField("script", "doc['field1'].value").setFetchSource("text", null).setVersion(true))).get();
         assertSearchResponse(response);
 
         Terms terms = response.getAggregations().get("terms");
@@ -451,14 +287,7 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
     @Test
     public void testInvalidSortField() throws Exception {
         try {
-            client().prepareSearch("idx").setTypes("type")
-                    .addAggregation(terms("terms")
-                                    .executionHint(randomExecutionHint())
-                                    .field(TERMS_AGGS_FIELD)
-                                    .subAggregation(
-                                            topHits("hits").addSort(SortBuilders.fieldSort("xyz").order(SortOrder.DESC))
-                                    )
-                    ).get();
+            client().prepareSearch("idx").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(TERMS_AGGS_FIELD).subAggregation(topHits("hits").addSort(SortBuilders.fieldSort("xyz").order(SortOrder.DESC)))).get();
             fail();
         } catch (SearchPhaseExecutionException e) {
             assertThat(e.getMessage(), containsString("No mapping found for [xyz] in order to sort on"));
@@ -467,58 +296,24 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testFailWithSubAgg() throws Exception {
-        String source = "{\n" +
-                "  \"aggs\": {\n" +
-                "    \"top-tags\": {\n" +
-                "      \"terms\": {\n" +
-                "        \"field\": \"tags\"\n" +
-                "      },\n" +
-                "      \"aggs\": {\n" +
-                "        \"top_tags_hits\": {\n" +
-                "          \"top_hits\": {},\n" +
-                "          \"aggs\": {\n" +
-                "            \"max\": {\n" +
-                "              \"max\": {\n" +
-                "                \"field\": \"age\"\n" +
-                "              }\n" +
-                "            }\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        String source = "{\n" + "  \"aggs\": {\n" + "    \"top-tags\": {\n" + "      \"terms\": {\n" + "        \"field\": \"tags\"\n" + "      },\n" + "      \"aggs\": {\n" + "        \"top_tags_hits\": {\n" + "          \"top_hits\": {},\n" + "          \"aggs\": {\n" + "            \"max\": {\n" + "              \"max\": {\n" + "                \"field\": \"age\"\n" + "              }\n" + "            }\n" + "          }\n" + "        }\n" + "      }\n" + "    }\n" + "  }\n" + "}";
         try {
-            client().prepareSearch("idx").setTypes("type")
-                    .setSource(source)
-                    .get();
+            client().prepareSearch("idx").setTypes("type").setSource(source).get();
             fail();
         } catch (SearchPhaseExecutionException e) {
             assertThat(e.getMessage(), containsString("Aggregator [top_tags_hits] of type [top_hits] cannot accept sub-aggregations"));
         }
     }
-    
+
     @Test
     public void testFailDeferredOnlyWhenScorerIsUsed() throws Exception {
         // No track_scores or score based sort defined in top_hits agg, so don't fail:
-        SearchResponse response = client().prepareSearch("idx")
-                .setTypes("type")
-                .addAggregation(
-                        terms("terms").executionHint(randomExecutionHint()).field(TERMS_AGGS_FIELD)
-                                .collectMode(SubAggCollectionMode.BREADTH_FIRST)
-                                .subAggregation(topHits("hits").addSort(SortBuilders.fieldSort(SORT_FIELD).order(SortOrder.DESC))))
-                .get();
+        SearchResponse response = client().prepareSearch("idx").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(TERMS_AGGS_FIELD).collectMode(SubAggCollectionMode.BREADTH_FIRST).subAggregation(topHits("hits").addSort(SortBuilders.fieldSort(SORT_FIELD).order(SortOrder.DESC)))).get();
         assertSearchResponse(response);
 
         // Score based, so fail with deferred aggs:
         try {
-            client().prepareSearch("idx")
-                    .setTypes("type")
-                    .addAggregation(
-                            terms("terms").executionHint(randomExecutionHint()).field(TERMS_AGGS_FIELD)
-                                    .collectMode(SubAggCollectionMode.BREADTH_FIRST)
-                                    .subAggregation(topHits("hits")))
-                    .get();
+            client().prepareSearch("idx").setTypes("type").addAggregation(terms("terms").executionHint(randomExecutionHint()).field(TERMS_AGGS_FIELD).collectMode(SubAggCollectionMode.BREADTH_FIRST).subAggregation(topHits("hits"))).get();
             fail();
         } catch (Exception e) {
             // It is considered a parse failure if the search request asks for top_hits
@@ -531,9 +326,7 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testEmptyIndex() throws Exception {
-        SearchResponse response = client().prepareSearch("empty").setTypes("type")
-                .addAggregation(topHits("hits"))
-                .get();
+        SearchResponse response = client().prepareSearch("empty").setTypes("type").addAggregation(topHits("hits")).get();
         assertSearchResponse(response);
 
         TopHits hits = response.getAggregations().get("hits");
@@ -544,21 +337,10 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testTrackScores() throws Exception {
-        boolean[] trackScores = new boolean[]{true, false};
+        boolean[] trackScores = new boolean[] { true, false };
         for (boolean trackScore : trackScores) {
             logger.info("Track score=" + trackScore);
-            SearchResponse response = client().prepareSearch("idx").setTypes("field-collapsing")
-                    .setQuery(matchQuery("text", "term rare"))
-                    .addAggregation(terms("terms")
-                                    .field("group")
-                                    .subAggregation(
-                                            topHits("hits")
-                                                    .setTrackScores(trackScore)
-                                                    .setSize(1)
-                                                    .addSort("_id", SortOrder.DESC)
-                                    )
-                    )
-                    .get();
+            SearchResponse response = client().prepareSearch("idx").setTypes("field-collapsing").setQuery(matchQuery("text", "term rare")).addAggregation(terms("terms").field("group").subAggregation(topHits("hits").setTrackScores(trackScore).setSize(1).addSort("_id", SortOrder.DESC))).get();
             assertSearchResponse(response);
 
             Terms terms = response.getAggregations().get("terms");
@@ -591,20 +373,7 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testTopHitsInNestedSimple() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("articles")
-                .setQuery(matchQuery("title", "title"))
-                .addAggregation(
-                        nested("to-comments")
-                                .path("comments")
-                                .subAggregation(
-                                        terms("users")
-                                                .field("comments.user")
-                                                .subAggregation(
-                                                        topHits("top-comments").addSort("comments.date", SortOrder.ASC)
-                                                )
-                                )
-                )
-                .get();
+        SearchResponse searchResponse = client().prepareSearch("articles").setQuery(matchQuery("title", "title")).addAggregation(nested("to-comments").path("comments").subAggregation(terms("users").field("comments.user").subAggregation(topHits("top-comments").addSort("comments.date", SortOrder.ASC)))).get();
 
         Nested nested = searchResponse.getAggregations().get("to-comments");
         assertThat(nested.getDocCount(), equalTo(4l));
@@ -643,19 +412,9 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testTopHitsInSecondLayerNested() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("articles")
-                .setQuery(matchQuery("title", "title"))
-                .addAggregation(
-                        nested("to-comments")
-                                .path("comments")
-                                .subAggregation(
-                                    nested("to-reviewers").path("comments.reviewers").subAggregation(
-                                            // Also need to sort on _doc because there are two reviewers with the same name
-                                            topHits("top-reviewers").addSort("comments.reviewers.name", SortOrder.ASC).addSort("_doc", SortOrder.DESC).setSize(7)
-                                    )
-                                )
-                                .subAggregation(topHits("top-comments").addSort("comments.date", SortOrder.DESC).setSize(4))
-                ).get();
+        SearchResponse searchResponse = client().prepareSearch("articles").setQuery(matchQuery("title", "title")).addAggregation(nested("to-comments").path("comments").subAggregation(nested("to-reviewers").path("comments.reviewers").subAggregation(
+                        // Also need to sort on _doc because there are two reviewers with the same name
+                        topHits("top-reviewers").addSort("comments.reviewers.name", SortOrder.ASC).addSort("_doc", SortOrder.DESC).setSize(7))).subAggregation(topHits("top-comments").addSort("comments.date", SortOrder.DESC).setSize(4))).get();
         assertNoFailures(searchResponse);
 
         Nested toComments = searchResponse.getAggregations().get("to-comments");
@@ -745,28 +504,10 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
     @Test
     public void testNestedFetchFeatures() {
         String hlType = randomFrom("plain", "fvh", "postings");
-        HighlightBuilder.Field hlField = new HighlightBuilder.Field("message")
-                .highlightQuery(matchQuery("comments.message", "comment"))
-                .forceSource(randomBoolean()) // randomly from stored field or _source
-                .highlighterType(hlType);
+        HighlightBuilder.Field hlField = new HighlightBuilder.Field("message").highlightQuery(matchQuery("comments.message", "comment")).forceSource(randomBoolean()) // randomly from stored field or _source
+                        .highlighterType(hlType);
 
-        SearchResponse searchResponse = client().prepareSearch("articles")
-                .setQuery(nestedQuery("comments", matchQuery("message", "comment").queryName("test")))
-                .addAggregation(
-                        nested("to-comments")
-                                .path("comments")
-                                .subAggregation(
-                                        topHits("top-comments").setSize(1)
-                                                .addHighlightedField(hlField)
-                                                .setExplain(true)
-                                                .addFieldDataField("comments.user")
-                                                .addScriptField("script", "doc['comments.user'].value")
-                                                .setFetchSource("message", null)
-                                                .setVersion(true)
-                                                .addSort("comments.date", SortOrder.ASC)
-                                )
-                )
-                .get();
+        SearchResponse searchResponse = client().prepareSearch("articles").setQuery(nestedQuery("comments", matchQuery("message", "comment").queryName("test"))).addAggregation(nested("to-comments").path("comments").subAggregation(topHits("top-comments").setSize(1).addHighlightedField(hlField).setExplain(true).addFieldDataField("comments.user").addScriptField("script", "doc['comments.user'].value").setFetchSource("message", null).setVersion(true).addSort("comments.date", SortOrder.ASC))).get();
         assertHitCount(searchResponse, 2);
         Nested nested = searchResponse.getAggregations().get("to-comments");
         assertThat(nested.getDocCount(), equalTo(4l));
@@ -806,21 +547,7 @@ public class TopHitsTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testTopHitsInNested() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("articles")
-                .addAggregation(
-                        histogram("dates")
-                                .field("date")
-                                .interval(5)
-                                .order(Histogram.Order.aggregation("to-comments", true))
-                                .subAggregation(
-                                        nested("to-comments")
-                                                .path("comments")
-                                                .subAggregation(topHits("comments")
-                                                        .addHighlightedField(new HighlightBuilder.Field("message").highlightQuery(matchQuery("comments.message", "text")))
-                                                        .addSort("comments.id", SortOrder.ASC))
-                                )
-                )
-                .get();
+        SearchResponse searchResponse = client().prepareSearch("articles").addAggregation(histogram("dates").field("date").interval(5).order(Histogram.Order.aggregation("to-comments", true)).subAggregation(nested("to-comments").path("comments").subAggregation(topHits("comments").addHighlightedField(new HighlightBuilder.Field("message").highlightQuery(matchQuery("comments.message", "text"))).addSort("comments.id", SortOrder.ASC)))).get();
 
         Histogram histogram = searchResponse.getAggregations().get("dates");
         for (int i = 0; i < numArticles; i += 5) {

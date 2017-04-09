@@ -71,7 +71,6 @@ public class ChannelsTests extends ElasticsearchTestCase {
         assertThat("read bytes didn't match written bytes", randomBytes, Matchers.equalTo(readBytes));
     }
 
-
     @Test
     public void testPartialReadWriteThroughArrays() throws Exception {
         int length = randomIntBetween(1, randomBytes.length / 2);
@@ -161,7 +160,6 @@ public class ChannelsTests extends ElasticsearchTestCase {
 
         assertTrue("read bytes didn't match written bytes", sourceRef.equals(copyRef));
     }
-
 
     @Test
     public void testWriteFromChannel() throws IOException {

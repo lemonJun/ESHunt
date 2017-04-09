@@ -47,27 +47,21 @@ public class ResourceWatcherServiceTests extends ElasticsearchTestCase {
         assertThat(service.lowMonitor.interval, is(ResourceWatcherService.Frequency.LOW.interval));
 
         // checking bwc
-        settings = ImmutableSettings.builder()
-                .put("watcher.interval", "40s") // only applies to medium
-                .build();
+        settings = ImmutableSettings.builder().put("watcher.interval", "40s") // only applies to medium
+                        .build();
         service = new ResourceWatcherService(settings, threadPool);
         assertThat(service.highMonitor.interval.millis(), is(timeValueSeconds(5).millis()));
         assertThat(service.mediumMonitor.interval.millis(), is(timeValueSeconds(40).millis()));
         assertThat(service.lowMonitor.interval.millis(), is(timeValueSeconds(60).millis()));
 
         // checking custom
-        settings = ImmutableSettings.builder()
-                .put("watcher.interval.high", "10s")
-                .put("watcher.interval.medium", "20s")
-                .put("watcher.interval.low", "30s")
-                .build();
+        settings = ImmutableSettings.builder().put("watcher.interval.high", "10s").put("watcher.interval.medium", "20s").put("watcher.interval.low", "30s").build();
         service = new ResourceWatcherService(settings, threadPool);
         assertThat(service.highMonitor.interval.millis(), is(timeValueSeconds(10).millis()));
         assertThat(service.mediumMonitor.interval.millis(), is(timeValueSeconds(20).millis()));
         assertThat(service.lowMonitor.interval.millis(), is(timeValueSeconds(30).millis()));
         terminate(threadPool);
     }
-
 
     @Test
     public void testHandle() throws Exception {

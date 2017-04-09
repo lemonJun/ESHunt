@@ -25,10 +25,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class ConcurrentDuel<T> {
 
-    
     private final ExecutorService pool;
     private final int numExecutorThreads;
-    
+
     public ConcurrentDuel(int numThreads) {
         pool = Executors.newFixedThreadPool(numThreads);
         this.numExecutorThreads = numThreads;
@@ -37,13 +36,13 @@ public class ConcurrentDuel<T> {
     public void close() {
         pool.shutdown();
     }
-    
+
     public List<T> runDuel(final DuelExecutor<T> executor, int iterations, int numTasks) throws InterruptedException, ExecutionException {
         List<T> results = new ArrayList<>();
         T firstRun = executor.run();
         results.add(firstRun);
         for (int i = 0; i < 3; i++) {
-        
+
         }
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicLong count = new AtomicLong(iterations);
@@ -55,8 +54,8 @@ public class ConcurrentDuel<T> {
                 public List<T> call() throws Exception {
                     List<T> results = new ArrayList<>();
                     latch.await();
-                    while(count.decrementAndGet() >= 0) {
-                        results.add(executor.run());    
+                    while (count.decrementAndGet() >= 0) {
+                        results.add(executor.run());
                     }
                     return results;
                 }
@@ -68,10 +67,11 @@ public class ConcurrentDuel<T> {
         }
         return results;
     }
+
     public void duel(DuelJudge<T> judge, final DuelExecutor<T> executor, int iterations) throws InterruptedException, ExecutionException {
         duel(judge, executor, iterations, numExecutorThreads);
     }
-    
+
     public void duel(DuelJudge<T> judge, final DuelExecutor<T> executor, int iterations, int threadCount) throws InterruptedException, ExecutionException {
         T firstRun = executor.run();
         List<T> runDuel = runDuel(executor, iterations, threadCount);
@@ -79,11 +79,11 @@ public class ConcurrentDuel<T> {
             judge.judge(firstRun, t);
         }
     }
-    
+
     public static interface DuelExecutor<T> {
         public T run();
     }
-    
+
     public static interface DuelJudge<T> {
         public void judge(T firstRun, T result);
     }

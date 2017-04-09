@@ -40,12 +40,7 @@ public class ValueCountTests extends ElasticsearchIntegrationTest {
         createIndex("idx");
         createIndex("idx_unmapped");
         for (int i = 0; i < 10; i++) {
-            client().prepareIndex("idx", "type", ""+i).setSource(jsonBuilder()
-                    .startObject()
-                    .field("value", i+1)
-                    .startArray("values").value(i+2).value(i+3).endArray()
-                    .endObject())
-                    .execute().actionGet();
+            client().prepareIndex("idx", "type", "" + i).setSource(jsonBuilder().startObject().field("value", i + 1).startArray("values").value(i + 2).value(i + 3).endArray().endObject()).execute().actionGet();
         }
         client().admin().indices().prepareFlush().execute().actionGet();
         client().admin().indices().prepareRefresh().execute().actionGet();
@@ -54,10 +49,7 @@ public class ValueCountTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void unmapped() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx_unmapped")
-                .setQuery(matchAllQuery())
-                .addAggregation(count("count").field("value"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx_unmapped").setQuery(matchAllQuery()).addAggregation(count("count").field("value")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(0l));
 
@@ -70,10 +62,7 @@ public class ValueCountTests extends ElasticsearchIntegrationTest {
     @Test
     public void singleValuedField() throws Exception {
 
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(count("count").field("value"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(count("count").field("value")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -85,10 +74,7 @@ public class ValueCountTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedField_PartiallyUnmapped() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx", "idx_unmapped")
-                .setQuery(matchAllQuery())
-                .addAggregation(count("count").field("value"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx", "idx_unmapped").setQuery(matchAllQuery()).addAggregation(count("count").field("value")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -101,10 +87,7 @@ public class ValueCountTests extends ElasticsearchIntegrationTest {
     @Test
     public void multiValuedField() throws Exception {
 
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(count("count").field("values"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(count("count").field("values")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -116,10 +99,7 @@ public class ValueCountTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedScript() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(count("count").script("doc['value'].value"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(count("count").script("doc['value'].value")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -131,10 +111,7 @@ public class ValueCountTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedScript() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(count("count").script("doc['values'].values"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(count("count").script("doc['values'].values")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -146,10 +123,7 @@ public class ValueCountTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void singleValuedScriptWithParams() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(count("count").script("doc[s].value").param("s", "value"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(count("count").script("doc[s].value").param("s", "value")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 
@@ -161,10 +135,7 @@ public class ValueCountTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void multiValuedScriptWithParams() throws Exception {
-        SearchResponse searchResponse = client().prepareSearch("idx")
-                .setQuery(matchAllQuery())
-                .addAggregation(count("count").script("doc[s].values").param("s", "values"))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch("idx").setQuery(matchAllQuery()).addAggregation(count("count").script("doc[s].values").param("s", "values")).execute().actionGet();
 
         assertThat(searchResponse.getHits().getTotalHits(), equalTo(10l));
 

@@ -34,7 +34,7 @@ public class FileUtilsTests extends ElasticsearchTestCase {
 
     @Test
     public void testLoadSingleYamlSuite() throws Exception {
-        Map<String,Set<File>> yamlSuites = FileUtils.findYamlSuites("/rest-api-spec/test", "/rest-api-spec/test/get/10_basic");
+        Map<String, Set<File>> yamlSuites = FileUtils.findYamlSuites("/rest-api-spec/test", "/rest-api-spec/test/get/10_basic");
         assertSingleFile(yamlSuites, "get", "10_basic.yaml");
 
         //the path prefix is optional
@@ -49,7 +49,7 @@ public class FileUtilsTests extends ElasticsearchTestCase {
     @Test
     public void testLoadMultipleYamlSuites() throws Exception {
         //single directory
-        Map<String,Set<File>> yamlSuites = FileUtils.findYamlSuites("/rest-api-spec/test", "get");
+        Map<String, Set<File>> yamlSuites = FileUtils.findYamlSuites("/rest-api-spec/test", "get");
         assertThat(yamlSuites, notNullValue());
         assertThat(yamlSuites.size(), equalTo(1));
         assertThat(yamlSuites.containsKey("get"), equalTo(true));

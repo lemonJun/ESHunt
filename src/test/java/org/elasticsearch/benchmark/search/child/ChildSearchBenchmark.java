@@ -50,16 +50,10 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 public class ChildSearchBenchmark {
 
     public static void main(String[] args) throws Exception {
-        Settings settings = settingsBuilder()
-                .put("index.refresh_interval", "-1")
-                .put("gateway.type", "local")
-                .put(SETTING_NUMBER_OF_SHARDS, 1)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put("index.refresh_interval", "-1").put("gateway.type", "local").put(SETTING_NUMBER_OF_SHARDS, 1).put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
         String clusterName = ChildSearchBenchmark.class.getSimpleName();
-        Node node1 = nodeBuilder().clusterName(clusterName)
-                .settings(settingsBuilder().put(settings).put("name", "node1")).node();
+        Node node1 = nodeBuilder().clusterName(clusterName).settings(settingsBuilder().put(settings).put("name", "node1")).node();
         Client client = node1.client();
 
         long COUNT = SizeValue.parseSizeValue("10m").singles();
@@ -72,9 +66,7 @@ public class ChildSearchBenchmark {
         client.admin().cluster().prepareHealth(indexName).setWaitForGreenStatus().setTimeout("10s").execute().actionGet();
         try {
             client.admin().indices().create(createIndexRequest(indexName)).actionGet();
-            client.admin().indices().preparePutMapping(indexName).setType("child").setSource(XContentFactory.jsonBuilder().startObject().startObject("child")
-                    .startObject("_parent").field("type", "parent").endObject()
-                    .endObject().endObject()).execute().actionGet();
+            client.admin().indices().preparePutMapping(indexName).setType("child").setSource(XContentFactory.jsonBuilder().startObject().startObject("child").startObject("_parent").field("type", "parent").endObject().endObject().endObject()).execute().actionGet();
             Thread.sleep(5000);
 
             StopWatch stopWatch = new StopWatch().start();
@@ -87,12 +79,9 @@ public class ChildSearchBenchmark {
                 BulkRequestBuilder request = client.prepareBulk();
                 for (int j = 0; j < BATCH; j++) {
                     counter++;
-                    request.add(Requests.indexRequest(indexName).type("parent").id(Integer.toString(counter))
-                            .source(parentSource(counter, "test" + counter)));
+                    request.add(Requests.indexRequest(indexName).type("parent").id(Integer.toString(counter)).source(parentSource(counter, "test" + counter)));
                     for (int k = 0; k < CHILD_COUNT; k++) {
-                        request.add(Requests.indexRequest(indexName).type("child").id(Integer.toString(counter) + "_" + k)
-                                .parent(Integer.toString(counter))
-                                .source(childSource(counter, "tag" + k)));
+                        request.add(Requests.indexRequest(indexName).type("child").id(Integer.toString(counter) + "_" + k).parent(Integer.toString(counter)).source(childSource(counter, "tag" + k)));
                     }
                 }
                 BulkResponse response = request.execute().actionGet();
@@ -137,21 +126,13 @@ public class ChildSearchBenchmark {
         }
         System.out.println("--> Just Child Query Avg: " + (totalQueryTime / QUERY_COUNT) + "ms");
 
-        NodesStatsResponse statsResponse = client.admin().cluster().prepareNodesStats()
-                .setJvm(true).execute().actionGet();
+        NodesStatsResponse statsResponse = client.admin().cluster().prepareNodesStats().setJvm(true).execute().actionGet();
         System.out.println("--> Committed heap size: " + statsResponse.getNodes()[0].getJvm().getMem().getHeapCommitted());
         System.out.println("--> Used heap size: " + statsResponse.getNodes()[0].getJvm().getMem().getHeapUsed());
-        
+
         // run parent child constant query
         for (int j = 0; j < QUERY_WARMUP; j++) {
-            SearchResponse searchResponse = client.prepareSearch(indexName)
-                    .setQuery(
-                            filteredQuery(
-                                    matchAllQuery(),
-                                    hasChildFilter("child", termQuery("tag", "tag1"))
-                            )
-                    )
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(filteredQuery(matchAllQuery(), hasChildFilter("child", termQuery("tag", "tag1")))).execute().actionGet();
             if (searchResponse.getFailedShards() > 0) {
                 System.err.println("Search Failures " + Arrays.toString(searchResponse.getShardFailures()));
             }
@@ -162,14 +143,7 @@ public class ChildSearchBenchmark {
 
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
-            SearchResponse searchResponse = client.prepareSearch(indexName)
-                    .setQuery(
-                            filteredQuery(
-                                    matchAllQuery(),
-                                    hasChildFilter("child", termQuery("tag", "tag1"))
-                            )
-                    )
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(filteredQuery(matchAllQuery(), hasChildFilter("child", termQuery("tag", "tag1")))).execute().actionGet();
             if (searchResponse.getFailedShards() > 0) {
                 System.err.println("Search Failures " + Arrays.toString(searchResponse.getShardFailures()));
             }
@@ -183,14 +157,7 @@ public class ChildSearchBenchmark {
         System.out.println("--> Running has_child filter with match_all child query");
         totalQueryTime = 0;
         for (int j = 1; j <= QUERY_COUNT; j++) {
-            SearchResponse searchResponse = client.prepareSearch(indexName)
-                    .setQuery(
-                            filteredQuery(
-                                    matchAllQuery(),
-                                    hasChildFilter("child", matchAllQuery())
-                            )
-                    )
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(filteredQuery(matchAllQuery(), hasChildFilter("child", matchAllQuery()))).execute().actionGet();
             if (searchResponse.getFailedShards() > 0) {
                 System.err.println("Search Failures " + Arrays.toString(searchResponse.getShardFailures()));
             }
@@ -204,9 +171,7 @@ public class ChildSearchBenchmark {
 
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
-            SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(
-                    filteredQuery(matchAllQuery(), hasChildFilter("child", termQuery("id", Integer.toString(j + 1))))
-            ).execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(filteredQuery(matchAllQuery(), hasChildFilter("child", termQuery("id", Integer.toString(j + 1))))).execute().actionGet();
             long expected = 1;
             if (searchResponse.getHits().totalHits() != expected) {
                 System.err.println("mismatch on hits");
@@ -218,9 +183,7 @@ public class ChildSearchBenchmark {
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
             double expected = Math.pow((j + 1), 3) * CHILD_COUNT;
-            SearchResponse searchResponse = client.prepareSearch(indexName)
-                    .setQuery(filteredQuery(matchAllQuery(), hasChildFilter("child", constantScoreQuery(rangeFilter("num").lte(expected)))))
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(filteredQuery(matchAllQuery(), hasChildFilter("child", constantScoreQuery(rangeFilter("num").lte(expected))))).execute().actionGet();
             if (searchResponse.getHits().totalHits() != expected) {
                 System.err.println("mismatch on hits: " + searchResponse.getHits().totalHits() + " != " + expected);
             }
@@ -230,14 +193,7 @@ public class ChildSearchBenchmark {
 
         // run parent child constant query
         for (int j = 0; j < QUERY_WARMUP; j++) {
-            SearchResponse searchResponse = client.prepareSearch(indexName)
-                    .setQuery(
-                            filteredQuery(
-                                    matchAllQuery(),
-                                    hasParentFilter("parent", termQuery("name", "test1"))
-                            )
-                    )
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(filteredQuery(matchAllQuery(), hasParentFilter("parent", termQuery("name", "test1")))).execute().actionGet();
             if (searchResponse.getFailedShards() > 0) {
                 System.err.println("Search Failures " + Arrays.toString(searchResponse.getShardFailures()));
             }
@@ -248,14 +204,7 @@ public class ChildSearchBenchmark {
 
         totalQueryTime = 0;
         for (int j = 1; j <= QUERY_COUNT; j++) {
-            SearchResponse searchResponse = client.prepareSearch(indexName)
-                    .setQuery(
-                            filteredQuery(
-                                    matchAllQuery(),
-                                    hasParentFilter("parent", termQuery("name", "test1"))
-                            )
-                    )
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(filteredQuery(matchAllQuery(), hasParentFilter("parent", termQuery("name", "test1")))).execute().actionGet();
             if (searchResponse.getFailedShards() > 0) {
                 System.err.println("Search Failures " + Arrays.toString(searchResponse.getShardFailures()));
             }
@@ -269,12 +218,7 @@ public class ChildSearchBenchmark {
         System.out.println("--> Running has_parent filter with match_all parent query ");
         totalQueryTime = 0;
         for (int j = 1; j <= QUERY_COUNT; j++) {
-            SearchResponse searchResponse = client.prepareSearch(indexName)
-                    .setQuery(filteredQuery(
-                            matchAllQuery(),
-                            hasParentFilter("parent", matchAllQuery())
-                    ))
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(filteredQuery(matchAllQuery(), hasParentFilter("parent", matchAllQuery()))).execute().actionGet();
             if (searchResponse.getFailedShards() > 0) {
                 System.err.println("Search Failures " + Arrays.toString(searchResponse.getShardFailures()));
             }
@@ -289,18 +233,18 @@ public class ChildSearchBenchmark {
         for (int j = 0; j < QUERY_WARMUP; j++) {
             SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(topChildrenQuery("child", termQuery("tag", "tag1"))).execute().actionGet();
             // we expect to have mismatch on hits here
-//            if (searchResponse.hits().totalHits() != COUNT) {
-//                System.err.println("mismatch on hits");
-//            }
+            //            if (searchResponse.hits().totalHits() != COUNT) {
+            //                System.err.println("mismatch on hits");
+            //            }
         }
 
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
             SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(topChildrenQuery("child", termQuery("tag", "tag1"))).execute().actionGet();
             // we expect to have mismatch on hits here
-//            if (searchResponse.hits().totalHits() != COUNT) {
-//                System.err.println("mismatch on hits");
-//            }
+            //            if (searchResponse.hits().totalHits() != COUNT) {
+            //                System.err.println("mismatch on hits");
+            //            }
             totalQueryTime += searchResponse.getTookInMillis();
         }
         System.out.println("--> top_children Query Avg: " + (totalQueryTime / QUERY_COUNT) + "ms");
@@ -310,24 +254,23 @@ public class ChildSearchBenchmark {
         for (int j = 0; j < QUERY_WARMUP; j++) {
             SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(topChildrenQuery("child", matchAllQuery())).execute().actionGet();
             // we expect to have mismatch on hits here
-//            if (searchResponse.hits().totalHits() != COUNT) {
-//                System.err.println("mismatch on hits");
-//            }
+            //            if (searchResponse.hits().totalHits() != COUNT) {
+            //                System.err.println("mismatch on hits");
+            //            }
         }
 
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
             SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(topChildrenQuery("child", matchAllQuery())).execute().actionGet();
             // we expect to have mismatch on hits here
-//            if (searchResponse.hits().totalHits() != COUNT) {
-//                System.err.println("mismatch on hits");
-//            }
+            //            if (searchResponse.hits().totalHits() != COUNT) {
+            //                System.err.println("mismatch on hits");
+            //            }
             totalQueryTime += searchResponse.getTookInMillis();
         }
         System.out.println("--> top_children, with match_all Query Avg: " + (totalQueryTime / QUERY_COUNT) + "ms");
 
-        statsResponse = client.admin().cluster().prepareNodesStats()
-                .setJvm(true).setIndices(true).execute().actionGet();
+        statsResponse = client.admin().cluster().prepareNodesStats().setJvm(true).setIndices(true).execute().actionGet();
 
         System.out.println("--> Id cache size: " + statsResponse.getNodes()[0].getIndices().getIdCache().getMemorySize());
         System.out.println("--> Used heap size: " + statsResponse.getNodes()[0].getJvm().getMem().getHeapUsed());
@@ -350,7 +293,7 @@ public class ChildSearchBenchmark {
             totalQueryTime += searchResponse.getTookInMillis();
         }
         System.out.println("--> has_child Query Avg: " + (totalQueryTime / QUERY_COUNT) + "ms");
-        
+
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
             SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(hasChildQuery("child", matchAllQuery()).scoreType("max")).execute().actionGet();
@@ -361,7 +304,7 @@ public class ChildSearchBenchmark {
             totalQueryTime += searchResponse.getTookInMillis();
         }
         System.out.println("--> has_child query with match_all Query Avg: " + (totalQueryTime / QUERY_COUNT) + "ms");
-        
+
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
             SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(hasChildQuery("child", termQuery("id", Integer.toString(j + 1))).scoreType("max")).execute().actionGet();
@@ -372,7 +315,7 @@ public class ChildSearchBenchmark {
             totalQueryTime += searchResponse.getTookInMillis();
         }
         System.out.println("--> has_child query with single parent match Query Avg: " + (totalQueryTime / QUERY_COUNT) + "ms");
-        
+
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
             double expected = Math.pow((j + 1), 3) * CHILD_COUNT;
@@ -383,7 +326,7 @@ public class ChildSearchBenchmark {
             totalQueryTime += searchResponse.getTookInMillis();
         }
         System.out.println("--> has_child query with exponential parent results Query Avg: " + (totalQueryTime / QUERY_COUNT) + "ms");
-        
+
         /*System.out.println("--> Running has_parent query with score type");
         // run parent child score query
         for (int j = 0; j < QUERY_WARMUP; j++) {
@@ -392,7 +335,7 @@ public class ChildSearchBenchmark {
                 System.err.println("mismatch on hits");
             }
         }
-
+        
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
             SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(hasParentQuery("parent", termQuery("name", "test1")).scoreType("score")).execute().actionGet();
@@ -402,7 +345,7 @@ public class ChildSearchBenchmark {
             totalQueryTime += searchResponse.getTookInMillis();
         }
         System.out.println("--> has_parent Query Avg: " + (totalQueryTime / QUERY_COUNT) + "ms");
-
+        
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
             SearchResponse searchResponse = client.prepareSearch(indexName).setQuery(hasParentQuery("parent", matchAllQuery()).scoreType("score")).execute().actionGet();
@@ -414,8 +357,7 @@ public class ChildSearchBenchmark {
         System.out.println("--> has_parent query with match_all Query Avg: " + (totalQueryTime / QUERY_COUNT) + "ms");*/
 
         System.gc();
-        statsResponse = client.admin().cluster().prepareNodesStats()
-                .setJvm(true).setIndices(true).execute().actionGet();
+        statsResponse = client.admin().cluster().prepareNodesStats().setJvm(true).setIndices(true).execute().actionGet();
 
         System.out.println("--> Id cache size: " + statsResponse.getNodes()[0].getIndices().getIdCache().getMemorySize());
         System.out.println("--> Used heap size: " + statsResponse.getNodes()[0].getJvm().getMem().getHeapUsed());

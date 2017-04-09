@@ -50,26 +50,13 @@ public class CopyToMapperTests extends ElasticsearchSingleNodeTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCopyToFieldsParsing() throws Exception {
-        String mapping = jsonBuilder().startObject().startObject("type1").startObject("properties")
-                .startObject("copy_test")
-                .field("type", "string")
-                .array("copy_to", "another_field", "cyclic_test")
-                .endObject()
+        String mapping = jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("copy_test").field("type", "string").array("copy_to", "another_field", "cyclic_test").endObject()
 
-                .startObject("another_field")
-                .field("type", "string")
-                .endObject()
+                        .startObject("another_field").field("type", "string").endObject()
 
-                .startObject("cyclic_test")
-                .field("type", "string")
-                .array("copy_to", "copy_test")
-                .endObject()
+                        .startObject("cyclic_test").field("type", "string").array("copy_to", "copy_test").endObject()
 
-                .startObject("int_to_str_test")
-                .field("type", "integer")
-                .array("copy_to",  "another_field", "new_field")
-                .endObject()
-                .endObject().endObject().endObject().string();
+                        .startObject("int_to_str_test").field("type", "integer").array("copy_to", "another_field", "new_field").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
         FieldMapper fieldMapper = docMapper.mappers().name("copy_test").mapper();
@@ -89,11 +76,7 @@ public class CopyToMapperTests extends ElasticsearchSingleNodeTest {
         assertThat(copyToList.get(1).toString(), equalTo("cyclic_test"));
 
         // Check data parsing
-        BytesReference json = jsonBuilder().startObject()
-                .field("copy_test", "foo")
-                .field("cyclic_test", "bar")
-                .field("int_to_str_test", 42)
-                .endObject().bytes();
+        BytesReference json = jsonBuilder().startObject().field("copy_test", "foo").field("cyclic_test", "bar").field("int_to_str_test", 42).endObject().bytes();
 
         ParseContext.Document doc = docMapper.parse("type1", "1", json).rootDoc();
         assertThat(doc.getFields("copy_test").length, equalTo(2));
@@ -123,28 +106,15 @@ public class CopyToMapperTests extends ElasticsearchSingleNodeTest {
     public void testCopyToFieldsInnerObjectParsing() throws Exception {
         String mapping = jsonBuilder().startObject().startObject("type1").startObject("properties")
 
-                .startObject("copy_test")
-                .field("type", "string")
-                .field("copy_to", "very.inner.field")
-                .endObject()
+                        .startObject("copy_test").field("type", "string").field("copy_to", "very.inner.field").endObject()
 
-                .startObject("very")
-                .field("type", "object")
-                .startObject("properties")
-                .startObject("inner")
-                .field("type", "object")
-                .endObject()
-                .endObject()
-                .endObject()
+                        .startObject("very").field("type", "object").startObject("properties").startObject("inner").field("type", "object").endObject().endObject().endObject()
 
-                .endObject().endObject().endObject().string();
+                        .endObject().endObject().endObject().string();
 
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        BytesReference json = jsonBuilder().startObject()
-                .field("copy_test", "foo")
-                .startObject("foo").startObject("bar").field("baz", "zoo").endObject().endObject()
-                .endObject().bytes();
+        BytesReference json = jsonBuilder().startObject().field("copy_test", "foo").startObject("foo").startObject("bar").field("baz", "zoo").endObject().endObject().endObject().bytes();
 
         ParseContext.Document doc = docMapper.parse("type1", "1", json).rootDoc();
         assertThat(doc.getFields("copy_test").length, equalTo(1));
@@ -160,18 +130,13 @@ public class CopyToMapperTests extends ElasticsearchSingleNodeTest {
     public void testCopyToFieldsNonExistingInnerObjectParsing() throws Exception {
         String mapping = jsonBuilder().startObject().startObject("type1").startObject("properties")
 
-                .startObject("copy_test")
-                .field("type", "string")
-                .field("copy_to", "very.inner.field")
-                .endObject()
+                        .startObject("copy_test").field("type", "string").field("copy_to", "very.inner.field").endObject()
 
-                .endObject().endObject().endObject().string();
+                        .endObject().endObject().endObject().string();
 
         DocumentMapper docMapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        BytesReference json = jsonBuilder().startObject()
-                .field("copy_test", "foo")
-                .endObject().bytes();
+        BytesReference json = jsonBuilder().startObject().field("copy_test", "foo").endObject().bytes();
 
         try {
             docMapper.parse("type1", "1", json).rootDoc();
@@ -186,21 +151,15 @@ public class CopyToMapperTests extends ElasticsearchSingleNodeTest {
 
         String mappingBefore = jsonBuilder().startObject().startObject("type1").startObject("properties")
 
-                .startObject("copy_test")
-                .field("type", "string")
-                .array("copy_to", "foo", "bar")
-                .endObject()
+                        .startObject("copy_test").field("type", "string").array("copy_to", "foo", "bar").endObject()
 
-                .endObject().endObject().endObject().string();
+                        .endObject().endObject().endObject().string();
 
         String mappingAfter = jsonBuilder().startObject().startObject("type1").startObject("properties")
 
-                .startObject("copy_test")
-                .field("type", "string")
-                .array("copy_to", "baz", "bar")
-                .endObject()
+                        .startObject("copy_test").field("type", "string").array("copy_to", "baz", "bar").endObject()
 
-                .endObject().endObject().endObject().string();
+                        .endObject().endObject().endObject().string();
 
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
         DocumentMapper docMapperBefore = parser.parse(mappingBefore);
@@ -210,7 +169,6 @@ public class CopyToMapperTests extends ElasticsearchSingleNodeTest {
         assertThat(fields.size(), equalTo(2));
         assertThat(fields.get(0), equalTo("foo"));
         assertThat(fields.get(1), equalTo("bar"));
-
 
         DocumentMapper docMapperAfter = parser.parse(mappingAfter);
 
@@ -230,24 +188,11 @@ public class CopyToMapperTests extends ElasticsearchSingleNodeTest {
     public void testCopyToNestedField() throws Exception {
         IndexService indexService = createIndex("test");
         DocumentMapperParser parser = indexService.mapperService().documentMapperParser();
-        for (boolean mapped : new boolean[] {true, false}) {
-            XContentBuilder mapping = jsonBuilder().startObject()
-                    .startObject("type")
-                        .startObject("properties")
-                            .startObject("n1")
-                                .field("type", "nested")
-                                .startObject("properties")
-                                    .startObject("n2")
-                                        .field("type", "nested")
-                                        .startObject("properties")
-                                            .startObject("source")
-                                                .field("type", "long")
-                                                .startArray("copy_to")
-                                                    .value("target") // should go to the root doc
-                                                    .value("n1.target") // should go to the parent doc
-                                                    .value("n1.n2.target") // should go to the current doc
-                                                .endArray()
-                                            .endObject();
+        for (boolean mapped : new boolean[] { true, false }) {
+            XContentBuilder mapping = jsonBuilder().startObject().startObject("type").startObject("properties").startObject("n1").field("type", "nested").startObject("properties").startObject("n2").field("type", "nested").startObject("properties").startObject("source").field("type", "long").startArray("copy_to").value("target") // should go to the root doc
+                            .value("n1.target") // should go to the parent doc
+                            .value("n1.n2.target") // should go to the current doc
+                            .endArray().endObject();
             for (int i = 0; i < 3; ++i) {
                 if (mapped) {
                     mapping = mapping.startObject("target").field("type", "long").endObject();
@@ -258,28 +203,7 @@ public class CopyToMapperTests extends ElasticsearchSingleNodeTest {
 
             DocumentMapper mapper = parser.parse(mapping.string());
 
-            XContentBuilder jsonDoc = XContentFactory.jsonBuilder()
-                    .startObject()
-                        .startArray("n1")
-                            .startObject()
-                                .startArray("n2")
-                                    .startObject()
-                                        .field("source", 3)
-                                    .endObject()
-                                    .startObject()
-                                        .field("source", 5)
-                                    .endObject()
-                                .endArray()
-                            .endObject()
-                            .startObject()
-                                .startArray("n2")
-                                    .startObject()
-                                        .field("source", 7)
-                                    .endObject()
-                                .endArray()
-                            .endObject()
-                        .endArray()
-                    .endObject();
+            XContentBuilder jsonDoc = XContentFactory.jsonBuilder().startObject().startArray("n1").startObject().startArray("n2").startObject().field("source", 3).endObject().startObject().field("source", 5).endObject().endArray().endObject().startObject().startArray("n2").startObject().field("source", 7).endObject().endArray().endObject().endArray().endObject();
 
             ParsedDocument doc = mapper.parse("type", "1", jsonDoc.bytes());
             assertEquals(6, doc.docs().size());

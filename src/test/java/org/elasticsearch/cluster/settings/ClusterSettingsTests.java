@@ -45,10 +45,7 @@ public class ClusterSettingsTests extends ElasticsearchIntegrationTest {
         String key1 = "no_idea_what_you_are_talking_about";
         int value1 = 10;
 
-        ClusterUpdateSettingsResponse response = client().admin().cluster()
-                .prepareUpdateSettings()
-                .setTransientSettings(ImmutableSettings.builder().put(key1, value1).build())
-                .get();
+        ClusterUpdateSettingsResponse response = client().admin().cluster().prepareUpdateSettings().setTransientSettings(ImmutableSettings.builder().put(key1, value1).build()).get();
 
         assertAcked(response);
         assertThat(response.getTransientSettings().getAsMap().entrySet(), Matchers.emptyIterable());
@@ -65,12 +62,7 @@ public class ClusterSettingsTests extends ElasticsearchIntegrationTest {
         Settings transientSettings1 = ImmutableSettings.builder().put(key1, value1).build();
         Settings persistentSettings1 = ImmutableSettings.builder().put(key2, value2).build();
 
-        ClusterUpdateSettingsResponse response1 = client().admin().cluster()
-                .prepareUpdateSettings()
-                .setTransientSettings(transientSettings1)
-                .setPersistentSettings(persistentSettings1)
-                .execute()
-                .actionGet();
+        ClusterUpdateSettingsResponse response1 = client().admin().cluster().prepareUpdateSettings().setTransientSettings(transientSettings1).setPersistentSettings(persistentSettings1).execute().actionGet();
 
         assertAcked(response1);
         assertThat(response1.getTransientSettings().get(key1), notNullValue());
@@ -81,12 +73,7 @@ public class ClusterSettingsTests extends ElasticsearchIntegrationTest {
         Settings transientSettings2 = ImmutableSettings.builder().put(key1, value1).put(key2, value2).build();
         Settings persistentSettings2 = ImmutableSettings.EMPTY;
 
-        ClusterUpdateSettingsResponse response2 = client().admin().cluster()
-                .prepareUpdateSettings()
-                .setTransientSettings(transientSettings2)
-                .setPersistentSettings(persistentSettings2)
-                .execute()
-                .actionGet();
+        ClusterUpdateSettingsResponse response2 = client().admin().cluster().prepareUpdateSettings().setTransientSettings(transientSettings2).setPersistentSettings(persistentSettings2).execute().actionGet();
 
         assertAcked(response2);
         assertThat(response2.getTransientSettings().get(key1), notNullValue());
@@ -97,12 +84,7 @@ public class ClusterSettingsTests extends ElasticsearchIntegrationTest {
         Settings transientSettings3 = ImmutableSettings.EMPTY;
         Settings persistentSettings3 = ImmutableSettings.builder().put(key1, value1).put(key2, value2).build();
 
-        ClusterUpdateSettingsResponse response3 = client().admin().cluster()
-                .prepareUpdateSettings()
-                .setTransientSettings(transientSettings3)
-                .setPersistentSettings(persistentSettings3)
-                .execute()
-                .actionGet();
+        ClusterUpdateSettingsResponse response3 = client().admin().cluster().prepareUpdateSettings().setTransientSettings(transientSettings3).setPersistentSettings(persistentSettings3).execute().actionGet();
 
         assertAcked(response3);
         assertThat(response3.getTransientSettings().get(key1), nullValue());
@@ -118,28 +100,19 @@ public class ClusterSettingsTests extends ElasticsearchIntegrationTest {
 
         assertThat(discoverySettings.getPublishTimeout(), equalTo(DiscoverySettings.DEFAULT_PUBLISH_TIMEOUT));
 
-        ClusterUpdateSettingsResponse response = client().admin().cluster()
-                .prepareUpdateSettings()
-                .setTransientSettings(ImmutableSettings.builder().put(DiscoverySettings.PUBLISH_TIMEOUT, "1s").build())
-                .get();
+        ClusterUpdateSettingsResponse response = client().admin().cluster().prepareUpdateSettings().setTransientSettings(ImmutableSettings.builder().put(DiscoverySettings.PUBLISH_TIMEOUT, "1s").build()).get();
 
         assertAcked(response);
         assertThat(response.getTransientSettings().getAsMap().get(DiscoverySettings.PUBLISH_TIMEOUT), equalTo("1s"));
         assertThat(discoverySettings.getPublishTimeout().seconds(), equalTo(1l));
 
-        response = client().admin().cluster()
-                .prepareUpdateSettings()
-                .setTransientSettings(ImmutableSettings.builder().put(DiscoverySettings.PUBLISH_TIMEOUT, "whatever").build())
-                .get();
+        response = client().admin().cluster().prepareUpdateSettings().setTransientSettings(ImmutableSettings.builder().put(DiscoverySettings.PUBLISH_TIMEOUT, "whatever").build()).get();
 
         assertAcked(response);
         assertThat(response.getTransientSettings().getAsMap().entrySet(), Matchers.emptyIterable());
         assertThat(discoverySettings.getPublishTimeout().seconds(), equalTo(1l));
 
-        response = client().admin().cluster()
-                .prepareUpdateSettings()
-                .setTransientSettings(ImmutableSettings.builder().put(DiscoverySettings.PUBLISH_TIMEOUT, -1).build())
-                .get();
+        response = client().admin().cluster().prepareUpdateSettings().setTransientSettings(ImmutableSettings.builder().put(DiscoverySettings.PUBLISH_TIMEOUT, -1).build()).get();
 
         assertAcked(response);
         assertThat(response.getTransientSettings().getAsMap().entrySet(), Matchers.emptyIterable());
@@ -154,9 +127,7 @@ public class ClusterSettingsTests extends ElasticsearchIntegrationTest {
         String key2 = "cluster.routing.allocation.node_concurrent_recoveries";
         Settings persistentSettings = ImmutableSettings.builder().put(key2, "5").build();
 
-        ClusterUpdateSettingsRequestBuilder request = client().admin().cluster().prepareUpdateSettings()
-                                                                                .setTransientSettings(transientSettings)
-                                                                                .setPersistentSettings(persistentSettings);
+        ClusterUpdateSettingsRequestBuilder request = client().admin().cluster().prepareUpdateSettings().setTransientSettings(transientSettings).setPersistentSettings(persistentSettings);
 
         // Cluster settings updates are blocked when the cluster is read only
         try {

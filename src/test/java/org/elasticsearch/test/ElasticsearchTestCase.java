@@ -161,7 +161,6 @@ public abstract class ElasticsearchTestCase extends AbstractRandomizedTest {
         }
     }
 
-
     public static boolean awaitBusy(Predicate<?> breakPredicate) throws InterruptedException {
         return awaitBusy(breakPredicate, 10, TimeUnit.SECONDS);
     }
@@ -184,7 +183,7 @@ public abstract class ElasticsearchTestCase extends AbstractRandomizedTest {
         return breakPredicate.apply(null);
     }
 
-    private static final String[] numericTypes = new String[]{"byte", "short", "integer", "long"};
+    private static final String[] numericTypes = new String[] { "byte", "short", "integer", "long" };
 
     public static String randomNumericType(Random random) {
         return numericTypes[random.nextInt(numericTypes.length)];
@@ -247,7 +246,7 @@ public abstract class ElasticsearchTestCase extends AbstractRandomizedTest {
         } else {
             // CBOR was added in 1.2.0 earlier version can't derive the format
             XContentType type = randomFrom(XContentType.values());
-            while(type == XContentType.CBOR) {
+            while (type == XContentType.CBOR) {
                 type = randomFrom(XContentType.values());
             }
             return type;
@@ -301,7 +300,7 @@ public abstract class ElasticsearchTestCase extends AbstractRandomizedTest {
         assert version.before(Version.CURRENT) : "Version: " + version + " should be before: " + Version.CURRENT + " but wasn't";
         return version;
     }
-    
+
     /**
      * A random {@link Version}.
      *
@@ -310,7 +309,7 @@ public abstract class ElasticsearchTestCase extends AbstractRandomizedTest {
     public static Version randomVersion() {
         return randomVersion(getRandom());
     }
-    
+
     /**
      * A random {@link Version}.
      * 
@@ -322,7 +321,7 @@ public abstract class ElasticsearchTestCase extends AbstractRandomizedTest {
     public static Version randomVersion(Random random) {
         return SORTED_VERSIONS.get(random.nextInt(SORTED_VERSIONS.size()));
     }
-    
+
     /**
      * Returns immutable list of all known versions.
      */
@@ -387,7 +386,6 @@ public abstract class ElasticsearchTestCase extends AbstractRandomizedTest {
             this.parent = parent;
         }
 
-
         @Override
         public void uncaughtException(Thread t, Throwable e) {
             if (e instanceof EsRejectedExecutionException) {
@@ -432,12 +430,7 @@ public abstract class ElasticsearchTestCase extends AbstractRandomizedTest {
     }
 
     private static String threadName(Thread t) {
-        return "Thread[" +
-                "id=" + t.getId() +
-                ", name=" + t.getName() +
-                ", state=" + t.getState() +
-                ", group=" + groupName(t.getThreadGroup()) +
-                "]";
+        return "Thread[" + "id=" + t.getId() + ", name=" + t.getName() + ", state=" + t.getState() + ", group=" + groupName(t.getThreadGroup()) + "]";
     }
 
     private static String groupName(ThreadGroup threadGroup) {
@@ -467,13 +460,12 @@ public abstract class ElasticsearchTestCase extends AbstractRandomizedTest {
         return generateRandomStringArray(maxArraySize, maxStringSize, false);
     }
 
-
     /**
      * If a test is annotated with {@link org.elasticsearch.test.ElasticsearchTestCase.CompatibilityVersion}
      * all randomized settings will only contain settings or mappings which are compatible with the specified version ID.
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.TYPE})
+    @Target({ ElementType.TYPE })
     @Ignore
     public @interface CompatibilityVersion {
         int version();
@@ -483,7 +475,7 @@ public abstract class ElasticsearchTestCase extends AbstractRandomizedTest {
      * Most tests don't use {@link FieldCache} but some of them might do.
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.TYPE})
+    @Target({ ElementType.TYPE })
     @Ignore
     public @interface UsesLuceneFieldCacheOnPurpose {
     }
@@ -512,7 +504,7 @@ public abstract class ElasticsearchTestCase extends AbstractRandomizedTest {
         }
         CompatibilityVersion annotation = clazz.getAnnotation(CompatibilityVersion.class);
         if (annotation != null) {
-            return  Version.smallest(Version.fromId(annotation.version()), compatibiltyVersion(clazz.getSuperclass()));
+            return Version.smallest(Version.fromId(annotation.version()), compatibiltyVersion(clazz.getSuperclass()));
         }
         return compatibiltyVersion(clazz.getSuperclass());
     }
@@ -524,7 +516,6 @@ public abstract class ElasticsearchTestCase extends AbstractRandomizedTest {
         }
         return System.getProperty(TESTS_BACKWARDS_COMPATIBILITY_VERSION);
     }
-
 
     public static boolean terminate(ExecutorService... services) throws InterruptedException {
         boolean terminated = true;

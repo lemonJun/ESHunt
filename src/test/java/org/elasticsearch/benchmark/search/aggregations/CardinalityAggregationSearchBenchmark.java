@@ -56,67 +56,29 @@ public class CardinalityAggregationSearchBenchmark {
     private static final int ITERS = 5;
 
     public static void main(String[] args) {
-        Settings settings = settingsBuilder()
-                .put("index.refresh_interval", "-1")
-                .put(SETTING_NUMBER_OF_SHARDS, 5)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put("index.refresh_interval", "-1").put(SETTING_NUMBER_OF_SHARDS, 5).put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
         Node[] nodes = new Node[1];
         for (int i = 0; i < nodes.length; i++) {
-            nodes[i] = nodeBuilder().clusterName(CLUSTER_NAME)
-                    .settings(settingsBuilder().put(settings).put("name", "node" + i))
-                    .node();
+            nodes[i] = nodeBuilder().clusterName(CLUSTER_NAME).settings(settingsBuilder().put(settings).put("name", "node" + i)).node();
         }
 
-        Node clientNode = nodeBuilder()
-                .clusterName(CLUSTER_NAME)
-                .settings(settingsBuilder().put(settings).put("name", "client")).client(true).node();
+        Node clientNode = nodeBuilder().clusterName(CLUSTER_NAME).settings(settingsBuilder().put(settings).put("name", "client")).client(true).node();
 
         Client client = clientNode.client();
 
         try {
-            client.admin().indices().create(createIndexRequest("index").settings(settings).mapping("type",
-                    jsonBuilder().startObject().startObject("type").startObject("properties")
-                        .startObject("low_card_str_value")
-                            .field("type", "multi_field")
-                            .startObject("fields")
-                                .startObject("low_card_str_value")
-                                    .field("type", "string")
-                                .endObject()
-                                .startObject("hash")
-                                    .field("type", "murmur3")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                        .startObject("high_card_str_value")
-                            .field("type", "multi_field")
-                            .startObject("fields")
-                                .startObject("high_card_str_value")
-                                    .field("type", "string")
-                                .endObject()
-                                .startObject("hash")
-                                    .field("type", "murmur3")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                        .startObject("low_card_num_value")
-                            .field("type", "long")
-                        .endObject()
-                        .startObject("high_card_num_value")
-                            .field("type", "long")
-                        .endObject()
-                    .endObject().endObject().endObject())).actionGet();
+            client.admin().indices().create(createIndexRequest("index").settings(settings).mapping("type", jsonBuilder().startObject().startObject("type").startObject("properties").startObject("low_card_str_value").field("type", "multi_field").startObject("fields").startObject("low_card_str_value").field("type", "string").endObject().startObject("hash").field("type", "murmur3").endObject().endObject().endObject().startObject("high_card_str_value").field("type", "multi_field").startObject("fields").startObject("high_card_str_value").field("type", "string").endObject().startObject("hash").field("type", "murmur3").endObject().endObject().endObject().startObject("low_card_num_value").field("type", "long").endObject().startObject("high_card_num_value").field("type", "long").endObject().endObject().endObject().endObject())).actionGet();
 
             System.out.println("Indexing " + NUM_DOCS + " documents");
 
             StopWatch stopWatch = new StopWatch().start();
-            for (int i = 0; i < NUM_DOCS; ) {
+            for (int i = 0; i < NUM_DOCS;) {
                 BulkRequestBuilder request = client.prepareBulk();
                 for (int j = 0; j < BATCH && i < NUM_DOCS; ++j) {
                     final int lowCard = RandomInts.randomInt(R, LOW_CARD);
                     final int highCard = RandomInts.randomInt(R, HIGH_CARD);
-                    request.add(client.prepareIndex("index", "type", Integer.toString(i)).setSource("low_card_str_value", "str" + lowCard, "high_card_str_value", "str" + highCard, "low_card_num_value", lowCard , "high_card_num_value", highCard));
+                    request.add(client.prepareIndex("index", "type", Integer.toString(i)).setSource("low_card_str_value", "str" + lowCard, "high_card_str_value", "str" + highCard, "low_card_num_value", lowCard, "high_card_num_value", highCard));
                     ++i;
                 }
                 BulkResponse response = request.execute().actionGet();
@@ -144,7 +106,7 @@ public class CardinalityAggregationSearchBenchmark {
             if (i >= WARM) {
                 System.out.println("RUN " + (i - WARM));
             }
-            for (String field : new String[] {"low_card_str_value", "low_card_str_value.hash", "high_card_str_value", "high_card_str_value.hash", "low_card_num_value", "high_card_num_value"}) {
+            for (String field : new String[] { "low_card_str_value", "low_card_str_value.hash", "high_card_str_value", "high_card_str_value.hash", "low_card_num_value", "high_card_num_value" }) {
                 long start = System.nanoTime();
                 SearchResponse resp = null;
                 for (int j = 0; j < ITERS; ++j) {

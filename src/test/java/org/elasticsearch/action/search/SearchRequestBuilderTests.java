@@ -111,15 +111,7 @@ public class SearchRequestBuilderTests extends ElasticsearchTestCase {
 
     @Test
     public void testThatToStringDoesntWipeRequestSource() {
-        String source = "{\n" +
-                "            \"query\" : {\n" +
-                "            \"match\" : {\n" +
-                "                \"field\" : {\n" +
-                "                    \"query\" : \"value\"" +
-                "                }\n" +
-                "            }\n" +
-                "        }\n" +
-                "        }";
+        String source = "{\n" + "            \"query\" : {\n" + "            \"match\" : {\n" + "                \"field\" : {\n" + "                    \"query\" : \"value\"" + "                }\n" + "            }\n" + "        }\n" + "        }";
         SearchRequestBuilder searchRequestBuilder = new SearchRequestBuilder(client).setSource(source);
         String preToString = searchRequestBuilder.request().source().toUtf8();
         assertThat(searchRequestBuilder.toString(), equalTo(source));

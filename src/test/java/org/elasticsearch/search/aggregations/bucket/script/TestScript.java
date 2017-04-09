@@ -22,7 +22,7 @@ package org.elasticsearch.search.aggregations.bucket.script;
 import org.elasticsearch.script.ExecutableScript;
 import org.elasticsearch.search.aggregations.bucket.significant.heuristics.ScriptHeuristic;
 
-public abstract class TestScript implements ExecutableScript{
+public abstract class TestScript implements ExecutableScript {
 
     ScriptHeuristic.LongAccessor _subset_freq;
     ScriptHeuristic.LongAccessor _subset_size;
@@ -35,16 +35,16 @@ public abstract class TestScript implements ExecutableScript{
     @Override
     public void setNextVar(String name, Object value) {
         if (name.equals("_subset_freq")) {
-            _subset_freq = (ScriptHeuristic.LongAccessor)value;
+            _subset_freq = (ScriptHeuristic.LongAccessor) value;
         }
         if (name.equals("_subset_size")) {
-            _subset_size = (ScriptHeuristic.LongAccessor)value;
+            _subset_size = (ScriptHeuristic.LongAccessor) value;
         }
         if (name.equals("_superset_freq")) {
-            _superset_freq = (ScriptHeuristic.LongAccessor)value;
+            _superset_freq = (ScriptHeuristic.LongAccessor) value;
         }
         if (name.equals("_superset_size")) {
-            _superset_size = (ScriptHeuristic.LongAccessor)value;
+            _superset_size = (ScriptHeuristic.LongAccessor) value;
         }
     }
 

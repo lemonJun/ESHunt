@@ -50,7 +50,7 @@ public class PluginJsonFilterParser extends AbstractIndexComponent implements Fi
 
     @Override
     public String[] names() {
-        return new String[]{this.name};
+        return new String[] { this.name };
     }
 
     @Override

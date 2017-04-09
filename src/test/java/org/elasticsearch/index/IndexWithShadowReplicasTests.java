@@ -78,13 +78,8 @@ import static org.hamcrest.Matchers.*;
 public class IndexWithShadowReplicasTests extends ElasticsearchIntegrationTest {
 
     private Settings nodeSettings() {
-        return ImmutableSettings.builder()
-                .put("node.add_id_to_custom_path", false)
-                .put("node.enable_custom_paths", true)
-                .put("gateway.type", "local") // don't delete things!
-                .put(ThrottlingAllocationDecider.CLUSTER_ROUTING_ALLOCATION_NODE_CONCURRENT_RECOVERIES, 6)
-                .put("index.store.fs.fs_lock", randomFrom("native", "simple"))
-                .build();
+        return ImmutableSettings.builder().put("node.add_id_to_custom_path", false).put("node.enable_custom_paths", true).put("gateway.type", "local") // don't delete things!
+                        .put(ThrottlingAllocationDecider.CLUSTER_ROUTING_ALLOCATION_NODE_CONCURRENT_RECOVERIES, 6).put("index.store.fs.fs_lock", randomFrom("native", "simple")).build();
     }
 
     /**
@@ -97,36 +92,25 @@ public class IndexWithShadowReplicasTests extends ElasticsearchIntegrationTest {
 
         internalCluster().startNodesAsync(3, nodeSettings).get();
         final Path dataPath = newTempDir().toPath();
-        Settings idxSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0).build();
+        Settings idxSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0).build();
         assertAcked(prepareCreate("foo").setSettings(idxSettings));
         ensureGreen();
         final int numDocs = randomIntBetween(10, 100);
         for (int i = 0; i < numDocs; i++) {
-            client().prepareIndex("foo", "doc", ""+i).setSource("foo", "bar").get();
+            client().prepareIndex("foo", "doc", "" + i).setSource("foo", "bar").get();
         }
         assertNoFailures(client().admin().indices().prepareFlush().setForce(true).setWaitIfOngoing(true).execute().actionGet());
 
-        assertAcked(client().admin().cluster().preparePutRepository("test-repo")
-                .setType("fs").setSettings(ImmutableSettings.settingsBuilder()
-                        .put("location", randomRepoPath())));
+        assertAcked(client().admin().cluster().preparePutRepository("test-repo").setType("fs").setSettings(ImmutableSettings.settingsBuilder().put("location", randomRepoPath())));
         CreateSnapshotResponse createSnapshotResponse = client().admin().cluster().prepareCreateSnapshot("test-repo", "test-snap").setWaitForCompletion(true).setIndices("foo").get();
         assertThat(createSnapshotResponse.getSnapshotInfo().successfulShards(), greaterThan(0));
         assertThat(createSnapshotResponse.getSnapshotInfo().successfulShards(), equalTo(createSnapshotResponse.getSnapshotInfo().totalShards()));
         assertThat(client().admin().cluster().prepareGetSnapshots("test-repo").setSnapshots("test-snap").get().getSnapshots().get(0).state(), equalTo(SnapshotState.SUCCESS));
 
-        Settings shadowSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString())
-                .put(IndexMetaData.SETTING_SHADOW_REPLICAS, true)
-                .put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 2).build();
+        Settings shadowSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString()).put(IndexMetaData.SETTING_SHADOW_REPLICAS, true).put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 2).build();
 
         logger.info("--> restore the index into shadow replica index");
-        RestoreSnapshotResponse restoreSnapshotResponse = client().admin().cluster().prepareRestoreSnapshot("test-repo", "test-snap")
-                .setIndexSettings(shadowSettings).setWaitForCompletion(true)
-                .setRenamePattern("(.+)").setRenameReplacement("$1-copy")
-                .execute().actionGet();
+        RestoreSnapshotResponse restoreSnapshotResponse = client().admin().cluster().prepareRestoreSnapshot("test-repo", "test-snap").setIndexSettings(shadowSettings).setWaitForCompletion(true).setRenamePattern("(.+)").setRenameReplacement("$1-copy").execute().actionGet();
         assertThat(restoreSnapshotResponse.getRestoreInfo().totalShards(), greaterThan(0));
         ensureGreen();
         refresh();
@@ -155,13 +139,7 @@ public class IndexWithShadowReplicasTests extends ElasticsearchIntegrationTest {
         final String IDX = "test";
         final Path dataPath = newTempDir().toPath();
 
-        Settings idxSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 2)
-                .put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString())
-                .put(IndexMetaData.SETTING_SHADOW_REPLICAS, true)
-                .put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true)
-                .build();
+        Settings idxSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 2).put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString()).put(IndexMetaData.SETTING_SHADOW_REPLICAS, true).put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true).build();
 
         prepareCreate(IDX).setSettings(idxSettings).addMapping("doc", "foo", "type=string").get();
         ensureGreen(IDX);
@@ -218,13 +196,7 @@ public class IndexWithShadowReplicasTests extends ElasticsearchIntegrationTest {
         Path dataPath = newTempDir().toPath();
         String IDX = "test";
 
-        Settings idxSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                .put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString())
-                .put(IndexMetaData.SETTING_SHADOW_REPLICAS, true)
-                .put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true)
-                .build();
+        Settings idxSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1).put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString()).put(IndexMetaData.SETTING_SHADOW_REPLICAS, true).put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true).build();
 
         prepareCreate(IDX).setSettings(idxSettings).addMapping("doc", "foo", "type=string").get();
         ensureYellow(IDX);
@@ -277,13 +249,7 @@ public class IndexWithShadowReplicasTests extends ElasticsearchIntegrationTest {
         Path dataPath = newTempDir().toPath();
         String IDX = "test";
 
-        Settings idxSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                .put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString())
-                .put(IndexMetaData.SETTING_SHADOW_REPLICAS, true)
-                .put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true)
-                .build();
+        Settings idxSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1).put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString()).put(IndexMetaData.SETTING_SHADOW_REPLICAS, true).put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true).build();
 
         prepareCreate(IDX).setSettings(idxSettings).addMapping("doc", "foo", "type=string").get();
         ensureYellow(IDX);
@@ -338,13 +304,7 @@ public class IndexWithShadowReplicasTests extends ElasticsearchIntegrationTest {
         Path dataPath = newTempDir().toPath();
         final String IDX = "test";
 
-        Settings idxSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                .put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString())
-                .put(IndexMetaData.SETTING_SHADOW_REPLICAS, true)
-                .put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true)
-                .build();
+        Settings idxSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1).put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString()).put(IndexMetaData.SETTING_SHADOW_REPLICAS, true).put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true).build();
 
         prepareCreate(IDX).setSettings(idxSettings).addMapping("doc", "foo", "type=string").get();
         ensureYellow(IDX);
@@ -367,8 +327,7 @@ public class IndexWithShadowReplicasTests extends ElasticsearchIntegrationTest {
                 started.countDown();
                 while (counter.get() < (numPhase1Docs + numPhase2Docs)) {
                     try {
-                        final IndexResponse indexResponse = client().prepareIndex(IDX, "doc",
-                                Integer.toString(counter.incrementAndGet())).setSource("foo", "bar").get();
+                        final IndexResponse indexResponse = client().prepareIndex(IDX, "doc", Integer.toString(counter.incrementAndGet())).setSource("foo", "bar").get();
                         assertTrue(indexResponse.isCreated());
                     } catch (Throwable t) {
                         exceptions.add(t);
@@ -405,23 +364,13 @@ public class IndexWithShadowReplicasTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testPrimaryRelocationWhereRecoveryFails() throws Exception {
-        Settings nodeSettings = ImmutableSettings.builder()
-                .put("node.add_id_to_custom_path", false)
-                .put("node.enable_custom_paths", true)
-                .put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, MockTransportService.class.getName())
-                .build();
+        Settings nodeSettings = ImmutableSettings.builder().put("node.add_id_to_custom_path", false).put("node.enable_custom_paths", true).put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, MockTransportService.class.getName()).build();
 
         String node1 = internalCluster().startNode(nodeSettings);
         Path dataPath = newTempDir().toPath();
         final String IDX = "test";
 
-        Settings idxSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                .put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString())
-                .put(IndexMetaData.SETTING_SHADOW_REPLICAS, true)
-                .put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true)
-                .build();
+        Settings idxSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1).put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString()).put(IndexMetaData.SETTING_SHADOW_REPLICAS, true).put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true).build();
 
         prepareCreate(IDX).setSettings(idxSettings).addMapping("doc", "foo", "type=string").get();
         ensureYellow(IDX);
@@ -443,28 +392,24 @@ public class IndexWithShadowReplicasTests extends ElasticsearchIntegrationTest {
         final AtomicBoolean keepFailing = new AtomicBoolean(true);
 
         MockTransportService mockTransportService = ((MockTransportService) internalCluster().getInstance(TransportService.class, node1));
-        mockTransportService.addDelegate(internalCluster().getInstance(Discovery.class, node3).localNode(),
-                new MockTransportService.DelegateTransport(mockTransportService.original()) {
+        mockTransportService.addDelegate(internalCluster().getInstance(Discovery.class, node3).localNode(), new MockTransportService.DelegateTransport(mockTransportService.original()) {
 
-                    @Override
-                    public void sendRequest(DiscoveryNode node, long requestId, String action,
-                                            TransportRequest request, TransportRequestOptions options)
-                            throws IOException, TransportException {
-                        if (keepFailing.get() && action.equals(RecoveryTarget.Actions.TRANSLOG_OPS)) {
-                            logger.info("--> failing translog ops");
-                            throw new ElasticsearchException("failing on purpose");
-                        }
-                        super.sendRequest(node, requestId, action, request, options);
-                    }
-                });
+            @Override
+            public void sendRequest(DiscoveryNode node, long requestId, String action, TransportRequest request, TransportRequestOptions options) throws IOException, TransportException {
+                if (keepFailing.get() && action.equals(RecoveryTarget.Actions.TRANSLOG_OPS)) {
+                    logger.info("--> failing translog ops");
+                    throw new ElasticsearchException("failing on purpose");
+                }
+                super.sendRequest(node, requestId, action, request, options);
+            }
+        });
 
         Thread thread = new Thread() {
             @Override
             public void run() {
                 started.countDown();
                 while (counter.get() < (numPhase1Docs + numPhase2Docs + numPhase3Docs)) {
-                    final IndexResponse indexResponse = client().prepareIndex(IDX, "doc",
-                            Integer.toString(counter.incrementAndGet())).setSource("foo", "bar").get();
+                    final IndexResponse indexResponse = client().prepareIndex(IDX, "doc", Integer.toString(counter.incrementAndGet())).setSource("foo", "bar").get();
                     assertTrue(indexResponse.isCreated());
                     final int docCount = counter.get();
                     if (docCount == numPhase1Docs) {
@@ -509,13 +454,7 @@ public class IndexWithShadowReplicasTests extends ElasticsearchIntegrationTest {
         Path dataPath = newTempDir().toPath();
         String IDX = "test";
 
-        Settings idxSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, randomIntBetween(1, nodeCount - 1))
-                .put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString())
-                .put(IndexMetaData.SETTING_SHADOW_REPLICAS, true)
-                .put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true)
-                .build();
+        Settings idxSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, randomIntBetween(1, nodeCount - 1)).put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString()).put(IndexMetaData.SETTING_SHADOW_REPLICAS, true).put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true).build();
 
         prepareCreate(IDX).setSettings(idxSettings).addMapping("doc", "foo", "type=string").get();
         ensureGreen(IDX);
@@ -550,13 +489,7 @@ public class IndexWithShadowReplicasTests extends ElasticsearchIntegrationTest {
         Path dataPath = newTempDir().toPath();
         String IDX = "test";
 
-        Settings idxSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 5)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1)
-                .put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString())
-                .put(IndexMetaData.SETTING_SHADOW_REPLICAS, true)
-                .put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true)
-                .build();
+        Settings idxSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 5).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1).put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString()).put(IndexMetaData.SETTING_SHADOW_REPLICAS, true).put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true).build();
 
         prepareCreate(IDX).setSettings(idxSettings).addMapping("doc", "foo", "type=string").get();
         ensureGreen(IDX);
@@ -604,13 +537,7 @@ public class IndexWithShadowReplicasTests extends ElasticsearchIntegrationTest {
         Path dataPath = newTempDir().toPath();
         String IDX = "test";
 
-        Settings idxSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 2)
-                .put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString())
-                .put(IndexMetaData.SETTING_SHADOW_REPLICAS, true)
-                .put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true)
-                .build();
+        Settings idxSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 2).put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString()).put(IndexMetaData.SETTING_SHADOW_REPLICAS, true).put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true).build();
 
         prepareCreate(IDX).setSettings(idxSettings).addMapping("doc", "foo", "type=string,index=not_analyzed").get();
         ensureGreen(IDX);
@@ -679,21 +606,11 @@ public class IndexWithShadowReplicasTests extends ElasticsearchIntegrationTest {
         Path dataPath = newTempDir().toPath();
         String IDX = "test";
 
-        Settings includeFoo = ImmutableSettings.builder()
-                .put("index.routing.allocation.include.affinity", "foo")
-                .build();
-        Settings includeBar = ImmutableSettings.builder()
-                .put("index.routing.allocation.include.affinity", "bar")
-                .build();
+        Settings includeFoo = ImmutableSettings.builder().put("index.routing.allocation.include.affinity", "foo").build();
+        Settings includeBar = ImmutableSettings.builder().put("index.routing.allocation.include.affinity", "bar").build();
 
-        Settings idxSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 5)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)
-                .put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString())
-                .put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true)
-                .put(IndexMetaData.SETTING_SHARED_FS_ALLOW_RECOVERY_ON_ANY_NODE, true)
-                .put(includeFoo) // start with requiring the shards on "foo"
-                .build();
+        Settings idxSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 5).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0).put(IndexMetaData.SETTING_DATA_PATH, dataPath.toAbsolutePath().toString()).put(IndexMetaData.SETTING_SHARED_FILESYSTEM, true).put(IndexMetaData.SETTING_SHARED_FS_ALLOW_RECOVERY_ON_ANY_NODE, true).put(includeFoo) // start with requiring the shards on "foo"
+                        .build();
 
         // only one node, so all primaries will end up on node1
         prepareCreate(IDX).setSettings(idxSettings).addMapping("doc", "foo", "type=string,index=not_analyzed").get();
@@ -747,19 +664,13 @@ public class IndexWithShadowReplicasTests extends ElasticsearchIntegrationTest {
     @Test
     public void testLockTryingToDelete() throws Exception {
         String lockType = "native"; // test does not work with simple locks
-        Settings nodeSettings = ImmutableSettings.builder()
-                .put("gateway.type", "local") // don't delete things!
-                .put("index.store.fs.fs_lock", lockType)
-                .build();
+        Settings nodeSettings = ImmutableSettings.builder().put("gateway.type", "local") // don't delete things!
+                        .put("index.store.fs.fs_lock", lockType).build();
         String IDX = "test";
         logger.info("--> lock type: {}", lockType);
 
         internalCluster().startNode(nodeSettings);
-        Settings idxSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1)
-                .put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0)
-                .put("index.store.fs.fs_lock", lockType)
-                .build();
+        Settings idxSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_NUMBER_OF_SHARDS, 1).put(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 0).put("index.store.fs.fs_lock", lockType).build();
 
         // only one node, so all primaries will end up on node1
         prepareCreate(IDX).setSettings(idxSettings).addMapping("doc", "foo", "type=string,index=not_analyzed").get();

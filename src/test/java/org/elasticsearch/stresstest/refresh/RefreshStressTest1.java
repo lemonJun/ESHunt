@@ -35,19 +35,11 @@ public class RefreshStressTest1 {
 
     public static void main(String[] args) throws InterruptedException, IOException {
         int numberOfShards = 5;
-        Node node = NodeBuilder.nodeBuilder().local(true).loadConfigSettings(false).clusterName("testCluster").settings(
-                ImmutableSettings.settingsBuilder()
-                        .put("node.name", "node1")
-                        .put("gateway.type", "none")
-                        .put("index.number_of_shards", numberOfShards)
-                                //.put("path.data", new File("target/data").getAbsolutePath())
+        Node node = NodeBuilder.nodeBuilder().local(true).loadConfigSettings(false).clusterName("testCluster").settings(ImmutableSettings.settingsBuilder().put("node.name", "node1").put("gateway.type", "none").put("index.number_of_shards", numberOfShards)
+                        //.put("path.data", new File("target/data").getAbsolutePath())
                         .build()).node();
-        Node node2 = NodeBuilder.nodeBuilder().local(true).loadConfigSettings(false).clusterName("testCluster").settings(
-                ImmutableSettings.settingsBuilder()
-                        .put("node.name", "node2")
-                        .put("gateway.type", "none")
-                        .put("index.number_of_shards", numberOfShards)
-                                //.put("path.data", new File("target/data").getAbsolutePath())
+        Node node2 = NodeBuilder.nodeBuilder().local(true).loadConfigSettings(false).clusterName("testCluster").settings(ImmutableSettings.settingsBuilder().put("node.name", "node2").put("gateway.type", "none").put("index.number_of_shards", numberOfShards)
+                        //.put("path.data", new File("target/data").getAbsolutePath())
                         .build()).node();
         Client client = node.client();
 
@@ -58,16 +50,16 @@ public class RefreshStressTest1 {
             String mapping = "{ \"" + typeName + "\" :  {\"dynamic_templates\" : [{\"no_analyze_strings\" : {\"match_mapping_type\" : \"string\",\"match\" : \"*\",\"mapping\" : {\"type\" : \"string\",\"index\" : \"not_analyzed\"}}}]}}";
             client.admin().indices().prepareCreate(indexName).execute().actionGet();
             client.admin().indices().preparePutMapping(indexName).setType(typeName).setSource(mapping).execute().actionGet();
-//      sleep after put mapping
-//      Thread.sleep(100);
+            //      sleep after put mapping
+            //      Thread.sleep(100);
 
             System.out.println("indexing " + loop);
             String name = "name" + id;
             client.prepareIndex(indexName, typeName, id).setSource("{ \"id\": \"" + id + "\", \"name\": \"" + name + "\" }").execute().actionGet();
 
             client.admin().indices().prepareRefresh(indexName).execute().actionGet();
-//      sleep after refresh
-//      Thread.sleep(100);
+            //      sleep after refresh
+            //      Thread.sleep(100);
 
             System.out.println("searching " + loop);
             SearchResponse result = client.prepareSearch(indexName).setPostFilter(FilterBuilders.termFilter("name", name)).execute().actionGet();
@@ -84,7 +76,8 @@ public class RefreshStressTest1 {
                     } else if (i == 100) {
                         if (client.prepareGet(indexName, typeName, id).execute().actionGet().isExists())
                             throw new RuntimeException("Record wasn't found after 10s but can be get by id");
-                        else throw new RuntimeException("Record wasn't found after 10s and can't be get by id");
+                        else
+                            throw new RuntimeException("Record wasn't found after 10s and can't be get by id");
                     }
                 }
             }

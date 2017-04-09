@@ -37,9 +37,7 @@ import java.util.Set;
 
 public class ClusterDiscoveryConfiguration extends SettingsSource {
 
-    static Settings DEFAULT_NODE_SETTINGS = ImmutableSettings.settingsBuilder()
-            .put("gateway.type", "local")
-            .put("discovery.type", "zen").build();
+    static Settings DEFAULT_NODE_SETTINGS = ImmutableSettings.settingsBuilder().put("gateway.type", "local").put("discovery.type", "zen").build();
 
     final int numOfNodes;
     final Settings nodeSettings;
@@ -119,14 +117,12 @@ public class ClusterDiscoveryConfiguration extends SettingsSource {
 
         private static int calcBasePort() {
             // note that this has properly co-exist with the port logic at InternalTestCluster's constructor
-            return 30000 +
-                    1000 * (ElasticsearchIntegrationTest.CHILD_JVM_ID);
+            return 30000 + 1000 * (ElasticsearchIntegrationTest.CHILD_JVM_ID);
         }
 
         @Override
         public Settings node(int nodeOrdinal) {
-            ImmutableSettings.Builder builder = ImmutableSettings.builder()
-                    .put("discovery.zen.ping.multicast.enabled", false);
+            ImmutableSettings.Builder builder = ImmutableSettings.builder().put("discovery.zen.ping.multicast.enabled", false);
 
             String[] unicastHosts = new String[unicastHostOrdinals.length];
             if (localMode) {

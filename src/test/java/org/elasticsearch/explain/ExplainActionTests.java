@@ -51,15 +51,12 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testSimple() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addAlias(new Alias("alias"))
-                .setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
+        assertAcked(prepareCreate("test").addAlias(new Alias("alias")).setSettings(ImmutableSettings.settingsBuilder().put("index.refresh_interval", -1)));
         ensureGreen("test");
 
         client().prepareIndex("test", "test", "1").setSource("field", "value1").get();
-        
-        ExplainResponse response = client().prepareExplain(indexOrAlias(), "test", "1")
-                .setQuery(QueryBuilders.matchAllQuery()).get();
+
+        ExplainResponse response = client().prepareExplain(indexOrAlias(), "test", "1").setQuery(QueryBuilders.matchAllQuery()).get();
         assertNotNull(response);
         assertFalse(response.isExists()); // not a match b/c not realtime
         assertThat(response.getIndex(), equalTo("test"));
@@ -68,8 +65,7 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
         assertFalse(response.isMatch()); // not a match b/c not realtime
 
         refresh();
-        response = client().prepareExplain(indexOrAlias(), "test", "1")
-                .setQuery(QueryBuilders.matchAllQuery()).get();
+        response = client().prepareExplain(indexOrAlias(), "test", "1").setQuery(QueryBuilders.matchAllQuery()).get();
         assertNotNull(response);
         assertTrue(response.isMatch());
         assertNotNull(response.getExplanation());
@@ -79,8 +75,7 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
         assertThat(response.getId(), equalTo("1"));
         assertThat(response.getExplanation().getValue(), equalTo(1.0f));
 
-        response = client().prepareExplain(indexOrAlias(), "test", "1")
-                .setQuery(QueryBuilders.termQuery("field", "value2")).get();
+        response = client().prepareExplain(indexOrAlias(), "test", "1").setQuery(QueryBuilders.termQuery("field", "value2")).get();
         assertNotNull(response);
         assertTrue(response.isExists());
         assertFalse(response.isMatch());
@@ -90,10 +85,7 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
         assertNotNull(response.getExplanation());
         assertFalse(response.getExplanation().isMatch());
 
-        response = client().prepareExplain(indexOrAlias(), "test", "1")
-                .setQuery(QueryBuilders.boolQuery()
-                                .must(QueryBuilders.termQuery("field", "value1"))
-                                .must(QueryBuilders.termQuery("field", "value2"))).get();
+        response = client().prepareExplain(indexOrAlias(), "test", "1").setQuery(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("field", "value1")).must(QueryBuilders.termQuery("field", "value2"))).get();
         assertNotNull(response);
         assertTrue(response.isExists());
         assertFalse(response.isMatch());
@@ -104,8 +96,7 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
         assertFalse(response.getExplanation().isMatch());
         assertThat(response.getExplanation().getDetails().length, equalTo(2));
 
-        response = client().prepareExplain(indexOrAlias(), "test", "2")
-                .setQuery(QueryBuilders.matchAllQuery()).get();
+        response = client().prepareExplain(indexOrAlias(), "test", "2").setQuery(QueryBuilders.matchAllQuery()).get();
         assertNotNull(response);
         assertFalse(response.isExists());
         assertFalse(response.isMatch());
@@ -120,19 +111,10 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
         assertAcked(prepareCreate("test").addAlias(new Alias("alias")));
         ensureGreen("test");
 
-        client().prepareIndex("test", "test", "1")
-                .setSource(
-                        jsonBuilder().startObject()
-                                .startObject("obj1")
-                                .field("field1", "value1")
-                                .field("field2", "value2")
-                                .endObject()
-                                .endObject()).get();
+        client().prepareIndex("test", "test", "1").setSource(jsonBuilder().startObject().startObject("obj1").field("field1", "value1").field("field2", "value2").endObject().endObject()).get();
 
         refresh();
-        ExplainResponse response = client().prepareExplain(indexOrAlias(), "test", "1")
-                .setQuery(QueryBuilders.matchAllQuery())
-                .setFields("obj1.field1").get();
+        ExplainResponse response = client().prepareExplain(indexOrAlias(), "test", "1").setQuery(QueryBuilders.matchAllQuery()).setFields("obj1.field1").get();
         assertNotNull(response);
         assertTrue(response.isMatch());
         assertNotNull(response.getExplanation());
@@ -145,9 +127,7 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
         assertThat(response.getGetResult().isSourceEmpty(), equalTo(true));
 
         refresh();
-        response = client().prepareExplain(indexOrAlias(), "test", "1")
-                .setQuery(QueryBuilders.matchAllQuery())
-                .setFields("obj1.field1").setFetchSource(true).get();
+        response = client().prepareExplain(indexOrAlias(), "test", "1").setQuery(QueryBuilders.matchAllQuery()).setFields("obj1.field1").setFetchSource(true).get();
         assertNotNull(response);
         assertTrue(response.isMatch());
         assertNotNull(response.getExplanation());
@@ -159,9 +139,7 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
         assertThat(response.getGetResult().getFields().get("obj1.field1").getValue().toString(), equalTo("value1"));
         assertThat(response.getGetResult().isSourceEmpty(), equalTo(false));
 
-        response = client().prepareExplain(indexOrAlias(), "test", "1")
-                .setQuery(QueryBuilders.matchAllQuery())
-                .setFields("obj1.field1", "obj1.field2").get();
+        response = client().prepareExplain(indexOrAlias(), "test", "1").setQuery(QueryBuilders.matchAllQuery()).setFields("obj1.field1", "obj1.field2").get();
         assertNotNull(response);
         assertTrue(response.isMatch());
         String v1 = (String) response.getGetResult().field("obj1.field1").getValue();
@@ -176,19 +154,10 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
         assertAcked(prepareCreate("test").addAlias(new Alias("alias")));
         ensureGreen("test");
 
-        client().prepareIndex("test", "test", "1")
-                .setSource(
-                        jsonBuilder().startObject()
-                                .startObject("obj1")
-                                .field("field1", "value1")
-                                .field("field2", "value2")
-                                .endObject()
-                                .endObject()).get();
+        client().prepareIndex("test", "test", "1").setSource(jsonBuilder().startObject().startObject("obj1").field("field1", "value1").field("field2", "value2").endObject().endObject()).get();
 
         refresh();
-        ExplainResponse response = client().prepareExplain(indexOrAlias(), "test", "1")
-                .setQuery(QueryBuilders.matchAllQuery())
-                .setFetchSource("obj1.field1", null).get();
+        ExplainResponse response = client().prepareExplain(indexOrAlias(), "test", "1").setQuery(QueryBuilders.matchAllQuery()).setFetchSource("obj1.field1", null).get();
         assertNotNull(response);
         assertTrue(response.isMatch());
         assertNotNull(response.getExplanation());
@@ -199,9 +168,7 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
         assertThat(response.getGetResult().getSource().size(), equalTo(1));
         assertThat(((Map<String, Object>) response.getGetResult().getSource().get("obj1")).get("field1").toString(), equalTo("value1"));
 
-        response = client().prepareExplain(indexOrAlias(), "test", "1")
-                .setQuery(QueryBuilders.matchAllQuery())
-                .setFetchSource(null, "obj1.field2").get();
+        response = client().prepareExplain(indexOrAlias(), "test", "1").setQuery(QueryBuilders.matchAllQuery()).setFetchSource(null, "obj1.field2").get();
         assertNotNull(response);
         assertTrue(response.isMatch());
         assertThat(((Map<String, Object>) response.getGetResult().getSource().get("obj1")).get("field1").toString(), equalTo("value1"));
@@ -209,16 +176,13 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testExplainWithFilteredAlias() throws Exception {
-        assertAcked(prepareCreate("test")
-                .addMapping("test", "field2", "type=string")
-                .addAlias(new Alias("alias1").filter(FilterBuilders.termFilter("field2", "value2"))));
+        assertAcked(prepareCreate("test").addMapping("test", "field2", "type=string").addAlias(new Alias("alias1").filter(FilterBuilders.termFilter("field2", "value2"))));
         ensureGreen("test");
 
         client().prepareIndex("test", "test", "1").setSource("field1", "value1", "field2", "value1").get();
         refresh();
 
-        ExplainResponse response = client().prepareExplain("alias1", "test", "1")
-                .setQuery(QueryBuilders.matchAllQuery()).get();
+        ExplainResponse response = client().prepareExplain("alias1", "test", "1").setQuery(QueryBuilders.matchAllQuery()).get();
         assertNotNull(response);
         assertTrue(response.isExists());
         assertFalse(response.isMatch());
@@ -226,16 +190,13 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testExplainWithFilteredAliasFetchSource() throws Exception {
-        assertAcked(client().admin().indices().prepareCreate("test")
-                .addMapping("test", "field2", "type=string")
-                .addAlias(new Alias("alias1").filter(FilterBuilders.termFilter("field2", "value2"))));
+        assertAcked(client().admin().indices().prepareCreate("test").addMapping("test", "field2", "type=string").addAlias(new Alias("alias1").filter(FilterBuilders.termFilter("field2", "value2"))));
         ensureGreen("test");
 
         client().prepareIndex("test", "test", "1").setSource("field1", "value1", "field2", "value1").get();
         refresh();
 
-        ExplainResponse response = client().prepareExplain("alias1", "test", "1")
-                .setQuery(QueryBuilders.matchAllQuery()).setFetchSource(true).get();
+        ExplainResponse response = client().prepareExplain("alias1", "test", "1").setQuery(QueryBuilders.matchAllQuery()).setFetchSource(true).get();
 
         assertNotNull(response);
         assertTrue(response.isExists());
@@ -248,7 +209,7 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
         assertThat(response.getGetResult().getType(), equalTo("test"));
         assertThat(response.getGetResult().getId(), equalTo("1"));
         assertThat(response.getGetResult().getSource(), notNullValue());
-        assertThat((String)response.getGetResult().getSource().get("field1"), equalTo("value1"));
+        assertThat((String) response.getGetResult().getSource().get("field1"), equalTo("value1"));
     }
 
     @Test
@@ -271,7 +232,6 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
         return randomBoolean() ? "test" : "alias";
     }
 
-
     @Test
     public void streamExplainTest() throws Exception {
 
@@ -287,10 +247,10 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
         InputStreamStreamInput esBuffer = new InputStreamStreamInput(esInBuffer);
 
         Explanation result = Lucene.readExplanation(esBuffer);
-        assertThat(exp.toString(),equalTo(result.toString()));
+        assertThat(exp.toString(), equalTo(result.toString()));
 
         exp = new ComplexExplanation(true, 2.0f, "some explanation");
-        exp.addDetail(new Explanation(2.0f,"another explanation"));
+        exp.addDetail(new Explanation(2.0f, "another explanation"));
 
         // write complex
         outBuffer = new ByteArrayOutputStream();
@@ -302,7 +262,7 @@ public class ExplainActionTests extends ElasticsearchIntegrationTest {
         esBuffer = new InputStreamStreamInput(esInBuffer);
 
         result = Lucene.readExplanation(esBuffer);
-        assertThat(exp.toString(),equalTo(result.toString()));
+        assertThat(exp.toString(), equalTo(result.toString()));
 
     }
 }

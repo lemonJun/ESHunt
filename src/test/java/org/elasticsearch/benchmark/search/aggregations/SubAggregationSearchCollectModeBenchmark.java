@@ -75,64 +75,21 @@ public class SubAggregationSearchCollectModeBenchmark {
         Bootstrap.initializeNatives(true, false);
         Random random = new Random();
 
-        Settings settings = settingsBuilder()
-                .put("index.refresh_interval", "-1")
-                .put("gateway.type", "local")
-                .put(SETTING_NUMBER_OF_SHARDS, 1)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put("index.refresh_interval", "-1").put("gateway.type", "local").put(SETTING_NUMBER_OF_SHARDS, 1).put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
         String clusterName = SubAggregationSearchCollectModeBenchmark.class.getSimpleName();
         nodes = new InternalNode[1];
         for (int i = 0; i < nodes.length; i++) {
-            nodes[i] = (InternalNode) nodeBuilder().clusterName(clusterName)
-                    .settings(settingsBuilder().put(settings).put("name", "node" + i))
-                    .node();
+            nodes[i] = (InternalNode) nodeBuilder().clusterName(clusterName).settings(settingsBuilder().put(settings).put("name", "node" + i)).node();
         }
 
-        Node clientNode = nodeBuilder()
-                .clusterName(clusterName)
-                .settings(settingsBuilder().put(settings).put("name", "client")).client(true).node();
+        Node clientNode = nodeBuilder().clusterName(clusterName).settings(settingsBuilder().put(settings).put("name", "client")).client(true).node();
 
         client = clientNode.client();
 
         Thread.sleep(10000);
         try {
-            client.admin().indices().create(createIndexRequest("test").mapping("type1", jsonBuilder()
-              .startObject()
-                .startObject("type1")
-                  .startObject("properties")
-                    .startObject("s_value_dv")
-                      .field("type", "string")
-                      .field("index", "no")
-                      .startObject("fielddata")
-                        .field("format", "doc_values")
-                      .endObject()
-                    .endObject()
-                    .startObject("sm_value_dv")
-                      .field("type", "string")
-                      .field("index", "no")
-                      .startObject("fielddata")
-                        .field("format", "doc_values")
-                      .endObject()
-                    .endObject()
-                    .startObject("l_value_dv")
-                      .field("type", "long")
-                      .field("index", "no")
-                      .startObject("fielddata")
-                        .field("format", "doc_values")
-                      .endObject()
-                    .endObject()
-                    .startObject("lm_value_dv")
-                      .field("type", "long")
-                      .field("index", "no")
-                      .startObject("fielddata")
-                        .field("format", "doc_values")
-                      .endObject()
-                    .endObject()
-                  .endObject()
-                .endObject()
-              .endObject())).actionGet();
+            client.admin().indices().create(createIndexRequest("test").mapping("type1", jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("s_value_dv").field("type", "string").field("index", "no").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("sm_value_dv").field("type", "string").field("index", "no").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("l_value_dv").field("type", "long").field("index", "no").startObject("fielddata").field("format", "doc_values").endObject().endObject().startObject("lm_value_dv").field("type", "long").field("index", "no").startObject("fielddata").field("format", "doc_values").endObject().endObject().endObject().endObject().endObject())).actionGet();
 
             long[] lValues = new long[NUMBER_OF_TERMS];
             for (int i = 0; i < NUMBER_OF_TERMS; i++) {
@@ -168,7 +125,7 @@ public class SubAggregationSearchCollectModeBenchmark {
                     builder.field("s_value_dv", sValue);
                     builder.field("l_value_dv", lValue);
 
-                    for (String field : new String[] {"sm_value", "sm_value_dv"}) {
+                    for (String field : new String[] { "sm_value", "sm_value_dv" }) {
                         builder.startArray(field);
                         for (int k = 0; k < NUMBER_OF_MULTI_VALUE_TERMS; k++) {
                             builder.value(sValues[ThreadLocalRandom.current().nextInt(sValues.length)]);
@@ -176,7 +133,7 @@ public class SubAggregationSearchCollectModeBenchmark {
                         builder.endArray();
                     }
 
-                    for (String field : new String[] {"lm_value", "lm_value_dv"}) {
+                    for (String field : new String[] { "lm_value", "lm_value_dv" }) {
                         builder.startArray(field);
                         for (int k = 0; k < NUMBER_OF_MULTI_VALUE_TERMS; k++) {
                             builder.value(lValues[ThreadLocalRandom.current().nextInt(sValues.length)]);
@@ -186,8 +143,7 @@ public class SubAggregationSearchCollectModeBenchmark {
 
                     builder.endObject();
 
-                    request.add(Requests.indexRequest("test").type("type1").id(Integer.toString(counter))
-                            .source(builder));
+                    request.add(Requests.indexRequest("test").type("type1").id(Integer.toString(counter)).source(builder));
                 }
                 BulkResponse response = request.execute().actionGet();
                 if (response.hasFailures()) {
@@ -211,22 +167,22 @@ public class SubAggregationSearchCollectModeBenchmark {
         System.out.println("--> Number of docs in index: " + COUNT);
 
         List<StatsResult> stats = Lists.newArrayList();
-        stats.add(runTest("0000", new SubAggCollectionMode[] {SubAggCollectionMode.DEPTH_FIRST,SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST}));
-        stats.add(runTest("0001", new SubAggCollectionMode[] {SubAggCollectionMode.DEPTH_FIRST,SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST}));
-        stats.add(runTest("0010", new SubAggCollectionMode[] {SubAggCollectionMode.DEPTH_FIRST,SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST}));
-        stats.add(runTest("0011", new SubAggCollectionMode[] {SubAggCollectionMode.DEPTH_FIRST,SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST}));
-        stats.add(runTest("0100", new SubAggCollectionMode[] {SubAggCollectionMode.DEPTH_FIRST,SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST}));
-        stats.add(runTest("0101", new SubAggCollectionMode[] {SubAggCollectionMode.DEPTH_FIRST,SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST}));
-        stats.add(runTest("0110", new SubAggCollectionMode[] {SubAggCollectionMode.DEPTH_FIRST,SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST}));
-        stats.add(runTest("0111", new SubAggCollectionMode[] {SubAggCollectionMode.DEPTH_FIRST,SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST}));
-        stats.add(runTest("1000", new SubAggCollectionMode[] {SubAggCollectionMode.BREADTH_FIRST,SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST}));
-        stats.add(runTest("1001", new SubAggCollectionMode[] {SubAggCollectionMode.BREADTH_FIRST,SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST}));
-        stats.add(runTest("1010", new SubAggCollectionMode[] {SubAggCollectionMode.BREADTH_FIRST,SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST}));
-        stats.add(runTest("1011", new SubAggCollectionMode[] {SubAggCollectionMode.BREADTH_FIRST,SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST}));
-        stats.add(runTest("1100", new SubAggCollectionMode[] {SubAggCollectionMode.BREADTH_FIRST,SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST}));
-        stats.add(runTest("1101", new SubAggCollectionMode[] {SubAggCollectionMode.BREADTH_FIRST,SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST}));
-        stats.add(runTest("1110", new SubAggCollectionMode[] {SubAggCollectionMode.BREADTH_FIRST,SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST}));
-        stats.add(runTest("1111", new SubAggCollectionMode[] {SubAggCollectionMode.BREADTH_FIRST,SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST}));
+        stats.add(runTest("0000", new SubAggCollectionMode[] { SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST }));
+        stats.add(runTest("0001", new SubAggCollectionMode[] { SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST }));
+        stats.add(runTest("0010", new SubAggCollectionMode[] { SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST }));
+        stats.add(runTest("0011", new SubAggCollectionMode[] { SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST }));
+        stats.add(runTest("0100", new SubAggCollectionMode[] { SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST }));
+        stats.add(runTest("0101", new SubAggCollectionMode[] { SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST }));
+        stats.add(runTest("0110", new SubAggCollectionMode[] { SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST }));
+        stats.add(runTest("0111", new SubAggCollectionMode[] { SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST }));
+        stats.add(runTest("1000", new SubAggCollectionMode[] { SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST }));
+        stats.add(runTest("1001", new SubAggCollectionMode[] { SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST }));
+        stats.add(runTest("1010", new SubAggCollectionMode[] { SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST }));
+        stats.add(runTest("1011", new SubAggCollectionMode[] { SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST }));
+        stats.add(runTest("1100", new SubAggCollectionMode[] { SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.DEPTH_FIRST }));
+        stats.add(runTest("1101", new SubAggCollectionMode[] { SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST, SubAggCollectionMode.BREADTH_FIRST }));
+        stats.add(runTest("1110", new SubAggCollectionMode[] { SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.DEPTH_FIRST }));
+        stats.add(runTest("1111", new SubAggCollectionMode[] { SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST, SubAggCollectionMode.BREADTH_FIRST }));
 
         System.out.println("------------------ SUMMARY ----------------------------------------------");
         System.out.format(Locale.ENGLISH, "%35s%10s%10s%15s%15s\n", "name", "took", "millis", "fieldata size", "heap used");
@@ -265,14 +221,7 @@ public class SubAggregationSearchCollectModeBenchmark {
         System.out.println("--> Warmup (" + name + ")...");
         // run just the child query, warm up first
         for (int j = 0; j < QUERY_WARMUP; j++) {
-            SearchResponse searchResponse = client.prepareSearch("test")
-                    .setSearchType(SearchType.COUNT)
-                    .setQuery(matchAllQuery())
-                    .addAggregation(AggregationBuilders.terms(name + "s_value").field("s_value").collectMode(collectionModes[0])
-                            .subAggregation(AggregationBuilders.terms(name + "l_value").field("l_value").collectMode(collectionModes[1])
-                                    .subAggregation(AggregationBuilders.terms(name + "s_value_dv").field("s_value_dv").collectMode(collectionModes[2])
-                                            .subAggregation(AggregationBuilders.terms(name + "l_value_dv").field("l_value_dv").collectMode(collectionModes[3])))))
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch("test").setSearchType(SearchType.COUNT).setQuery(matchAllQuery()).addAggregation(AggregationBuilders.terms(name + "s_value").field("s_value").collectMode(collectionModes[0]).subAggregation(AggregationBuilders.terms(name + "l_value").field("l_value").collectMode(collectionModes[1]).subAggregation(AggregationBuilders.terms(name + "s_value_dv").field("s_value_dv").collectMode(collectionModes[2]).subAggregation(AggregationBuilders.terms(name + "l_value_dv").field("l_value_dv").collectMode(collectionModes[3]))))).execute().actionGet();
             if (j == 0) {
                 System.out.println("--> Loading : took: " + searchResponse.getTook());
             }
@@ -282,18 +231,10 @@ public class SubAggregationSearchCollectModeBenchmark {
         }
         System.out.println("--> Warmup (" + name + ") DONE");
 
-
         System.out.println("--> Running (" + name + ")...");
         totalQueryTime = 0;
         for (int j = 0; j < QUERY_COUNT; j++) {
-            SearchResponse searchResponse = client.prepareSearch("test")
-                    .setSearchType(SearchType.COUNT)
-                    .setQuery(matchAllQuery())
-                    .addAggregation(AggregationBuilders.terms(name + "s_value").field("s_value").collectMode(collectionModes[0])
-                            .subAggregation(AggregationBuilders.terms(name + "l_value").field("l_value").collectMode(collectionModes[1])
-                                    .subAggregation(AggregationBuilders.terms(name + "s_value_dv").field("s_value_dv").collectMode(collectionModes[2])
-                                            .subAggregation(AggregationBuilders.terms(name + "l_value_dv").field("l_value_dv").collectMode(collectionModes[3])))))
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch("test").setSearchType(SearchType.COUNT).setQuery(matchAllQuery()).addAggregation(AggregationBuilders.terms(name + "s_value").field("s_value").collectMode(collectionModes[0]).subAggregation(AggregationBuilders.terms(name + "l_value").field("l_value").collectMode(collectionModes[1]).subAggregation(AggregationBuilders.terms(name + "s_value_dv").field("s_value_dv").collectMode(collectionModes[2]).subAggregation(AggregationBuilders.terms(name + "l_value_dv").field("l_value_dv").collectMode(collectionModes[3]))))).execute().actionGet();
             if (searchResponse.getHits().totalHits() != COUNT) {
                 System.err.println("--> mismatch on hits");
             }

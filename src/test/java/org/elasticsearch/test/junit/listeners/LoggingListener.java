@@ -97,7 +97,7 @@ public class LoggingListener extends RunListener {
         final String[] loggersAndLevels = testLogging.value().split(",");
         for (String loggerAndLevel : loggersAndLevels) {
             String[] loggerAndLevelArray = loggerAndLevel.split(":");
-            if (loggerAndLevelArray.length >=2) {
+            if (loggerAndLevelArray.length >= 2) {
                 String loggerName = loggerAndLevelArray[0];
                 String level = loggerAndLevelArray[1];
                 map.put(loggerName, level);

@@ -33,7 +33,6 @@ public class BlockClusterStateProcessing extends SingleNodeDisruption {
 
     AtomicReference<CountDownLatch> disruptionLatch = new AtomicReference<>();
 
-
     public BlockClusterStateProcessing(Random random) {
         this(null, random);
     }
@@ -42,7 +41,6 @@ public class BlockClusterStateProcessing extends SingleNodeDisruption {
         super(random);
         this.disruptedNode = disruptedNode;
     }
-
 
     @Override
     public void startDisrupting() {

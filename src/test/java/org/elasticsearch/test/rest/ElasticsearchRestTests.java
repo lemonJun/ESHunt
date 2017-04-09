@@ -111,10 +111,7 @@ public class ElasticsearchRestTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-                .putArray(URLRepository.ALLOWED_URLS_SETTING, "http://snapshot.test*")
-                .put(InternalNode.HTTP_ENABLED, true)
-                .put(super.nodeSettings(nodeOrdinal)).build();
+        return ImmutableSettings.builder().putArray(URLRepository.ALLOWED_URLS_SETTING, "http://snapshot.test*").put(InternalNode.HTTP_ENABLED, true).put(super.nodeSettings(nodeOrdinal)).build();
     }
 
     @ParametersFactory
@@ -135,7 +132,7 @@ public class ElasticsearchRestTests extends ElasticsearchIntegrationTest {
         List<RestTestCandidate> restTestCandidates = collectTestCandidates();
         List<Object[]> objects = Lists.newArrayList();
         for (RestTestCandidate restTestCandidate : restTestCandidates) {
-            objects.add(new Object[]{restTestCandidate});
+            objects.add(new Object[] { restTestCandidate });
         }
         return objects;
     }
@@ -186,7 +183,7 @@ public class ElasticsearchRestTests extends ElasticsearchIntegrationTest {
     private static String[] resolvePathsProperty(String propertyName, String defaultValue) {
         String property = System.getProperty(propertyName);
         if (!Strings.hasLength(property)) {
-            return defaultValue == null ? null : new String[]{defaultValue};
+            return defaultValue == null ? null : new String[] { defaultValue };
         } else {
             return property.split(PATHS_SEPARATOR);
         }
@@ -256,11 +253,9 @@ public class ElasticsearchRestTests extends ElasticsearchIntegrationTest {
         restTestExecutionContext.clear();
 
         //skip test if the whole suite (yaml file) is disabled
-        assumeFalse(buildSkipMessage(testCandidate.getSuitePath(), testCandidate.getSetupSection().getSkipSection()),
-                testCandidate.getSetupSection().getSkipSection().skip(restTestExecutionContext.esVersion()));
+        assumeFalse(buildSkipMessage(testCandidate.getSuitePath(), testCandidate.getSetupSection().getSkipSection()), testCandidate.getSetupSection().getSkipSection().skip(restTestExecutionContext.esVersion()));
         //skip test if test section is disabled
-        assumeFalse(buildSkipMessage(testCandidate.getTestPath(), testCandidate.getTestSection().getSkipSection()),
-                testCandidate.getTestSection().getSkipSection().skip(restTestExecutionContext.esVersion()));
+        assumeFalse(buildSkipMessage(testCandidate.getTestPath(), testCandidate.getTestSection().getSkipSection()), testCandidate.getTestSection().getSkipSection().skip(restTestExecutionContext.esVersion()));
     }
 
     @Override

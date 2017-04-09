@@ -112,8 +112,7 @@ public class TranslogVersionTests extends ElasticsearchTestCase {
             TranslogStream stream = TranslogStreams.translogStreamFor(translogFile);
             fail("should have thrown an exception about the header being corrupt");
         } catch (TranslogCorruptedException e) {
-            assertThat("translog corruption from header: " + e.getMessage(),
-                    e.getMessage().contains("translog looks like version 1 or later, but has corrupted header"), equalTo(true));
+            assertThat("translog corruption from header: " + e.getMessage(), e.getMessage().contains("translog looks like version 1 or later, but has corrupted header"), equalTo(true));
         }
 
         try {
@@ -122,8 +121,7 @@ public class TranslogVersionTests extends ElasticsearchTestCase {
             TranslogStream stream = TranslogStreams.translogStreamFor(translogFile);
             fail("should have thrown an exception about the header being corrupt");
         } catch (TranslogCorruptedException e) {
-            assertThat("translog corruption from header: " + e.getMessage(),
-                    e.getMessage().contains("Invalid first byte in translog file, got: 1, expected 0x00 or 0x3f"), equalTo(true));
+            assertThat("translog corruption from header: " + e.getMessage(), e.getMessage().contains("Invalid first byte in translog file, got: 1, expected 0x00 or 0x3f"), equalTo(true));
         }
 
         try {
@@ -141,8 +139,7 @@ public class TranslogVersionTests extends ElasticsearchTestCase {
             }
             fail("should have thrown an exception about the body being corrupted");
         } catch (TranslogCorruptedException e) {
-            assertThat("translog corruption from body: " + e.getMessage(),
-                    e.getMessage().contains("translog stream is corrupted"), equalTo(true));
+            assertThat("translog corruption from body: " + e.getMessage(), e.getMessage().contains("translog stream is corrupted"), equalTo(true));
         }
 
     }
@@ -164,8 +161,7 @@ public class TranslogVersionTests extends ElasticsearchTestCase {
             }
             fail("should have thrown an exception about the body being truncated");
         } catch (TruncatedTranslogException e) {
-            assertThat("translog truncated: " + e.getMessage(),
-                    e.getMessage().contains("reached premature end of file, translog is truncated"), equalTo(true));
+            assertThat("translog truncated: " + e.getMessage(), e.getMessage().contains("reached premature end of file, translog is truncated"), equalTo(true));
         }
     }
 }

@@ -36,9 +36,7 @@ public class DedicatedMasterGetFieldMappingTests extends SimpleGetFieldMappingsT
 
     @Before
     public void before1() throws Exception {
-        Settings settings = settingsBuilder()
-                .put("node.data", false)
-                .build();
+        Settings settings = settingsBuilder().put("node.data", false).build();
         internalCluster().startNodesAsync(settings, ImmutableSettings.EMPTY).get();
     }
 

@@ -75,8 +75,7 @@ public class ClusterStateBackwardsCompatTests extends ElasticsearchBackwardsComp
                     try (TransportClient tc = newTransportClient()) {
                         tc.addTransportAddress(n.getNode().address());
 
-                        ClusterStateResponse response = tc.admin().cluster().prepareState().setIndices("test-blocks")
-                                .setBlocks(true).setNodes(false).execute().actionGet();
+                        ClusterStateResponse response = tc.admin().cluster().prepareState().setIndices("test-blocks").setBlocks(true).setNodes(false).execute().actionGet();
 
                         ClusterBlocks clusterBlocks = response.getState().blocks();
                         assertNotNull(clusterBlocks);
@@ -102,8 +101,7 @@ public class ClusterStateBackwardsCompatTests extends ElasticsearchBackwardsComp
     }
 
     private TransportClient newTransportClient() {
-        Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.ignore_cluster_name", true)
-                .put("node.name", "transport_client_" + getTestName()).build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.ignore_cluster_name", true).put("node.name", "transport_client_" + getTestName()).build();
         return new TransportClient(settings);
     }
 }

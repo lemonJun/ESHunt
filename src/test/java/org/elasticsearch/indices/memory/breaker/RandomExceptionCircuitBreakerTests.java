@@ -58,33 +58,20 @@ public class RandomExceptionCircuitBreakerTests extends ElasticsearchIntegration
 
     @Test
     public void testBreakerWithRandomExceptions() throws IOException, InterruptedException, ExecutionException {
-        for (NodeStats node : client().admin().cluster().prepareNodesStats()
-                .clear().setBreaker(true).execute().actionGet().getNodes()) {
+        for (NodeStats node : client().admin().cluster().prepareNodesStats().clear().setBreaker(true).execute().actionGet().getNodes()) {
             assertThat("Breaker is not set to 0", node.getBreaker().getStats(CircuitBreaker.Name.FIELDDATA).getEstimated(), equalTo(0L));
         }
 
-        String mapping = XContentFactory.jsonBuilder()
-                .startObject()
-                .startObject("type")
-                .startObject("properties")
-                .startObject("test-str")
-                .field("type", "string")
-                .field("index", "not_analyzed")
-                .startObject("fielddata")
-                .field("format", randomBytesFieldDataFormat())
-                .endObject() // fielddata
-                .endObject() // test-str
-                .startObject("test-num")
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("test-str").field("type", "string").field("index", "not_analyzed").startObject("fielddata").field("format", randomBytesFieldDataFormat()).endObject() // fielddata
+                        .endObject() // test-str
+                        .startObject("test-num")
                         // I don't use randomNumericType() here because I don't want "byte", and I want "float" and "double"
-                .field("type", randomFrom(Arrays.asList("float", "long", "double", "short", "integer")))
-                .startObject("fielddata")
-                .field("format", randomNumericFieldDataFormat())
-                .endObject() // fielddata
-                .endObject() // test-num
-                .endObject() // properties
-                .endObject() // type
-                .endObject() // {}
-                .string();
+                        .field("type", randomFrom(Arrays.asList("float", "long", "double", "short", "integer"))).startObject("fielddata").field("format", randomNumericFieldDataFormat()).endObject() // fielddata
+                        .endObject() // test-num
+                        .endObject() // properties
+                        .endObject() // type
+                        .endObject() // {}
+                        .string();
         final double topLevelRate;
         final double lowLevelRate;
         if (frequently()) {
@@ -106,18 +93,10 @@ public class RandomExceptionCircuitBreakerTests extends ElasticsearchIntegration
             lowLevelRate = 0d;
         }
 
-        ImmutableSettings.Builder settings = settingsBuilder()
-                .put(indexSettings())
-                .put(MockEngineSupport.READER_WRAPPER_TYPE, RandomExceptionDirectoryReaderWrapper.class.getName())
-                .put(EXCEPTION_TOP_LEVEL_RATIO_KEY, topLevelRate)
-                .put(EXCEPTION_LOW_LEVEL_RATIO_KEY, lowLevelRate)
-                .put(MockEngineSupport.WRAP_READER_RATIO, 1.0d);
+        ImmutableSettings.Builder settings = settingsBuilder().put(indexSettings()).put(MockEngineSupport.READER_WRAPPER_TYPE, RandomExceptionDirectoryReaderWrapper.class.getName()).put(EXCEPTION_TOP_LEVEL_RATIO_KEY, topLevelRate).put(EXCEPTION_LOW_LEVEL_RATIO_KEY, lowLevelRate).put(MockEngineSupport.WRAP_READER_RATIO, 1.0d);
         logger.info("creating index: [test] using settings: [{}]", settings.build().getAsMap());
-        client().admin().indices().prepareCreate("test")
-                .setSettings(settings)
-                .addMapping("type", mapping).execute().actionGet();
-        ClusterHealthResponse clusterHealthResponse = client().admin().cluster()
-                .health(Requests.clusterHealthRequest().waitForYellowStatus().timeout(TimeValue.timeValueSeconds(5))).get(); // it's OK to timeout here
+        client().admin().indices().prepareCreate("test").setSettings(settings).addMapping("type", mapping).execute().actionGet();
+        ClusterHealthResponse clusterHealthResponse = client().admin().cluster().health(Requests.clusterHealthRequest().waitForYellowStatus().timeout(TimeValue.timeValueSeconds(5))).get(); // it's OK to timeout here
         final int numDocs;
         if (clusterHealthResponse.isTimedOut()) {
             /* some seeds just won't let you create the index at all and we enter a ping-pong mode
@@ -131,20 +110,16 @@ public class RandomExceptionCircuitBreakerTests extends ElasticsearchIntegration
         }
         for (int i = 0; i < numDocs; i++) {
             try {
-                client().prepareIndex("test", "type", "" + i)
-                        .setTimeout(TimeValue.timeValueSeconds(1)).setSource("test-str", randomUnicodeOfLengthBetween(5, 25), "test-num", i).get();
+                client().prepareIndex("test", "type", "" + i).setTimeout(TimeValue.timeValueSeconds(1)).setSource("test-str", randomUnicodeOfLengthBetween(5, 25), "test-num", i).get();
             } catch (ElasticsearchException ex) {
             }
         }
         logger.info("Start Refresh");
         RefreshResponse refreshResponse = client().admin().indices().prepareRefresh("test").execute().get(); // don't assert on failures here
         final boolean refreshFailed = refreshResponse.getShardFailures().length != 0 || refreshResponse.getFailedShards() != 0;
-        logger.info("Refresh failed: [{}] numShardsFailed: [{}], shardFailuresLength: [{}], successfulShards: [{}], totalShards: [{}] ",
-                refreshFailed, refreshResponse.getFailedShards(), refreshResponse.getShardFailures().length,
-                refreshResponse.getSuccessfulShards(), refreshResponse.getTotalShards());
+        logger.info("Refresh failed: [{}] numShardsFailed: [{}], shardFailuresLength: [{}], successfulShards: [{}], totalShards: [{}] ", refreshFailed, refreshResponse.getFailedShards(), refreshResponse.getShardFailures().length, refreshResponse.getSuccessfulShards(), refreshResponse.getTotalShards());
         final int numSearches = scaledRandomIntBetween(50, 150);
-        NodesStatsResponse resp = client().admin().cluster().prepareNodesStats()
-                .clear().setBreaker(true).execute().actionGet();
+        NodesStatsResponse resp = client().admin().cluster().prepareNodesStats().clear().setBreaker(true).execute().actionGet();
         for (NodeStats stats : resp.getNodes()) {
             assertThat("Breaker is set to 0", stats.getBreaker().getStats(CircuitBreaker.Name.FIELDDATA).getEstimated(), equalTo(0L));
         }
@@ -177,7 +152,7 @@ public class RandomExceptionCircuitBreakerTests extends ElasticsearchIntegration
                 // successfully set back to zero. If there is a bug in the circuit
                 // breaker adjustment code, it should show up here by the breaker
                 // estimate being either positive or negative.
-                ensureGreen("test");  // make sure all shards are there - there could be shards that are still starting up.
+                ensureGreen("test"); // make sure all shards are there - there could be shards that are still starting up.
                 assertAllSuccessful(client().admin().indices().prepareClearCache("test").setFieldDataCache(true).execute().actionGet());
 
                 // Since .cleanUp() is no longer called on cache clear, we need to call it on each node manually
@@ -186,16 +161,13 @@ public class RandomExceptionCircuitBreakerTests extends ElasticsearchIntegration
                     // Clean up the cache, ensuring that entries' listeners have been called
                     fdCache.getCache().cleanUp();
                 }
-                NodesStatsResponse nodeStats = client().admin().cluster().prepareNodesStats()
-                        .clear().setBreaker(true).execute().actionGet();
+                NodesStatsResponse nodeStats = client().admin().cluster().prepareNodesStats().clear().setBreaker(true).execute().actionGet();
                 for (NodeStats stats : nodeStats.getNodes()) {
-                    assertThat("Breaker reset to 0 last search success: " + success + " mapping: " + mapping,
-                            stats.getBreaker().getStats(CircuitBreaker.Name.FIELDDATA).getEstimated(), equalTo(0L));
+                    assertThat("Breaker reset to 0 last search success: " + success + " mapping: " + mapping, stats.getBreaker().getStats(CircuitBreaker.Name.FIELDDATA).getEstimated(), equalTo(0L));
                 }
             }
         }
     }
-
 
     public static final String EXCEPTION_TOP_LEVEL_RATIO_KEY = "index.engine.exception.ratio.top";
     public static final String EXCEPTION_LOW_LEVEL_RATIO_KEY = "index.engine.exception.ratio.low";
@@ -203,6 +175,7 @@ public class RandomExceptionCircuitBreakerTests extends ElasticsearchIntegration
     // TODO: Generalize this class and add it as a utility
     public static class RandomExceptionDirectoryReaderWrapper extends MockEngineSupport.DirectoryReaderWrapper {
         private final Settings settings;
+
         static class ThrowingSubReaderWrapper extends SubReaderWrapper implements ThrowingAtomicReaderWrapper.Thrower {
             private final Random random;
             private final double topLevelRatio;
@@ -257,7 +230,6 @@ public class RandomExceptionCircuitBreakerTests extends ElasticsearchIntegration
                 return field.startsWith("test");
             }
         }
-
 
         public RandomExceptionDirectoryReaderWrapper(DirectoryReader in, Settings settings) {
             super(in, new ThrowingSubReaderWrapper(settings));

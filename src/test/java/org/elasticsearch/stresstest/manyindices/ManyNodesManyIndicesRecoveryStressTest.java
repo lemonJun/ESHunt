@@ -39,15 +39,9 @@ public class ManyNodesManyIndicesRecoveryStressTest {
         final int NUM_DOCS = 2;
         final int FLUSH_AFTER = 1;
 
-        final Settings nodeSettings = ImmutableSettings.settingsBuilder()
-                .put("transport.netty.connections_per_node.low", 0)
-                .put("transport.netty.connections_per_node.med", 0)
-                .put("transport.netty.connections_per_node.high", 1)
-                .build();
+        final Settings nodeSettings = ImmutableSettings.settingsBuilder().put("transport.netty.connections_per_node.low", 0).put("transport.netty.connections_per_node.med", 0).put("transport.netty.connections_per_node.high", 1).build();
 
-        final Settings indexSettings = ImmutableSettings.settingsBuilder()
-                .put("index.number_of_shards", 1)
-                .build();
+        final Settings indexSettings = ImmutableSettings.settingsBuilder().put("index.number_of_shards", 1).build();
 
         List<Node> nodes = Lists.newArrayList();
         for (int i = 0; i < NUM_NODES; i++) {

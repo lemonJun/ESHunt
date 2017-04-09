@@ -141,7 +141,6 @@ public class RecoveryWhileUnderLoadTests extends ElasticsearchIntegrationTest {
             logger.info("--> waiting for GREEN health status ...");
             assertNoTimeout(client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setTimeout("5m").setWaitForGreenStatus());
 
-
             logger.info("--> waiting for {} docs to be indexed ...", totalNumDocs);
             waitForDocs(totalNumDocs, indexer);
             indexer.assertNoFailures();

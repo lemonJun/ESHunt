@@ -51,8 +51,7 @@ public class AggregationsBinaryTests extends ElasticsearchIntegrationTest {
         createIndex("idx");
         List<IndexRequestBuilder> builders = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            builders.add(client().prepareIndex("idx", "type").setSource(
-                    jsonBuilder().startObject().field(STRING_FIELD_NAME, "val" + i).field(INT_FIELD_NAME, i).endObject()));
+            builders.add(client().prepareIndex("idx", "type").setSource(jsonBuilder().startObject().field(STRING_FIELD_NAME, "val" + i).field(INT_FIELD_NAME, i).endObject()));
         }
         indexRandom(true, builders);
         ensureSearchable();

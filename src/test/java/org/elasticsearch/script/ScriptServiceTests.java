@@ -69,12 +69,9 @@ public class ScriptServiceTests extends ElasticsearchTestCase {
     @Before
     public void setup() throws IOException {
         File configDir = newTempDir();
-        baseSettings = settingsBuilder()
-                .put("path.conf", configDir)
-                .build();
+        baseSettings = settingsBuilder().put("path.conf", configDir).build();
         resourceWatcherService = new ResourceWatcherService(baseSettings, null);
-        scriptEngineServices = ImmutableSet.of(new TestEngineService(), new GroovyScriptEngineService(baseSettings),
-                new ExpressionScriptEngineService(baseSettings), new MustacheScriptEngineService(baseSettings));
+        scriptEngineServices = ImmutableSet.of(new TestEngineService(), new GroovyScriptEngineService(baseSettings), new ExpressionScriptEngineService(baseSettings), new MustacheScriptEngineService(baseSettings));
         scriptEnginesByLangMap = ScriptModesTests.buildScriptEnginesByLangMap(scriptEngineServices);
         //randomly register custom script contexts
         int randomInt = randomIntBetween(0, 3);
@@ -206,7 +203,7 @@ public class ScriptServiceTests extends ElasticsearchTestCase {
     public void testDisableDynamicDeprecatedSetting() throws IOException {
         ImmutableSettings.Builder builder = ImmutableSettings.builder();
         ScriptService.DynamicScriptDisabling dynamicScriptDisabling = randomFrom(ScriptService.DynamicScriptDisabling.values());
-        switch(dynamicScriptDisabling) {
+        switch (dynamicScriptDisabling) {
             case EVERYTHING_ALLOWED:
                 builder.put("script.disable_dynamic", randomFrom("false", "none"));
                 break;
@@ -382,14 +379,14 @@ public class ScriptServiceTests extends ElasticsearchTestCase {
         do {
             pluginName = randomAsciiOfLength(randomIntBetween(1, 10));
             unknownContext = randomAsciiOfLength(randomIntBetween(1, 30));
-        } while(scriptContextRegistry.isSupportedContext(new ScriptContext.Plugin(pluginName, unknownContext)));
+        } while (scriptContextRegistry.isSupportedContext(new ScriptContext.Plugin(pluginName, unknownContext)));
 
         for (ScriptEngineService scriptEngineService : scriptEngineServices) {
             for (String type : scriptEngineService.types()) {
                 try {
                     scriptService.compile(type, "test", randomFrom(ScriptType.values()), new ScriptContext.Plugin(pluginName, unknownContext));
                     fail("script compilation should have been rejected");
-                } catch(ElasticsearchIllegalArgumentException e) {
+                } catch (ElasticsearchIllegalArgumentException e) {
                     assertThat(e.getMessage(), containsString("script context [" + pluginName + "_" + unknownContext + "] not supported"));
                 }
             }
@@ -408,7 +405,7 @@ public class ScriptServiceTests extends ElasticsearchTestCase {
         try {
             scriptService.compile(lang, script, scriptType, scriptContext);
             fail("compile should have been rejected for lang [" + lang + "], script_type [" + scriptType + "], scripted_op [" + scriptContext + "]");
-        } catch(ScriptException e) {
+        } catch (ScriptException e) {
             //all good
         }
     }
@@ -421,12 +418,12 @@ public class ScriptServiceTests extends ElasticsearchTestCase {
 
         @Override
         public String[] types() {
-            return new String[] {"test", "test2"};
+            return new String[] { "test", "test2" };
         }
 
         @Override
         public String[] extensions() {
-            return new String[] {"test", "tst"};
+            return new String[] { "test", "tst" };
         }
 
         @Override

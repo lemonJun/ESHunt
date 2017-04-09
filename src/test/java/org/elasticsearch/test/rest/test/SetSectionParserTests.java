@@ -32,9 +32,7 @@ public class SetSectionParserTests extends AbstractParserTests {
 
     @Test
     public void testParseSetSectionSingleValue() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                        "{ _id: id }"
-        );
+        parser = YamlXContent.yamlXContent.createParser("{ _id: id }");
 
         SetSectionParser setSectionParser = new SetSectionParser();
 
@@ -48,9 +46,7 @@ public class SetSectionParserTests extends AbstractParserTests {
 
     @Test
     public void testParseSetSectionMultipleValues() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "{ _id: id, _type: type, _index: index }"
-        );
+        parser = YamlXContent.yamlXContent.createParser("{ _id: id, _type: type, _index: index }");
 
         SetSectionParser setSectionParser = new SetSectionParser();
 
@@ -66,9 +62,7 @@ public class SetSectionParserTests extends AbstractParserTests {
 
     @Test(expected = RestTestParseException.class)
     public void testParseSetSectionNoValues() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "{ }"
-        );
+        parser = YamlXContent.yamlXContent.createParser("{ }");
 
         SetSectionParser setSectionParser = new SetSectionParser();
 

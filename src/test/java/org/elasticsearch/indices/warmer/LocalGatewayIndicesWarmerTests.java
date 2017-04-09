@@ -39,7 +39,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 /**
  */
-@ClusterScope(numDataNodes =0, scope= Scope.TEST)
+@ClusterScope(numDataNodes = 0, scope = Scope.TEST)
 public class LocalGatewayIndicesWarmerTests extends ElasticsearchIntegrationTest {
 
     private final ESLogger logger = Loggers.getLogger(LocalGatewayIndicesWarmerTests.class);
@@ -55,28 +55,11 @@ public class LocalGatewayIndicesWarmerTests extends ElasticsearchIntegrationTest
 
         ensureYellow();
 
-        assertAcked(client().admin().indices().preparePutWarmer("warmer_1")
-                .setSearchRequest(client().prepareSearch("test").setQuery(QueryBuilders.termQuery("field", "value1"))));
-        assertAcked(client().admin().indices().preparePutWarmer("warmer_2")
-                .setSearchRequest(client().prepareSearch("test").setQuery(QueryBuilders.termQuery("field", "value2"))));
+        assertAcked(client().admin().indices().preparePutWarmer("warmer_1").setSearchRequest(client().prepareSearch("test").setQuery(QueryBuilders.termQuery("field", "value1"))));
+        assertAcked(client().admin().indices().preparePutWarmer("warmer_2").setSearchRequest(client().prepareSearch("test").setQuery(QueryBuilders.termQuery("field", "value2"))));
 
         logger.info("--> put template with warmer");
-        client().admin().indices().preparePutTemplate("template_1")
-                .setSource("{\n" +
-                        "    \"template\" : \"xxx\",\n" +
-                        "    \"warmers\" : {\n" +
-                        "        \"warmer_1\" : {\n" +
-                        "            \"types\" : [],\n" +
-                        "            \"source\" : {\n" +
-                        "                \"query\" : {\n" +
-                        "                    \"match_all\" : {}\n" +
-                        "                }\n" +
-                        "            }\n" +
-                        "        }\n" +
-                        "    }\n" +
-                        "}")
-                .execute().actionGet();
-
+        client().admin().indices().preparePutTemplate("template_1").setSource("{\n" + "    \"template\" : \"xxx\",\n" + "    \"warmers\" : {\n" + "        \"warmer_1\" : {\n" + "            \"types\" : [],\n" + "            \"source\" : {\n" + "                \"query\" : {\n" + "                    \"match_all\" : {}\n" + "                }\n" + "            }\n" + "        }\n" + "    }\n" + "}").execute().actionGet();
 
         logger.info("--> verify warmers are registered in cluster state");
         ClusterState clusterState = client().admin().cluster().prepareState().execute().actionGet().getState();
@@ -114,7 +97,6 @@ public class LocalGatewayIndicesWarmerTests extends ElasticsearchIntegrationTest
             assertThat(recoveredTemplateWarmers.entries().get(i).name(), equalTo(templateWarmers.entries().get(i).name()));
             assertThat(recoveredTemplateWarmers.entries().get(i).source(), equalTo(templateWarmers.entries().get(i).source()));
         }
-
 
         logger.info("--> delete warmer warmer_1");
         DeleteWarmerResponse deleteWarmerResponse = client().admin().indices().prepareDeleteWarmer().setIndices("test").setNames("warmer_1").execute().actionGet();

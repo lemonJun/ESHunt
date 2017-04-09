@@ -62,39 +62,30 @@ public class SearchStatsTests extends ElasticsearchIntegrationTest {
         final int shardsIdx1 = randomIntBetween(1, 10); // we make sure each node gets at least a single shard...
         final int shardsIdx2 = Math.max(numNodes - shardsIdx1, randomIntBetween(1, 10));
         assertThat(numNodes, lessThanOrEqualTo(shardsIdx1 + shardsIdx2));
-        assertAcked(prepareCreate("test1").setSettings(ImmutableSettings.builder()
-                .put(SETTING_NUMBER_OF_SHARDS, shardsIdx1)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)));
-        int docsTest1 = scaledRandomIntBetween(3*shardsIdx1, 5*shardsIdx1);
+        assertAcked(prepareCreate("test1").setSettings(ImmutableSettings.builder().put(SETTING_NUMBER_OF_SHARDS, shardsIdx1).put(SETTING_NUMBER_OF_REPLICAS, 0)));
+        int docsTest1 = scaledRandomIntBetween(3 * shardsIdx1, 5 * shardsIdx1);
         for (int i = 0; i < docsTest1; i++) {
             client().prepareIndex("test1", "type", Integer.toString(i)).setSource("field", "value").execute().actionGet();
             if (rarely()) {
                 refresh();
             }
         }
-        assertAcked(prepareCreate("test2").setSettings(ImmutableSettings.builder()
-                .put(SETTING_NUMBER_OF_SHARDS, shardsIdx2)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)));
-        int docsTest2 = scaledRandomIntBetween(3*shardsIdx2, 5*shardsIdx2);
+        assertAcked(prepareCreate("test2").setSettings(ImmutableSettings.builder().put(SETTING_NUMBER_OF_SHARDS, shardsIdx2).put(SETTING_NUMBER_OF_REPLICAS, 0)));
+        int docsTest2 = scaledRandomIntBetween(3 * shardsIdx2, 5 * shardsIdx2);
         for (int i = 0; i < docsTest2; i++) {
             client().prepareIndex("test2", "type", Integer.toString(i)).setSource("field", "value").execute().actionGet();
             if (rarely()) {
                 refresh();
             }
         }
-        assertThat(shardsIdx1+shardsIdx2, equalTo(numAssignedShards("test1", "test2")));
+        assertThat(shardsIdx1 + shardsIdx2, equalTo(numAssignedShards("test1", "test2")));
         assertThat(numAssignedShards("test1", "test2"), greaterThanOrEqualTo(2));
         // THERE WILL BE AT LEAST 2 NODES HERE SO WE CAN WAIT FOR GREEN
         ensureGreen();
         refresh();
         int iters = scaledRandomIntBetween(100, 150);
         for (int i = 0; i < iters; i++) {
-            SearchResponse searchResponse = internalCluster().clientNodeClient().prepareSearch()
-                    .setQuery(QueryBuilders.termQuery("field", "value")).setStats("group1", "group2")
-                    .addHighlightedField("field")
-                    .addScriptField("scrip1", "_source.field")
-                    .setSize(100)
-                    .execute().actionGet();
+            SearchResponse searchResponse = internalCluster().clientNodeClient().prepareSearch().setQuery(QueryBuilders.termQuery("field", "value")).setStats("group1", "group2").addHighlightedField("field").addScriptField("scrip1", "_source.field").setSize(100).execute().actionGet();
             assertHitCount(searchResponse, docsTest1 + docsTest2);
             assertAllSuccessful(searchResponse);
         }
@@ -128,9 +119,9 @@ public class SearchStatsTests extends ElasticsearchIntegrationTest {
                 assertThat(total.getQueryTimeInMillis(), equalTo(0l));
             }
         }
-        
+
         assertThat(num, greaterThan(0));
-     
+
     }
 
     private Set<String> nodeIdsWithIndex(String... indices) {
@@ -159,16 +150,11 @@ public class SearchStatsTests extends ElasticsearchIntegrationTest {
         IndicesStatsResponse indicesStats = client().admin().indices().prepareStats().execute().actionGet();
         assertThat(indicesStats.getTotal().getSearch().getOpenContexts(), equalTo(0l));
 
-        SearchResponse searchResponse = client().prepareSearch()
-                .setSearchType(SearchType.SCAN)
-                .setQuery(matchAllQuery())
-                .setSize(5)
-                .setScroll(TimeValue.timeValueMinutes(2))
-                .execute().actionGet();
+        SearchResponse searchResponse = client().prepareSearch().setSearchType(SearchType.SCAN).setQuery(matchAllQuery()).setSize(5).setScroll(TimeValue.timeValueMinutes(2)).execute().actionGet();
         assertSearchResponse(searchResponse);
 
         indicesStats = client().admin().indices().prepareStats().execute().actionGet();
-        assertThat(indicesStats.getTotal().getSearch().getOpenContexts(), equalTo((long)numAssignedShards("test1")));
+        assertThat(indicesStats.getTotal().getSearch().getOpenContexts(), equalTo((long) numAssignedShards("test1")));
 
         // scroll, but with no timeout (so no context)
         searchResponse = client().prepareSearchScroll(searchResponse.getScrollId()).execute().actionGet();

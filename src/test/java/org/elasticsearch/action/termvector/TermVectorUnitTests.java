@@ -170,8 +170,7 @@ public class TermVectorUnitTests extends ElasticsearchLuceneTestCase {
 
     @Test
     public void testRestRequestParsing() throws Exception {
-        BytesReference inputBytes = new BytesArray(
-                " {\"fields\" : [\"a\",  \"b\",\"c\"], \"offsets\":false, \"positions\":false, \"payloads\":true}");
+        BytesReference inputBytes = new BytesArray(" {\"fields\" : [\"a\",  \"b\",\"c\"], \"offsets\":false, \"positions\":false, \"payloads\":true}");
 
         TermVectorRequest tvr = new TermVectorRequest(null, null, null);
         XContentParser parser = XContentFactory.xContent(XContentType.JSON).createParser(inputBytes);
@@ -208,8 +207,7 @@ public class TermVectorUnitTests extends ElasticsearchLuceneTestCase {
 
     @Test
     public void testRequestParsingThrowsException() throws Exception {
-        BytesReference inputBytes = new BytesArray(
-                " {\"fields\" : \"a,  b,c   \", \"offsets\":false, \"positions\":false, \"payloads\":true, \"meaningless_term\":2}");
+        BytesReference inputBytes = new BytesArray(" {\"fields\" : \"a,  b,c   \", \"offsets\":false, \"positions\":false, \"payloads\":true, \"meaningless_term\":2}");
         TermVectorRequest tvr = new TermVectorRequest(null, null, null);
         boolean threwException = false;
         try {
@@ -258,7 +256,7 @@ public class TermVectorUnitTests extends ElasticsearchLuceneTestCase {
 
         }
     }
-    
+
     @Test
     public void testFieldTypeToTermVectorString() throws Exception {
         FieldType ft = new FieldType();
@@ -296,14 +294,15 @@ public class TermVectorUnitTests extends ElasticsearchLuceneTestCase {
         MultiTermVectorsRequest request = new MultiTermVectorsRequest();
         request.add(new TermVectorRequest(), bytes);
         checkParsedParameters(request);
-        
+
         data = Streams.copyToBytesFromClasspath("/org/elasticsearch/action/termvector/multiRequest2.json");
         bytes = new BytesArray(data);
         request = new MultiTermVectorsRequest();
         request.add(new TermVectorRequest(), bytes);
         checkParsedParameters(request);
-        
+
     }
+
     void checkParsedParameters(MultiTermVectorsRequest request) {
         Set<String> ids = new HashSet<>();
         ids.add("1");
@@ -320,9 +319,9 @@ public class TermVectorUnitTests extends ElasticsearchLuceneTestCase {
             assertThat(singleRequest.offsets(), equalTo(false));
             assertThat(singleRequest.termStatistics(), equalTo(true));
             assertThat(singleRequest.fieldStatistics(), equalTo(false));
-            assertThat(singleRequest.id(),Matchers.anyOf(Matchers.equalTo("1"), Matchers.equalTo("2")));
+            assertThat(singleRequest.id(), Matchers.anyOf(Matchers.equalTo("1"), Matchers.equalTo("2")));
             assertThat(singleRequest.selectedFields(), equalTo(fields));
         }
     }
-    
+
 }

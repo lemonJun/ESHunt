@@ -49,12 +49,9 @@ public class IndexingMemoryControllerUnitTests extends ElasticsearchTestCase {
         long currentTimeSec = TimeValue.timeValueNanos(System.nanoTime()).seconds();
 
         public MockController(Settings settings) {
-            super(ImmutableSettings.builder()
-                            .put(SHARD_INACTIVE_INTERVAL_TIME_SETTING, "200h") // disable it
+            super(ImmutableSettings.builder().put(SHARD_INACTIVE_INTERVAL_TIME_SETTING, "200h") // disable it
                             .put(SHARD_INACTIVE_TIME_SETTING, "0s") // immediate
-                            .put(settings)
-                            .build(),
-                    null, null, 100 * 1024 * 1024); // fix jvm mem size to 100mb
+                            .put(settings).build(), null, null, 100 * 1024 * 1024); // fix jvm mem size to 100mb
         }
 
         public void incTranslog(ShardId shard1, int id, int ops) {
@@ -136,9 +133,7 @@ public class IndexingMemoryControllerUnitTests extends ElasticsearchTestCase {
     }
 
     public void testShardAdditionAndRemoval() {
-        MockController controller = new MockController(ImmutableSettings.builder()
-                .put(IndexingMemoryController.INDEX_BUFFER_SIZE_SETTING, "10mb")
-                .put(IndexingMemoryController.TRANSLOG_BUFFER_SIZE_SETTING, "100kb").build());
+        MockController controller = new MockController(ImmutableSettings.builder().put(IndexingMemoryController.INDEX_BUFFER_SIZE_SETTING, "10mb").put(IndexingMemoryController.TRANSLOG_BUFFER_SIZE_SETTING, "100kb").build());
         final ShardId shard1 = new ShardId("test", 1);
         controller.setTranslog(shard1, randomInt(10), randomInt(10));
         controller.forceCheck();
@@ -168,11 +163,7 @@ public class IndexingMemoryControllerUnitTests extends ElasticsearchTestCase {
     }
 
     public void testActiveInactive() {
-        MockController controller = new MockController(ImmutableSettings.builder()
-                .put(IndexingMemoryController.INDEX_BUFFER_SIZE_SETTING, "10mb")
-                .put(IndexingMemoryController.TRANSLOG_BUFFER_SIZE_SETTING, "100kb")
-                .put(IndexingMemoryController.SHARD_INACTIVE_TIME_SETTING, "5s")
-                .build());
+        MockController controller = new MockController(ImmutableSettings.builder().put(IndexingMemoryController.INDEX_BUFFER_SIZE_SETTING, "10mb").put(IndexingMemoryController.TRANSLOG_BUFFER_SIZE_SETTING, "100kb").put(IndexingMemoryController.SHARD_INACTIVE_TIME_SETTING, "5s").build());
 
         final ShardId shard1 = new ShardId("test", 1);
         controller.setTranslog(shard1, 0, 0);
@@ -220,53 +211,33 @@ public class IndexingMemoryControllerUnitTests extends ElasticsearchTestCase {
     }
 
     public void testMinShardBufferSizes() {
-        MockController controller = new MockController(ImmutableSettings.builder()
-                .put(IndexingMemoryController.INDEX_BUFFER_SIZE_SETTING, "10mb")
-                .put(IndexingMemoryController.TRANSLOG_BUFFER_SIZE_SETTING, "50kb")
-                .put(IndexingMemoryController.MIN_SHARD_INDEX_BUFFER_SIZE_SETTING, "6mb")
-                .put(IndexingMemoryController.MIN_SHARD_TRANSLOG_BUFFER_SIZE_SETTING, "40kb").build());
+        MockController controller = new MockController(ImmutableSettings.builder().put(IndexingMemoryController.INDEX_BUFFER_SIZE_SETTING, "10mb").put(IndexingMemoryController.TRANSLOG_BUFFER_SIZE_SETTING, "50kb").put(IndexingMemoryController.MIN_SHARD_INDEX_BUFFER_SIZE_SETTING, "6mb").put(IndexingMemoryController.MIN_SHARD_TRANSLOG_BUFFER_SIZE_SETTING, "40kb").build());
 
         assertTwoActiveShards(controller, new ByteSizeValue(6, ByteSizeUnit.MB), new ByteSizeValue(40, ByteSizeUnit.KB));
     }
 
     public void testMaxShardBufferSizes() {
-        MockController controller = new MockController(ImmutableSettings.builder()
-                .put(IndexingMemoryController.INDEX_BUFFER_SIZE_SETTING, "10mb")
-                .put(IndexingMemoryController.TRANSLOG_BUFFER_SIZE_SETTING, "50kb")
-                .put(IndexingMemoryController.MAX_SHARD_INDEX_BUFFER_SIZE_SETTING, "3mb")
-                .put(IndexingMemoryController.MAX_SHARD_TRANSLOG_BUFFER_SIZE_SETTING, "10kb").build());
+        MockController controller = new MockController(ImmutableSettings.builder().put(IndexingMemoryController.INDEX_BUFFER_SIZE_SETTING, "10mb").put(IndexingMemoryController.TRANSLOG_BUFFER_SIZE_SETTING, "50kb").put(IndexingMemoryController.MAX_SHARD_INDEX_BUFFER_SIZE_SETTING, "3mb").put(IndexingMemoryController.MAX_SHARD_TRANSLOG_BUFFER_SIZE_SETTING, "10kb").build());
 
         assertTwoActiveShards(controller, new ByteSizeValue(3, ByteSizeUnit.MB), new ByteSizeValue(10, ByteSizeUnit.KB));
     }
 
     public void testRelativeBufferSizes() {
-        MockController controller = new MockController(ImmutableSettings.builder()
-                .put(IndexingMemoryController.INDEX_BUFFER_SIZE_SETTING, "50%")
-                .put(IndexingMemoryController.TRANSLOG_BUFFER_SIZE_SETTING, "0.5%")
-                .build());
+        MockController controller = new MockController(ImmutableSettings.builder().put(IndexingMemoryController.INDEX_BUFFER_SIZE_SETTING, "50%").put(IndexingMemoryController.TRANSLOG_BUFFER_SIZE_SETTING, "0.5%").build());
 
         assertThat(controller.indexingBufferSize(), equalTo(new ByteSizeValue(50, ByteSizeUnit.MB)));
         assertThat(controller.translogBufferSize(), equalTo(new ByteSizeValue(512, ByteSizeUnit.KB)));
     }
 
-
     public void testMinBufferSizes() {
-        MockController controller = new MockController(ImmutableSettings.builder()
-                .put(IndexingMemoryController.INDEX_BUFFER_SIZE_SETTING, "0.001%")
-                .put(IndexingMemoryController.TRANSLOG_BUFFER_SIZE_SETTING, "0.001%")
-                .put(IndexingMemoryController.MIN_INDEX_BUFFER_SIZE_SETTING, "6mb")
-                .put(IndexingMemoryController.MIN_TRANSLOG_BUFFER_SIZE_SETTING, "512kb").build());
+        MockController controller = new MockController(ImmutableSettings.builder().put(IndexingMemoryController.INDEX_BUFFER_SIZE_SETTING, "0.001%").put(IndexingMemoryController.TRANSLOG_BUFFER_SIZE_SETTING, "0.001%").put(IndexingMemoryController.MIN_INDEX_BUFFER_SIZE_SETTING, "6mb").put(IndexingMemoryController.MIN_TRANSLOG_BUFFER_SIZE_SETTING, "512kb").build());
 
         assertThat(controller.indexingBufferSize(), equalTo(new ByteSizeValue(6, ByteSizeUnit.MB)));
         assertThat(controller.translogBufferSize(), equalTo(new ByteSizeValue(512, ByteSizeUnit.KB)));
     }
 
     public void testMaxBufferSizes() {
-        MockController controller = new MockController(ImmutableSettings.builder()
-                .put(IndexingMemoryController.INDEX_BUFFER_SIZE_SETTING, "90%")
-                .put(IndexingMemoryController.TRANSLOG_BUFFER_SIZE_SETTING, "90%")
-                .put(IndexingMemoryController.MAX_INDEX_BUFFER_SIZE_SETTING, "6mb")
-                .put(IndexingMemoryController.MAX_TRANSLOG_BUFFER_SIZE_SETTING, "512kb").build());
+        MockController controller = new MockController(ImmutableSettings.builder().put(IndexingMemoryController.INDEX_BUFFER_SIZE_SETTING, "90%").put(IndexingMemoryController.TRANSLOG_BUFFER_SIZE_SETTING, "90%").put(IndexingMemoryController.MAX_INDEX_BUFFER_SIZE_SETTING, "6mb").put(IndexingMemoryController.MAX_TRANSLOG_BUFFER_SIZE_SETTING, "512kb").build());
 
         assertThat(controller.indexingBufferSize(), equalTo(new ByteSizeValue(6, ByteSizeUnit.MB)));
         assertThat(controller.translogBufferSize(), equalTo(new ByteSizeValue(512, ByteSizeUnit.KB)));

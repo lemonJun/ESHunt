@@ -40,21 +40,11 @@ public class AnalyzerMapperTests extends ElasticsearchSingleNodeTest {
     public void testAnalyzerMapping() throws Exception {
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
 
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_analyzer").field("path", "field_analyzer").endObject()
-                .startObject("properties")
-                .startObject("field1").field("type", "string").endObject()
-                .startObject("field2").field("type", "string").field("analyzer", "simple").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_analyzer").field("path", "field_analyzer").endObject().startObject("properties").startObject("field1").field("type", "string").endObject().startObject("field2").field("type", "string").field("analyzer", "simple").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper documentMapper = parser.parse(mapping);
 
-        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field_analyzer", "whitespace")
-                .field("field1", "value1")
-                .field("field2", "value2")
-                .endObject().bytes());
+        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field_analyzer", "whitespace").field("field1", "value1").field("field2", "value2").endObject().bytes());
 
         FieldNameAnalyzer analyzer = (FieldNameAnalyzer) doc.analyzer();
         assertThat(((NamedAnalyzer) analyzer.defaultAnalyzer()).name(), equalTo("whitespace"));
@@ -65,11 +55,7 @@ public class AnalyzerMapperTests extends ElasticsearchSingleNodeTest {
 
         DocumentMapper reparsedMapper = parser.parse(documentMapper.mappingSource().string());
 
-        doc = reparsedMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field_analyzer", "whitespace")
-                .field("field1", "value1")
-                .field("field2", "value2")
-                .endObject().bytes());
+        doc = reparsedMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field_analyzer", "whitespace").field("field1", "value1").field("field2", "value2").endObject().bytes());
 
         analyzer = (FieldNameAnalyzer) doc.analyzer();
         assertThat(((NamedAnalyzer) analyzer.defaultAnalyzer()).name(), equalTo("whitespace"));
@@ -77,27 +63,15 @@ public class AnalyzerMapperTests extends ElasticsearchSingleNodeTest {
         assertThat(((NamedAnalyzer) analyzer.analyzers().get("field2")).name(), equalTo("simple"));
     }
 
-
     @Test
     public void testAnalyzerMappingExplicit() throws Exception {
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
 
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_analyzer").field("path", "field_analyzer").endObject()
-                .startObject("properties")
-                .startObject("field_analyzer").field("type", "string").endObject()
-                .startObject("field1").field("type", "string").endObject()
-                .startObject("field2").field("type", "string").field("analyzer", "simple").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_analyzer").field("path", "field_analyzer").endObject().startObject("properties").startObject("field_analyzer").field("type", "string").endObject().startObject("field1").field("type", "string").endObject().startObject("field2").field("type", "string").field("analyzer", "simple").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper documentMapper = parser.parse(mapping);
 
-        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field_analyzer", "whitespace")
-                .field("field1", "value1")
-                .field("field2", "value2")
-                .endObject().bytes());
+        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field_analyzer", "whitespace").field("field1", "value1").field("field2", "value2").endObject().bytes());
 
         FieldNameAnalyzer analyzer = (FieldNameAnalyzer) doc.analyzer();
         assertThat(((NamedAnalyzer) analyzer.defaultAnalyzer()).name(), equalTo("whitespace"));
@@ -108,11 +82,7 @@ public class AnalyzerMapperTests extends ElasticsearchSingleNodeTest {
 
         DocumentMapper reparsedMapper = parser.parse(documentMapper.mappingSource().string());
 
-        doc = reparsedMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field_analyzer", "whitespace")
-                .field("field1", "value1")
-                .field("field2", "value2")
-                .endObject().bytes());
+        doc = reparsedMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field_analyzer", "whitespace").field("field1", "value1").field("field2", "value2").endObject().bytes());
 
         analyzer = (FieldNameAnalyzer) doc.analyzer();
         assertThat(((NamedAnalyzer) analyzer.defaultAnalyzer()).name(), equalTo("whitespace"));
@@ -124,22 +94,11 @@ public class AnalyzerMapperTests extends ElasticsearchSingleNodeTest {
     public void testAnalyzerMappingNotIndexedNorStored() throws Exception {
         DocumentMapperParser parser = createIndex("test").mapperService().documentMapperParser();
 
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_analyzer").field("path", "field_analyzer").endObject()
-                .startObject("properties")
-                .startObject("field_analyzer").field("type", "string").field("index", "no").field("store", "no").endObject()
-                .startObject("field1").field("type", "string").endObject()
-                .startObject("field2").field("type", "string").field("analyzer", "simple").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_analyzer").field("path", "field_analyzer").endObject().startObject("properties").startObject("field_analyzer").field("type", "string").field("index", "no").field("store", "no").endObject().startObject("field1").field("type", "string").endObject().startObject("field2").field("type", "string").field("analyzer", "simple").endObject().endObject().endObject().endObject().string();
 
         DocumentMapper documentMapper = parser.parse(mapping);
 
-        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field_analyzer", "whitespace")
-                .field("field1", "value1")
-                .field("field2", "value2")
-                .endObject().bytes());
+        ParsedDocument doc = documentMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field_analyzer", "whitespace").field("field1", "value1").field("field2", "value2").endObject().bytes());
 
         FieldNameAnalyzer analyzer = (FieldNameAnalyzer) doc.analyzer();
         assertThat(((NamedAnalyzer) analyzer.defaultAnalyzer()).name(), equalTo("whitespace"));
@@ -150,11 +109,7 @@ public class AnalyzerMapperTests extends ElasticsearchSingleNodeTest {
 
         DocumentMapper reparsedMapper = parser.parse(documentMapper.mappingSource().string());
 
-        doc = reparsedMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject()
-                .field("field_analyzer", "whitespace")
-                .field("field1", "value1")
-                .field("field2", "value2")
-                .endObject().bytes());
+        doc = reparsedMapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field_analyzer", "whitespace").field("field1", "value1").field("field2", "value2").endObject().bytes());
 
         analyzer = (FieldNameAnalyzer) doc.analyzer();
         assertThat(((NamedAnalyzer) analyzer.defaultAnalyzer()).name(), equalTo("whitespace"));

@@ -54,6 +54,7 @@ public class Base64Test extends ElasticsearchTestCase {
         try {
             Base64.decode(base64.getBytes(Charsets.UTF_8));
             fail(String.format(Locale.ROOT, "Expected IOException to be thrown for string %s (len %d)", base64, base64.length()));
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
     }
 }

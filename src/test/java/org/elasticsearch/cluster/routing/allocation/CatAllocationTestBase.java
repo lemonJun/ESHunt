@@ -63,7 +63,7 @@ public abstract class CatAllocationTestBase extends ElasticsearchAllocationTestC
             String line = null;
             // regexp FTW
             Pattern pattern = Pattern.compile("^(.+)\\s+(\\d)\\s+([rp])\\s+(STARTED|RELOCATING|INITIALIZING|UNASSIGNED)\\s+\\d+\\s+[0-9.a-z]+\\s+(\\d+\\.\\d+\\.\\d+\\.\\d+).*$");
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 final Matcher matcher;
                 if ((matcher = pattern.matcher(line)).matches()) {
                     final String index = matcher.group(1);
@@ -90,7 +90,7 @@ public abstract class CatAllocationTestBase extends ElasticsearchAllocationTestC
         logger.info("Building initial routing table");
         MetaData.Builder builder = MetaData.builder();
         RoutingTable.Builder routingTableBuilder = RoutingTable.builder();
-        for(Idx idx : indices.values()) {
+        for (Idx idx : indices.values()) {
             IndexMetaData idxMeta = IndexMetaData.builder(idx.name).numberOfShards(idx.numShards()).numberOfReplicas(idx.numReplicas()).build();
             builder.put(idxMeta, false);
             IndexRoutingTable.Builder tableBuilder = new IndexRoutingTable.Builder(idx.name).initializeAsRecovery(idxMeta);
@@ -103,7 +103,7 @@ public abstract class CatAllocationTestBase extends ElasticsearchAllocationTestC
                 shardIdToRouting.put(r.getId(), refData);
 
             }
-            for (IndexShardRoutingTable t: shardIdToRouting.values()) {
+            for (IndexShardRoutingTable t : shardIdToRouting.values()) {
                 tableBuilder.addIndexShard(t);
             }
             IndexRoutingTable table = tableBuilder.build();
@@ -130,8 +130,8 @@ public abstract class CatAllocationTestBase extends ElasticsearchAllocationTestC
     }
 
     private ClusterState rebalance(ClusterState clusterState) {
-        RoutingTable routingTable;AllocationService strategy = createAllocationService(settingsBuilder()
-                .build());
+        RoutingTable routingTable;
+        AllocationService strategy = createAllocationService(settingsBuilder().build());
         RoutingAllocation.Result reroute = strategy.reroute(clusterState);
         routingTable = reroute.routingTable();
         clusterState = ClusterState.builder(clusterState).routingTable(routingTable).build();
@@ -151,8 +151,6 @@ public abstract class CatAllocationTestBase extends ElasticsearchAllocationTestC
         return clusterState;
     }
 
-
-
     public class Idx {
         final String name;
         final List<MutableShardRouting> routing = new ArrayList<>();
@@ -161,7 +159,6 @@ public abstract class CatAllocationTestBase extends ElasticsearchAllocationTestC
             this.name = name;
         }
 
-
         public void add(MutableShardRouting r) {
             routing.add(r);
         }
@@ -169,7 +166,7 @@ public abstract class CatAllocationTestBase extends ElasticsearchAllocationTestC
         public int numReplicas() {
             int count = 0;
             for (MutableShardRouting msr : routing) {
-                if (msr.primary() == false && msr.id()==0) {
+                if (msr.primary() == false && msr.id() == 0) {
                     count++;
                 }
             }
@@ -180,7 +177,7 @@ public abstract class CatAllocationTestBase extends ElasticsearchAllocationTestC
             int max = 0;
             for (MutableShardRouting msr : routing) {
                 if (msr.primary()) {
-                    max = Math.max(msr.getId()+1, max);
+                    max = Math.max(msr.getId() + 1, max);
                 }
             }
             return max;

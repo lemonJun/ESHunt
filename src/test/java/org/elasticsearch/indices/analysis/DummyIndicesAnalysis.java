@@ -30,14 +30,9 @@ public class DummyIndicesAnalysis extends AbstractComponent {
     @Inject
     public DummyIndicesAnalysis(Settings settings, IndicesAnalysisService indicesAnalysisService) {
         super(settings);
-        indicesAnalysisService.analyzerProviderFactories().put("dummy",
-                new PreBuiltAnalyzerProviderFactory("dummy", AnalyzerScope.INDICES,
-                        new DummyAnalyzer(Lucene.ANALYZER_VERSION)));
-        indicesAnalysisService.tokenFilterFactories().put("dummy_token_filter",
-                new PreBuiltTokenFilterFactoryFactory(new DummyTokenFilterFactory()));
-        indicesAnalysisService.charFilterFactories().put("dummy_char_filter",
-                new PreBuiltCharFilterFactoryFactory(new DummyCharFilterFactory()));
-        indicesAnalysisService.tokenizerFactories().put("dummy_tokenizer",
-                new PreBuiltTokenizerFactoryFactory(new DummyTokenizerFactory()));
+        indicesAnalysisService.analyzerProviderFactories().put("dummy", new PreBuiltAnalyzerProviderFactory("dummy", AnalyzerScope.INDICES, new DummyAnalyzer(Lucene.ANALYZER_VERSION)));
+        indicesAnalysisService.tokenFilterFactories().put("dummy_token_filter", new PreBuiltTokenFilterFactoryFactory(new DummyTokenFilterFactory()));
+        indicesAnalysisService.charFilterFactories().put("dummy_char_filter", new PreBuiltCharFilterFactoryFactory(new DummyCharFilterFactory()));
+        indicesAnalysisService.tokenizerFactories().put("dummy_tokenizer", new PreBuiltTokenizerFactoryFactory(new DummyTokenizerFactory()));
     }
 }

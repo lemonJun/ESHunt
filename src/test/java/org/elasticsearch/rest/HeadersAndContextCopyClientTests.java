@@ -247,15 +247,7 @@ public class HeadersAndContextCopyClientTests extends ElasticsearchTestCase {
 
         Client client = client(new NoOpClient(), new FakeRestRequest(restHeaders, restContext), usefulRestHeaders);
 
-        ActionRequestBuilder requestBuilders [] = new ActionRequestBuilder[] {
-                client.prepareIndex("index", "type"),
-                client.prepareGet("index", "type", "id"),
-                client.prepareBulk(),
-                client.prepareDelete(),
-                client.prepareIndex(),
-                client.prepareClearScroll(),
-                client.prepareMultiGet(),
-        };
+        ActionRequestBuilder requestBuilders[] = new ActionRequestBuilder[] { client.prepareIndex("index", "type"), client.prepareGet("index", "type", "id"), client.prepareBulk(), client.prepareDelete(), client.prepareIndex(), client.prepareClearScroll(), client.prepareMultiGet(), };
 
         for (ActionRequestBuilder requestBuilder : requestBuilders) {
             putHeaders(requestBuilder.request(), transportHeaders);
@@ -287,14 +279,7 @@ public class HeadersAndContextCopyClientTests extends ElasticsearchTestCase {
 
         Client client = client(new NoOpClient(), new FakeRestRequest(restHeaders, restContext), usefulRestHeaders);
 
-        ActionRequestBuilder requestBuilders [] = new ActionRequestBuilder[] {
-                client.admin().cluster().prepareNodesInfo(),
-                client.admin().cluster().prepareClusterStats(),
-                client.admin().cluster().prepareState(),
-                client.admin().cluster().prepareCreateSnapshot("repo", "name"),
-                client.admin().cluster().prepareHealth(),
-                client.admin().cluster().prepareReroute()
-        };
+        ActionRequestBuilder requestBuilders[] = new ActionRequestBuilder[] { client.admin().cluster().prepareNodesInfo(), client.admin().cluster().prepareClusterStats(), client.admin().cluster().prepareState(), client.admin().cluster().prepareCreateSnapshot("repo", "name"), client.admin().cluster().prepareHealth(), client.admin().cluster().prepareReroute() };
 
         for (ActionRequestBuilder requestBuilder : requestBuilders) {
             putHeaders(requestBuilder.request(), transportHeaders);
@@ -326,15 +311,7 @@ public class HeadersAndContextCopyClientTests extends ElasticsearchTestCase {
 
         Client client = client(new NoOpClient(), new FakeRestRequest(restHeaders, restContext), usefulRestHeaders);
 
-        ActionRequestBuilder requestBuilders [] = new ActionRequestBuilder[] {
-                client.admin().indices().prepareValidateQuery(),
-                client.admin().indices().prepareCreate("test"),
-                client.admin().indices().prepareAliases(),
-                client.admin().indices().prepareAnalyze("text"),
-                client.admin().indices().prepareDeleteWarmer(),
-                client.admin().indices().prepareTypesExists("type"),
-                client.admin().indices().prepareClose()
-        };
+        ActionRequestBuilder requestBuilders[] = new ActionRequestBuilder[] { client.admin().indices().prepareValidateQuery(), client.admin().indices().prepareCreate("test"), client.admin().indices().prepareAliases(), client.admin().indices().prepareAnalyze("text"), client.admin().indices().prepareDeleteWarmer(), client.admin().indices().prepareTypesExists("type"), client.admin().indices().prepareClose() };
 
         for (ActionRequestBuilder requestBuilder : requestBuilders) {
             putHeaders(requestBuilder.request(), transportHeaders);

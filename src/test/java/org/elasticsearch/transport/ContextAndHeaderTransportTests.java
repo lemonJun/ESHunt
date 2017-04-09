@@ -83,33 +83,19 @@ public class ContextAndHeaderTransportTests extends ElasticsearchIntegrationTest
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("plugin.types", ActionLoggingPlugin.class.getName())
-                .put("script.indexed", "on")
-                .put(HTTP_ENABLED, true)
-                .build();
+        return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("plugin.types", ActionLoggingPlugin.class.getName()).put("script.indexed", "on").put(HTTP_ENABLED, true).build();
     }
 
     @Before
     public void createIndices() throws Exception {
         requests.clear();
 
-        String mapping = jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("location").field("type", "geo_shape").endObject()
-                .startObject("name").field("type", "string").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = jsonBuilder().startObject().startObject("type").startObject("properties").startObject("location").field("type", "geo_shape").endObject().startObject("name").field("type", "string").endObject().endObject().endObject().endObject().string();
 
-        Settings settings = settingsBuilder()
-                .put(indexSettings())
-                .put(SETTING_NUMBER_OF_SHARDS, 1) // A single shard will help to keep the tests repeatable.
-                .build();
-        assertAcked(transportClient().admin().indices().prepareCreate(lookupIndex)
-                .setSettings(settings).addMapping("type", mapping));
-        assertAcked(transportClient().admin().indices().prepareCreate(queryIndex)
-                .setSettings(settings).addMapping("type", mapping));
+        Settings settings = settingsBuilder().put(indexSettings()).put(SETTING_NUMBER_OF_SHARDS, 1) // A single shard will help to keep the tests repeatable.
+                        .build();
+        assertAcked(transportClient().admin().indices().prepareCreate(lookupIndex).setSettings(settings).addMapping("type", mapping));
+        assertAcked(transportClient().admin().indices().prepareCreate(queryIndex).setSettings(settings).addMapping("type", mapping));
         ensureGreen(queryIndex, lookupIndex);
     }
 
@@ -121,19 +107,14 @@ public class ContextAndHeaderTransportTests extends ElasticsearchIntegrationTest
 
     @Test
     public void testThatTermsLookupGetRequestContainsContextAndHeaders() throws Exception {
-        transportClient().prepareIndex(lookupIndex, "type", "1")
-                .setSource(jsonBuilder().startObject().array("followers", "foo", "bar", "baz").endObject()).get();
-        transportClient().prepareIndex(queryIndex, "type", "1")
-                .setSource(jsonBuilder().startObject().field("username", "foo").endObject()).get();
+        transportClient().prepareIndex(lookupIndex, "type", "1").setSource(jsonBuilder().startObject().array("followers", "foo", "bar", "baz").endObject()).get();
+        transportClient().prepareIndex(queryIndex, "type", "1").setSource(jsonBuilder().startObject().field("username", "foo").endObject()).get();
         transportClient().admin().indices().prepareRefresh(queryIndex, lookupIndex).get();
 
         TermsLookupFilterBuilder termsLookupFilterBuilder = FilterBuilders.termsLookupFilter("username").lookupIndex(lookupIndex).lookupType("type").lookupId("1").lookupPath("followers");
         FilteredQueryBuilder queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), termsLookupFilterBuilder);
 
-        SearchResponse searchResponse = transportClient()
-                .prepareSearch(queryIndex)
-                .setQuery(queryBuilder)
-                .get();
+        SearchResponse searchResponse = transportClient().prepareSearch(queryIndex).setQuery(queryBuilder).get();
         assertNoFailures(searchResponse);
         assertHitCount(searchResponse, 1);
 
@@ -142,52 +123,24 @@ public class ContextAndHeaderTransportTests extends ElasticsearchIntegrationTest
 
     @Test
     public void testThatGeoShapeQueryGetRequestContainsContextAndHeaders() throws Exception {
-        IndexResponse indexResponse = transportClient().prepareIndex(lookupIndex, "type", "1").setSource(jsonBuilder().startObject()
-                .field("name", "Munich Suburban Area")
-                .startObject("location")
-                .field("type", "polygon")
-                .startArray("coordinates").startArray()
-                .startArray().value(11.34).value(48.25).endArray()
-                .startArray().value(11.68).value(48.25).endArray()
-                .startArray().value(11.65).value(48.06).endArray()
-                .startArray().value(11.37).value(48.13).endArray()
-                .startArray().value(11.34).value(48.25).endArray() // close the polygon
-                .endArray().endArray()
-                .endObject()
-                .endObject()).get();
+        IndexResponse indexResponse = transportClient().prepareIndex(lookupIndex, "type", "1").setSource(jsonBuilder().startObject().field("name", "Munich Suburban Area").startObject("location").field("type", "polygon").startArray("coordinates").startArray().startArray().value(11.34).value(48.25).endArray().startArray().value(11.68).value(48.25).endArray().startArray().value(11.65).value(48.06).endArray().startArray().value(11.37).value(48.13).endArray().startArray().value(11.34).value(48.25).endArray() // close the polygon
+                        .endArray().endArray().endObject().endObject()).get();
         assertThat(indexResponse.isCreated(), is(true));
 
         // second document
-        indexResponse = transportClient().prepareIndex(queryIndex, "type", "1").setSource(jsonBuilder().startObject()
-                .field("name", "Munich Center")
-                .startObject("location")
-                .field("type", "point")
-                .startArray("coordinates").value(11.57).value(48.13).endArray()
-                .endObject()
-                .endObject())
-                .get();
+        indexResponse = transportClient().prepareIndex(queryIndex, "type", "1").setSource(jsonBuilder().startObject().field("name", "Munich Center").startObject("location").field("type", "point").startArray("coordinates").value(11.57).value(48.13).endArray().endObject().endObject()).get();
         assertThat(indexResponse.isCreated(), is(true));
         transportClient().admin().indices().prepareRefresh(lookupIndex, queryIndex).get();
 
         SearchResponse searchResponse;
         if (randomBoolean()) {
-            GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("location", "1", "type")
-                    .indexedShapeIndex(lookupIndex)
-                    .indexedShapePath("location");
+            GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("location", "1", "type").indexedShapeIndex(lookupIndex).indexedShapePath("location");
 
-            searchResponse = transportClient()
-                    .prepareSearch(queryIndex)
-                    .setQuery(queryBuilder)
-                    .get();
+            searchResponse = transportClient().prepareSearch(queryIndex).setQuery(queryBuilder).get();
         } else {
-            GeoShapeFilterBuilder filterBuilder = FilterBuilders.geoShapeFilter("location", "1", "type", ShapeRelation.INTERSECTS)
-                    .indexedShapeIndex(lookupIndex)
-                    .indexedShapePath("location");
+            GeoShapeFilterBuilder filterBuilder = FilterBuilders.geoShapeFilter("location", "1", "type", ShapeRelation.INTERSECTS).indexedShapeIndex(lookupIndex).indexedShapePath("location");
 
-            searchResponse = transportClient()
-                    .prepareSearch(queryIndex)
-                    .setQuery(QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder))
-                    .get();
+            searchResponse = transportClient().prepareSearch(queryIndex).setQuery(QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder)).get();
 
         }
 
@@ -200,26 +153,14 @@ public class ContextAndHeaderTransportTests extends ElasticsearchIntegrationTest
 
     @Test
     public void testThatMoreLikeThisQueryMultiTermVectorRequestContainsContextAndHeaders() throws Exception {
-        transportClient().prepareIndex(lookupIndex, "type", "1")
-                .setSource(jsonBuilder().startObject().field("name", "Star Wars - The new republic").endObject())
-                .get();
-        transportClient().prepareIndex(queryIndex, "type", "1")
-                .setSource(jsonBuilder().startObject().field("name", "Jar Jar Binks - A horrible mistake").endObject())
-                .get();
-        transportClient().prepareIndex(queryIndex, "type", "2")
-                .setSource(jsonBuilder().startObject().field("name", "Star Wars - Return of the jedi").endObject())
-                .get();
+        transportClient().prepareIndex(lookupIndex, "type", "1").setSource(jsonBuilder().startObject().field("name", "Star Wars - The new republic").endObject()).get();
+        transportClient().prepareIndex(queryIndex, "type", "1").setSource(jsonBuilder().startObject().field("name", "Jar Jar Binks - A horrible mistake").endObject()).get();
+        transportClient().prepareIndex(queryIndex, "type", "2").setSource(jsonBuilder().startObject().field("name", "Star Wars - Return of the jedi").endObject()).get();
         transportClient().admin().indices().prepareRefresh(lookupIndex, queryIndex).get();
 
-        MoreLikeThisQueryBuilder moreLikeThisQueryBuilder = QueryBuilders.moreLikeThisQuery("name")
-                .addItem(new MoreLikeThisQueryBuilder.Item(lookupIndex, "type", "1"))
-                .minTermFreq(1)
-                .minDocFreq(1);
+        MoreLikeThisQueryBuilder moreLikeThisQueryBuilder = QueryBuilders.moreLikeThisQuery("name").addItem(new MoreLikeThisQueryBuilder.Item(lookupIndex, "type", "1")).minTermFreq(1).minDocFreq(1);
 
-        SearchResponse searchResponse = transportClient()
-                .prepareSearch(queryIndex)
-                .setQuery(moreLikeThisQueryBuilder)
-                .get();
+        SearchResponse searchResponse = transportClient().prepareSearch(queryIndex).setQuery(moreLikeThisQueryBuilder).get();
         assertNoFailures(searchResponse);
         assertHitCount(searchResponse, 1);
 
@@ -228,12 +169,8 @@ public class ContextAndHeaderTransportTests extends ElasticsearchIntegrationTest
 
     @Test
     public void testThatPercolatingExistingDocumentGetRequestContainsContextAndHeaders() throws Exception {
-        transportClient().prepareIndex(lookupIndex, ".percolator", "1")
-                .setSource(jsonBuilder().startObject().startObject("query").startObject("match").field("name", "star wars").endObject().endObject().endObject())
-                .get();
-        transportClient().prepareIndex(lookupIndex, "type", "1")
-                .setSource(jsonBuilder().startObject().field("name", "Star Wars - The new republic").endObject())
-                .get();
+        transportClient().prepareIndex(lookupIndex, ".percolator", "1").setSource(jsonBuilder().startObject().startObject("query").startObject("match").field("name", "star wars").endObject().endObject().endObject()).get();
+        transportClient().prepareIndex(lookupIndex, "type", "1").setSource(jsonBuilder().startObject().field("name", "Star Wars - The new republic").endObject()).get();
         transportClient().admin().indices().prepareRefresh(lookupIndex).get();
 
         GetRequest getRequest = transportClient().prepareGet(lookupIndex, "type", "1").request();
@@ -245,24 +182,16 @@ public class ContextAndHeaderTransportTests extends ElasticsearchIntegrationTest
 
     @Test
     public void testThatIndexedScriptGetRequestContainsContextAndHeaders() throws Exception {
-        PutIndexedScriptResponse scriptResponse = transportClient().preparePutIndexedScript(GroovyScriptEngineService.NAME, "my_script",
-                jsonBuilder().startObject().field("script", "_score * 10").endObject().string()
-        ).get();
+        PutIndexedScriptResponse scriptResponse = transportClient().preparePutIndexedScript(GroovyScriptEngineService.NAME, "my_script", jsonBuilder().startObject().field("script", "_score * 10").endObject().string()).get();
         assertThat(scriptResponse.isCreated(), is(true));
 
-        transportClient().prepareIndex(queryIndex, "type", "1")
-                .setSource(jsonBuilder().startObject().field("name", "Star Wars - The new republic").endObject())
-                .get();
+        transportClient().prepareIndex(queryIndex, "type", "1").setSource(jsonBuilder().startObject().field("name", "Star Wars - The new republic").endObject()).get();
         transportClient().admin().indices().prepareRefresh(queryIndex).get();
 
         // custom content, not sure how to specify "script_id" otherwise in the API
-        XContentBuilder builder = jsonBuilder().startObject().startObject("function_score").field("boost_mode", "replace").startArray("functions")
-                .startObject().startObject("script_score").field("script_id", "my_script").field("lang", "groovy").endObject().endObject().endArray().endObject().endObject();
+        XContentBuilder builder = jsonBuilder().startObject().startObject("function_score").field("boost_mode", "replace").startArray("functions").startObject().startObject("script_score").field("script_id", "my_script").field("lang", "groovy").endObject().endObject().endArray().endObject().endObject();
 
-        SearchResponse searchResponse = transportClient()
-                .prepareSearch(queryIndex)
-                .setQuery(builder)
-                .get();
+        SearchResponse searchResponse = transportClient().prepareSearch(queryIndex).setQuery(builder).get();
         assertNoFailures(searchResponse);
         assertHitCount(searchResponse, 1);
         assertThat(searchResponse.getHits().getMaxScore(), is(10.0f));
@@ -273,25 +202,16 @@ public class ContextAndHeaderTransportTests extends ElasticsearchIntegrationTest
 
     @Test
     public void testThatSearchTemplatesWithIndexedTemplatesGetRequestContainsContextAndHeaders() throws Exception {
-        PutIndexedScriptResponse scriptResponse = transportClient().preparePutIndexedScript(MustacheScriptEngineService.NAME, "the_template",
-                jsonBuilder().startObject().startObject("template").startObject("query").startObject("match")
-                        .field("name", "{{query_string}}").endObject().endObject().endObject().endObject().string()
-        ).get();
+        PutIndexedScriptResponse scriptResponse = transportClient().preparePutIndexedScript(MustacheScriptEngineService.NAME, "the_template", jsonBuilder().startObject().startObject("template").startObject("query").startObject("match").field("name", "{{query_string}}").endObject().endObject().endObject().endObject().string()).get();
         assertThat(scriptResponse.isCreated(), is(true));
 
-        transportClient().prepareIndex(queryIndex, "type", "1")
-                .setSource(jsonBuilder().startObject().field("name", "Star Wars - The new republic").endObject())
-                .get();
+        transportClient().prepareIndex(queryIndex, "type", "1").setSource(jsonBuilder().startObject().field("name", "Star Wars - The new republic").endObject()).get();
         transportClient().admin().indices().prepareRefresh(queryIndex).get();
 
         Map<String, Object> params = new HashMap<>();
         params.put("query_string", "star wars");
 
-        SearchResponse searchResponse = transportClient().prepareSearch(queryIndex)
-                .setTemplateName("the_template")
-                .setTemplateParams(params)
-                .setTemplateType(ScriptService.ScriptType.INDEXED)
-                .get();
+        SearchResponse searchResponse = transportClient().prepareSearch(queryIndex).setTemplateName("the_template").setTemplateParams(params).setTemplateType(ScriptService.ScriptType.INDEXED).get();
 
         assertNoFailures(searchResponse);
         assertHitCount(searchResponse, 1);
@@ -308,12 +228,7 @@ public class ContextAndHeaderTransportTests extends ElasticsearchIntegrationTest
         }
 
         CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpResponse response = new HttpRequestBuilder(httpClient)
-                .httpTransport(internalCluster().getDataNodeInstance(HttpServerTransport.class))
-                .addHeader(randomHeaderKey, randomHeaderValue)
-                .addHeader(releventHeaderName, randomHeaderValue)
-                .path("/" + queryIndex + "/_search")
-                .execute();
+        HttpResponse response = new HttpRequestBuilder(httpClient).httpTransport(internalCluster().getDataNodeInstance(HttpServerTransport.class)).addHeader(randomHeaderKey, randomHeaderValue).addHeader(releventHeaderName, randomHeaderValue).path("/" + queryIndex + "/_search").execute();
 
         assertThat(response, hasStatus(OK));
         List<SearchRequest> searchRequests = getRequests(SearchRequest.class);
@@ -363,8 +278,7 @@ public class ContextAndHeaderTransportTests extends ElasticsearchIntegrationTest
         String msg = String.format(Locale.ROOT, "Expected header %s to be in request %s", randomHeaderKey, request.getClass().getName());
         if (request instanceof IndexRequest) {
             IndexRequest indexRequest = (IndexRequest) request;
-            msg = String.format(Locale.ROOT, "Expected header %s to be in index request %s/%s/%s", randomHeaderKey,
-                    indexRequest.index(), indexRequest.type(), indexRequest.id());
+            msg = String.format(Locale.ROOT, "Expected header %s to be in index request %s/%s/%s", randomHeaderKey, indexRequest.index(), indexRequest.type(), indexRequest.id());
         }
         assertThat(msg, request.hasHeader(randomHeaderKey), is(true));
         assertThat(request.getHeader(randomHeaderKey).toString(), is(randomHeaderValue));
@@ -445,7 +359,6 @@ public class ContextAndHeaderTransportTests extends ElasticsearchIntegrationTest
 
     public static class ActionLoggingModule extends AbstractModule implements PreProcessModule {
 
-
         @Override
         protected void configure() {
             bind(LoggingFilter.class).asEagerSingleton();
@@ -454,7 +367,7 @@ public class ContextAndHeaderTransportTests extends ElasticsearchIntegrationTest
         @Override
         public void processModule(Module module) {
             if (module instanceof ActionModule) {
-                ((ActionModule)module).registerFilter(LoggingFilter.class);
+                ((ActionModule) module).registerFilter(LoggingFilter.class);
             }
         }
     }

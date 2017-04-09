@@ -97,7 +97,7 @@ public class NettyHttpServerPipeliningTest extends ElasticsearchTestCase {
 
         List<String> requests = Arrays.asList("/firstfast", "/slow?sleep=500", "/secondfast", "/slow?sleep=1000", "/thirdfast");
         try (NettyHttpClient nettyHttpClient = new NettyHttpClient()) {
-            Collection<HttpResponse> responses = nettyHttpClient.sendRequests(transportAddress.address(), requests.toArray(new String[]{}));
+            Collection<HttpResponse> responses = nettyHttpClient.sendRequests(transportAddress.address(), requests.toArray(new String[] {}));
             Collection<String> responseBodies = returnHttpResponseBodies(responses);
             assertThat(responseBodies, contains("/firstfast", "/slow?sleep=500", "/secondfast", "/slow?sleep=1000", "/thirdfast"));
         }
@@ -112,7 +112,7 @@ public class NettyHttpServerPipeliningTest extends ElasticsearchTestCase {
 
         List<String> requests = Arrays.asList("/slow?sleep=1000", "/firstfast", "/secondfast", "/thirdfast", "/slow?sleep=500");
         try (NettyHttpClient nettyHttpClient = new NettyHttpClient()) {
-            Collection<HttpResponse> responses = nettyHttpClient.sendRequests(transportAddress.address(), requests.toArray(new String[]{}));
+            Collection<HttpResponse> responses = nettyHttpClient.sendRequests(transportAddress.address(), requests.toArray(new String[] {}));
             List<String> responseBodies = Lists.newArrayList(returnHttpResponseBodies(responses));
             // we cannot be sure about the order of the fast requests, but the slow ones should have to be last
             assertThat(responseBodies, hasSize(5));

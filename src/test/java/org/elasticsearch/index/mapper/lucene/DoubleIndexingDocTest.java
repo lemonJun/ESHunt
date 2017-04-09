@@ -43,20 +43,10 @@ public class DoubleIndexingDocTest extends ElasticsearchSingleNodeLuceneTestCase
         Directory dir = newDirectory();
         IndexWriter writer = new IndexWriter(dir, newIndexWriterConfig(random(), TEST_VERSION_CURRENT, Lucene.STANDARD_ANALYZER));
 
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").endObject().endObject().endObject().string();
         DocumentMapper mapper = createIndex("test").mapperService().documentMapperParser().parse(mapping);
 
-        ParsedDocument doc = mapper.parse("type", "1", XContentFactory.jsonBuilder()
-                .startObject()
-                .field("field1", "value1")
-                .field("field2", 1)
-                .field("field3", 1.1)
-                .field("field4", "2010-01-01")
-                .startArray("field5").value(1).value(2).value(3).endArray()
-                .endObject()
-                .bytes());
+        ParsedDocument doc = mapper.parse("type", "1", XContentFactory.jsonBuilder().startObject().field("field1", "value1").field("field2", 1).field("field3", 1.1).field("field4", "2010-01-01").startArray("field5").value(1).value(2).value(3).endArray().endObject().bytes());
 
         writer.addDocument(doc.rootDoc(), doc.analyzer());
         writer.addDocument(doc.rootDoc(), doc.analyzer());

@@ -37,7 +37,7 @@ public class AnalyzerBackwardsCompatTests extends ElasticsearchTokenStreamTestCa
         org.elasticsearch.Version version = org.elasticsearch.Version.CURRENT;
         for (int i = 0; i < iters; i++) {
             ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder().put("index.analysis.filter.my_stop.type", "stop");
-            if (version.onOrAfter(noStopwordVersion))  {
+            if (version.onOrAfter(noStopwordVersion)) {
                 if (random().nextBoolean()) {
                     builder.put(SETTING_VERSION_CREATED, version);
                 }
@@ -48,9 +48,9 @@ public class AnalyzerBackwardsCompatTests extends ElasticsearchTokenStreamTestCa
             AnalysisService analysisService = AnalysisTestsHelper.createAnalysisServiceFromSettings(builder.build());
             NamedAnalyzer analyzer = analysisService.analyzer("foo");
             if (version.onOrAfter(noStopwordVersion)) {
-                assertAnalyzesTo(analyzer, "this is bogus", new String[]{"this", "is", "bogus"});
+                assertAnalyzesTo(analyzer, "this is bogus", new String[] { "this", "is", "bogus" });
             } else {
-                assertAnalyzesTo(analyzer, "this is bogus", new String[]{"bogus"});
+                assertAnalyzesTo(analyzer, "this is bogus", new String[] { "bogus" });
             }
             version = randomVersion();
         }

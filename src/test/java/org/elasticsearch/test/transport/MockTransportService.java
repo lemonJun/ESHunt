@@ -316,7 +316,6 @@ public class MockTransportService extends TransportService {
 
         protected final Transport transport;
 
-
         public DelegateTransport(Transport transport) {
             this.transport = transport;
         }
@@ -409,7 +408,6 @@ public class MockTransportService extends TransportService {
         }
     }
 
-
     List<Tracer> activeTracers = new CopyOnWriteArrayList<>();
 
     public static class Tracer {
@@ -493,6 +491,5 @@ public class MockTransportService extends TransportService {
             }
         }
     }
-
 
 }

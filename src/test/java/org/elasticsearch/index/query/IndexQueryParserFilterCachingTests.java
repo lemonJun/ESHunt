@@ -19,7 +19,6 @@
 
 package org.elasticsearch.index.query;
 
-
 import org.apache.lucene.search.ConstantScoreQuery;
 import org.apache.lucene.search.Query;
 import org.elasticsearch.common.bytes.BytesArray;
@@ -58,10 +57,7 @@ public class IndexQueryParserFilterCachingTests extends ElasticsearchSingleNodeT
 
     @Before
     public void setup() throws IOException {
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("index.cache.filter.type", "weighted")
-                .put("name", "IndexQueryParserFilterCachingTests")
-                .build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("index.cache.filter.type", "weighted").put("name", "IndexQueryParserFilterCachingTests").build();
         IndexService indexService = createIndex("test", settings);
         injector = indexService.injector();
 
@@ -94,9 +90,7 @@ public class IndexQueryParserFilterCachingTests extends ElasticsearchSingleNodeT
      * @param expectedCache true if we expect a cached filter
      */
     private void testDateRangeFilterCache(IndexQueryParserService queryParser, Object gte, Object lte, Boolean forcedCache, boolean expectedCache) {
-        RangeFilterBuilder filterBuilder = FilterBuilders.rangeFilter("born")
-                .gte(gte)
-                .lte(lte);
+        RangeFilterBuilder filterBuilder = FilterBuilders.rangeFilter("born").gte(gte).lte(lte);
         if (forcedCache != null) {
             filterBuilder.cache(forcedCache);
         }
@@ -104,25 +98,24 @@ public class IndexQueryParserFilterCachingTests extends ElasticsearchSingleNodeT
         Query parsedQuery = queryParser.parse(QueryBuilders.constantScoreQuery(filterBuilder)).query();
         assertThat(parsedQuery, instanceOf(ConstantScoreQuery.class));
 
-
         if (expectedCache) {
-            if (((ConstantScoreQuery)parsedQuery).getFilter() instanceof CachedFilter) {
+            if (((ConstantScoreQuery) parsedQuery).getFilter() instanceof CachedFilter) {
                 logger.info("gte [{}], lte [{}], _cache [{}] is cached", gte, lte, forcedCache);
             } else {
                 logger.warn("gte [{}], lte [{}], _cache [{}] should be cached", gte, lte, forcedCache);
             }
         } else {
-            if (((ConstantScoreQuery)parsedQuery).getFilter() instanceof NoCacheFilter) {
+            if (((ConstantScoreQuery) parsedQuery).getFilter() instanceof NoCacheFilter) {
                 logger.info("gte [{}], lte [{}], _cache [{}] is not cached", gte, lte, forcedCache);
             } else {
                 logger.warn("gte [{}], lte [{}], _cache [{}] should not be cached", gte, lte, forcedCache);
             }
         }
 
-       if (expectedCache) {
-            assertThat(((ConstantScoreQuery)parsedQuery).getFilter(), instanceOf(CachedFilter.class));
+        if (expectedCache) {
+            assertThat(((ConstantScoreQuery) parsedQuery).getFilter(), instanceOf(CachedFilter.class));
         } else {
-            assertThat(((ConstantScoreQuery)parsedQuery).getFilter(), instanceOf(NoCacheFilter.class));
+            assertThat(((ConstantScoreQuery) parsedQuery).getFilter(), instanceOf(NoCacheFilter.class));
         }
     }
 
@@ -204,9 +197,9 @@ public class IndexQueryParserFilterCachingTests extends ElasticsearchSingleNodeT
         String query = copyToStringFromClasspath("/org/elasticsearch/index/query/date_range_in_boolean.json");
         Query parsedQuery = queryParser.parse(query).query();
         assertThat(parsedQuery, instanceOf(ConstantScoreQuery.class));
-        assertThat(((ConstantScoreQuery)parsedQuery).getFilter(), instanceOf(XBooleanFilter.class));
-        assertThat(((XBooleanFilter)((ConstantScoreQuery)parsedQuery).getFilter()).clauses().get(1).getFilter(), instanceOf(NoCacheFilter.class));
-        assertThat(((XBooleanFilter)((ConstantScoreQuery)parsedQuery).getFilter()).clauses().size(), is(2));
+        assertThat(((ConstantScoreQuery) parsedQuery).getFilter(), instanceOf(XBooleanFilter.class));
+        assertThat(((XBooleanFilter) ((ConstantScoreQuery) parsedQuery).getFilter()).clauses().get(1).getFilter(), instanceOf(NoCacheFilter.class));
+        assertThat(((XBooleanFilter) ((ConstantScoreQuery) parsedQuery).getFilter()).clauses().size(), is(2));
 
         query = copyToStringFromClasspath("/org/elasticsearch/index/query/date_range_in_boolean_with_long_value.json");
         parsedQuery = queryParser.parse(query).query();
@@ -225,9 +218,9 @@ public class IndexQueryParserFilterCachingTests extends ElasticsearchSingleNodeT
         query = copyToStringFromClasspath("/org/elasticsearch/index/query/date_range_in_boolean_cached_now.json");
         parsedQuery = queryParser.parse(query).query();
         assertThat(parsedQuery, instanceOf(ConstantScoreQuery.class));
-        assertThat(((ConstantScoreQuery)parsedQuery).getFilter(), instanceOf(XBooleanFilter.class));
-        assertThat(((XBooleanFilter)((ConstantScoreQuery)parsedQuery).getFilter()).clauses().get(1).getFilter(), instanceOf(NoCacheFilter.class));
-        assertThat(((XBooleanFilter)((ConstantScoreQuery)parsedQuery).getFilter()).clauses().size(), is(2));
+        assertThat(((ConstantScoreQuery) parsedQuery).getFilter(), instanceOf(XBooleanFilter.class));
+        assertThat(((XBooleanFilter) ((ConstantScoreQuery) parsedQuery).getFilter()).clauses().get(1).getFilter(), instanceOf(NoCacheFilter.class));
+        assertThat(((XBooleanFilter) ((ConstantScoreQuery) parsedQuery).getFilter()).clauses().size(), is(2));
 
         query = copyToStringFromClasspath("/org/elasticsearch/index/query/date_range_in_boolean_cached_complex_now.json");
         parsedQuery = queryParser.parse(query).query();

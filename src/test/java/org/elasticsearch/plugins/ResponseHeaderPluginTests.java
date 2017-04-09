@@ -40,11 +40,7 @@ public class ResponseHeaderPluginTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("plugin.types", TestResponseHeaderPlugin.class.getName())
-                .put("force.http.enabled", true)
-                .build();
+        return ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("plugin.types", TestResponseHeaderPlugin.class.getName()).put("force.http.enabled", true).build();
     }
 
     @Test
@@ -58,5 +54,5 @@ public class ResponseHeaderPluginTests extends ElasticsearchIntegrationTest {
         assertThat(authResponse, hasStatus(OK));
         assertThat(authResponse.getHeaders().get("Secret"), equalTo("granted"));
     }
-    
+
 }

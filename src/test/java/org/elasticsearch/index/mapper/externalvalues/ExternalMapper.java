@@ -107,8 +107,7 @@ public class ExternalMapper extends AbstractFieldMapper<Object> {
 
             context.path().pathType(origPathType);
 
-            return new ExternalMapper(buildNames(context), generatedValue, mapperName, binMapper, boolMapper, pointMapper, shapeMapper, stringMapper,
-                    multiFieldsBuilder.build(this, context), copyTo);
+            return new ExternalMapper(buildNames(context), generatedValue, mapperName, binMapper, boolMapper, pointMapper, shapeMapper, stringMapper, multiFieldsBuilder.build(this, context), copyTo);
         }
     }
 
@@ -122,7 +121,7 @@ public class ExternalMapper extends AbstractFieldMapper<Object> {
             this.generatedValue = generatedValue;
         }
 
-        @SuppressWarnings({"unchecked"})
+        @SuppressWarnings({ "unchecked" })
         @Override
         public Mapper.Builder parse(String name, Map<String, Object> node, ParserContext parserContext) throws MapperParsingException {
             ExternalMapper.Builder builder = new ExternalMapper.Builder(name, generatedValue, mapperName);
@@ -147,12 +146,8 @@ public class ExternalMapper extends AbstractFieldMapper<Object> {
     private final GeoShapeFieldMapper shapeMapper;
     private final Mapper stringMapper;
 
-    public ExternalMapper(FieldMapper.Names names,
-                          String generatedValue, String mapperName,
-                          BinaryFieldMapper binMapper, BooleanFieldMapper boolMapper, GeoPointFieldMapper pointMapper,
-                          GeoShapeFieldMapper shapeMapper, Mapper stringMapper, MultiFields multiFields, CopyTo copyTo) {
-        super(names, 1.0f, Defaults.FIELD_TYPE, false, null, null, null, null, null, null, null, ImmutableSettings.EMPTY,
-                multiFields, copyTo);
+    public ExternalMapper(FieldMapper.Names names, String generatedValue, String mapperName, BinaryFieldMapper binMapper, BooleanFieldMapper boolMapper, GeoPointFieldMapper pointMapper, GeoShapeFieldMapper shapeMapper, Mapper stringMapper, MultiFields multiFields, CopyTo copyTo) {
+        super(names, 1.0f, Defaults.FIELD_TYPE, false, null, null, null, null, null, null, null, ImmutableSettings.EMPTY, multiFields, copyTo);
         this.generatedValue = generatedValue;
         this.mapperName = mapperName;
         this.binMapper = binMapper;

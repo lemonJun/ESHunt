@@ -40,11 +40,7 @@ import static org.hamcrest.Matchers.equalTo;
 public class SearchWithRejectionsTests extends ElasticsearchIntegrationTest {
     @Override
     public Settings nodeSettings(int nodeOrdinal) {
-        return settingsBuilder().put(super.nodeSettings(nodeOrdinal))
-                .put("threadpool.search.type", "fixed")
-                .put("threadpool.search.size", 1)
-                .put("threadpool.search.queue_size", 1)
-                .build();
+        return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("threadpool.search.type", "fixed").put("threadpool.search.size", 1).put("threadpool.search.queue_size", 1).build();
     }
 
     @Test
@@ -64,10 +60,7 @@ public class SearchWithRejectionsTests extends ElasticsearchIntegrationTest {
         SearchType searchType = randomFrom(SearchType.DEFAULT, SearchType.QUERY_AND_FETCH, SearchType.QUERY_THEN_FETCH, SearchType.DFS_QUERY_AND_FETCH, SearchType.DFS_QUERY_THEN_FETCH);
         logger.info("search type is {}", searchType);
         for (int i = 0; i < numSearches; i++) {
-            responses[i] = client().prepareSearch()
-                    .setQuery(matchAllQuery())
-                    .setSearchType(searchType)
-                    .execute();
+            responses[i] = client().prepareSearch().setQuery(matchAllQuery()).setSearchType(searchType).execute();
         }
         for (int i = 0; i < numSearches; i++) {
             try {

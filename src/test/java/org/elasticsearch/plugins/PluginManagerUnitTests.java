@@ -42,10 +42,7 @@ public class PluginManagerUnitTests extends ElasticsearchTestCase {
         File homeFolder = newTempDir();
         File genericConfigFolder = newTempDir();
 
-        Settings settings = settingsBuilder()
-                .put("path.conf", genericConfigFolder)
-                .put("path.home", homeFolder)
-                .build();
+        Settings settings = settingsBuilder().put("path.conf", genericConfigFolder).put("path.home", homeFolder).build();
         Environment environment = new Environment(settings);
 
         PluginManager.PluginHandle pluginHandle = new PluginManager.PluginHandle(pluginName, "version", "user", "repo");

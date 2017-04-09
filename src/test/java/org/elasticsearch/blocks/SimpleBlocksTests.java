@@ -39,7 +39,7 @@ import static org.hamcrest.Matchers.notNullValue;
 
 @ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.TEST)
 public class SimpleBlocksTests extends ElasticsearchIntegrationTest {
-    
+
     @Test
     public void verifyIndexAndClusterReadOnly() throws Exception {
         // cluster.read_only = null: write and metadata not blocked
@@ -62,14 +62,13 @@ public class SimpleBlocksTests extends ElasticsearchIntegrationTest {
         canIndexDocument("test1");
         canIndexExists("test1");
 
-
         // newly created an index has no blocks
         canCreateIndex("ro");
         canIndexDocument("ro");
         canIndexExists("ro");
 
         // adds index write and metadata block
-        setIndexReadOnly( "ro", "true");
+        setIndexReadOnly("ro", "true");
         canNotIndexDocument("ro");
         canIndexExists("ro");
 
@@ -88,13 +87,9 @@ public class SimpleBlocksTests extends ElasticsearchIntegrationTest {
     public void testIndexReadWriteMetaDataBlocks() {
         canCreateIndex("test1");
         canIndexDocument("test1");
-        client().admin().indices().prepareUpdateSettings("test1")
-                .setSettings(settingsBuilder().put(IndexMetaData.SETTING_BLOCKS_WRITE, true))
-                .execute().actionGet();
+        client().admin().indices().prepareUpdateSettings("test1").setSettings(settingsBuilder().put(IndexMetaData.SETTING_BLOCKS_WRITE, true)).execute().actionGet();
         canNotIndexDocument("test1");
-        client().admin().indices().prepareUpdateSettings("test1")
-                .setSettings(settingsBuilder().put(IndexMetaData.SETTING_BLOCKS_WRITE, false))
-                .execute().actionGet();
+        client().admin().indices().prepareUpdateSettings("test1").setSettings(settingsBuilder().put(IndexMetaData.SETTING_BLOCKS_WRITE, false)).execute().actionGet();
         canIndexDocument("test1");
     }
 

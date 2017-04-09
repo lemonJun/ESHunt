@@ -47,7 +47,7 @@ import java.util.Map;
 import static org.hamcrest.Matchers.*;
 
 public class VersionsTests extends ElasticsearchLuceneTestCase {
-    
+
     public static DirectoryReader reopen(DirectoryReader reader) throws IOException {
         return reopen(reader, true);
     }
@@ -61,6 +61,7 @@ public class VersionsTests extends ElasticsearchLuceneTestCase {
         }
         return newReader;
     }
+
     @Test
     public void testVersions() throws Exception {
         Directory dir = newDirectory();
@@ -99,7 +100,7 @@ public class VersionsTests extends ElasticsearchLuceneTestCase {
         doc.add(uid);
         doc.add(version);
         writer.updateDocument(new Term(UidFieldMapper.NAME, "1"), doc);
-        
+
         directoryReader = reopen(directoryReader);
         assertThat(Versions.loadVersion(directoryReader, new Term(UidFieldMapper.NAME, "1")), equalTo(3l));
         assertThat(Versions.loadDocIdAndVersion(directoryReader, new Term(UidFieldMapper.NAME, "1")).version, equalTo(3l));
@@ -193,17 +194,20 @@ public class VersionsTests extends ElasticsearchLuceneTestCase {
         }
         String uid;
         long version;
+
         UidField(String uid, long version) {
             super(UidFieldMapper.NAME, uid, FIELD_TYPE);
             this.uid = uid;
             this.version = version;
         }
+
         @Override
         public TokenStream tokenStream(Analyzer analyzer, TokenStream reuse) throws IOException {
             return new TokenStream() {
                 boolean finished = true;
                 final CharTermAttribute term = addAttribute(CharTermAttribute.class);
                 final PayloadAttribute payload = addAttribute(PayloadAttribute.class);
+
                 @Override
                 public boolean incrementToken() throws IOException {
                     if (finished) {
@@ -214,6 +218,7 @@ public class VersionsTests extends ElasticsearchLuceneTestCase {
                     finished = true;
                     return true;
                 }
+
                 @Override
                 public void reset() throws IOException {
                     finished = false;
@@ -262,8 +267,7 @@ public class VersionsTests extends ElasticsearchLuceneTestCase {
         iw.addDocument(document);
         iw.commit();
 
-        final Map<String, Long> expectedVersions = ImmutableMap.<String, Long>builder()
-                .put("1", 0L).put("2", 0L).put("3", 0L).put("4", 4L).put("5", 5L).put("6", 6L).build();
+        final Map<String, Long> expectedVersions = ImmutableMap.<String, Long> builder().put("1", 0L).put("2", 0L).put("3", 0L).put("4", 4L).put("5", 5L).put("6", 6L).build();
 
         // Force merge and check versions
         iw.forceMerge(1, true);

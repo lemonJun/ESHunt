@@ -32,9 +32,7 @@ public class AssertionParsersTests extends AbstractParserTests {
 
     @Test
     public void testParseIsTrue() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "get.fields._timestamp"
-        );
+        parser = YamlXContent.yamlXContent.createParser("get.fields._timestamp");
 
         IsTrueParser isTrueParser = new IsTrueParser();
         IsTrueAssertion trueAssertion = isTrueParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -45,9 +43,7 @@ public class AssertionParsersTests extends AbstractParserTests {
 
     @Test
     public void testParseIsFalse() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "docs.1._source"
-        );
+        parser = YamlXContent.yamlXContent.createParser("docs.1._source");
 
         IsFalseParser isFalseParser = new IsFalseParser();
         IsFalseAssertion falseAssertion = isFalseParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -58,9 +54,7 @@ public class AssertionParsersTests extends AbstractParserTests {
 
     @Test
     public void testParseGreaterThan() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "{ field: 3}"
-        );
+        parser = YamlXContent.yamlXContent.createParser("{ field: 3}");
 
         GreaterThanParser greaterThanParser = new GreaterThanParser();
         GreaterThanAssertion greaterThanAssertion = greaterThanParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -72,9 +66,7 @@ public class AssertionParsersTests extends AbstractParserTests {
 
     @Test
     public void testParseLessThan() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "{ field: 3}"
-        );
+        parser = YamlXContent.yamlXContent.createParser("{ field: 3}");
 
         LessThanParser lessThanParser = new LessThanParser();
         LessThanAssertion lessThanAssertion = lessThanParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -86,9 +78,7 @@ public class AssertionParsersTests extends AbstractParserTests {
 
     @Test
     public void testParseLength() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "{ _id: 22}"
-        );
+        parser = YamlXContent.yamlXContent.createParser("{ _id: 22}");
 
         LengthParser lengthParser = new LengthParser();
         LengthAssertion lengthAssertion = lengthParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -101,9 +91,7 @@ public class AssertionParsersTests extends AbstractParserTests {
     @Test
     @SuppressWarnings("unchecked")
     public void testParseMatchSimpleIntegerValue() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "{ field: 10 }"
-        );
+        parser = YamlXContent.yamlXContent.createParser("{ field: 10 }");
 
         MatchParser matchParser = new MatchParser();
         MatchAssertion matchAssertion = matchParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -117,9 +105,7 @@ public class AssertionParsersTests extends AbstractParserTests {
     @Test
     @SuppressWarnings("unchecked")
     public void testParseMatchSimpleStringValue() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "{ foo: bar }"
-        );
+        parser = YamlXContent.yamlXContent.createParser("{ foo: bar }");
 
         MatchParser matchParser = new MatchParser();
         MatchAssertion matchAssertion = matchParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -133,9 +119,7 @@ public class AssertionParsersTests extends AbstractParserTests {
     @Test
     @SuppressWarnings("unchecked")
     public void testParseMatchArray() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "{'matches': ['test_percolator_1', 'test_percolator_2']}"
-        );
+        parser = YamlXContent.yamlXContent.createParser("{'matches': ['test_percolator_1', 'test_percolator_2']}");
 
         MatchParser matchParser = new MatchParser();
         MatchAssertion matchAssertion = matchParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -152,9 +136,7 @@ public class AssertionParsersTests extends AbstractParserTests {
     @Test
     @SuppressWarnings("unchecked")
     public void testParseMatchSourceValues() throws Exception {
-        parser = YamlXContent.yamlXContent.createParser(
-                "{ _source: { responses.0.hits.total: 3, foo: bar  }}"
-        );
+        parser = YamlXContent.yamlXContent.createParser("{ _source: { responses.0.hits.total: 3, foo: bar  }}");
 
         MatchParser matchParser = new MatchParser();
         MatchAssertion matchAssertion = matchParser.parse(new RestTestSuiteParseContext("api", "suite", parser));
@@ -166,7 +148,7 @@ public class AssertionParsersTests extends AbstractParserTests {
         assertThat(expectedValue.size(), equalTo(2));
         Object o = expectedValue.get("responses.0.hits.total");
         assertThat(o, instanceOf(Integer.class));
-        assertThat((Integer)o, equalTo(3));
+        assertThat((Integer) o, equalTo(3));
         o = expectedValue.get("foo");
         assertThat(o, instanceOf(String.class));
         assertThat(o.toString(), equalTo("bar"));

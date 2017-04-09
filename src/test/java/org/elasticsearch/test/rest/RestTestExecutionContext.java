@@ -62,7 +62,7 @@ public class RestTestExecutionContext implements Closeable {
      * Saves the obtained response in the execution context.
      * @throws RestException if the returned status code is non ok
      */
-    public RestResponse callApi(String apiName, Map<String, String> params, List<Map<String, Object>> bodies) throws IOException, RestException  {
+    public RestResponse callApi(String apiName, Map<String, String> params, List<Map<String, Object>> bodies) throws IOException, RestException {
         //makes a copy of the parameters before modifying them for this specific request
         HashMap<String, String> requestParams = Maps.newHashMap(params);
         for (Map.Entry<String, String> entry : requestParams.entrySet()) {
@@ -78,7 +78,7 @@ public class RestTestExecutionContext implements Closeable {
             //we always stash the last response body
             stash.stashValue("body", response.getBody());
             return response;
-        } catch(RestException e) {
+        } catch (RestException e) {
             response = e.restResponse();
             throw e;
         }
@@ -104,7 +104,7 @@ public class RestTestExecutionContext implements Closeable {
         return XContentFactory.jsonBuilder().map(body).string();
     }
 
-    private RestResponse callApiInternal(String apiName, Map<String, String> params, String body) throws IOException, RestException  {
+    private RestResponse callApiInternal(String apiName, Map<String, String> params, String body) throws IOException, RestException {
         return restClient.callApi(apiName, params, body);
     }
 

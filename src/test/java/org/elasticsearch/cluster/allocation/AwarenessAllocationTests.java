@@ -47,7 +47,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 /**
  */
-@ClusterScope(scope= ElasticsearchIntegrationTest.Scope.TEST, numDataNodes =0)
+@ClusterScope(scope = ElasticsearchIntegrationTest.Scope.TEST, numDataNodes = 0)
 public class AwarenessAllocationTests extends ElasticsearchIntegrationTest {
 
     private final ESLogger logger = Loggers.getLogger(AwarenessAllocationTests.class);
@@ -59,10 +59,7 @@ public class AwarenessAllocationTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testSimpleAwareness() throws Exception {
-        Settings commonSettings = ImmutableSettings.settingsBuilder()
-                .put("cluster.routing.allocation.awareness.attributes", "rack_id")
-                .build();
-
+        Settings commonSettings = ImmutableSettings.settingsBuilder().put("cluster.routing.allocation.awareness.attributes", "rack_id").build();
 
         logger.info("--> starting 2 nodes on the same rack");
         internalCluster().startNodesAsync(2, ImmutableSettings.settingsBuilder().put(commonSettings).put("node.rack_id", "rack_1").build()).get();
@@ -106,29 +103,19 @@ public class AwarenessAllocationTests extends ElasticsearchIntegrationTest {
             }
         }, 10, TimeUnit.SECONDS), equalTo(true));
     }
-    
+
     @Test
     @Slow
     public void testAwarenessZones() throws Exception {
-        Settings commonSettings = ImmutableSettings.settingsBuilder()
-                .put("cluster.routing.allocation.awareness.force.zone.values", "a,b")
-                .put("cluster.routing.allocation.awareness.attributes", "zone")
-                .build();
+        Settings commonSettings = ImmutableSettings.settingsBuilder().put("cluster.routing.allocation.awareness.force.zone.values", "a,b").put("cluster.routing.allocation.awareness.attributes", "zone").build();
 
         logger.info("--> starting 4 nodes on different zones");
-        List<String> nodes = internalCluster().startNodesAsync(
-                ImmutableSettings.settingsBuilder().put(commonSettings).put("node.zone", "a").put(ElectMasterService.DISCOVERY_ZEN_MINIMUM_MASTER_NODES, 3).build(),
-                ImmutableSettings.settingsBuilder().put(commonSettings).put("node.zone", "b").put(ElectMasterService.DISCOVERY_ZEN_MINIMUM_MASTER_NODES, 3).build(),
-                ImmutableSettings.settingsBuilder().put(commonSettings).put("node.zone", "b").put(ElectMasterService.DISCOVERY_ZEN_MINIMUM_MASTER_NODES, 3).build(),
-                ImmutableSettings.settingsBuilder().put(commonSettings).put("node.zone", "a").put(ElectMasterService.DISCOVERY_ZEN_MINIMUM_MASTER_NODES, 3).build()
-        ).get();
+        List<String> nodes = internalCluster().startNodesAsync(ImmutableSettings.settingsBuilder().put(commonSettings).put("node.zone", "a").put(ElectMasterService.DISCOVERY_ZEN_MINIMUM_MASTER_NODES, 3).build(), ImmutableSettings.settingsBuilder().put(commonSettings).put("node.zone", "b").put(ElectMasterService.DISCOVERY_ZEN_MINIMUM_MASTER_NODES, 3).build(), ImmutableSettings.settingsBuilder().put(commonSettings).put("node.zone", "b").put(ElectMasterService.DISCOVERY_ZEN_MINIMUM_MASTER_NODES, 3).build(), ImmutableSettings.settingsBuilder().put(commonSettings).put("node.zone", "a").put(ElectMasterService.DISCOVERY_ZEN_MINIMUM_MASTER_NODES, 3).build()).get();
         String A_0 = nodes.get(0);
         String B_0 = nodes.get(1);
         String B_1 = nodes.get(2);
         String A_1 = nodes.get(3);
-        client().admin().indices().prepareCreate("test")
-        .setSettings(settingsBuilder().put("index.number_of_shards", 5)
-                .put("index.number_of_replicas", 1)).execute().actionGet();
+        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_shards", 5).put("index.number_of_replicas", 1)).execute().actionGet();
         ClusterHealthResponse health = client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().setWaitForNodes("4").setWaitForRelocatingShards(0).execute().actionGet();
         assertThat(health.isTimedOut(), equalTo(false));
         ClusterState clusterState = client().admin().cluster().prepareState().execute().actionGet().getState();
@@ -141,30 +128,22 @@ public class AwarenessAllocationTests extends ElasticsearchIntegrationTest {
                 }
             }
         }
-        assertThat(counts.get(A_1), anyOf(equalTo(2),equalTo(3)));
-        assertThat(counts.get(B_1), anyOf(equalTo(2),equalTo(3)));
-        assertThat(counts.get(A_0), anyOf(equalTo(2),equalTo(3)));
-        assertThat(counts.get(B_0), anyOf(equalTo(2),equalTo(3)));
+        assertThat(counts.get(A_1), anyOf(equalTo(2), equalTo(3)));
+        assertThat(counts.get(B_1), anyOf(equalTo(2), equalTo(3)));
+        assertThat(counts.get(A_0), anyOf(equalTo(2), equalTo(3)));
+        assertThat(counts.get(B_0), anyOf(equalTo(2), equalTo(3)));
     }
-    
+
     @Test
     @Slow
     public void testAwarenessZonesIncrementalNodes() throws Exception {
-        Settings commonSettings = ImmutableSettings.settingsBuilder()
-                .put("cluster.routing.allocation.awareness.force.zone.values", "a,b")
-                .put("cluster.routing.allocation.awareness.attributes", "zone")
-                .build();
+        Settings commonSettings = ImmutableSettings.settingsBuilder().put("cluster.routing.allocation.awareness.force.zone.values", "a,b").put("cluster.routing.allocation.awareness.attributes", "zone").build();
 
         logger.info("--> starting 2 nodes on zones 'a' & 'b'");
-        List<String> nodes = internalCluster().startNodesAsync(
-                ImmutableSettings.settingsBuilder().put(commonSettings).put("node.zone", "a").build(),
-                ImmutableSettings.settingsBuilder().put(commonSettings).put("node.zone", "b").build()
-        ).get();
+        List<String> nodes = internalCluster().startNodesAsync(ImmutableSettings.settingsBuilder().put(commonSettings).put("node.zone", "a").build(), ImmutableSettings.settingsBuilder().put(commonSettings).put("node.zone", "b").build()).get();
         String A_0 = nodes.get(0);
         String B_0 = nodes.get(1);
-        client().admin().indices().prepareCreate("test")
-        .setSettings(settingsBuilder().put("index.number_of_shards", 5)
-                .put("index.number_of_replicas", 1)).execute().actionGet();
+        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_shards", 5).put("index.number_of_replicas", 1)).execute().actionGet();
         ClusterHealthResponse health = client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().setWaitForNodes("2").setWaitForRelocatingShards(0).execute().actionGet();
         assertThat(health.isTimedOut(), equalTo(false));
         ClusterState clusterState = client().admin().cluster().prepareState().execute().actionGet().getState();
@@ -202,7 +181,7 @@ public class AwarenessAllocationTests extends ElasticsearchIntegrationTest {
         assertThat(counts.get(A_0), equalTo(5));
         assertThat(counts.get(B_0), equalTo(3));
         assertThat(counts.get(B_1), equalTo(2));
-        
+
         String noZoneNode = internalCluster().startNode();
         health = client().admin().cluster().prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().setWaitForNodes("4").execute().actionGet();
         assertThat(health.isTimedOut(), equalTo(false));
@@ -221,7 +200,7 @@ public class AwarenessAllocationTests extends ElasticsearchIntegrationTest {
                 }
             }
         }
-        
+
         assertThat(counts.get(A_0), equalTo(5));
         assertThat(counts.get(B_0), equalTo(3));
         assertThat(counts.get(B_1), equalTo(2));
@@ -242,7 +221,7 @@ public class AwarenessAllocationTests extends ElasticsearchIntegrationTest {
                 }
             }
         }
-        
+
         assertThat(counts.get(A_0), equalTo(3));
         assertThat(counts.get(B_0), equalTo(3));
         assertThat(counts.get(B_1), equalTo(2));

@@ -71,26 +71,15 @@ public class DiskThresholdDeciderUnitTests extends ElasticsearchTestCase {
 
         DiskThresholdDecider.ApplySettings applySettings = decider.newApplySettings();
 
-        Settings newSettings = ImmutableSettings.builder()
-                .put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_DISK_THRESHOLD_ENABLED, false)
-                .put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_INCLUDE_RELOCATIONS, false)
-                .put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_HIGH_DISK_WATERMARK, "70%")
-                .put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_LOW_DISK_WATERMARK, "500mb")
-                .put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_REROUTE_INTERVAL, "30s")
-                .build();
+        Settings newSettings = ImmutableSettings.builder().put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_DISK_THRESHOLD_ENABLED, false).put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_INCLUDE_RELOCATIONS, false).put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_HIGH_DISK_WATERMARK, "70%").put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_LOW_DISK_WATERMARK, "500mb").put(DiskThresholdDecider.CLUSTER_ROUTING_ALLOCATION_REROUTE_INTERVAL, "30s").build();
 
         applySettings.onRefreshSettings(newSettings);
 
-        assertThat("high threshold bytes should be unset",
-                decider.getFreeBytesThresholdHigh(), equalTo(ByteSizeValue.parseBytesSizeValue("0b")));
-        assertThat("high threshold percentage should be changed",
-                decider.getFreeDiskThresholdHigh(), equalTo(30.0d));
-        assertThat("low threshold bytes should be set to 500mb",
-                decider.getFreeBytesThresholdLow(), equalTo(ByteSizeValue.parseBytesSizeValue("500mb")));
-        assertThat("low threshold bytes should be unset",
-                decider.getFreeDiskThresholdLow(), equalTo(0.0d));
-        assertThat("reroute interval should be changed to 30 seconds",
-                decider.getRerouteInterval().seconds(), equalTo(30L));
+        assertThat("high threshold bytes should be unset", decider.getFreeBytesThresholdHigh(), equalTo(ByteSizeValue.parseBytesSizeValue("0b")));
+        assertThat("high threshold percentage should be changed", decider.getFreeDiskThresholdHigh(), equalTo(30.0d));
+        assertThat("low threshold bytes should be set to 500mb", decider.getFreeBytesThresholdLow(), equalTo(ByteSizeValue.parseBytesSizeValue("500mb")));
+        assertThat("low threshold bytes should be unset", decider.getFreeDiskThresholdLow(), equalTo(0.0d));
+        assertThat("reroute interval should be changed to 30 seconds", decider.getRerouteInterval().seconds(), equalTo(30L));
         assertFalse("disk threshold decider should now be disabled", decider.isEnabled());
         assertFalse("relocations should now be disabled", decider.isIncludeRelocations());
     }

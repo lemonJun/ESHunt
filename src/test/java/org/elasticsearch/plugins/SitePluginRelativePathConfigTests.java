@@ -53,11 +53,7 @@ public class SitePluginRelativePathConfigTests extends ElasticsearchIntegrationT
             pluginDir = Paths.get(tempDir.toString(), getRelativePath(tempDir), pluginDir.toString());
         }
 
-        return settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("path.plugins", pluginDir)
-                .put("force.http.enabled", true)
-                .build();
+        return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("path.plugins", pluginDir).put("force.http.enabled", true).build();
     }
 
     @Test

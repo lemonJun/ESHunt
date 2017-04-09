@@ -49,9 +49,7 @@ public class DirectBufferNetworkTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.builder()
-            .put(InternalNode.HTTP_ENABLED, true)
-            .put(super.nodeSettings(nodeOrdinal)).build();
+        return ImmutableSettings.builder().put(InternalNode.HTTP_ENABLED, true).put(super.nodeSettings(nodeOrdinal)).build();
     }
 
     /**
@@ -95,7 +93,7 @@ public class DirectBufferNetworkTests extends ElasticsearchIntegrationTest {
         logger.info("validating large direct buffer not allocated");
         validateNoLargeDirectBufferAllocated();
     }
-    
+
     /**
      * Validates that all the thread local allocated ByteBuffer in sun.nio under the Util$BufferCache
      * are not greater than 1mb.

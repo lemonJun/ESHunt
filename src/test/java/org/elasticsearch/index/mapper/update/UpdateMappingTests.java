@@ -36,7 +36,6 @@ import java.util.LinkedHashMap;
 import static org.elasticsearch.common.io.Streams.copyToStringFromClasspath;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-
 public class UpdateMappingTests extends ElasticsearchSingleNodeTest {
 
     @Test
@@ -89,13 +88,8 @@ public class UpdateMappingTests extends ElasticsearchSingleNodeTest {
 
     public void testConflictFieldsMapping(String fieldName) throws Exception {
         //test store, ... all the parameters that are not to be changed just like in other fields
-        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject(fieldName).field("enabled", true).field("store", "no").endObject()
-                .endObject().endObject();
-        XContentBuilder mappingUpdate = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject(fieldName).field("enabled", true).field("store", "yes").endObject()
-                .startObject("properties").startObject("text").field("type", "string").endObject().endObject()
-                .endObject().endObject();
+        XContentBuilder mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject(fieldName).field("enabled", true).field("store", "no").endObject().endObject().endObject();
+        XContentBuilder mappingUpdate = XContentFactory.jsonBuilder().startObject().startObject("type").startObject(fieldName).field("enabled", true).field("store", "yes").endObject().startObject("properties").startObject("text").field("type", "string").endObject().endObject().endObject().endObject();
         testConflictWhileMergingAndMappingUnchanged(mapping, mappingUpdate);
     }
 
@@ -116,17 +110,7 @@ public class UpdateMappingTests extends ElasticsearchSingleNodeTest {
         IndexService indexService = createIndex("test", ImmutableSettings.settingsBuilder().build());
         XContentBuilder indexMapping = XContentFactory.jsonBuilder();
         boolean enabled = randomBoolean();
-        indexMapping.startObject()
-                .startObject("type")
-                .startObject("_index")
-                .field("enabled", enabled)
-                .field("store", true)
-                .startObject("fielddata")
-                .field("format", "fst")
-                .endObject()
-                .endObject()
-                .endObject()
-                .endObject();
+        indexMapping.startObject().startObject("type").startObject("_index").field("enabled", enabled).field("store", true).startObject("fielddata").field("format", "fst").endObject().endObject().endObject().endObject();
         DocumentMapper documentMapper = indexService.mapperService().parse("type", new CompressedString(indexMapping.string()), true);
         assertThat(documentMapper.indexMapper().enabled(), equalTo(enabled));
         assertTrue(documentMapper.indexMapper().fieldType().stored());
@@ -143,17 +127,7 @@ public class UpdateMappingTests extends ElasticsearchSingleNodeTest {
         IndexService indexService = createIndex("test", ImmutableSettings.settingsBuilder().build());
         XContentBuilder indexMapping = XContentFactory.jsonBuilder();
         boolean enabled = randomBoolean();
-        indexMapping.startObject()
-                .startObject("type")
-                .startObject("_timestamp")
-                .field("enabled", enabled)
-                .field("store", true)
-                .startObject("fielddata")
-                .field("format", "doc_values")
-                .endObject()
-                .endObject()
-                .endObject()
-                .endObject();
+        indexMapping.startObject().startObject("type").startObject("_timestamp").field("enabled", enabled).field("store", true).startObject("fielddata").field("format", "doc_values").endObject().endObject().endObject().endObject();
         DocumentMapper documentMapper = indexService.mapperService().parse("type", new CompressedString(indexMapping.string()), true);
         assertThat(documentMapper.timestampFieldMapper().enabled(), equalTo(enabled));
         assertTrue(documentMapper.timestampFieldMapper().fieldType().stored());
@@ -170,14 +144,7 @@ public class UpdateMappingTests extends ElasticsearchSingleNodeTest {
         IndexService indexService = createIndex("test", ImmutableSettings.settingsBuilder().build());
         XContentBuilder indexMapping = XContentFactory.jsonBuilder();
         boolean enabled = randomBoolean();
-        indexMapping.startObject()
-                .startObject("type")
-                .startObject("_size")
-                .field("enabled", enabled)
-                .field("store", true)
-                .endObject()
-                .endObject()
-                .endObject();
+        indexMapping.startObject().startObject("type").startObject("_size").field("enabled", enabled).field("store", true).endObject().endObject().endObject();
         DocumentMapper documentMapper = indexService.mapperService().parse("type", new CompressedString(indexMapping.string()), true);
         assertThat(documentMapper.sizeFieldMapper().enabled(), equalTo(enabled));
         assertTrue(documentMapper.sizeFieldMapper().fieldType().stored());
@@ -201,13 +168,9 @@ public class UpdateMappingTests extends ElasticsearchSingleNodeTest {
     public void testDefaultApplied() throws IOException {
         createIndex("test1", ImmutableSettings.settingsBuilder().build());
         createIndex("test2", ImmutableSettings.settingsBuilder().build());
-        XContentBuilder defaultMapping = XContentFactory.jsonBuilder().startObject()
-                .startObject(MapperService.DEFAULT_MAPPING).startObject("_size").field("enabled", true).endObject().endObject()
-                .endObject();
+        XContentBuilder defaultMapping = XContentFactory.jsonBuilder().startObject().startObject(MapperService.DEFAULT_MAPPING).startObject("_size").field("enabled", true).endObject().endObject().endObject();
         client().admin().indices().preparePutMapping().setType(MapperService.DEFAULT_MAPPING).setSource(defaultMapping).get();
-        XContentBuilder typeMapping = XContentFactory.jsonBuilder().startObject()
-                .startObject("type").startObject("_all").field("enabled", false).endObject().endObject()
-                .endObject();
+        XContentBuilder typeMapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_all").field("enabled", false).endObject().endObject().endObject();
         client().admin().indices().preparePutMapping("test1").setType("type").setSource(typeMapping).get();
         client().admin().indices().preparePutMapping("test1", "test2").setType("type").setSource(typeMapping).get();
 
@@ -215,6 +178,6 @@ public class UpdateMappingTests extends ElasticsearchSingleNodeTest {
         assertNotNull(response.getMappings().get("test2").get("type").getSourceAsMap().get("_all"));
         assertFalse((Boolean) ((LinkedHashMap) response.getMappings().get("test2").get("type").getSourceAsMap().get("_all")).get("enabled"));
         assertNotNull(response.getMappings().get("test2").get("type").getSourceAsMap().get("_size"));
-        assertTrue((Boolean)((LinkedHashMap)response.getMappings().get("test2").get("type").getSourceAsMap().get("_size")).get("enabled"));
+        assertTrue((Boolean) ((LinkedHashMap) response.getMappings().get("test2").get("type").getSourceAsMap().get("_size")).get("enabled"));
     }
 }

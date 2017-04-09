@@ -32,10 +32,9 @@ import java.util.regex.Pattern;
  */
 public class LongGCDisruption extends SingleNodeDisruption {
 
-    private final static Pattern[] unsafeClasses = new Pattern[]{
+    private final static Pattern[] unsafeClasses = new Pattern[] {
             // logging has shared JVM locks - we may suspend a thread and block other nodes from doing their thing
-            Pattern.compile("Logger")
-    };
+            Pattern.compile("Logger") };
 
     protected final String disruptedNode;
     private Set<Thread> suspendedThreads;
@@ -86,8 +85,7 @@ public class LongGCDisruption extends SingleNodeDisruption {
                     thread.suspend();
                     // double check the thread is not in a shared resource like logging. If so, let it go and come back..
                     boolean safe = true;
-                    safe:
-                    for (StackTraceElement stackElement : thread.getStackTrace()) {
+                    safe: for (StackTraceElement stackElement : thread.getStackTrace()) {
                         String className = stackElement.getClassName();
                         for (Pattern unsafePattern : unsafeClasses) {
                             if (unsafePattern.matcher(className).find()) {

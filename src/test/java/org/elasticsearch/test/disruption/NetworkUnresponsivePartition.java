@@ -45,8 +45,7 @@ public class NetworkUnresponsivePartition extends NetworkPartition {
     }
 
     @Override
-    void applyDisruption(DiscoveryNode node1, MockTransportService transportService1,
-                         DiscoveryNode node2, MockTransportService transportService2) {
+    void applyDisruption(DiscoveryNode node1, MockTransportService transportService1, DiscoveryNode node2, MockTransportService transportService2) {
         transportService1.addUnresponsiveRule(node2);
         transportService2.addUnresponsiveRule(node1);
     }

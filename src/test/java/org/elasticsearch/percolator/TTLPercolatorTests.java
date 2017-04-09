@@ -56,10 +56,7 @@ public class TTLPercolatorTests extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("indices.ttl.interval", PURGE_INTERVAL)
-                .build();
+        return settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("indices.ttl.interval", PURGE_INTERVAL).build();
     }
 
     @Test
@@ -67,62 +64,31 @@ public class TTLPercolatorTests extends ElasticsearchIntegrationTest {
         final Client client = client();
         ensureGreen();
 
-        String percolatorMapping = XContentFactory.jsonBuilder().startObject().startObject(PercolatorService.TYPE_NAME)
-                .startObject("_ttl").field("enabled", true).endObject()
-                .startObject("_timestamp").field("enabled", true).endObject()
-                .endObject().endObject().string();
+        String percolatorMapping = XContentFactory.jsonBuilder().startObject().startObject(PercolatorService.TYPE_NAME).startObject("_ttl").field("enabled", true).endObject().startObject("_timestamp").field("enabled", true).endObject().endObject().endObject().string();
 
-        String typeMapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("_ttl").field("enabled", true).endObject()
-                .startObject("_timestamp").field("enabled", true).endObject()
-                .startObject("properties").startObject("field1").field("type", "string").endObject().endObject()
-                .endObject().endObject().string();
+        String typeMapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_ttl").field("enabled", true).endObject().startObject("_timestamp").field("enabled", true).endObject().startObject("properties").startObject("field1").field("type", "string").endObject().endObject().endObject().endObject().string();
 
-        client.admin().indices().prepareCreate("test")
-                .setSettings(settingsBuilder().put("index.number_of_shards", 2))
-                .addMapping(PercolatorService.TYPE_NAME, percolatorMapping)
-                .addMapping("type1", typeMapping)
-                .execute().actionGet();
+        client.admin().indices().prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_shards", 2)).addMapping(PercolatorService.TYPE_NAME, percolatorMapping).addMapping("type1", typeMapping).execute().actionGet();
         ensureGreen();
 
         final NumShards test = getNumShards("test");
 
         long ttl = 1500;
         long now = System.currentTimeMillis();
-        client.prepareIndex("test", PercolatorService.TYPE_NAME, "kuku").setSource(jsonBuilder()
-                .startObject()
-                .startObject("query")
-                .startObject("term")
-                .field("field1", "value1")
-                .endObject()
-                .endObject()
-                .endObject()
-        ).setRefresh(true).setTTL(ttl).execute().actionGet();
+        client.prepareIndex("test", PercolatorService.TYPE_NAME, "kuku").setSource(jsonBuilder().startObject().startObject("query").startObject("term").field("field1", "value1").endObject().endObject().endObject()).setRefresh(true).setTTL(ttl).execute().actionGet();
 
-        IndicesStatsResponse response = client.admin().indices().prepareStats("test")
-                .clear().setIndexing(true)
-                .execute().actionGet();
-        assertThat(response.getIndices().get("test").getTotal().getIndexing().getTotal().getIndexCount(), equalTo((long)test.dataCopies));
+        IndicesStatsResponse response = client.admin().indices().prepareStats("test").clear().setIndexing(true).execute().actionGet();
+        assertThat(response.getIndices().get("test").getTotal().getIndexing().getTotal().getIndexCount(), equalTo((long) test.dataCopies));
 
-        PercolateResponse percolateResponse = client.preparePercolate()
-                .setIndices("test").setDocumentType("type1")
-                .setSource(jsonBuilder()
-                        .startObject()
-                        .startObject("doc")
-                        .field("field1", "value1")
-                        .endObject()
-                        .endObject()
-                ).execute().actionGet();
+        PercolateResponse percolateResponse = client.preparePercolate().setIndices("test").setDocumentType("type1").setSource(jsonBuilder().startObject().startObject("doc").field("field1", "value1").endObject().endObject()).execute().actionGet();
         assertNoFailures(percolateResponse);
         if (percolateResponse.getMatches().length == 0) {
             // OK, ttl + purgeInterval has passed (slow machine or many other tests were running at the same time
             GetResponse getResponse = client.prepareGet("test", PercolatorService.TYPE_NAME, "kuku").execute().actionGet();
             assertThat(getResponse.isExists(), equalTo(false));
-            response = client.admin().indices().prepareStats("test")
-                    .clear().setIndexing(true)
-                    .execute().actionGet();
+            response = client.admin().indices().prepareStats("test").clear().setIndexing(true).execute().actionGet();
             long currentDeleteCount = response.getIndices().get("test").getTotal().getIndexing().getTotal().getDeleteCount();
-            assertThat(currentDeleteCount, equalTo((long)test.dataCopies));
+            assertThat(currentDeleteCount, equalTo((long) test.dataCopies));
             return;
         }
 
@@ -144,52 +110,28 @@ public class TTLPercolatorTests extends ElasticsearchIntegrationTest {
             }
         }, 5, TimeUnit.SECONDS), equalTo(true));
 
-        percolateResponse = client.preparePercolate()
-                .setIndices("test").setDocumentType("type1")
-                .setSource(jsonBuilder()
-                        .startObject()
-                        .startObject("doc")
-                        .field("field1", "value1")
-                        .endObject()
-                        .endObject()
-                ).execute().actionGet();
+        percolateResponse = client.preparePercolate().setIndices("test").setDocumentType("type1").setSource(jsonBuilder().startObject().startObject("doc").field("field1", "value1").endObject().endObject()).execute().actionGet();
         assertMatchCount(percolateResponse, 0l);
         assertThat(percolateResponse.getMatches(), emptyArray());
     }
 
-
     @Test
     public void testEnsureTTLDoesNotCreateIndex() throws IOException, InterruptedException {
         ensureGreen();
-        client().admin().cluster().prepareUpdateSettings().setTransientSettings(settingsBuilder()
-                .put("indices.ttl.interval", 60) // 60 sec
-                .build()).get();
+        client().admin().cluster().prepareUpdateSettings().setTransientSettings(settingsBuilder().put("indices.ttl.interval", 60) // 60 sec
+                        .build()).get();
 
-        String typeMapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                .startObject("_ttl").field("enabled", true).endObject()
-                .endObject().endObject().string();
+        String typeMapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("_ttl").field("enabled", true).endObject().endObject().endObject().string();
 
-        client().admin().indices().prepareCreate("test")
-                .setSettings(settingsBuilder().put("index.number_of_shards", 1))
-                .addMapping("type1", typeMapping)
-                .execute().actionGet();
+        client().admin().indices().prepareCreate("test").setSettings(settingsBuilder().put("index.number_of_shards", 1)).addMapping("type1", typeMapping).execute().actionGet();
         ensureGreen();
-        client().admin().cluster().prepareUpdateSettings().setTransientSettings(settingsBuilder()
-                .put("indices.ttl.interval", 1) // 60 sec
-                .build()).get();
+        client().admin().cluster().prepareUpdateSettings().setTransientSettings(settingsBuilder().put("indices.ttl.interval", 1) // 60 sec
+                        .build()).get();
 
         for (int i = 0; i < 100; i++) {
             logger.debug("index doc {} ", i);
             try {
-                client().prepareIndex("test", "type1", "" + i).setSource(jsonBuilder()
-                        .startObject()
-                        .startObject("query")
-                        .startObject("term")
-                        .field("field1", "value1")
-                        .endObject()
-                        .endObject()
-                        .endObject()
-                ).setTTL(randomIntBetween(1, 500)).execute().actionGet();
+                client().prepareIndex("test", "type1", "" + i).setSource(jsonBuilder().startObject().startObject("query").startObject("term").field("field1", "value1").endObject().endObject().endObject()).setTTL(randomIntBetween(1, 500)).execute().actionGet();
             } catch (MapperParsingException e) {
                 logger.info("failed indexing {}", i, e);
                 // if we are unlucky the TTL is so small that we see the expiry date is already in the past when
@@ -209,10 +151,7 @@ public class TTLPercolatorTests extends ElasticsearchIntegrationTest {
             }
         }, 5, TimeUnit.SECONDS), equalTo(true));
         internalCluster().wipeIndices("test");
-        client().admin().indices().prepareCreate("test")
-                .addMapping("type1", typeMapping)
-                .execute().actionGet();
-
+        client().admin().indices().prepareCreate("test").addMapping("type1", typeMapping).execute().actionGet();
 
     }
 

@@ -46,16 +46,9 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 public class NestedSearchBenchMark {
 
     public static void main(String[] args) throws Exception {
-        Settings settings = settingsBuilder()
-                .put("index.refresh_interval", "-1")
-                .put("gateway.type", "local")
-                .put(SETTING_NUMBER_OF_SHARDS, 1)
-                .put(SETTING_NUMBER_OF_REPLICAS, 0)
-                .build();
+        Settings settings = settingsBuilder().put("index.refresh_interval", "-1").put("gateway.type", "local").put(SETTING_NUMBER_OF_SHARDS, 1).put(SETTING_NUMBER_OF_REPLICAS, 0).build();
 
-        Node node1 = nodeBuilder()
-                .settings(settingsBuilder().put(settings).put("name", "node1"))
-                .node();
+        Node node1 = nodeBuilder().settings(settingsBuilder().put(settings).put("name", "node1")).node();
         Client client = node1.client();
 
         int count = (int) SizeValue.parseSizeValue("1m").singles();
@@ -65,33 +58,13 @@ public class NestedSearchBenchMark {
         int queryWarmup = 5;
         int queryCount = 500;
         String indexName = "test";
-        ClusterHealthResponse clusterHealthResponse = client.admin().cluster().prepareHealth()
-                .setWaitForGreenStatus().execute().actionGet();
+        ClusterHealthResponse clusterHealthResponse = client.admin().cluster().prepareHealth().setWaitForGreenStatus().execute().actionGet();
         if (clusterHealthResponse.isTimedOut()) {
             System.err.println("--> Timed out waiting for cluster health");
         }
 
         try {
-            client.admin().indices().prepareCreate(indexName)
-                    .addMapping("type", XContentFactory.jsonBuilder()
-                            .startObject()
-                            .startObject("type")
-                            .startObject("properties")
-                            .startObject("field1")
-                            .field("type", "integer")
-                            .endObject()
-                            .startObject("field2")
-                            .field("type", "nested")
-                            .startObject("properties")
-                            .startObject("field3")
-                            .field("type", "integer")
-                            .endObject()
-                            .endObject()
-                            .endObject()
-                            .endObject()
-                            .endObject()
-                            .endObject()
-                    ).execute().actionGet();
+            client.admin().indices().prepareCreate(indexName).addMapping("type", XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "integer").endObject().startObject("field2").field("type", "nested").startObject("properties").startObject("field3").field("type", "integer").endObject().endObject().endObject().endObject().endObject().endObject()).execute().actionGet();
             clusterHealthResponse = client.admin().cluster().prepareHealth(indexName).setWaitForGreenStatus().execute().actionGet();
             if (clusterHealthResponse.isTimedOut()) {
                 System.err.println("--> Timed out waiting for cluster health");
@@ -107,18 +80,12 @@ public class NestedSearchBenchMark {
                 BulkRequestBuilder request = client.prepareBulk();
                 for (int j = 0; j < batch; j++) {
                     counter++;
-                    XContentBuilder doc = XContentFactory.jsonBuilder().startObject()
-                            .field("field1", counter)
-                            .startArray("field2");
+                    XContentBuilder doc = XContentFactory.jsonBuilder().startObject().field("field1", counter).startArray("field2");
                     for (int k = 0; k < nestedCount; k++) {
-                        doc = doc.startObject()
-                                .field("field3", k)
-                                .endObject();
+                        doc = doc.startObject().field("field3", k).endObject();
                     }
                     doc = doc.endArray();
-                    request.add(
-                            Requests.indexRequest(indexName).type("type").id(Integer.toString(counter)).source(doc)
-                    );
+                    request.add(Requests.indexRequest(indexName).type("type").id(Integer.toString(counter)).source(doc));
                 }
                 BulkResponse response = request.execute().actionGet();
                 if (response.hasFailures()) {
@@ -140,23 +107,14 @@ public class NestedSearchBenchMark {
         client.admin().indices().prepareRefresh().execute().actionGet();
         System.out.println("--> Number of docs in index: " + client.prepareCount().setQuery(matchAllQuery()).execute().actionGet().getCount());
 
-        NodesStatsResponse statsResponse = client.admin().cluster().prepareNodesStats()
-                .setJvm(true).execute().actionGet();
+        NodesStatsResponse statsResponse = client.admin().cluster().prepareNodesStats().setJvm(true).execute().actionGet();
         System.out.println("--> Committed heap size: " + statsResponse.getNodes()[0].getJvm().getMem().getHeapCommitted());
         System.out.println("--> Used heap size: " + statsResponse.getNodes()[0].getJvm().getMem().getHeapUsed());
 
         System.out.println("--> Running match_all with sorting on nested field");
         // run just the child query, warm up first
         for (int j = 0; j < queryWarmup; j++) {
-            SearchResponse searchResponse = client.prepareSearch()
-                    .setQuery(matchAllQuery())
-                    .addSort(
-                            SortBuilders.fieldSort("field2.field3")
-                                    .setNestedPath("field2")
-                                    .sortMode("avg")
-                                    .order(SortOrder.ASC)
-                    )
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch().setQuery(matchAllQuery()).addSort(SortBuilders.fieldSort("field2.field3").setNestedPath("field2").sortMode("avg").order(SortOrder.ASC)).execute().actionGet();
             if (j == 0) {
                 System.out.println("--> Warmup took: " + searchResponse.getTook());
             }
@@ -167,15 +125,7 @@ public class NestedSearchBenchMark {
 
         long totalQueryTime = 0;
         for (int j = 0; j < queryCount; j++) {
-            SearchResponse searchResponse = client.prepareSearch()
-                    .setQuery(matchAllQuery())
-                    .addSort(
-                            SortBuilders.fieldSort("field2.field3")
-                                    .setNestedPath("field2")
-                                    .sortMode("avg")
-                                    .order(j % 2 == 0 ? SortOrder.ASC : SortOrder.DESC)
-                    )
-                    .execute().actionGet();
+            SearchResponse searchResponse = client.prepareSearch().setQuery(matchAllQuery()).addSort(SortBuilders.fieldSort("field2.field3").setNestedPath("field2").sortMode("avg").order(j % 2 == 0 ? SortOrder.ASC : SortOrder.DESC)).execute().actionGet();
 
             if (searchResponse.getHits().totalHits() != rootDocs) {
                 System.err.println("--> mismatch on hits");
@@ -184,8 +134,7 @@ public class NestedSearchBenchMark {
         }
         System.out.println("--> Sorting by nested fields took: " + (totalQueryTime / queryCount) + "ms");
 
-        statsResponse = client.admin().cluster().prepareNodesStats()
-                .setJvm(true).execute().actionGet();
+        statsResponse = client.admin().cluster().prepareNodesStats().setJvm(true).execute().actionGet();
         System.out.println("--> Committed heap size: " + statsResponse.getNodes()[0].getJvm().getMem().getHeapCommitted());
         System.out.println("--> Used heap size: " + statsResponse.getNodes()[0].getJvm().getMem().getHeapUsed());
     }

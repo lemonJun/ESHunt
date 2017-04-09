@@ -78,18 +78,14 @@ public class FieldDataTermsFilterTests extends ElasticsearchSingleNodeTest {
         ifdService = indexService.injector().getInstance(IndexFieldDataService.class);
         IndexQueryParserService parserService = indexService.queryParserService();
         parseContext = new QueryParseContext(indexService.index(), parserService);
-        writer = new IndexWriter(new RAMDirectory(),
-                new IndexWriterConfig(Lucene.VERSION, new StandardAnalyzer(Lucene.VERSION)));
+        writer = new IndexWriter(new RAMDirectory(), new IndexWriterConfig(Lucene.VERSION, new StandardAnalyzer(Lucene.VERSION)));
 
         // setup field mappers
-        strMapper = new StringFieldMapper.Builder("str_value")
-                .build(new Mapper.BuilderContext(settings, new ContentPath(1)));
+        strMapper = new StringFieldMapper.Builder("str_value").build(new Mapper.BuilderContext(settings, new ContentPath(1)));
 
-        lngMapper = new LongFieldMapper.Builder("lng_value")
-                .build(new Mapper.BuilderContext(settings, new ContentPath(1)));
+        lngMapper = new LongFieldMapper.Builder("lng_value").build(new Mapper.BuilderContext(settings, new ContentPath(1)));
 
-        dblMapper = new DoubleFieldMapper.Builder("dbl_value")
-                .build(new Mapper.BuilderContext(settings, new ContentPath(1)));
+        dblMapper = new DoubleFieldMapper.Builder("dbl_value").build(new Mapper.BuilderContext(settings, new ContentPath(1)));
 
         int numDocs = 10;
         for (int i = 0; i < numDocs; i++) {
@@ -148,8 +144,7 @@ public class FieldDataTermsFilterTests extends ElasticsearchSingleNodeTest {
         // filter from mapper
         result.clear(0, size);
         assertThat(result.cardinality(), equalTo(0));
-        result.or(strMapper.fieldDataTermsFilter(cTerms, parseContext)
-                .getDocIdSet(reader.getContext(), reader.getLiveDocs()).iterator());
+        result.or(strMapper.fieldDataTermsFilter(cTerms, parseContext).getDocIdSet(reader.getContext(), reader.getLiveDocs()).iterator());
         assertThat(result.cardinality(), equalTo(docs.size()));
         for (int i = 0; i < reader.maxDoc(); i++) {
             assertThat(result.get(i), equalTo(docs.contains(i)));
@@ -170,9 +165,7 @@ public class FieldDataTermsFilterTests extends ElasticsearchSingleNodeTest {
         result.or(hFilter.getDocIdSet(reader.getContext(), reader.getLiveDocs()).iterator());
         assertThat(result.cardinality(), equalTo(0));
 
-        assertEquals(
-                FieldDataTermsFilter.newBytes(getFieldData(strMapper), hTerms),
-                FieldDataTermsFilter.newBytes(getFieldData(strMapper), hTerms));
+        assertEquals(FieldDataTermsFilter.newBytes(getFieldData(strMapper), hTerms), FieldDataTermsFilter.newBytes(getFieldData(strMapper), hTerms));
     }
 
     @Test
@@ -203,8 +196,7 @@ public class FieldDataTermsFilterTests extends ElasticsearchSingleNodeTest {
         // filter from mapper
         result.clear(0, size);
         assertThat(result.cardinality(), equalTo(0));
-        result.or(lngMapper.fieldDataTermsFilter(cTerms, parseContext)
-                .getDocIdSet(reader.getContext(), reader.getLiveDocs()).iterator());
+        result.or(lngMapper.fieldDataTermsFilter(cTerms, parseContext).getDocIdSet(reader.getContext(), reader.getLiveDocs()).iterator());
         assertThat(result.cardinality(), equalTo(docs.size()));
         for (int i = 0; i < reader.maxDoc(); i++) {
             assertThat(result.get(i), equalTo(docs.contains(i)));
@@ -213,9 +205,7 @@ public class FieldDataTermsFilterTests extends ElasticsearchSingleNodeTest {
         hFilter = FieldDataTermsFilter.newLongs(getFieldData(dblMapper), hTerms);
         assertNull(hFilter.getDocIdSet(reader.getContext(), reader.getLiveDocs()));
 
-        assertEquals(
-                FieldDataTermsFilter.newLongs(getFieldData(lngMapper), hTerms),
-                FieldDataTermsFilter.newLongs(getFieldData(lngMapper), hTerms));
+        assertEquals(FieldDataTermsFilter.newLongs(getFieldData(lngMapper), hTerms), FieldDataTermsFilter.newLongs(getFieldData(lngMapper), hTerms));
     }
 
     @Test
@@ -246,8 +236,7 @@ public class FieldDataTermsFilterTests extends ElasticsearchSingleNodeTest {
         // filter from mapper
         result.clear(0, size);
         assertThat(result.cardinality(), equalTo(0));
-        result.or(dblMapper.fieldDataTermsFilter(cTerms, parseContext)
-                .getDocIdSet(reader.getContext(), reader.getLiveDocs()).iterator());
+        result.or(dblMapper.fieldDataTermsFilter(cTerms, parseContext).getDocIdSet(reader.getContext(), reader.getLiveDocs()).iterator());
         assertThat(result.cardinality(), equalTo(docs.size()));
         for (int i = 0; i < reader.maxDoc(); i++) {
             assertThat(result.get(i), equalTo(docs.contains(i)));
@@ -256,9 +245,7 @@ public class FieldDataTermsFilterTests extends ElasticsearchSingleNodeTest {
         hFilter = FieldDataTermsFilter.newDoubles(getFieldData(lngMapper), hTerms);
         assertNull(hFilter.getDocIdSet(reader.getContext(), reader.getLiveDocs()));
 
-        assertEquals(
-                FieldDataTermsFilter.newDoubles(getFieldData(dblMapper), hTerms),
-                FieldDataTermsFilter.newDoubles(getFieldData(dblMapper), hTerms));
+        assertEquals(FieldDataTermsFilter.newDoubles(getFieldData(dblMapper), hTerms), FieldDataTermsFilter.newDoubles(getFieldData(dblMapper), hTerms));
     }
 
     @Test

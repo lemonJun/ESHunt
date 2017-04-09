@@ -46,10 +46,7 @@ public class PreBuiltAnalyzerIntegrationTests extends ElasticsearchIntegrationTe
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return ImmutableSettings.settingsBuilder()
-                .put(super.nodeSettings(nodeOrdinal))
-                .put("plugin.types", DummyAnalysisPlugin.class.getName())
-            .build();
+        return ImmutableSettings.settingsBuilder().put(super.nodeSettings(nodeOrdinal)).put("plugin.types", DummyAnalysisPlugin.class.getName()).build();
     }
 
     @Test
@@ -61,26 +58,17 @@ public class PreBuiltAnalyzerIntegrationTests extends ElasticsearchIntegrationTe
             String indexName = randomAsciiOfLength(10).toLowerCase(Locale.ROOT);
             indexNames.add(indexName);
 
-            int randomInt = randomInt(PreBuiltAnalyzers.values().length-1);
+            int randomInt = randomInt(PreBuiltAnalyzers.values().length - 1);
             PreBuiltAnalyzers preBuiltAnalyzer = PreBuiltAnalyzers.values()[randomInt];
             String name = preBuiltAnalyzer.name().toLowerCase(Locale.ROOT);
 
             Version randomVersion = randomVersion();
             if (!loadedAnalyzers.containsKey(preBuiltAnalyzer)) {
-                 loadedAnalyzers.put(preBuiltAnalyzer, Lists.<Version>newArrayList());
+                loadedAnalyzers.put(preBuiltAnalyzer, Lists.<Version> newArrayList());
             }
             loadedAnalyzers.get(preBuiltAnalyzer).add(randomVersion);
 
-            final XContentBuilder mapping = jsonBuilder().startObject()
-                .startObject("type")
-                    .startObject("properties")
-                        .startObject("foo")
-                            .field("type", "string")
-                            .field("analyzer", name)
-                        .endObject()
-                    .endObject()
-                .endObject()
-                .endObject();
+            final XContentBuilder mapping = jsonBuilder().startObject().startObject("type").startObject("properties").startObject("foo").field("type", "string").field("analyzer", name).endObject().endObject().endObject().endObject();
 
             Settings versionSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_VERSION_CREATED, randomVersion).build();
             client().admin().indices().prepareCreate(indexName).addMapping("type", mapping).setSettings(versionSettings).get();
@@ -91,7 +79,7 @@ public class PreBuiltAnalyzerIntegrationTests extends ElasticsearchIntegrationTe
         final int numDocs = randomIntBetween(10, 100);
         // index some amount of data
         for (int i = 0; i < numDocs; i++) {
-            String randomIndex = indexNames.get(randomInt(indexNames.size()-1));
+            String randomIndex = indexNames.get(randomInt(indexNames.size() - 1));
             String randomId = randomInt() + "";
 
             Map<String, Object> data = Maps.newHashMap();
@@ -103,7 +91,7 @@ public class PreBuiltAnalyzerIntegrationTests extends ElasticsearchIntegrationTe
         refresh();
 
         // close some of the indices
-        int amountOfIndicesToClose = randomInt(numIndices-1);
+        int amountOfIndicesToClose = randomInt(numIndices - 1);
         for (int i = 0; i < amountOfIndicesToClose; i++) {
             String indexName = indexNames.get(i);
             client().admin().indices().prepareClose(indexName).execute().actionGet();
@@ -124,31 +112,9 @@ public class PreBuiltAnalyzerIntegrationTests extends ElasticsearchIntegrationTe
      */
     @Test
     public void testThatPluginAnalyzersCanBeUpdated() throws Exception {
-        final XContentBuilder mapping = jsonBuilder().startObject()
-            .startObject("type")
-                .startObject("properties")
-                    .startObject("foo")
-                        .field("type", "string")
-                        .field("analyzer", "dummy")
-                    .endObject()
-                    .startObject("bar")
-                        .field("type", "string")
-                        .field("analyzer", "my_dummy")
-                    .endObject()
-                .endObject()
-            .endObject()
-            .endObject();
+        final XContentBuilder mapping = jsonBuilder().startObject().startObject("type").startObject("properties").startObject("foo").field("type", "string").field("analyzer", "dummy").endObject().startObject("bar").field("type", "string").field("analyzer", "my_dummy").endObject().endObject().endObject().endObject();
 
-        Settings versionSettings = ImmutableSettings.builder()
-                .put(IndexMetaData.SETTING_VERSION_CREATED, randomVersion())
-                .put("index.analysis.analyzer.my_dummy.type", "custom")
-                .put("index.analysis.analyzer.my_dummy.filter", "my_dummy_token_filter")
-                .put("index.analysis.analyzer.my_dummy.char_filter", "my_dummy_char_filter")
-                .put("index.analysis.analyzer.my_dummy.tokenizer", "my_dummy_tokenizer")
-                .put("index.analysis.tokenizer.my_dummy_tokenizer.type", "dummy_tokenizer")
-                .put("index.analysis.filter.my_dummy_token_filter.type", "dummy_token_filter")
-                .put("index.analysis.char_filter.my_dummy_char_filter.type", "dummy_char_filter")
-                .build();
+        Settings versionSettings = ImmutableSettings.builder().put(IndexMetaData.SETTING_VERSION_CREATED, randomVersion()).put("index.analysis.analyzer.my_dummy.type", "custom").put("index.analysis.analyzer.my_dummy.filter", "my_dummy_token_filter").put("index.analysis.analyzer.my_dummy.char_filter", "my_dummy_char_filter").put("index.analysis.analyzer.my_dummy.tokenizer", "my_dummy_tokenizer").put("index.analysis.tokenizer.my_dummy_tokenizer.type", "dummy_tokenizer").put("index.analysis.filter.my_dummy_token_filter.type", "dummy_token_filter").put("index.analysis.char_filter.my_dummy_char_filter.type", "dummy_char_filter").build();
 
         client().admin().indices().prepareCreate("test-analysis-dummy").addMapping("type", mapping).setSettings(versionSettings).get();
 
@@ -198,7 +164,8 @@ public class PreBuiltAnalyzerIntegrationTests extends ElasticsearchIntegrationTe
                 clazz = clazz.getSuperclass();
             }
 
-            if (Object.class.equals(clazz)) throw new RuntimeException("Could not find storedValue field in class" + clazz);
+            if (Object.class.equals(clazz))
+                throw new RuntimeException("Could not find storedValue field in class" + clazz);
         }
 
         return field;

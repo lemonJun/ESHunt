@@ -32,8 +32,7 @@ import org.junit.Test;
 
 import java.lang.reflect.Method;
 
-
-@ElasticsearchIntegrationTest.ClusterScope(scope= ElasticsearchIntegrationTest.Scope.SUITE,  numClientNodes = 0)
+@ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.SUITE, numClientNodes = 0)
 public class NodesStatsBasicBackwardsCompatTests extends ElasticsearchBackwardsCompatIntegrationTest {
 
     @Test
@@ -42,9 +41,7 @@ public class NodesStatsBasicBackwardsCompatTests extends ElasticsearchBackwardsC
 
         NodesInfoResponse nodesInfo = client().admin().cluster().prepareNodesInfo().execute().actionGet();
 
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("client.transport.ignore_cluster_name", true)
-                .put("node.name", "transport_client_" + getTestName()).build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.ignore_cluster_name", true).put("node.name", "transport_client_" + getTestName()).build();
 
         // We explicitly connect to each node with a custom TransportClient
         for (NodeInfo n : nodesInfo.getNodes()) {
@@ -61,9 +58,7 @@ public class NodesStatsBasicBackwardsCompatTests extends ElasticsearchBackwardsC
 
         NodesInfoResponse nodesInfo = client().admin().cluster().prepareNodesInfo().execute().actionGet();
 
-        Settings settings = ImmutableSettings.settingsBuilder()
-                .put("node.name", "transport_client_" + getTestName())
-                .put("client.transport.ignore_cluster_name", true).build();
+        Settings settings = ImmutableSettings.settingsBuilder().put("node.name", "transport_client_" + getTestName()).put("client.transport.ignore_cluster_name", true).build();
 
         // We explicitly connect to each node with a custom TransportClient
         for (NodeInfo n : nodesInfo.getNodes()) {

@@ -68,23 +68,18 @@ import static org.hamcrest.Matchers.*;
  */
 public abstract class AbstractClientHeadersTests extends ElasticsearchTestCase {
 
-    protected static final Settings HEADER_SETTINGS = ImmutableSettings.builder()
-            .put(Headers.PREFIX + ".key1", "val1")
-            .put(Headers.PREFIX + ".key2", "val 2")
-            .build();
+    protected static final Settings HEADER_SETTINGS = ImmutableSettings.builder().put(Headers.PREFIX + ".key1", "val1").put(Headers.PREFIX + ".key2", "val 2").build();
 
     @SuppressWarnings("unchecked")
     private static final GenericAction[] ACTIONS = new GenericAction[] {
-                // client actions
-                GetAction.INSTANCE, SearchAction.INSTANCE, DeleteAction.INSTANCE, DeleteIndexedScriptAction.INSTANCE,
-                IndexAction.INSTANCE,
+            // client actions
+            GetAction.INSTANCE, SearchAction.INSTANCE, DeleteAction.INSTANCE, DeleteIndexedScriptAction.INSTANCE, IndexAction.INSTANCE,
 
-                // cluster admin actions
-                ClusterStatsAction.INSTANCE, CreateSnapshotAction.INSTANCE, NodesShutdownAction.INSTANCE, ClusterRerouteAction.INSTANCE,
+            // cluster admin actions
+            ClusterStatsAction.INSTANCE, CreateSnapshotAction.INSTANCE, NodesShutdownAction.INSTANCE, ClusterRerouteAction.INSTANCE,
 
-                // indices admin actions
-                CreateIndexAction.INSTANCE, IndicesStatsAction.INSTANCE, ClearIndicesCacheAction.INSTANCE, FlushAction.INSTANCE
-    };
+            // indices admin actions
+            CreateIndexAction.INSTANCE, IndicesStatsAction.INSTANCE, ClearIndicesCacheAction.INSTANCE, FlushAction.INSTANCE };
 
     private Client client;
 
@@ -99,7 +94,6 @@ public abstract class AbstractClientHeadersTests extends ElasticsearchTestCase {
     }
 
     protected abstract Client buildClient(Settings headersSettings, GenericAction[] testedActions);
-
 
     @Test
     public void testActions() {
@@ -132,22 +126,13 @@ public abstract class AbstractClientHeadersTests extends ElasticsearchTestCase {
     @Test
     public void testOverideHeader() throws Exception {
         String key1Val = randomAsciiOfLength(5);
-        Map<String, Object> expected = ImmutableMap.<String, Object>builder()
-                .put("key1", key1Val)
-                .put("key2", "val 2")
-                .build();
+        Map<String, Object> expected = ImmutableMap.<String, Object> builder().put("key1", key1Val).put("key2", "val 2").build();
 
-        client.prepareGet("idx", "type", "id")
-                .putHeader("key1", key1Val)
-                .execute().addListener(new AssertingActionListener<GetResponse>(GetAction.NAME, expected));
+        client.prepareGet("idx", "type", "id").putHeader("key1", key1Val).execute().addListener(new AssertingActionListener<GetResponse>(GetAction.NAME, expected));
 
-        client.admin().cluster().prepareClusterStats()
-                .putHeader("key1", key1Val)
-                .execute().addListener(new AssertingActionListener<ClusterStatsResponse>(ClusterStatsAction.NAME, expected));
+        client.admin().cluster().prepareClusterStats().putHeader("key1", key1Val).execute().addListener(new AssertingActionListener<ClusterStatsResponse>(ClusterStatsAction.NAME, expected));
 
-        client.admin().indices().prepareCreate("idx")
-                .putHeader("key1", key1Val)
-                .execute().addListener(new AssertingActionListener<CreateIndexResponse>(CreateIndexAction.NAME, expected));
+        client.admin().indices().prepareCreate("idx").putHeader("key1", key1Val).execute().addListener(new AssertingActionListener<CreateIndexResponse>(CreateIndexAction.NAME, expected));
     }
 
     protected static void assertHeaders(Map<String, Object> headers, Map<String, Object> expected) {
@@ -193,7 +178,7 @@ public abstract class AbstractClientHeadersTests extends ElasticsearchTestCase {
             this(action, HEADER_SETTINGS.getAsSettings(Headers.PREFIX).getAsStructuredMap());
         }
 
-       public AssertingActionListener(String action, Map<String, Object> expectedHeaders) {
+        public AssertingActionListener(String action, Map<String, Object> expectedHeaders) {
             this.action = action;
             this.expectedHeaders = expectedHeaders;
         }

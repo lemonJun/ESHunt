@@ -44,8 +44,8 @@ public class CorruptedCompressorTests extends ElasticsearchTestCase {
         // and then the hash table is reused and still thinks that there is such a hash at position 6
         // and at position 7, it finds a sequence with the same hash
         // so it inserts a buggy reference
-        byte[] b1 = new byte[] {0,1,2,3,4,(byte)153,64,64,64,9,9,9,9,9,9,9,9,9,9};
-        byte[] b2 = new byte[] {1,(byte)153,0,0,0,0,(byte)153,64,64,64,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        byte[] b1 = new byte[] { 0, 1, 2, 3, 4, (byte) 153, 64, 64, 64, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9 };
+        byte[] b2 = new byte[] { 1, (byte) 153, 0, 0, 0, 0, (byte) 153, 64, 64, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         ChunkEncoder encoder = ChunkEncoderFactory.safeInstance();
         ChunkDecoder decoder = ChunkDecoderFactory.safeInstance();
         check(encoder, decoder, b1, 0, b1.length);

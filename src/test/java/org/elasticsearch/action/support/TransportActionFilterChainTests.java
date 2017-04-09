@@ -45,7 +45,7 @@ public class TransportActionFilterChainTests extends ElasticsearchTestCase {
 
     @Before
     public void init() throws Exception {
-         counter = new AtomicInteger();
+        counter = new AtomicInteger();
     }
 
     @Test
@@ -87,7 +87,7 @@ public class TransportActionFilterChainTests extends ElasticsearchTestCase {
             if (testFilter.callback == RequestOperation.LISTENER_FAILURE) {
                 errorExpected = true;
             }
-            if (!(testFilter.callback == RequestOperation.CONTINUE_PROCESSING) ) {
+            if (!(testFilter.callback == RequestOperation.CONTINUE_PROCESSING)) {
                 break;
             }
         }
@@ -97,7 +97,7 @@ public class TransportActionFilterChainTests extends ElasticsearchTestCase {
         try {
             assertThat(future.get(), notNullValue());
             assertThat("shouldn't get here if an error is expected", errorExpected, equalTo(false));
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             assertThat("shouldn't get here if an error is not expected " + t.getMessage(), errorExpected, equalTo(true));
         }
 
@@ -116,7 +116,7 @@ public class TransportActionFilterChainTests extends ElasticsearchTestCase {
         for (ActionFilter filter : testFiltersByLastExecution) {
             RequestTestFilter testFilter = (RequestTestFilter) filter;
             finalTestFilters.add(testFilter);
-            if (!(testFilter.callback == RequestOperation.CONTINUE_PROCESSING) ) {
+            if (!(testFilter.callback == RequestOperation.CONTINUE_PROCESSING)) {
                 break;
             }
         }
@@ -179,7 +179,7 @@ public class TransportActionFilterChainTests extends ElasticsearchTestCase {
         try {
             assertThat(future.get(), notNullValue());
             assertThat("shouldn't get here if an error is expected", errorExpected, equalTo(false));
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             assertThat("shouldn't get here if an error is not expected " + t.getMessage(), errorExpected, equalTo(true));
         }
 

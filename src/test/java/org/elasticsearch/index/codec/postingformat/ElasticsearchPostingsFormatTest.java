@@ -29,9 +29,7 @@ import org.apache.lucene.util.TimeUnits;
 import org.elasticsearch.test.junit.listeners.ReproduceInfoPrinter;
 
 /** Runs elasticsearch postings format against lucene's standard postings format tests */
-@Listeners({
-        ReproduceInfoPrinter.class
-})
+@Listeners({ ReproduceInfoPrinter.class })
 @TimeoutSuite(millis = TimeUnits.HOUR)
 @LuceneTestCase.SuppressSysoutChecks(bugUrl = "we log a lot on purpose")
 public class ElasticsearchPostingsFormatTest extends BasePostingsFormatTestCase {
@@ -40,5 +38,5 @@ public class ElasticsearchPostingsFormatTest extends BasePostingsFormatTestCase 
     protected Codec getCodec() {
         return TestUtil.alwaysPostingsFormat(new Elasticsearch090RWPostingsFormat());
     }
-    
+
 }

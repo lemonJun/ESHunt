@@ -48,18 +48,7 @@ public class UnassignedInfoTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void testReasonOrdinalOrder() {
-        UnassignedInfo.Reason[] order = new UnassignedInfo.Reason[]{
-                UnassignedInfo.Reason.UNKNOWN,
-                UnassignedInfo.Reason.INDEX_CREATED,
-                UnassignedInfo.Reason.CLUSTER_RECOVERED,
-                UnassignedInfo.Reason.INDEX_REOPENED,
-                UnassignedInfo.Reason.DANGLING_INDEX_IMPORTED,
-                UnassignedInfo.Reason.NEW_INDEX_RESTORED,
-                UnassignedInfo.Reason.EXISTING_INDEX_RESTORED,
-                UnassignedInfo.Reason.REPLICA_ADDED,
-                UnassignedInfo.Reason.ALLOCATION_FAILED,
-                UnassignedInfo.Reason.NODE_LEFT,
-                UnassignedInfo.Reason.REROUTE_CANCELLED};
+        UnassignedInfo.Reason[] order = new UnassignedInfo.Reason[] { UnassignedInfo.Reason.UNKNOWN, UnassignedInfo.Reason.INDEX_CREATED, UnassignedInfo.Reason.CLUSTER_RECOVERED, UnassignedInfo.Reason.INDEX_REOPENED, UnassignedInfo.Reason.DANGLING_INDEX_IMPORTED, UnassignedInfo.Reason.NEW_INDEX_RESTORED, UnassignedInfo.Reason.EXISTING_INDEX_RESTORED, UnassignedInfo.Reason.REPLICA_ADDED, UnassignedInfo.Reason.ALLOCATION_FAILED, UnassignedInfo.Reason.NODE_LEFT, UnassignedInfo.Reason.REROUTE_CANCELLED };
         for (int i = 0; i < order.length; i++) {
             assertThat(order[i].ordinal(), equalTo(i));
         }
@@ -81,12 +70,8 @@ public class UnassignedInfoTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void testIndexCreated() {
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(randomIntBetween(1, 3)).numberOfReplicas(randomIntBetween(0, 3)))
-                .build();
-        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT)
-                .metaData(metaData)
-                .routingTable(RoutingTable.builder().addAsNew(metaData.index("test"))).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(randomIntBetween(1, 3)).numberOfReplicas(randomIntBetween(0, 3))).build();
+        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsNew(metaData.index("test"))).build();
         for (MutableShardRouting shard : clusterState.routingNodes().shardsWithState(UNASSIGNED)) {
             assertThat(shard.unassignedInfo().getReason(), equalTo(UnassignedInfo.Reason.INDEX_CREATED));
         }
@@ -94,12 +79,8 @@ public class UnassignedInfoTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void testClusterRecovered() {
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(randomIntBetween(1, 3)).numberOfReplicas(randomIntBetween(0, 3)))
-                .build();
-        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT)
-                .metaData(metaData)
-                .routingTable(RoutingTable.builder().addAsRecovery(metaData.index("test"))).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(randomIntBetween(1, 3)).numberOfReplicas(randomIntBetween(0, 3))).build();
+        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsRecovery(metaData.index("test"))).build();
         for (MutableShardRouting shard : clusterState.routingNodes().shardsWithState(UNASSIGNED)) {
             assertThat(shard.unassignedInfo().getReason(), equalTo(UnassignedInfo.Reason.CLUSTER_RECOVERED));
         }
@@ -107,12 +88,8 @@ public class UnassignedInfoTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void testIndexReopened() {
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(randomIntBetween(1, 3)).numberOfReplicas(randomIntBetween(0, 3)))
-                .build();
-        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT)
-                .metaData(metaData)
-                .routingTable(RoutingTable.builder().addAsFromCloseToOpen(metaData.index("test"))).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(randomIntBetween(1, 3)).numberOfReplicas(randomIntBetween(0, 3))).build();
+        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsFromCloseToOpen(metaData.index("test"))).build();
         for (MutableShardRouting shard : clusterState.routingNodes().shardsWithState(UNASSIGNED)) {
             assertThat(shard.unassignedInfo().getReason(), equalTo(UnassignedInfo.Reason.INDEX_REOPENED));
         }
@@ -120,12 +97,8 @@ public class UnassignedInfoTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void testNewIndexRestored() {
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(randomIntBetween(1, 3)).numberOfReplicas(randomIntBetween(0, 3)))
-                .build();
-        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT)
-                .metaData(metaData)
-                .routingTable(RoutingTable.builder().addAsNewRestore(metaData.index("test"), new RestoreSource(new SnapshotId("rep1", "snp1"), "test"), new IntOpenHashSet())).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(randomIntBetween(1, 3)).numberOfReplicas(randomIntBetween(0, 3))).build();
+        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsNewRestore(metaData.index("test"), new RestoreSource(new SnapshotId("rep1", "snp1"), "test"), new IntOpenHashSet())).build();
         for (MutableShardRouting shard : clusterState.routingNodes().shardsWithState(UNASSIGNED)) {
             assertThat(shard.unassignedInfo().getReason(), equalTo(UnassignedInfo.Reason.NEW_INDEX_RESTORED));
         }
@@ -133,12 +106,8 @@ public class UnassignedInfoTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void testExistingIndexRestored() {
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(randomIntBetween(1, 3)).numberOfReplicas(randomIntBetween(0, 3)))
-                .build();
-        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT)
-                .metaData(metaData)
-                .routingTable(RoutingTable.builder().addAsRestore(metaData.index("test"), new RestoreSource(new SnapshotId("rep1", "snp1"), "test"))).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(randomIntBetween(1, 3)).numberOfReplicas(randomIntBetween(0, 3))).build();
+        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsRestore(metaData.index("test"), new RestoreSource(new SnapshotId("rep1", "snp1"), "test"))).build();
         for (MutableShardRouting shard : clusterState.routingNodes().shardsWithState(UNASSIGNED)) {
             assertThat(shard.unassignedInfo().getReason(), equalTo(UnassignedInfo.Reason.EXISTING_INDEX_RESTORED));
         }
@@ -146,12 +115,8 @@ public class UnassignedInfoTests extends ElasticsearchAllocationTestCase {
 
     @Test
     public void testDanglingIndexImported() {
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(randomIntBetween(1, 3)).numberOfReplicas(randomIntBetween(0, 3)))
-                .build();
-        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT)
-                .metaData(metaData)
-                .routingTable(RoutingTable.builder().addAsFromDangling(metaData.index("test"))).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(randomIntBetween(1, 3)).numberOfReplicas(randomIntBetween(0, 3))).build();
+        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsFromDangling(metaData.index("test"))).build();
         for (MutableShardRouting shard : clusterState.routingNodes().shardsWithState(UNASSIGNED)) {
             assertThat(shard.unassignedInfo().getReason(), equalTo(UnassignedInfo.Reason.DANGLING_INDEX_IMPORTED));
         }
@@ -160,12 +125,8 @@ public class UnassignedInfoTests extends ElasticsearchAllocationTestCase {
     @Test
     public void testReplicaAdded() {
         AllocationService allocation = createAllocationService();
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(0))
-                .build();
-        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT)
-                .metaData(metaData)
-                .routingTable(RoutingTable.builder().addAsNew(metaData.index("test"))).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(0)).build();
+        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsNew(metaData.index("test"))).build();
         clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1"))).build();
         clusterState = ClusterState.builder(clusterState).routingResult(allocation.reroute(clusterState)).build();
         // starting primaries
@@ -203,12 +164,8 @@ public class UnassignedInfoTests extends ElasticsearchAllocationTestCase {
     @Test
     public void testNodeLeave() {
         AllocationService allocation = createAllocationService();
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1))
-                .build();
-        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT)
-                .metaData(metaData)
-                .routingTable(RoutingTable.builder().addAsNew(metaData.index("test"))).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1)).build();
+        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsNew(metaData.index("test"))).build();
         clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2"))).build();
         clusterState = ClusterState.builder(clusterState).routingResult(allocation.reroute(clusterState)).build();
         // starting primaries
@@ -233,12 +190,8 @@ public class UnassignedInfoTests extends ElasticsearchAllocationTestCase {
     @Test
     public void testFailedShard() {
         AllocationService allocation = createAllocationService();
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1))
-                .build();
-        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT)
-                .metaData(metaData)
-                .routingTable(RoutingTable.builder().addAsNew(metaData.index("test"))).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1)).build();
+        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsNew(metaData.index("test"))).build();
         clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2"))).build();
         clusterState = ClusterState.builder(clusterState).routingResult(allocation.reroute(clusterState)).build();
         // starting primaries
@@ -293,13 +246,8 @@ public class UnassignedInfoTests extends ElasticsearchAllocationTestCase {
     @Test
     public void testNumberOfDelayedUnassigned() throws Exception {
         AllocationService allocation = createAllocationService();
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test1").numberOfShards(1).numberOfReplicas(1))
-                .put(IndexMetaData.builder("test2").numberOfShards(1).numberOfReplicas(1))
-                .build();
-        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT)
-                .metaData(metaData)
-                .routingTable(RoutingTable.builder().addAsNew(metaData.index("test1")).addAsNew(metaData.index("test2"))).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test1").numberOfShards(1).numberOfReplicas(1)).put(IndexMetaData.builder("test2").numberOfShards(1).numberOfReplicas(1)).build();
+        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsNew(metaData.index("test1")).addAsNew(metaData.index("test2"))).build();
         clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2"))).build();
         clusterState = ClusterState.builder(clusterState).routingResult(allocation.reroute(clusterState)).build();
         assertThat(UnassignedInfo.getNumberOfDelayedUnassigned(System.currentTimeMillis(), ImmutableSettings.builder().put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, "10h").build(), clusterState), equalTo(0));
@@ -317,13 +265,8 @@ public class UnassignedInfoTests extends ElasticsearchAllocationTestCase {
     @Test
     public void testFindNextDelayedAllocation() {
         AllocationService allocation = createAllocationService();
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test1").numberOfShards(1).numberOfReplicas(1))
-                .put(IndexMetaData.builder("test2").numberOfShards(1).numberOfReplicas(1))
-                .build();
-        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT)
-                .metaData(metaData)
-                .routingTable(RoutingTable.builder().addAsNew(metaData.index("test1")).addAsNew(metaData.index("test2"))).build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test1").numberOfShards(1).numberOfReplicas(1)).put(IndexMetaData.builder("test2").numberOfShards(1).numberOfReplicas(1)).build();
+        ClusterState clusterState = ClusterState.builder(ClusterName.DEFAULT).metaData(metaData).routingTable(RoutingTable.builder().addAsNew(metaData.index("test1")).addAsNew(metaData.index("test2"))).build();
         clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2"))).build();
         clusterState = ClusterState.builder(clusterState).routingResult(allocation.reroute(clusterState)).build();
         assertThat(UnassignedInfo.getNumberOfDelayedUnassigned(System.currentTimeMillis(), ImmutableSettings.builder().put(UnassignedInfo.INDEX_DELAYED_NODE_LEFT_TIMEOUT_SETTING, "10h").build(), clusterState), equalTo(0));

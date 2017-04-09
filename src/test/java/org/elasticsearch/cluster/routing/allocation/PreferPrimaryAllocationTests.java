@@ -42,22 +42,13 @@ public class PreferPrimaryAllocationTests extends ElasticsearchAllocationTestCas
     @Test
     public void testPreferPrimaryAllocationOverReplicas() {
         logger.info("create an allocation with 1 initial recoveries");
-        AllocationService strategy = createAllocationService(settingsBuilder()
-                .put("cluster.routing.allocation.node_concurrent_recoveries", 1)
-                .put("cluster.routing.allocation.node_initial_primaries_recoveries", 1)
-                .build());
+        AllocationService strategy = createAllocationService(settingsBuilder().put("cluster.routing.allocation.node_concurrent_recoveries", 1).put("cluster.routing.allocation.node_initial_primaries_recoveries", 1).build());
 
         logger.info("create several indices with no replicas, and wait till all are allocated");
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test1").numberOfShards(10).numberOfReplicas(0))
-                .put(IndexMetaData.builder("test2").numberOfShards(10).numberOfReplicas(0))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test1").numberOfShards(10).numberOfReplicas(0)).put(IndexMetaData.builder("test2").numberOfShards(10).numberOfReplicas(0)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test1"))
-                .addAsNew(metaData.index("test2"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test1")).addAsNew(metaData.index("test2")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
@@ -83,13 +74,9 @@ public class PreferPrimaryAllocationTests extends ElasticsearchAllocationTestCas
         assertThat(clusterState.routingNodes().shardsWithState(INITIALIZING).size(), equalTo(2));
 
         logger.info("create a new index");
-        metaData = MetaData.builder(clusterState.metaData())
-                .put(IndexMetaData.builder("new_index").numberOfShards(4).numberOfReplicas(0))
-                .build();
+        metaData = MetaData.builder(clusterState.metaData()).put(IndexMetaData.builder("new_index").numberOfShards(4).numberOfReplicas(0)).build();
 
-        routingTable = RoutingTable.builder(clusterState.routingTable())
-                .addAsNew(metaData.index("new_index"))
-                .build();
+        routingTable = RoutingTable.builder(clusterState.routingTable()).addAsNew(metaData.index("new_index")).build();
 
         clusterState = ClusterState.builder(clusterState).metaData(metaData).routingTable(routingTable).build();
 

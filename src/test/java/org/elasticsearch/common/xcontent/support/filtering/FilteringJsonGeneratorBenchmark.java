@@ -76,13 +76,7 @@ public class FilteringJsonGeneratorBenchmark {
         }
         double milliseconds = (System.nanoTime() - start) / 1_000_000d;
 
-        System.out.printf(Locale.ROOT, "%12d | %9d | %17d | %14.2f %% | %10.3f ms | %15.2f | %8.0f %n",
-                nbIterations, nbFields,
-                (int) (nbFields * ratio),
-                (ratio * 100d),
-                milliseconds,
-                ((double) nbIterations) / (milliseconds / 1000d),
-                size / ((double) nbIterations));
+        System.out.printf(Locale.ROOT, "%12d | %9d | %17d | %14.2f %% | %10.3f ms | %15.2f | %8.0f %n", nbIterations, nbFields, (int) (nbFields * ratio), (ratio * 100d), milliseconds, ((double) nbIterations) / (milliseconds / 1000d), size / ((double) nbIterations));
     }
 
     /**

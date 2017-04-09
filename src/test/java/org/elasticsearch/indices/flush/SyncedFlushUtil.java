@@ -45,7 +45,7 @@ public class SyncedFlushUtil {
     public static IndicesSyncedFlushResult attemptSyncedFlush(InternalTestCluster cluster, String index) {
         SyncedFlushService service = cluster.getInstance(SyncedFlushService.class);
         LatchedListener<IndicesSyncedFlushResult> listener = new LatchedListener();
-        service.attemptSyncedFlush(new String[]{index}, IndicesOptions.lenientExpandOpen(), listener);
+        service.attemptSyncedFlush(new String[] { index }, IndicesOptions.lenientExpandOpen(), listener);
         try {
             listener.latch.await();
         } catch (InterruptedException e) {
@@ -56,7 +56,6 @@ public class SyncedFlushUtil {
         }
         return listener.result;
     }
-
 
     /**
      * Blocking version of {@link SyncedFlushService#attemptSyncedFlush(ShardId, ActionListener)}

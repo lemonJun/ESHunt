@@ -33,6 +33,13 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Set;
 
+/**
+ * 重新打分过程
+ *
+ * @author WangYazhou
+ * @date  2017年4月9日 下午2:04:32
+ * @see
+ */
 public final class QueryRescorer implements Rescorer {
 
     private static enum ScoreMode {

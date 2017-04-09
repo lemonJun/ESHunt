@@ -39,9 +39,7 @@ public class ConcurrentIndexingVersioningStressTest {
 
     public static void main(String[] args) throws Exception {
 
-        Settings settings = settingsBuilder()
-                .put("gateway.type", "none")
-                .build();
+        Settings settings = settingsBuilder().put("gateway.type", "none").build();
 
         Node node1 = nodeBuilder().settings(settings).node();
         Node node2 = nodeBuilder().settings(settings).node();

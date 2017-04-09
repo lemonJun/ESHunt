@@ -57,44 +57,24 @@ public class GeoDistanceSearchBenchmark {
         if (client.admin().indices().prepareExists("test").execute().actionGet().isExists()) {
             System.out.println("Found an index, count: " + client.prepareCount("test").setQuery(QueryBuilders.matchAllQuery()).execute().actionGet().getCount());
         } else {
-            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1")
-                    .startObject("properties").startObject("location").field("type", "geo_point").field("lat_lon", true).endObject().endObject()
-                    .endObject().endObject().string();
-            client.admin().indices().prepareCreate("test")
-                    .setSettings(ImmutableSettings.settingsBuilder().put("index.number_of_shards", 1).put("index.number_of_replicas", 0))
-                    .addMapping("type1", mapping)
-                    .execute().actionGet();
+            String mapping = XContentFactory.jsonBuilder().startObject().startObject("type1").startObject("properties").startObject("location").field("type", "geo_point").field("lat_lon", true).endObject().endObject().endObject().endObject().string();
+            client.admin().indices().prepareCreate("test").setSettings(ImmutableSettings.settingsBuilder().put("index.number_of_shards", 1).put("index.number_of_replicas", 0)).addMapping("type1", mapping).execute().actionGet();
 
             System.err.println("--> Indexing [" + NUM_DOCS + "]");
-            for (long i = 0; i < NUM_DOCS; ) {
-                client.prepareIndex("test", "type1", Long.toString(i++)).setSource(jsonBuilder().startObject()
-                        .field("name", "New York")
-                        .startObject("location").field("lat", 40.7143528).field("lon", -74.0059731).endObject()
-                        .endObject()).execute().actionGet();
+            for (long i = 0; i < NUM_DOCS;) {
+                client.prepareIndex("test", "type1", Long.toString(i++)).setSource(jsonBuilder().startObject().field("name", "New York").startObject("location").field("lat", 40.7143528).field("lon", -74.0059731).endObject().endObject()).execute().actionGet();
 
                 // to NY: 5.286 km
-                client.prepareIndex("test", "type1", Long.toString(i++)).setSource(jsonBuilder().startObject()
-                        .field("name", "Times Square")
-                        .startObject("location").field("lat", 40.759011).field("lon", -73.9844722).endObject()
-                        .endObject()).execute().actionGet();
+                client.prepareIndex("test", "type1", Long.toString(i++)).setSource(jsonBuilder().startObject().field("name", "Times Square").startObject("location").field("lat", 40.759011).field("lon", -73.9844722).endObject().endObject()).execute().actionGet();
 
                 // to NY: 0.4621 km
-                client.prepareIndex("test", "type1", Long.toString(i++)).setSource(jsonBuilder().startObject()
-                        .field("name", "Tribeca")
-                        .startObject("location").field("lat", 40.718266).field("lon", -74.007819).endObject()
-                        .endObject()).execute().actionGet();
+                client.prepareIndex("test", "type1", Long.toString(i++)).setSource(jsonBuilder().startObject().field("name", "Tribeca").startObject("location").field("lat", 40.718266).field("lon", -74.007819).endObject().endObject()).execute().actionGet();
 
                 // to NY: 1.258 km
-                client.prepareIndex("test", "type1", Long.toString(i++)).setSource(jsonBuilder().startObject()
-                        .field("name", "Soho")
-                        .startObject("location").field("lat", 40.7247222).field("lon", -74).endObject()
-                        .endObject()).execute().actionGet();
+                client.prepareIndex("test", "type1", Long.toString(i++)).setSource(jsonBuilder().startObject().field("name", "Soho").startObject("location").field("lat", 40.7247222).field("lon", -74).endObject().endObject()).execute().actionGet();
 
                 // to NY: 8.572 km
-                client.prepareIndex("test", "type1", Long.toString(i++)).setSource(jsonBuilder().startObject()
-                        .field("name", "Brooklyn")
-                        .startObject("location").field("lat", 40.65).field("lon", -73.95).endObject()
-                        .endObject()).execute().actionGet();
+                client.prepareIndex("test", "type1", Long.toString(i++)).setSource(jsonBuilder().startObject().field("name", "Brooklyn").startObject("location").field("lat", 40.65).field("lon", -73.95).endObject().endObject()).execute().actionGet();
 
                 if ((i % 10000) == 0) {
                     System.err.println("--> indexed " + i);
@@ -136,7 +116,6 @@ public class GeoDistanceSearchBenchmark {
         }
         totalTime = System.currentTimeMillis() - start;
         System.err.println("--> Perf (ARC) - optimize_bbox (indexed) " + (totalTime / NUM_RUNS) + "ms");
-
 
         System.err.println("--> Warming up (ARC)  - no optimize_bbox");
         start = System.currentTimeMillis();
@@ -191,12 +170,6 @@ public class GeoDistanceSearchBenchmark {
 
     public static void run(Client client, GeoDistance geoDistance, String optimizeBbox) {
         client.prepareSearch() // from NY
-                .setSearchType(SearchType.COUNT)
-                .setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location")
-                        .distance("2km")
-                        .optimizeBbox(optimizeBbox)
-                        .geoDistance(geoDistance)
-                        .point(40.7143528, -74.0059731)))
-                .execute().actionGet();
+                        .setSearchType(SearchType.COUNT).setQuery(filteredQuery(matchAllQuery(), geoDistanceFilter("location").distance("2km").optimizeBbox(optimizeBbox).geoDistance(geoDistance).point(40.7143528, -74.0059731))).execute().actionGet();
     }
 }

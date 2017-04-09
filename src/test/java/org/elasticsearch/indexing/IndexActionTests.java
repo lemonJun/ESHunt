@@ -139,13 +139,14 @@ public class IndexActionTests extends ElasticsearchIntegrationTest {
         ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
         List<Callable<Void>> tasks = new ArrayList<>(taskCount);
         final Random random = getRandom();
-        for (int i=0;i< taskCount; i++ ) {
+        for (int i = 0; i < taskCount; i++) {
             tasks.add(new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
                     int docId = random.nextInt(docCount);
                     IndexResponse indexResponse = index("test", "type", Integer.toString(docId), "field1", "value");
-                    if (indexResponse.isCreated()) createdCounts.incrementAndGet(docId);
+                    if (indexResponse.isCreated())
+                        createdCounts.incrementAndGet(docId);
                     return null;
                 }
             });
@@ -153,7 +154,7 @@ public class IndexActionTests extends ElasticsearchIntegrationTest {
 
         threadPool.invokeAll(tasks);
 
-        for (int i=0;i<docCount;i++) {
+        for (int i = 0; i < docCount; i++) {
             assertThat(createdCounts.get(i), lessThanOrEqualTo(1));
         }
         terminate(threadPool);
@@ -164,8 +165,7 @@ public class IndexActionTests extends ElasticsearchIntegrationTest {
         createIndex("test");
         ensureGreen();
 
-        IndexResponse indexResponse = client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(123)
-                                              .setVersionType(VersionType.EXTERNAL).execute().actionGet();
+        IndexResponse indexResponse = client().prepareIndex("test", "type", "1").setSource("field1", "value1_1").setVersion(123).setVersionType(VersionType.EXTERNAL).execute().actionGet();
         assertTrue(indexResponse.isCreated());
     }
 
@@ -189,27 +189,22 @@ public class IndexActionTests extends ElasticsearchIntegrationTest {
             createIndex(randomAsciiOfLengthBetween(min, max).toLowerCase(Locale.ROOT));
             fail("exception should have been thrown on too-long index name");
         } catch (InvalidIndexNameException e) {
-            assertThat("exception contains message about index name too long: " + e.getMessage(),
-                    e.getMessage().contains("index name is too long,"), equalTo(true));
+            assertThat("exception contains message about index name too long: " + e.getMessage(), e.getMessage().contains("index name is too long,"), equalTo(true));
         }
 
         try {
             client().prepareIndex(randomAsciiOfLengthBetween(min, max).toLowerCase(Locale.ROOT), "mytype").setSource("foo", "bar").get();
             fail("exception should have been thrown on too-long index name");
         } catch (InvalidIndexNameException e) {
-            assertThat("exception contains message about index name too long: " + e.getMessage(),
-                    e.getMessage().contains("index name is too long,"), equalTo(true));
+            assertThat("exception contains message about index name too long: " + e.getMessage(), e.getMessage().contains("index name is too long,"), equalTo(true));
         }
 
         try {
             // Catch chars that are more than a single byte
-            client().prepareIndex(randomAsciiOfLength(MetaDataCreateIndexService.MAX_INDEX_NAME_BYTES -1).toLowerCase(Locale.ROOT) +
-                            "Ϟ".toLowerCase(Locale.ROOT),
-                    "mytype").setSource("foo", "bar").get();
+            client().prepareIndex(randomAsciiOfLength(MetaDataCreateIndexService.MAX_INDEX_NAME_BYTES - 1).toLowerCase(Locale.ROOT) + "Ϟ".toLowerCase(Locale.ROOT), "mytype").setSource("foo", "bar").get();
             fail("exception should have been thrown on too-long index name");
         } catch (InvalidIndexNameException e) {
-            assertThat("exception contains message about index name too long: " + e.getMessage(),
-                    e.getMessage().contains("index name is too long,"), equalTo(true));
+            assertThat("exception contains message about index name too long: " + e.getMessage(), e.getMessage().contains("index name is too long,"), equalTo(true));
         }
 
         // we can create an index of max length

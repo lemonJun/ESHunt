@@ -53,7 +53,7 @@ import java.util.Map;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 
-public class NoisyChannelSpellCheckerTests extends ElasticsearchTestCase{
+public class NoisyChannelSpellCheckerTests extends ElasticsearchTestCase {
     private final BytesRef space = new BytesRef(" ");
     private final BytesRef preTag = new BytesRef("<em>");
     private final BytesRef postTag = new BytesRef("</em>");
@@ -98,7 +98,7 @@ public class NoisyChannelSpellCheckerTests extends ElasticsearchTestCase{
 
         DirectoryReader ir = DirectoryReader.open(writer, false);
         WordScorer wordScorer = new LaplaceScorer(ir, MultiFields.getTerms(ir, "body_ngram"), "body_ngram", 0.95d, new BytesRef(" "), 0.5f);
-        
+
         NoisyChannelSpellChecker suggester = new NoisyChannelSpellChecker();
         DirectSpellChecker spellchecker = new DirectSpellChecker();
         spellchecker.setMinQueryLength(1);
@@ -109,7 +109,7 @@ public class NoisyChannelSpellCheckerTests extends ElasticsearchTestCase{
         assertThat(corrections[0].join(space).utf8ToString(), equalTo("american ace"));
         assertThat(corrections[0].join(space, preTag, postTag).utf8ToString(), equalTo("american <em>ace</em>"));
         assertThat(result.cutoffScore, greaterThan(0d));
-        
+
         result = suggester.getCorrections(wrapper, new BytesRef("american ame"), generator, 1, 1, ir, "body", wordScorer, 0, 1);
         corrections = result.corrections;
         assertThat(corrections.length, equalTo(1));
@@ -129,14 +129,14 @@ public class NoisyChannelSpellCheckerTests extends ElasticsearchTestCase{
         assertThat(corrections[1].join(space, preTag, postTag).utf8ToString(), equalTo("xor the <em>god</em> jewel"));
         assertThat(corrections[2].join(space, preTag, postTag).utf8ToString(), equalTo("<em>xorn</em> the <em>god</em> jewel"));
         assertThat(corrections[3].join(space, preTag, postTag).utf8ToString(), equalTo("<em>xorr</em> the got jewel"));
-        
+
         corrections = suggester.getCorrections(wrapper, new BytesRef("Xor the Got-Jewel"), generator, 0.5f, 4, ir, "body", wordScorer, 1, 2).corrections;
         assertThat(corrections.length, equalTo(4));
         assertThat(corrections[0].join(space).utf8ToString(), equalTo("xorr the god jewel"));
         assertThat(corrections[1].join(space).utf8ToString(), equalTo("xor the god jewel"));
         assertThat(corrections[2].join(space).utf8ToString(), equalTo("xorn the god jewel"));
         assertThat(corrections[3].join(space).utf8ToString(), equalTo("xorr the got jewel"));
-        
+
         // Test some of the highlighting corner cases
         suggester = new NoisyChannelSpellChecker(0.85);
         wordScorer = new LaplaceScorer(ir, MultiFields.getTerms(ir, "body_ngram"), "body_ngram", 0.85d, new BytesRef(" "), 0.5f);
@@ -152,7 +152,7 @@ public class NoisyChannelSpellCheckerTests extends ElasticsearchTestCase{
         assertThat(corrections[3].join(space, preTag, postTag).utf8ToString(), equalTo("xor teh <em>god</em> jewel"));
 
         // test synonyms
-        
+
         Analyzer analyzer = new Analyzer() {
 
             @Override
@@ -169,7 +169,7 @@ public class NoisyChannelSpellCheckerTests extends ElasticsearchTestCase{
                 return new TokenStreamComponents(t, filter);
             }
         };
-        
+
         spellchecker.setAccuracy(0.0f);
         spellchecker.setMinPrefix(1);
         spellchecker.setMinQueryLength(1);
@@ -178,7 +178,7 @@ public class NoisyChannelSpellCheckerTests extends ElasticsearchTestCase{
         corrections = suggester.getCorrections(analyzer, new BytesRef("captian usa"), generator, 2, 4, ir, "body", wordScorer, 1, 2).corrections;
         assertThat(corrections[0].join(space).utf8ToString(), equalTo("captain america"));
         assertThat(corrections[0].join(space, preTag, postTag).utf8ToString(), equalTo("<em>captain america</em>"));
-        
+
         generator = new DirectCandidateGenerator(spellchecker, "body", SuggestMode.SUGGEST_MORE_POPULAR, ir, 0.85, 10, null, analyzer, MultiFields.getTerms(ir, "body"));
         corrections = suggester.getCorrections(analyzer, new BytesRef("captian usw"), generator, 2, 4, ir, "body", wordScorer, 1, 2).corrections;
         assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("captain america"));
@@ -190,7 +190,7 @@ public class NoisyChannelSpellCheckerTests extends ElasticsearchTestCase{
         assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("captain america"));
         assertThat(corrections[0].join(space, preTag, postTag).utf8ToString(), equalTo("captain <em>america</em>"));
     }
-    
+
     @Test
     public void testMarvelHerosMultiGenerator() throws IOException {
         RAMDirectory dir = new RAMDirectory();
@@ -245,36 +245,35 @@ public class NoisyChannelSpellCheckerTests extends ElasticsearchTestCase{
         DirectSpellChecker spellchecker = new DirectSpellChecker();
         spellchecker.setMinQueryLength(1);
         DirectCandidateGenerator forward = new DirectCandidateGenerator(spellchecker, "body", SuggestMode.SUGGEST_ALWAYS, ir, 0.95, 10);
-        DirectCandidateGenerator reverse = new DirectCandidateGenerator(spellchecker, "body_reverse", SuggestMode.SUGGEST_ALWAYS, ir, 0.95, 10, wrapper, wrapper,  MultiFields.getTerms(ir, "body_reverse"));
+        DirectCandidateGenerator reverse = new DirectCandidateGenerator(spellchecker, "body_reverse", SuggestMode.SUGGEST_ALWAYS, ir, 0.95, 10, wrapper, wrapper, MultiFields.getTerms(ir, "body_reverse"));
         CandidateGenerator generator = new MultiCandidateGeneratorWrapper(10, forward, reverse);
-        
+
         Correction[] corrections = suggester.getCorrections(wrapper, new BytesRef("american cae"), generator, 1, 1, ir, "body", wordScorer, 1, 2).corrections;
         assertThat(corrections.length, equalTo(1));
         assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("american ace"));
-        
+
         generator = new MultiCandidateGeneratorWrapper(5, forward, reverse);
         corrections = suggester.getCorrections(wrapper, new BytesRef("american ame"), generator, 1, 1, ir, "body", wordScorer, 1, 2).corrections;
         assertThat(corrections.length, equalTo(1));
         assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("american ace"));
-        
+
         corrections = suggester.getCorrections(wrapper, new BytesRef("american cae"), forward, 1, 1, ir, "body", wordScorer, 1, 2).corrections;
         assertThat(corrections.length, equalTo(0)); // only use forward with constant prefix
-        
+
         corrections = suggester.getCorrections(wrapper, new BytesRef("america cae"), generator, 2, 1, ir, "body", wordScorer, 1, 2).corrections;
         assertThat(corrections.length, equalTo(1));
         assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("american ace"));
-        
+
         corrections = suggester.getCorrections(wrapper, new BytesRef("Zorr the Got-Jewel"), generator, 0.5f, 4, ir, "body", wordScorer, 0, 2).corrections;
         assertThat(corrections.length, equalTo(4));
         assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("xorr the god jewel"));
         assertThat(corrections[1].join(new BytesRef(" ")).utf8ToString(), equalTo("zorr the god jewel"));
         assertThat(corrections[2].join(new BytesRef(" ")).utf8ToString(), equalTo("four the god jewel"));
 
-
         corrections = suggester.getCorrections(wrapper, new BytesRef("Zorr the Got-Jewel"), generator, 0.5f, 1, ir, "body", wordScorer, 1.5f, 2).corrections;
         assertThat(corrections.length, equalTo(1));
         assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("xorr the god jewel"));
-        
+
         corrections = suggester.getCorrections(wrapper, new BytesRef("Xor the Got-Jewel"), generator, 0.5f, 1, ir, "body", wordScorer, 1.5f, 2).corrections;
         assertThat(corrections.length, equalTo(1));
         assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("xorr the god jewel"));
@@ -287,8 +286,7 @@ public class NoisyChannelSpellCheckerTests extends ElasticsearchTestCase{
 
     @Test
     public void testMarvelHerosTrigram() throws IOException {
-        
-      
+
         RAMDirectory dir = new RAMDirectory();
         Map<String, Analyzer> mapping = new HashMap<>();
         mapping.put("body_ngram", new Analyzer() {
@@ -335,11 +333,11 @@ public class NoisyChannelSpellCheckerTests extends ElasticsearchTestCase{
         Correction[] corrections = suggester.getCorrections(wrapper, new BytesRef("american ame"), generator, 1, 1, ir, "body", wordScorer, 1, 3).corrections;
         assertThat(corrections.length, equalTo(1));
         assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("american ace"));
-        
+
         corrections = suggester.getCorrections(wrapper, new BytesRef("american ame"), generator, 1, 1, ir, "body", wordScorer, 1, 1).corrections;
         assertThat(corrections.length, equalTo(0));
-//        assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("american ape"));
-        
+        //        assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("american ape"));
+
         wordScorer = new LinearInterpoatingScorer(ir, MultiFields.getTerms(ir, "body_ngram"), "body_ngram", 0.85d, new BytesRef(" "), 0.5, 0.4, 0.1);
         corrections = suggester.getCorrections(wrapper, new BytesRef("Xor the Got-Jewel"), generator, 0.5f, 4, ir, "body", wordScorer, 0, 3).corrections;
         assertThat(corrections.length, equalTo(4));
@@ -347,25 +345,20 @@ public class NoisyChannelSpellCheckerTests extends ElasticsearchTestCase{
         assertThat(corrections[1].join(new BytesRef(" ")).utf8ToString(), equalTo("xor the god jewel"));
         assertThat(corrections[2].join(new BytesRef(" ")).utf8ToString(), equalTo("xorn the god jewel"));
         assertThat(corrections[3].join(new BytesRef(" ")).utf8ToString(), equalTo("xorr the got jewel"));
-        
-      
 
-        
         corrections = suggester.getCorrections(wrapper, new BytesRef("Xor the Got-Jewel"), generator, 0.5f, 4, ir, "body", wordScorer, 1, 3).corrections;
         assertThat(corrections.length, equalTo(4));
         assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("xorr the god jewel"));
         assertThat(corrections[1].join(new BytesRef(" ")).utf8ToString(), equalTo("xor the god jewel"));
         assertThat(corrections[2].join(new BytesRef(" ")).utf8ToString(), equalTo("xorn the god jewel"));
         assertThat(corrections[3].join(new BytesRef(" ")).utf8ToString(), equalTo("xorr the got jewel"));
-        
 
         corrections = suggester.getCorrections(wrapper, new BytesRef("Xor the Got-Jewel"), generator, 0.5f, 1, ir, "body", wordScorer, 100, 3).corrections;
         assertThat(corrections.length, equalTo(1));
         assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("xorr the god jewel"));
-        
 
         // test synonyms
-        
+
         Analyzer analyzer = new Analyzer() {
 
             @Override
@@ -382,20 +375,19 @@ public class NoisyChannelSpellCheckerTests extends ElasticsearchTestCase{
                 return new TokenStreamComponents(t, filter);
             }
         };
-        
+
         spellchecker.setAccuracy(0.0f);
         spellchecker.setMinPrefix(1);
         spellchecker.setMinQueryLength(1);
         suggester = new NoisyChannelSpellChecker(0.95);
-        wordScorer = new LinearInterpoatingScorer(ir, MultiFields.getTerms(ir, "body_ngram"), "body_ngram", 0.95d, new BytesRef(" "),  0.5, 0.4, 0.1);
+        wordScorer = new LinearInterpoatingScorer(ir, MultiFields.getTerms(ir, "body_ngram"), "body_ngram", 0.95d, new BytesRef(" "), 0.5, 0.4, 0.1);
         corrections = suggester.getCorrections(analyzer, new BytesRef("captian usa"), generator, 2, 4, ir, "body", wordScorer, 1, 3).corrections;
         assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("captain america"));
-        
+
         generator = new DirectCandidateGenerator(spellchecker, "body", SuggestMode.SUGGEST_MORE_POPULAR, ir, 0.95, 10, null, analyzer, MultiFields.getTerms(ir, "body"));
         corrections = suggester.getCorrections(analyzer, new BytesRef("captian usw"), generator, 2, 4, ir, "body", wordScorer, 1, 3).corrections;
         assertThat(corrections[0].join(new BytesRef(" ")).utf8ToString(), equalTo("captain america"));
-        
-        
+
         wordScorer = new StupidBackoffScorer(ir, MultiFields.getTerms(ir, "body_ngram"), "body_ngram", 0.85d, new BytesRef(" "), 0.4);
         corrections = suggester.getCorrections(wrapper, new BytesRef("Xor the Got-Jewel"), generator, 0.5f, 2, ir, "body", wordScorer, 0, 3).corrections;
         assertThat(corrections.length, equalTo(2));

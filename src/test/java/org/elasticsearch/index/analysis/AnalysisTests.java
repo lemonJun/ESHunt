@@ -40,7 +40,7 @@ public class AnalysisTests extends ElasticsearchTestCase {
         assertThat(set.contains("baz"), is(false));
 
         /* Array */
-        settings = settingsBuilder().putArray("stem_exclusion", "foo","bar").build();
+        settings = settingsBuilder().putArray("stem_exclusion", "foo", "bar").build();
         set = Analysis.parseStemExclusion(settings, CharArraySet.EMPTY_SET, Version.CURRENT.luceneVersion);
         assertThat(set.contains("foo"), is(true));
         assertThat(set.contains("bar"), is(true));

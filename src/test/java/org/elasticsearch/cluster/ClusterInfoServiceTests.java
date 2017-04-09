@@ -142,18 +142,13 @@ public class ClusterInfoServiceTests extends ElasticsearchIntegrationTest {
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
         return ImmutableSettings.builder()
-                // manual collection or upon cluster forming.
-                .put(InternalClusterInfoService.INTERNAL_CLUSTER_INFO_TIMEOUT, "1s")
-                .put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, MockTransportService.class.getName())
-                .put("plugin.types", Plugin.class.getName())
-                .build();
+                        // manual collection or upon cluster forming.
+                        .put(InternalClusterInfoService.INTERNAL_CLUSTER_INFO_TIMEOUT, "1s").put(TransportModule.TRANSPORT_SERVICE_TYPE_KEY, MockTransportService.class.getName()).put("plugin.types", Plugin.class.getName()).build();
     }
 
     @Test
     public void testClusterInfoServiceCollectsInformation() throws Exception {
-        internalCluster().startNodesAsync(2,
-                ImmutableSettings.builder().put(InternalClusterInfoService.INTERNAL_CLUSTER_INFO_UPDATE_INTERVAL, "200ms").build())
-                .get();
+        internalCluster().startNodesAsync(2, ImmutableSettings.builder().put(InternalClusterInfoService.INTERNAL_CLUSTER_INFO_UPDATE_INTERVAL, "200ms").build()).get();
         assertAcked(prepareCreate("test").setSettings(settingsBuilder().put(Store.INDEX_STORE_STATS_REFRESH_INTERVAL, 0).build()));
         ensureGreen("test");
         InternalTestCluster internalTestCluster = internalCluster();
@@ -182,9 +177,8 @@ public class ClusterInfoServiceTests extends ElasticsearchIntegrationTest {
     @Test
     public void testClusterInfoServiceInformationClearOnError() throws InterruptedException, ExecutionException {
         internalCluster().startNodesAsync(2,
-                // manually control publishing
-                ImmutableSettings.builder().put(InternalClusterInfoService.INTERNAL_CLUSTER_INFO_UPDATE_INTERVAL, "60m").build())
-                .get();
+                        // manually control publishing
+                        ImmutableSettings.builder().put(InternalClusterInfoService.INTERNAL_CLUSTER_INFO_UPDATE_INTERVAL, "60m").build()).get();
         prepareCreate("test").setSettings(IndexMetaData.SETTING_NUMBER_OF_REPLICAS, 1).get();
         ensureGreen("test");
         InternalTestCluster internalTestCluster = internalCluster();
@@ -199,7 +193,6 @@ public class ClusterInfoServiceTests extends ElasticsearchIntegrationTest {
         assertThat("some usages are populated", info.getNodeDiskUsages().size(), Matchers.equalTo(2));
         assertThat("some shard sizes are populated", info.getShardSizes().size(), greaterThan(0));
 
-
         MockTransportService mockTransportService = (MockTransportService) internalCluster().getInstance(TransportService.class, internalTestCluster.getMasterName());
 
         final AtomicBoolean timeout = new AtomicBoolean(false);
@@ -208,8 +201,7 @@ public class ClusterInfoServiceTests extends ElasticsearchIntegrationTest {
         for (DiscoveryNode node : internalTestCluster.clusterService().state().getNodes()) {
             mockTransportService.addDelegate(node, new MockTransportService.DelegateTransport(mockTransportService.original()) {
                 @Override
-                public void sendRequest(DiscoveryNode node, long requestId, String action, TransportRequest request,
-                                        TransportRequestOptions options) throws IOException, TransportException {
+                public void sendRequest(DiscoveryNode node, long requestId, String action, TransportRequest request, TransportRequestOptions options) throws IOException, TransportException {
                     if (blockedActions.contains(action)) {
                         if (timeout.get()) {
                             logger.info("dropping [{}] to [{}]", action, node);

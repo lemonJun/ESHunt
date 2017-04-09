@@ -44,10 +44,7 @@ public class NettyEchoBenchmark {
         }
 
         // Configure the server.
-        ServerBootstrap serverBootstrap = new ServerBootstrap(
-                new NioServerSocketChannelFactory(
-                        Executors.newCachedThreadPool(),
-                        Executors.newCachedThreadPool()));
+        ServerBootstrap serverBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool()));
 
         // Set up the pipeline factory.
         serverBootstrap.setPipelineFactory(new ChannelPipelineFactory() {
@@ -60,13 +57,10 @@ public class NettyEchoBenchmark {
         // Bind and start to accept incoming connections.
         serverBootstrap.bind(new InetSocketAddress(9000));
 
-        ClientBootstrap clientBootstrap = new ClientBootstrap(
-                new NioClientSocketChannelFactory(
-                        Executors.newCachedThreadPool(),
-                        Executors.newCachedThreadPool()));
+        ClientBootstrap clientBootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool()));
 
-//        ClientBootstrap clientBootstrap = new ClientBootstrap(
-//                new OioClientSocketChannelFactory(Executors.newCachedThreadPool()));
+        //        ClientBootstrap clientBootstrap = new ClientBootstrap(
+        //                new OioClientSocketChannelFactory(Executors.newCachedThreadPool()));
 
         // Set up the pipeline factory.
         final EchoClientHandler clientHandler = new EchoClientHandler();
@@ -93,7 +87,6 @@ public class NettyEchoBenchmark {
             }
         }
         System.out.println("Warmed up");
-
 
         long start = System.currentTimeMillis();
         long cycleStart = System.currentTimeMillis();
@@ -138,7 +131,6 @@ public class NettyEchoBenchmark {
             e.getChannel().close();
         }
     }
-
 
     public static class EchoServerHandler extends SimpleChannelUpstreamHandler {
 

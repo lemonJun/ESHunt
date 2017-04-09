@@ -52,7 +52,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 
 public class CodecTests extends ElasticsearchSingleNodeLuceneTestCase {
-    
+
     @Override
     @Before
     public void setUp() throws Exception {
@@ -102,18 +102,9 @@ public class CodecTests extends ElasticsearchSingleNodeLuceneTestCase {
 
     @Test
     public void testResolvePostingFormatsFromMapping_default() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("field1").field("type", "string").field("postings_format", "default").endObject()
-                .startObject("field2").field("type", "string").field("postings_format", "my_format1").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "string").field("postings_format", "default").endObject().startObject("field2").field("type", "string").field("postings_format", "my_format1").endObject().endObject().endObject().endObject().string();
 
-        Settings indexSettings = ImmutableSettings.settingsBuilder()
-                .put("index.codec.postings_format.my_format1.type", "default")
-                .put("index.codec.postings_format.my_format1.min_block_size", 16)
-                .put("index.codec.postings_format.my_format1.max_block_size", 64)
-                .build();
+        Settings indexSettings = ImmutableSettings.settingsBuilder().put("index.codec.postings_format.my_format1.type", "default").put("index.codec.postings_format.my_format1.min_block_size", 16).put("index.codec.postings_format.my_format1.max_block_size", 64).build();
         CodecService codecService = createCodecService(indexSettings);
         DocumentMapper documentMapper = codecService.mapperService().documentMapperParser().parse(mapping);
         assertThat(documentMapper.mappers().name("field1").mapper().postingsFormatProvider(), instanceOf(PreBuiltPostingsFormatProvider.class));
@@ -128,9 +119,7 @@ public class CodecTests extends ElasticsearchSingleNodeLuceneTestCase {
 
     @Test
     public void testChangeUidPostingsFormat() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_uid").field("postings_format", "Lucene41").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_uid").field("postings_format", "Lucene41").endObject().endObject().endObject().string();
 
         CodecService codecService = createCodecService();
         DocumentMapper documentMapper = codecService.mapperService().documentMapperParser().parse(mapping);
@@ -140,16 +129,9 @@ public class CodecTests extends ElasticsearchSingleNodeLuceneTestCase {
 
     @Test
     public void testResolveDocValuesFormatsFromMapping_default() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("properties")
-                .startObject("field1").field("type", "integer").field("doc_values_format", "default").endObject()
-                .startObject("field2").field("type", "double").field("doc_values_format", "my_format1").endObject()
-                .endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("properties").startObject("field1").field("type", "integer").field("doc_values_format", "default").endObject().startObject("field2").field("type", "double").field("doc_values_format", "my_format1").endObject().endObject().endObject().endObject().string();
 
-        Settings indexSettings = ImmutableSettings.settingsBuilder()
-                .put("index.codec.doc_values_format.my_format1.type", "default")
-                .build();
+        Settings indexSettings = ImmutableSettings.settingsBuilder().put("index.codec.doc_values_format.my_format1.type", "default").build();
         CodecService codecService = createCodecService(indexSettings);
         DocumentMapper documentMapper = codecService.mapperService().documentMapperParser().parse(mapping);
         assertThat(documentMapper.mappers().name("field1").mapper().docValuesFormatProvider(), instanceOf(PreBuiltDocValuesFormatProvider.class));
@@ -160,9 +142,7 @@ public class CodecTests extends ElasticsearchSingleNodeLuceneTestCase {
 
     @Test
     public void testChangeVersionFormat() throws Exception {
-        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
-                .startObject("_version").field("doc_values_format", "Lucene410").endObject()
-                .endObject().endObject().string();
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type").startObject("_version").field("doc_values_format", "Lucene410").endObject().endObject().endObject().string();
 
         CodecService codecService = createCodecService();
         DocumentMapper documentMapper = codecService.mapperService().documentMapperParser().parse(mapping);

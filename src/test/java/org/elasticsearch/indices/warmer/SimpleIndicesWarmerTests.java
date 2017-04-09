@@ -58,72 +58,48 @@ public class SimpleIndicesWarmerTests extends ElasticsearchIntegrationTest {
         createIndex("test");
         ensureGreen();
 
-        PutWarmerResponse putWarmerResponse = client().admin().indices().preparePutWarmer("warmer_1")
-                .setSearchRequest(client().prepareSearch("test").setTypes("a1").setQuery(QueryBuilders.termQuery("field", "value1")))
-                .execute().actionGet();
+        PutWarmerResponse putWarmerResponse = client().admin().indices().preparePutWarmer("warmer_1").setSearchRequest(client().prepareSearch("test").setTypes("a1").setQuery(QueryBuilders.termQuery("field", "value1"))).execute().actionGet();
         assertThat(putWarmerResponse.isAcknowledged(), equalTo(true));
-        putWarmerResponse = client().admin().indices().preparePutWarmer("warmer_2")
-                .setSearchRequest(client().prepareSearch("test").setTypes("a2").setQuery(QueryBuilders.termQuery("field", "value2")))
-                .execute().actionGet();
+        putWarmerResponse = client().admin().indices().preparePutWarmer("warmer_2").setSearchRequest(client().prepareSearch("test").setTypes("a2").setQuery(QueryBuilders.termQuery("field", "value2"))).execute().actionGet();
         assertThat(putWarmerResponse.isAcknowledged(), equalTo(true));
 
         client().prepareIndex("test", "type1", "1").setSource("field", "value1").setRefresh(true).execute().actionGet();
         client().prepareIndex("test", "type1", "2").setSource("field", "value2").setRefresh(true).execute().actionGet();
 
-        GetWarmersResponse getWarmersResponse = client().admin().indices().prepareGetWarmers("tes*")
-                .execute().actionGet();
+        GetWarmersResponse getWarmersResponse = client().admin().indices().prepareGetWarmers("tes*").execute().actionGet();
         assertThat(getWarmersResponse.getWarmers().size(), equalTo(1));
         assertThat(getWarmersResponse.getWarmers().get("test").size(), equalTo(2));
         assertThat(getWarmersResponse.getWarmers().get("test").get(0).name(), equalTo("warmer_1"));
         assertThat(getWarmersResponse.getWarmers().get("test").get(1).name(), equalTo("warmer_2"));
 
-        getWarmersResponse = client().admin().indices().prepareGetWarmers("test").addWarmers("warmer_*")
-                .execute().actionGet();
+        getWarmersResponse = client().admin().indices().prepareGetWarmers("test").addWarmers("warmer_*").execute().actionGet();
         assertThat(getWarmersResponse.getWarmers().size(), equalTo(1));
         assertThat(getWarmersResponse.getWarmers().get("test").size(), equalTo(2));
         assertThat(getWarmersResponse.getWarmers().get("test").get(0).name(), equalTo("warmer_1"));
         assertThat(getWarmersResponse.getWarmers().get("test").get(1).name(), equalTo("warmer_2"));
 
-        getWarmersResponse = client().admin().indices().prepareGetWarmers("test").addWarmers("warmer_1")
-                .execute().actionGet();
+        getWarmersResponse = client().admin().indices().prepareGetWarmers("test").addWarmers("warmer_1").execute().actionGet();
         assertThat(getWarmersResponse.getWarmers().size(), equalTo(1));
         assertThat(getWarmersResponse.getWarmers().get("test").size(), equalTo(1));
         assertThat(getWarmersResponse.getWarmers().get("test").get(0).name(), equalTo("warmer_1"));
 
-        getWarmersResponse = client().admin().indices().prepareGetWarmers("test").addWarmers("warmer_2")
-                .execute().actionGet();
+        getWarmersResponse = client().admin().indices().prepareGetWarmers("test").addWarmers("warmer_2").execute().actionGet();
         assertThat(getWarmersResponse.getWarmers().size(), equalTo(1));
         assertThat(getWarmersResponse.getWarmers().get("test").size(), equalTo(1));
         assertThat(getWarmersResponse.getWarmers().get("test").get(0).name(), equalTo("warmer_2"));
 
-        getWarmersResponse = client().admin().indices().prepareGetWarmers("test").addTypes("a*").addWarmers("warmer_2")
-                .execute().actionGet();
+        getWarmersResponse = client().admin().indices().prepareGetWarmers("test").addTypes("a*").addWarmers("warmer_2").execute().actionGet();
         assertThat(getWarmersResponse.getWarmers().size(), equalTo(1));
         assertThat(getWarmersResponse.getWarmers().get("test").size(), equalTo(1));
         assertThat(getWarmersResponse.getWarmers().get("test").get(0).name(), equalTo("warmer_2"));
 
-        getWarmersResponse = client().admin().indices().prepareGetWarmers("test").addTypes("a1").addWarmers("warmer_2")
-                .execute().actionGet();
+        getWarmersResponse = client().admin().indices().prepareGetWarmers("test").addTypes("a1").addWarmers("warmer_2").execute().actionGet();
         assertThat(getWarmersResponse.getWarmers().size(), equalTo(0));
     }
 
     @Test
     public void templateWarmer() {
-        client().admin().indices().preparePutTemplate("template_1")
-                .setSource("{\n" +
-                        "    \"template\" : \"*\",\n" +
-                        "    \"warmers\" : {\n" +
-                        "        \"warmer_1\" : {\n" +
-                        "            \"types\" : [],\n" +
-                        "            \"source\" : {\n" +
-                        "                \"query\" : {\n" +
-                        "                    \"match_all\" : {}\n" +
-                        "                }\n" +
-                        "            }\n" +
-                        "        }\n" +
-                        "    }\n" +
-                        "}")
-                .execute().actionGet();
+        client().admin().indices().preparePutTemplate("template_1").setSource("{\n" + "    \"template\" : \"*\",\n" + "    \"warmers\" : {\n" + "        \"warmer_1\" : {\n" + "            \"types\" : [],\n" + "            \"source\" : {\n" + "                \"query\" : {\n" + "                    \"match_all\" : {}\n" + "                }\n" + "            }\n" + "        }\n" + "    }\n" + "}").execute().actionGet();
 
         createIndex("test");
         ensureGreen();
@@ -139,19 +115,7 @@ public class SimpleIndicesWarmerTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void createIndexWarmer() {
-        assertAcked(prepareCreate("test")
-                .setSource("{\n" +
-                        "    \"warmers\" : {\n" +
-                        "        \"warmer_1\" : {\n" +
-                        "            \"types\" : [],\n" +
-                        "            \"source\" : {\n" +
-                        "                \"query\" : {\n" +
-                        "                    \"match_all\" : {}\n" +
-                        "                }\n" +
-                        "            }\n" +
-                        "        }\n" +
-                        "    }\n" +
-                        "}"));
+        assertAcked(prepareCreate("test").setSource("{\n" + "    \"warmers\" : {\n" + "        \"warmer_1\" : {\n" + "            \"types\" : [],\n" + "            \"source\" : {\n" + "                \"query\" : {\n" + "                    \"match_all\" : {}\n" + "                }\n" + "            }\n" + "        }\n" + "    }\n" + "}"));
 
         ClusterState clusterState = client().admin().cluster().prepareState().execute().actionGet().getState();
         IndexWarmersMetaData warmersMetaData = clusterState.metaData().index("test").custom(IndexWarmersMetaData.TYPE);
@@ -178,9 +142,7 @@ public class SimpleIndicesWarmerTests extends ElasticsearchIntegrationTest {
         createIndex("test");
         ensureGreen();
 
-        PutWarmerResponse putWarmerResponse = client().admin().indices().preparePutWarmer("custom_warmer")
-                .setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery()))
-                .get();
+        PutWarmerResponse putWarmerResponse = client().admin().indices().preparePutWarmer("custom_warmer").setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery())).get();
         assertThat(putWarmerResponse.isAcknowledged(), equalTo(true));
 
         GetWarmersResponse getWarmersResponse = client().admin().indices().prepareGetWarmers("test").get();
@@ -202,9 +164,7 @@ public class SimpleIndicesWarmerTests extends ElasticsearchIntegrationTest {
         createIndex("test");
         ensureGreen();
 
-        PutWarmerResponse putWarmerResponse = client().admin().indices().preparePutWarmer("custom_warmer")
-                .setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery()))
-                .execute().actionGet();
+        PutWarmerResponse putWarmerResponse = client().admin().indices().preparePutWarmer("custom_warmer").setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery())).execute().actionGet();
         assertThat(putWarmerResponse.isAcknowledged(), equalTo(true));
 
         client().prepareIndex("test", "test", "1").setSource("foo", "bar").setRefresh(true).execute().actionGet();
@@ -225,14 +185,10 @@ public class SimpleIndicesWarmerTests extends ElasticsearchIntegrationTest {
         createIndex("test");
         ensureGreen();
 
-        PutWarmerResponse putWarmerResponse = client().admin().indices().preparePutWarmer("custom_warmer")
-                .setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery()))
-                .execute().actionGet();
+        PutWarmerResponse putWarmerResponse = client().admin().indices().preparePutWarmer("custom_warmer").setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery())).execute().actionGet();
         assertThat(putWarmerResponse.isAcknowledged(), equalTo(true));
 
-        PutWarmerResponse anotherPutWarmerResponse = client().admin().indices().preparePutWarmer("second_custom_warmer")
-                .setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery()))
-                .execute().actionGet();
+        PutWarmerResponse anotherPutWarmerResponse = client().admin().indices().preparePutWarmer("second_custom_warmer").setSearchRequest(client().prepareSearch("test").setTypes("test").setQuery(QueryBuilders.matchAllQuery())).execute().actionGet();
         assertThat(anotherPutWarmerResponse.isAcknowledged(), equalTo(true));
 
         GetWarmersResponse getWarmersResponse = client().admin().indices().prepareGetWarmers("*").addWarmers("*").get();
@@ -289,20 +245,7 @@ public class SimpleIndicesWarmerTests extends ElasticsearchIntegrationTest {
         EAGER_PER_FIELD {
             @Override
             CreateIndexRequestBuilder createIndex(String indexName, String type, String fieldName) throws Exception {
-                return client().admin().indices().prepareCreate(indexName).setSettings(ImmutableSettings.builder().put(SINGLE_SHARD_NO_REPLICA).put(SearchService.NORMS_LOADING_KEY, Loading.LAZY_VALUE)).addMapping(type, JsonXContent.contentBuilder()
-                                .startObject()
-                                    .startObject(type)
-                                        .startObject("properties")
-                                            .startObject(fieldName)
-                                                .field("type", "string")
-                                                .startObject("norms")
-                                                    .field("loading", Loading.EAGER_VALUE)
-                                                .endObject()
-                                            .endObject()
-                                        .endObject()
-                                    .endObject()
-                                .endObject()
-                );
+                return client().admin().indices().prepareCreate(indexName).setSettings(ImmutableSettings.builder().put(SINGLE_SHARD_NO_REPLICA).put(SearchService.NORMS_LOADING_KEY, Loading.LAZY_VALUE)).addMapping(type, JsonXContent.contentBuilder().startObject().startObject(type).startObject("properties").startObject(fieldName).field("type", "string").startObject("norms").field("loading", Loading.EAGER_VALUE).endObject().endObject().endObject().endObject().endObject());
             }
 
             @Override
@@ -347,17 +290,13 @@ public class SimpleIndicesWarmerTests extends ElasticsearchIntegrationTest {
 
         assertAcked(client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.builder().put(IndicesQueryCache.INDEX_CACHE_QUERY_ENABLED, false)));
         logger.info("register warmer with no query cache, validate no cache is used");
-        assertAcked(client().admin().indices().preparePutWarmer("warmer_1")
-                .setSearchRequest(client().prepareSearch("test").setTypes("a1").setQuery(QueryBuilders.matchAllQuery()))
-                .get());
+        assertAcked(client().admin().indices().preparePutWarmer("warmer_1").setSearchRequest(client().prepareSearch("test").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())).get());
 
         client().prepareIndex("test", "type1", "1").setSource("field", "value1").setRefresh(true).execute().actionGet();
         assertThat(client().admin().indices().prepareStats("test").setQueryCache(true).get().getTotal().getQueryCache().getMemorySizeInBytes(), equalTo(0l));
 
         logger.info("register warmer with query cache, validate caching happened");
-        assertAcked(client().admin().indices().preparePutWarmer("warmer_1")
-                .setSearchRequest(client().prepareSearch("test").setTypes("a1").setQuery(QueryBuilders.matchAllQuery()).setQueryCache(true))
-                .get());
+        assertAcked(client().admin().indices().preparePutWarmer("warmer_1").setSearchRequest(client().prepareSearch("test").setTypes("a1").setQuery(QueryBuilders.matchAllQuery()).setQueryCache(true)).get());
 
         // index again, to make sure it gets refreshed
         client().prepareIndex("test", "type1", "1").setSource("field", "value1").setRefresh(true).execute().actionGet();
@@ -369,9 +308,7 @@ public class SimpleIndicesWarmerTests extends ElasticsearchIntegrationTest {
         logger.info("enable default query caching on the index level, and test that no flag on warmer still caches");
         assertAcked(client().admin().indices().prepareUpdateSettings("test").setSettings(ImmutableSettings.builder().put(IndicesQueryCache.INDEX_CACHE_QUERY_ENABLED, true)));
 
-        assertAcked(client().admin().indices().preparePutWarmer("warmer_1")
-                .setSearchRequest(client().prepareSearch("test").setTypes("a1").setQuery(QueryBuilders.matchAllQuery()))
-                .get());
+        assertAcked(client().admin().indices().preparePutWarmer("warmer_1").setSearchRequest(client().prepareSearch("test").setTypes("a1").setQuery(QueryBuilders.matchAllQuery())).get());
 
         // index again, to make sure it gets refreshed
         client().prepareIndex("test", "type1", "1").setSource("field", "value1").setRefresh(true).execute().actionGet();

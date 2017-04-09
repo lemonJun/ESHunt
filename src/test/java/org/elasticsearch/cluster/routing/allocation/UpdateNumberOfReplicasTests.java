@@ -47,13 +47,9 @@ public class UpdateNumberOfReplicasTests extends ElasticsearchAllocationTestCase
 
         logger.info("Building initial routing table");
 
-        MetaData metaData = MetaData.builder()
-                .put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1))
-                .build();
+        MetaData metaData = MetaData.builder().put(IndexMetaData.builder("test").numberOfShards(1).numberOfReplicas(1)).build();
 
-        RoutingTable routingTable = RoutingTable.builder()
-                .addAsNew(metaData.index("test"))
-                .build();
+        RoutingTable routingTable = RoutingTable.builder().addAsNew(metaData.index("test")).build();
 
         ClusterState clusterState = ClusterState.builder(org.elasticsearch.cluster.ClusterName.DEFAULT).metaData(metaData).routingTable(routingTable).build();
 
@@ -64,7 +60,6 @@ public class UpdateNumberOfReplicasTests extends ElasticsearchAllocationTestCase
         assertThat(routingTable.index("test").shard(0).shards().get(1).state(), equalTo(UNASSIGNED));
         assertThat(routingTable.index("test").shard(0).shards().get(0).currentNodeId(), nullValue());
         assertThat(routingTable.index("test").shard(0).shards().get(1).currentNodeId(), nullValue());
-
 
         logger.info("Adding two nodes and performing rerouting");
         clusterState = ClusterState.builder(clusterState).nodes(DiscoveryNodes.builder().put(newNode("node1")).put(newNode("node2"))).build();
@@ -96,7 +91,6 @@ public class UpdateNumberOfReplicasTests extends ElasticsearchAllocationTestCase
         assertThat(routingTable.index("test").shard(0).replicaShards().size(), equalTo(1));
         assertThat(routingTable.index("test").shard(0).replicaShards().get(0).state(), equalTo(STARTED));
         assertThat(routingTable.index("test").shard(0).replicaShards().get(0).currentNodeId(), equalTo(nodeHoldingReplica));
-
 
         logger.info("add another replica");
         routingNodes = clusterState.routingNodes();
